@@ -1,0 +1,34 @@
+[
+  {
+    "id": "gritería-2026",
+    "title": "La Gritería",
+    "location": "León, León",
+    "date": "2026-12-07",
+    "dateLabel": "7 dic",
+    "image": "https://picsum.photos/seed/griteria/800/600"
+  },
+  {
+    "id": "hipica-granada",
+    "title": "Hípica de Granada",
+    "location": "Granada, Granada",
+    "date": "2026-09-14",
+    "dateLabel": "14 sep",
+    "image": "https://picsum.photos/seed/hipica/800/600"
+  },
+  {
+    "id": "festival-poesia",
+    "title": "Festival de Poesía",
+    "location": "Granada, Granada",
+    "date": "2026-11-20",
+    "dateLabel": "20 nov",
+    "image": "https://picsum.photos/seed/poesia/800/600"
+  },
+  {
+    "id": "torovenado",
+    "title": "El Torovenado",
+    "location": "Masaya, Masaya",
+    "date": "2026-10-25",
+    "dateLabel": "25 oct",
+    "image": "https://picsum.photos/seed/torovenado/800/600"
+  }
+]

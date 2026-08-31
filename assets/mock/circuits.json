@@ -1,0 +1,208 @@
+[
+  {
+    "id": "granada-historias-sabores",
+    "shortTitle": "Granada Histórica",
+    "title": "Granada, entre historias y sabores",
+    "subtitle": "Paseo por la historia y la cultura",
+    "category": "Ciudad",
+    "city": "Granada",
+    "rating": 4.5,
+    "reviewsCount": 126,
+    "stopIds": [
+      "granada-catedral",
+      "granada-parque-central",
+      "granada-calle-calzada",
+      "granada-convento-san-francisco",
+      "granada-mercado",
+      "granada-muelle"
+    ],
+    "duration": "3 h 30 min",
+    "durationShort": "3 h aprox.",
+    "badges": 3,
+    "difficulty": "Fácil",
+    "priceAdult": 250,
+    "priceChild": 0,
+    "description": "Un recorrido a pie por el corazón de Granada donde la historia colonial, la cultura viva y la gastronomía se encuentran en cada esquina",
+    "images": [
+      "https://picsum.photos/seed/granada-1/900/600",
+      "https://picsum.photos/seed/granada-2/900/600",
+      "https://picsum.photos/seed/granada-3/900/600",
+      "https://picsum.photos/seed/granada-4/900/600",
+      "https://picsum.photos/seed/granada-5/900/600"
+    ],
+    "recommendations": "Usa ropa cómoda, calzado adecuado, protector solar y lleva una botella de agua",
+    "meetingPoint": "Parque Central de Granada, frente a la Catedral",
+    "includes": "Guía local certificado, entradas y degustaciones",
+    "badgesNote": "Este recorrido contiene un total de 3 insignias coleccionables",
+    "notes": "El recorrido incluye caminatas por calles empedradas y visitas a sitios históricos",
+    "languages": ["Español", "Inglés"],
+    "startTimes": ["8:30 a.m.", "10:00 a.m.", "2:00 p.m."],
+    "location": { "latitude": 11.9344, "longitude": -85.9560 },
+    "comments": [
+      {
+        "author": "Ana Carolina R.",
+        "rating": 5,
+        "timeAgo": "Hace dos días",
+        "text": "Un recorrido increíble. Granada es aún más hermosa conociendo su cultura."
+      },
+      {
+        "author": "Silvia H.",
+        "rating": 4,
+        "timeAgo": "Hace una semana",
+        "text": "El guía sabía muchísimo de la historia colonial. Repetiría sin dudarlo."
+      },
+      {
+        "author": "Marcos J.",
+        "rating": 5,
+        "timeAgo": "Hace dos semanas",
+        "text": "Las degustaciones al final valen cada córdoba. Muy recomendado."
+      }
+    ]
+  },
+  {
+    "id": "isla-de-ometepe",
+    "shortTitle": "Isla de Ometepe",
+    "title": "Ometepe, la isla de los dos volcanes",
+    "subtitle": "Naturaleza, leyendas y aventura",
+    "category": "Naturaleza",
+    "city": "Rivas",
+    "rating": 4.8,
+    "reviewsCount": 89,
+    "stopIds": [
+      "ometepe-ferry",
+      "ometepe-moyogalpa",
+      "ometepe-ojo-de-agua",
+      "ometepe-petroglifos",
+      "ometepe-playa-santo-domingo",
+      "ometepe-charco-verde",
+      "ometepe-museo-ceibo",
+      "ometepe-mirador-maderas"
+    ],
+    "duration": "1 día",
+    "durationShort": "1 día",
+    "badges": 4,
+    "difficulty": "Moderado",
+    "priceAdult": 750,
+    "priceChild": 400,
+    "description": "Una travesía por la isla formada por los volcanes Concepción y Maderas, con petroglifos, ojos de agua y comunidades locales",
+    "images": [
+      "https://picsum.photos/seed/ometepe-1/900/600",
+      "https://picsum.photos/seed/ometepe-2/900/600",
+      "https://picsum.photos/seed/ometepe-3/900/600"
+    ],
+    "recommendations": "Lleva traje de baño, repelente, protector solar y calzado para caminata",
+    "meetingPoint": "Puerto de San Jorge, Rivas",
+    "includes": "Transporte terrestre, ferry, guía local y almuerzo típico",
+    "badgesNote": "Este recorrido contiene un total de 4 insignias coleccionables",
+    "notes": "La salida es temprano y el regreso depende del horario del ferry",
+    "languages": ["Español", "Inglés"],
+    "startTimes": ["6:00 a.m.", "7:30 a.m."],
+    "location": { "latitude": 11.5060, "longitude": -85.5850 },
+    "comments": [
+      {
+        "author": "Luis P.",
+        "rating": 5,
+        "timeAgo": "Hace tres días",
+        "text": "El Ojo de Agua y los petroglifos son impresionantes. Día completo bien aprovechado."
+      },
+      {
+        "author": "Karla M.",
+        "rating": 5,
+        "timeAgo": "Hace un mes",
+        "text": "Excelente organización, el almuerzo típico estuvo delicioso."
+      }
+    ]
+  },
+  {
+    "id": "leon-colonial",
+    "shortTitle": "León Colonial",
+    "title": "León, cuna de poetas y volcanes",
+    "subtitle": "Arte, catedrales y tradición",
+    "category": "Ciudad",
+    "city": "León",
+    "rating": 4.6,
+    "reviewsCount": 74,
+    "stopIds": [
+      "leon-catedral",
+      "leon-techos",
+      "leon-ruben-dario",
+      "leon-murales",
+      "leon-mercado"
+    ],
+    "duration": "4 h",
+    "durationShort": "4 h aprox.",
+    "badges": 2,
+    "difficulty": "Fácil",
+    "priceAdult": 300,
+    "priceChild": 150,
+    "description": "Un paseo por la ciudad universitaria: la Catedral Patrimonio de la Humanidad, murales, museos y la casa de Rubén Darío",
+    "images": [
+      "https://picsum.photos/seed/leon-1/900/600",
+      "https://picsum.photos/seed/leon-2/900/600",
+      "https://picsum.photos/seed/leon-3/900/600"
+    ],
+    "recommendations": "Lleva sombrero y agua, el sol de León es fuerte al mediodía",
+    "meetingPoint": "Parque Central de León, frente a la Catedral",
+    "includes": "Guía certificado, entrada a museos y subida a los techos de la Catedral",
+    "badgesNote": "Este recorrido contiene un total de 2 insignias coleccionables",
+    "notes": "La subida a los techos de la Catedral se hace descalzo",
+    "languages": ["Español", "Inglés", "Francés"],
+    "startTimes": ["9:00 a.m.", "3:00 p.m."],
+    "location": { "latitude": 12.4345, "longitude": -86.8780 },
+    "comments": [
+      {
+        "author": "Diana C.",
+        "rating": 5,
+        "timeAgo": "Hace cinco días",
+        "text": "Los techos blancos de la Catedral son una postal. Vale muchísimo la pena."
+      }
+    ]
+  },
+  {
+    "id": "ruta-del-cafe",
+    "shortTitle": "Ruta del Café",
+    "title": "Ruta del café en las Segovias",
+    "subtitle": "Del grano a la taza",
+    "category": "Naturaleza",
+    "city": "Matagalpa",
+    "rating": 4.7,
+    "reviewsCount": 58,
+    "stopIds": [
+      "cafe-selva-negra",
+      "cafe-beneficio",
+      "cafe-secado",
+      "cafe-tueste",
+      "cafe-cata",
+      "cafe-mirador",
+      "cafe-comunidad"
+    ],
+    "duration": "6 h",
+    "durationShort": "6 h aprox.",
+    "badges": 3,
+    "difficulty": "Moderado",
+    "priceAdult": 500,
+    "priceChild": 250,
+    "description": "Visita a fincas cafetaleras de montaña para conocer el proceso completo del café nicaragüense y catar el resultado",
+    "images": [
+      "https://picsum.photos/seed/cafe-1/900/600",
+      "https://picsum.photos/seed/cafe-2/900/600",
+      "https://picsum.photos/seed/cafe-3/900/600"
+    ],
+    "recommendations": "Usa botas o zapatos cerrados, puede haber lodo en los senderos",
+    "meetingPoint": "Parque Darío, Matagalpa",
+    "includes": "Transporte, cata de café, guía y refrigerio",
+    "badgesNote": "Este recorrido contiene un total de 3 insignias coleccionables",
+    "notes": "El clima de montaña es fresco y lluvioso por la tarde",
+    "languages": ["Español"],
+    "startTimes": ["7:00 a.m.", "8:00 a.m."],
+    "location": { "latitude": 12.9270, "longitude": -85.9170 },
+    "comments": [
+      {
+        "author": "Roberto A.",
+        "rating": 5,
+        "timeAgo": "Hace un mes",
+        "text": "Aprendí todo el proceso del café y la cata final estuvo buenísima."
+      }
+    ]
+  }
+]
