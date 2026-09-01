@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
@@ -54,6 +55,7 @@ void main() {
               tourRepository,
               collections,
               BadgesRepository(),
+              ActiveTripRepository(),
               stopId,
             ),
           ),

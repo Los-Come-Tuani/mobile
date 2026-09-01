@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
 import 'package:k_plan_mobile/src/ui/booking/viewmodels/booking_viewmodel.dart';
 
@@ -8,6 +9,7 @@ void main() {
   test('el desglose de precios aplica el 20% de servicio', () async {
     final viewModel = BookingViewModel(
       TourRepository(),
+      BookingsRepository(),
       'granada-historias-sabores',
     );
     await viewModel.load();
@@ -22,6 +24,7 @@ void main() {
   test('sin personas no se puede confirmar', () async {
     final viewModel = BookingViewModel(
       TourRepository(),
+      BookingsRepository(),
       'granada-historias-sabores',
     );
     await viewModel.load();
@@ -32,8 +35,31 @@ void main() {
     expect(viewModel.canConfirm, isFalse);
   });
 
+  test('confirmar la reserva la agrega a BookingsRepository', () async {
+    final bookingsRepository = BookingsRepository();
+    final viewModel = BookingViewModel(
+      TourRepository(),
+      bookingsRepository,
+      'granada-historias-sabores',
+    );
+    await viewModel.load();
+
+    final ok = await viewModel.confirm();
+
+    expect(ok, isTrue);
+    expect(bookingsRepository.bookings, hasLength(1));
+    expect(
+      bookingsRepository.bookings.first.circuitId,
+      'granada-historias-sabores',
+    );
+  });
+
   test('los niños suman con su propia tarifa', () async {
-    final viewModel = BookingViewModel(TourRepository(), 'leon-colonial');
+    final viewModel = BookingViewModel(
+      TourRepository(),
+      BookingsRepository(),
+      'leon-colonial',
+    );
     await viewModel.load();
 
     viewModel.setGroup(adults: 1, children: 2);

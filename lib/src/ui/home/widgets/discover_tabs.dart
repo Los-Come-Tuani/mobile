@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 enum DiscoverTab {
   forYou('Para ti', Icons.location_on_outlined),
   circuits('Circuitos', Icons.map_outlined),
+  stops('Paradas', Icons.route_outlined),
   events('Eventos', Icons.calendar_month_outlined);
 
   const DiscoverTab(this.label, this.icon);
@@ -52,7 +53,7 @@ class _TabItem extends StatelessWidget {
     final color = isSelected ? AppColors.primary30 : AppColors.secondaryText;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -64,13 +65,17 @@ class _TabItem extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(tab.icon, size: 18, color: color),
-          const SizedBox(width: 6),
-          Text(
-            tab.label,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: color,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          Icon(tab.icon, size: 16, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              tab.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(
+                color: color,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
             ),
           ),
         ],

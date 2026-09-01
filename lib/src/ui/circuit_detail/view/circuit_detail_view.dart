@@ -22,6 +22,7 @@ import '../../widgets/stop_list_tile.dart';
 import '../../widgets/section_header.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
+import '../widgets/start_trip_sheet.dart';
 
 /// Detalle de un circuito, con la acción de agendar.
 class CircuitDetailView extends StatefulWidget {
@@ -62,6 +63,56 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     }
   }
 
+  /// Elige la parada de arranque, marca el circuito como "en curso" y
+  /// ofrece abrirla en el mapa.
+  Future<void> _startTrip(List<Stop> stops) async {
+    if (stops.isEmpty) return;
+
+    final startStop = await showStartTripSheet(context, stops: stops);
+    if (startStop == null || !mounted) return;
+
+    context.read<CircuitDetailViewModel>().startTrip();
+
+    final selection = await showOpenWithSheet(context);
+    if (selection != null && mounted) {
+      final uri = selection.app.locationUri(
+        latitude: startStop.latitude,
+        longitude: startStop.longitude,
+      );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+
+    if (mounted) {
+      _notifySoon('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    }
+  }
+
+  Future<void> _endTrip() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.white,
+        title: const Text('¿Finalizar viaje?'),
+        content: const Text(
+          'Se perderá el progreso de paradas confirmadas en este viaje.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Finalizar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.read<CircuitDetailViewModel>().endTrip();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<CircuitDetailViewModel>();
@@ -81,11 +132,15 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
           : _DetailContent(
               circuit: circuit,
               stops: viewModel.stops,
+              isTripActive: viewModel.isTripActive,
+              checkedInCount: viewModel.checkedInCount,
               onOpenInMaps: () => _openInMaps(circuit),
               onDownload: () =>
                   _notifySoon('Descargar sin conexión: próximamente'),
               onSeeAllComments: () =>
                   _notifySoon('Todas las reseñas: próximamente'),
+              onStartTrip: () => _startTrip(viewModel.stops),
+              onEndTrip: _endTrip,
             ),
     );
   }
@@ -95,16 +150,24 @@ class _DetailContent extends StatelessWidget {
   const _DetailContent({
     required this.circuit,
     required this.stops,
+    required this.isTripActive,
+    required this.checkedInCount,
     required this.onOpenInMaps,
     required this.onDownload,
     required this.onSeeAllComments,
+    required this.onStartTrip,
+    required this.onEndTrip,
   });
 
   final Circuit circuit;
   final List<Stop> stops;
+  final bool isTripActive;
+  final int checkedInCount;
   final VoidCallback onOpenInMaps;
   final VoidCallback onDownload;
   final VoidCallback onSeeAllComments;
+  final VoidCallback onStartTrip;
+  final VoidCallback onEndTrip;
 
   static const double _galleryHeight = 260;
 
@@ -198,6 +261,23 @@ class _DetailContent extends StatelessWidget {
                 icon: Icons.calendar_month_outlined,
                 onPressed: () => context.push(Routes.bookingPath(circuit.id)),
               ),
+              const SizedBox(height: 12),
+              if (isTripActive)
+                _TripProgressCard(
+                  checkedInCount: checkedInCount,
+                  totalCount: stops.length,
+                  onEndTrip: onEndTrip,
+                )
+              else if (stops.isNotEmpty)
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary30),
+                    foregroundColor: AppColors.primary30,
+                  ),
+                  onPressed: onStartTrip,
+                  icon: const Icon(Icons.explore_outlined),
+                  label: const Text('Comenzar viaje'),
+                ),
               const SizedBox(height: 20),
               if (stops.isNotEmpty) ...[
                 SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
@@ -222,6 +302,62 @@ class _DetailContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Progreso del viaje en curso: cuántas paradas ya se confirmaron por QR.
+class _TripProgressCard extends StatelessWidget {
+  const _TripProgressCard({
+    required this.checkedInCount,
+    required this.totalCount,
+    required this.onEndTrip,
+  });
+
+  final int checkedInCount;
+  final int totalCount;
+  final VoidCallback onEndTrip;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = totalCount == 0 ? 0.0 : checkedInCount / totalCount;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.accentSecondaryGreen.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.explore, color: AppColors.accentSecondaryGreen),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Viaje en curso · $checkedInCount/$totalCount paradas '
+                  'confirmadas',
+                  style: AppTextStyles.bodySmall,
+                ),
+              ),
+              TextButton(onPressed: onEndTrip, child: const Text('Finalizar')),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: AppColors.divider,
+              color: AppColors.accentSecondaryGreen,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

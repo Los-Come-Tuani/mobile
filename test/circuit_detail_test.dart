@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
@@ -22,6 +23,7 @@ void main() {
             create: (_) => CircuitDetailViewModel(
               tourRepository,
               CircuitCollectionsRepository(tourRepository),
+              ActiveTripRepository(),
               'granada-historias-sabores',
             ),
           ),

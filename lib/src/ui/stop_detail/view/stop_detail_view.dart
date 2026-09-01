@@ -10,6 +10,7 @@ import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
@@ -20,6 +21,8 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../viewmodels/stop_detail_viewmodel.dart';
 import '../widgets/add_to_circuit_sheet.dart';
+import 'qr_generator_view.dart';
+import 'qr_scanner_view.dart';
 
 /// Detalle de una parada, con la acción de añadirla a un circuito.
 class StopDetailView extends StatefulWidget {
@@ -53,7 +56,7 @@ class _StopDetailViewState extends State<StopDetailView> {
               stop: stop,
               circuitsWithStop: viewModel.circuitsWithStop,
               hasClaimedBadge: viewModel.hasClaimedBadge,
-              onClaimBadge: viewModel.claimBadge,
+              onConfirmVisit: viewModel.confirmVisit,
             ),
     );
   }
@@ -64,28 +67,44 @@ class _StopContent extends StatelessWidget {
     required this.stop,
     required this.circuitsWithStop,
     required this.hasClaimedBadge,
-    required this.onClaimBadge,
+    required this.onConfirmVisit,
   });
 
   final Stop stop;
   final List<CircuitCollection> circuitsWithStop;
   final bool hasClaimedBadge;
 
-  /// Reclama la insignia de la categoría de esta parada. Devuelve `true`
-  /// si quedó reclamada ahora.
-  final bool Function() onClaimBadge;
+  /// Confirma la visita (tras el QR): marca el check-in y reclama la
+  /// insignia. Devuelve `true` si se ganó una insignia nueva.
+  final bool Function() onConfirmVisit;
 
   static const double _galleryHeight = 240;
 
-  void _claimBadge(BuildContext context) {
-    final claimed = onClaimBadge();
-    if (!claimed) return;
+  /// Abre la cámara a escanear el código de esta parada; si coincide,
+  /// confirma la visita y muestra la animación de insignia ganada.
+  Future<void> _scanQr(BuildContext context) async {
+    final matched = await showQrScanner(context, stopId: stop.id);
+    if (matched != true || !context.mounted) return;
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('¡Insignia de ${stop.category} obtenida!')),
-      );
+    final earnedNewBadge = onConfirmVisit();
+    if (earnedNewBadge) {
+      await showBadgeEarnedAnimation(context, category: stop.category);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('¡Parada confirmada!')));
+    }
+  }
+
+  /// Pantalla de demo: muestra el QR de esta parada para poder escanearlo
+  /// desde otro teléfono (no hay carteles físicos reales en el catálogo).
+  void _showDemoQr(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            QrGeneratorView(stopId: stop.id, stopName: stop.name),
+      ),
+    );
   }
 
   /// Guardar o añadir a un circuito, detrás del botón de "más".
@@ -207,7 +226,8 @@ class _StopContent extends StatelessWidget {
                 _BadgeCard(
                   category: stop.category,
                   isClaimed: hasClaimedBadge,
-                  onClaim: () => _claimBadge(context),
+                  onScanQr: () => _scanQr(context),
+                  onShowDemoQr: () => _showDemoQr(context),
                 ),
               ],
               const SizedBox(height: 20),
@@ -241,17 +261,20 @@ class _StopContent extends StatelessWidget {
   }
 }
 
-/// Invita a reclamar la insignia de esta parada, o confirma que ya se hizo.
+/// Invita a escanear el QR de esta parada para reclamar su insignia, o
+/// confirma que ya se hizo.
 class _BadgeCard extends StatelessWidget {
   const _BadgeCard({
     required this.category,
     required this.isClaimed,
-    required this.onClaim,
+    required this.onScanQr,
+    required this.onShowDemoQr,
   });
 
   final String category;
   final bool isClaimed;
-  final VoidCallback onClaim;
+  final VoidCallback onScanQr;
+  final VoidCallback onShowDemoQr;
 
   @override
   Widget build(BuildContext context) {
@@ -264,25 +287,55 @@ class _BadgeCard extends StatelessWidget {
             : AppColors.primary30.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppTheme.radius),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            isClaimed ? Icons.military_tech : Icons.military_tech_outlined,
-            color: isClaimed
-                ? AppColors.accentSecondaryGreen
-                : AppColors.primary30,
+          Row(
+            children: [
+              Icon(
+                isClaimed ? Icons.military_tech : Icons.military_tech_outlined,
+                color: isClaimed
+                    ? AppColors.accentSecondaryGreen
+                    : AppColors.primary30,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  isClaimed
+                      ? 'Insignia de $category obtenida'
+                      : 'Esta parada otorga una insignia de $category',
+                  style: AppTextStyles.bodySmall,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              isClaimed
-                  ? 'Insignia de $category obtenida'
-                  : 'Esta parada otorga una insignia de $category',
-              style: AppTextStyles.bodySmall,
+          if (!isClaimed) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.primary30),
+                      foregroundColor: AppColors.primary30,
+                    ),
+                    onPressed: onScanQr,
+                    icon: const Icon(Icons.qr_code_scanner, size: 18),
+                    label: const Text('Escanear código QR'),
+                  ),
+                ),
+                IconButton(
+                  onPressed: onShowDemoQr,
+                  tooltip: 'Ver código de prueba',
+                  icon: const Icon(
+                    Icons.qr_code,
+                    size: 20,
+                    color: AppColors.secondaryText,
+                  ),
+                ),
+              ],
             ),
-          ),
-          if (!isClaimed)
-            TextButton(onPressed: onClaim, child: const Text('Reclamar')),
+          ],
         ],
       ),
     );

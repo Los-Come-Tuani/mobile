@@ -1,13 +1,19 @@
 import '../../../core/utils/result.dart';
+import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit.dart';
 import '../../core/base_viewmodel.dart';
 
 /// Estado de la reserva que el usuario está armando.
 class BookingViewModel extends BaseViewModel {
-  BookingViewModel(this._tourRepository, this.circuitId);
+  BookingViewModel(
+    this._tourRepository,
+    this._bookingsRepository,
+    this.circuitId,
+  );
 
   final TourRepository _tourRepository;
+  final BookingsRepository _bookingsRepository;
   final String circuitId;
 
   /// Porcentaje de servicio que se cobra sobre el subtotal.
@@ -88,10 +94,11 @@ class BookingViewModel extends BaseViewModel {
     safeNotify();
   }
 
-  /// Confirma la reserva.
+  /// Confirma la reserva y la guarda en [BookingsRepository], que es lo
+  /// que hace aparecer el aviso de "próximo viaje" en el home.
   ///
   /// TODO: enviar a `ApiRoutes` cuando exista el endpoint de reservas;
-  /// por ahora sólo simula el guardado.
+  /// por ahora sólo simula el guardado remoto.
   Future<bool> confirm() async {
     if (!canConfirm || _isSaving) return false;
 
@@ -99,6 +106,15 @@ class BookingViewModel extends BaseViewModel {
     safeNotify();
 
     await Future<void>.delayed(const Duration(milliseconds: 700));
+
+    _bookingsRepository.add(
+      circuitId: circuitId,
+      circuitTitle: _circuit!.shortTitle,
+      date: _date,
+      startTime: _startTime,
+      adults: _adults,
+      children: _children,
+    );
 
     _isSaving = false;
     safeNotify();

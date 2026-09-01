@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/core/theme/app_theme.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
@@ -61,6 +63,8 @@ void main() {
                 tourRepository,
                 AuthRepository(),
                 CircuitCollectionsRepository(tourRepository),
+                BadgesRepository(),
+                BookingsRepository(),
               );
             },
           ),
@@ -70,7 +74,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Circuitos completos'), findsOneWidget);
-    expect(find.text('Lugares destacados'), findsOneWidget);
     expect(find.text('Granada Histórica'), findsOneWidget);
+
+    // La sección de paradas queda fuera del viewport inicial: hay que
+    // desplazar el home para que se pinte y sea encontrable.
+    await tester.ensureVisible(
+      find.text('Paradas destacadas', skipOffstage: false),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Paradas destacadas'), findsOneWidget);
   });
 }

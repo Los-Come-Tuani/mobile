@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'src/core/theme/app_theme.dart';
+import 'src/data/datasources/repository/active_trip_repository.dart';
 import 'src/data/datasources/repository/api_repository.dart';
 import 'src/data/datasources/repository/auth_repository.dart';
 import 'src/data/datasources/repository/badges_repository.dart';
+import 'src/data/datasources/repository/bookings_repository.dart';
 import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
@@ -52,6 +54,14 @@ class _KPlanAppState extends State<KPlanApp> {
         // Insignias por categoría y su saldo canjeable por cupones.
         ChangeNotifierProvider<BadgesRepository>(
           create: (_) => BadgesRepository(),
+        ),
+        // Reservas confirmadas, para el aviso de "próximo viaje" del home.
+        ChangeNotifierProvider<BookingsRepository>(
+          create: (_) => BookingsRepository(),
+        ),
+        // El circuito que el usuario está recorriendo ahora, si hay uno.
+        ChangeNotifierProvider<ActiveTripRepository>(
+          create: (_) => ActiveTripRepository(),
         ),
       ],
       child: MaterialApp.router(

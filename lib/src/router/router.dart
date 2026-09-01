@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../data/datasources/repository/active_trip_repository.dart';
 import '../data/datasources/repository/auth_repository.dart';
 import '../data/datasources/repository/badges_repository.dart';
+import '../data/datasources/repository/bookings_repository.dart';
 import '../data/datasources/repository/circuit_collections_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
@@ -85,6 +87,8 @@ GoRouter createRouter(AuthRepository authRepository) {
             context.read<TourRepository>(),
             context.read<AuthRepository>(),
             context.read<CircuitCollectionsRepository>(),
+            context.read<BadgesRepository>(),
+            context.read<BookingsRepository>(),
           ),
           child: const HomeView(),
         ),
@@ -97,6 +101,7 @@ GoRouter createRouter(AuthRepository authRepository) {
             create: (context) => CircuitDetailViewModel(
               context.read<TourRepository>(),
               context.read<CircuitCollectionsRepository>(),
+              context.read<ActiveTripRepository>(),
               id,
             ),
             child: const CircuitDetailView(),
@@ -108,8 +113,11 @@ GoRouter createRouter(AuthRepository authRepository) {
             builder: (context, state) {
               final id = state.pathParameters[Routes.circuitId] ?? '';
               return ChangeNotifierProvider<BookingViewModel>(
-                create: (context) =>
-                    BookingViewModel(context.read<TourRepository>(), id),
+                create: (context) => BookingViewModel(
+                  context.read<TourRepository>(),
+                  context.read<BookingsRepository>(),
+                  id,
+                ),
                 child: const BookingView(),
               );
             },
@@ -125,6 +133,7 @@ GoRouter createRouter(AuthRepository authRepository) {
               context.read<TourRepository>(),
               context.read<CircuitCollectionsRepository>(),
               context.read<BadgesRepository>(),
+              context.read<ActiveTripRepository>(),
               id,
             ),
             child: const StopDetailView(),

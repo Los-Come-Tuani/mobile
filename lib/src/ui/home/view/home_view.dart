@@ -5,14 +5,18 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../data/models/booking.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/event_item.dart';
-import '../../../data/models/place.dart';
+import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_search_field.dart';
+import '../../widgets/category_filter_bar.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/stop_list_tile.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/circuit_card.dart';
 import '../widgets/discover_tabs.dart';
@@ -20,7 +24,7 @@ import '../widgets/event_card.dart';
 import '../widgets/home_menu_drawer.dart';
 import '../widgets/home_top_bar.dart';
 import '../widgets/my_circuit_card.dart';
-import '../widgets/place_card.dart';
+import '../widgets/stop_card.dart';
 
 /// Home de descubrimiento: buscador, pestañas y secciones de contenido.
 class HomeView extends StatefulWidget {
@@ -53,6 +57,8 @@ class _HomeViewState extends State<HomeView> {
 
   void _openEvent(EventItem event) =>
       context.push(Routes.eventDetailPath(event.id));
+
+  void _openStop(Stop stop) => context.push(Routes.stopDetailPath(stop.id));
 
   @override
   Widget build(BuildContext context) {
@@ -102,12 +108,26 @@ class _HomeViewState extends State<HomeView> {
   List<Widget> _buildSections(HomeViewModel viewModel) {
     return switch (viewModel.tab) {
       DiscoverTab.forYou => [
+        if (viewModel.nextBooking != null) ...[
+          _UpcomingTripBanner(
+            booking: viewModel.nextBooking!,
+            onTap: () => context.push(
+              Routes.circuitDetailPath(viewModel.nextBooking!.circuitId),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        _RewardsBanner(
+          available: viewModel.availableBadges,
+          onTap: () => context.push(Routes.coupons),
+        ),
+        const SizedBox(height: 20),
         _MyCircuitsSection(collections: viewModel.myCircuits),
         _CircuitsSection(
           circuits: viewModel.circuits,
           onCircuitTap: _openCircuit,
         ),
-        _PlacesSection(places: viewModel.places),
+        _StopsSection(stops: viewModel.featuredStops, onStopTap: _openStop),
         _EventsSection(events: viewModel.events, onEventTap: _openEvent),
       ],
       DiscoverTab.circuits => [
@@ -122,6 +142,33 @@ class _HomeViewState extends State<HomeView> {
               circuit: circuit,
               width: double.infinity,
               onTap: () => _openCircuit(circuit),
+            ),
+          ),
+      ],
+      DiscoverTab.stops => [
+        Padding(
+          padding: AppTheme.screenPadding,
+          child: CategoryFilterBar(
+            selected: viewModel.categoryFilter,
+            onSelected: viewModel.onCategoryFilterChanged,
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (viewModel.stops.isEmpty)
+          const _EmptyState()
+        else
+          Padding(
+            padding: AppTheme.screenPadding,
+            child: Column(
+              children: [
+                for (var i = 0; i < viewModel.stops.length; i++)
+                  StopListTile(
+                    stop: viewModel.stops[i],
+                    position: i + 1,
+                    showConnector: false,
+                    onTap: () => _openStop(viewModel.stops[i]),
+                  ),
+              ],
             ),
           ),
       ],
@@ -226,18 +273,159 @@ class _CircuitsSection extends StatelessWidget {
   }
 }
 
-class _PlacesSection extends StatelessWidget {
-  const _PlacesSection({required this.places});
+/// Aviso del próximo viaje agendado: la "notificación" de una reserva
+/// confirmada, sin salir de la app.
+class _UpcomingTripBanner extends StatelessWidget {
+  const _UpcomingTripBanner({required this.booking, required this.onTap});
 
-  final List<Place> places;
+  final Booking booking;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Material(
+        color: AppColors.accentSecondaryGreen,
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.event_available,
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tu viaje a ${booking.circuitTitle} es el '
+                        '${Formatters.dayAndMonth(booking.date)}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Toca para ver los detalles del circuito',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Muestra el saldo de insignias y lleva al catálogo de cupones.
+class _RewardsBanner extends StatelessWidget {
+  const _RewardsBanner({required this.available, required this.onTap});
+
+  final int available;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Material(
+        color: AppColors.primary30,
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.military_tech,
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        available > 0
+                            ? 'Tienes $available insignias para canjear'
+                            : 'Gana insignias visitando paradas',
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Cámbialas por cupones y descuentos',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Paradas destacadas del catálogo, con acceso directo a su detalle.
+class _StopsSection extends StatelessWidget {
+  const _StopsSection({required this.stops, required this.onStopTap});
+
+  final List<Stop> stops;
+  final ValueChanged<Stop> onStopTap;
 
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: 'Lugares destacados',
+      title: 'Paradas destacadas',
       height: 186,
-      itemCount: places.length,
-      itemBuilder: (context, index) => PlaceCard(place: places[index]),
+      itemCount: stops.length,
+      itemBuilder: (context, index) =>
+          StopCard(stop: stops[index], onTap: () => onStopTap(stops[index])),
     );
   }
 }
