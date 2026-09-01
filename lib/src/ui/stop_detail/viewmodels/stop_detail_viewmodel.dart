@@ -1,4 +1,5 @@
 import '../../../core/utils/result.dart';
+import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit_collection.dart';
@@ -9,13 +10,16 @@ class StopDetailViewModel extends BaseViewModel {
   StopDetailViewModel(
     this._tourRepository,
     this._collectionsRepository,
+    this._badgesRepository,
     this.stopId,
   ) {
     _collectionsRepository.addListener(safeNotify);
+    _badgesRepository.addListener(safeNotify);
   }
 
   final TourRepository _tourRepository;
   final CircuitCollectionsRepository _collectionsRepository;
+  final BadgesRepository _badgesRepository;
   final String stopId;
 
   Stop? _stop;
@@ -24,6 +28,9 @@ class StopDetailViewModel extends BaseViewModel {
   /// Circuitos que ya incluyen esta parada.
   List<CircuitCollection> get circuitsWithStop =>
       _collectionsRepository.collectionsWith(stopId);
+
+  /// `true` si ya se reclamó la insignia de esta parada.
+  bool get hasClaimedBadge => _badgesRepository.hasClaimed(stopId);
 
   Future<void> load() async {
     setBusy(true);
@@ -41,9 +48,21 @@ class StopDetailViewModel extends BaseViewModel {
     safeNotify();
   }
 
+  /// Reclama la insignia de la categoría de esta parada. Devuelve `true`
+  /// si quedó reclamada ahora (`false` si ya se había reclamado antes).
+  bool claimBadge() {
+    final current = _stop;
+    if (current == null) return false;
+    return _badgesRepository.claim(
+      stopId: current.id,
+      category: current.category,
+    );
+  }
+
   @override
   void dispose() {
     _collectionsRepository.removeListener(safeNotify);
+    _badgesRepository.removeListener(safeNotify);
     super.dispose();
   }
 }

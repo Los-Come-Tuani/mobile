@@ -3,10 +3,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'src/core/constants/app_strings.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/data/datasources/repository/api_repository.dart';
 import 'src/data/datasources/repository/auth_repository.dart';
+import 'src/data/datasources/repository/badges_repository.dart';
 import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
@@ -49,9 +49,13 @@ class _KPlanAppState extends State<KPlanApp> {
         ChangeNotifierProvider<SavedRepository>(
           create: (_) => SavedRepository(),
         ),
+        // Insignias por categoría y su saldo canjeable por cupones.
+        ChangeNotifierProvider<BadgesRepository>(
+          create: (_) => BadgesRepository(),
+        ),
       ],
       child: MaterialApp.router(
-        title: AppStrings.appName,
+        title: "K'Plan",
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         routerConfig: _router,

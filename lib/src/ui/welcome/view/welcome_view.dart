@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_assets.dart';
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../router/routes.dart';
@@ -36,20 +35,20 @@ class WelcomeView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 36),
-                    Text(AppStrings.welcomeTitle, style: AppTextStyles.display),
+                    Text('Bienvenido', style: AppTextStyles.display),
                     const SizedBox(height: 8),
                     Text(
-                      AppStrings.welcomeSubtitle,
+                      'Por favor, inicie sesión para continuar',
                       style: AppTextStyles.body,
                     ),
                     const Spacer(),
                     PrimaryButton(
-                      label: AppStrings.login,
+                      label: 'Iniciar sesión',
                       onPressed: () => context.push(Routes.login),
                     ),
                     const SizedBox(height: 16),
                     SecondaryButton(
-                      label: AppStrings.register,
+                      label: 'Crear cuenta',
                       onPressed: () => context.push(Routes.register),
                     ),
                     const SizedBox(height: 32),

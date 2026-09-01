@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -42,7 +41,7 @@ class _BookingViewState extends State<BookingView> {
       initialDate: _viewModel.date,
       firstDate: _viewModel.firstSelectableDate,
       lastDate: _viewModel.lastSelectableDate,
-      helpText: AppStrings.date,
+      helpText: 'Fecha',
       locale: const Locale('es'),
     );
     if (picked != null) _viewModel.setDate(picked);
@@ -65,7 +64,7 @@ class _BookingViewState extends State<BookingView> {
   Future<void> _pickTime() async {
     final picked = await showOptionsSheet(
       context,
-      title: AppStrings.startTime,
+      title: 'Hora inicial',
       options: _viewModel.availableTimes,
       selected: _viewModel.startTime,
     );
@@ -75,7 +74,7 @@ class _BookingViewState extends State<BookingView> {
   Future<void> _pickLanguage() async {
     final picked = await showOptionsSheet(
       context,
-      title: AppStrings.language,
+      title: 'Idioma',
       options: _viewModel.availableLanguages,
       selected: _viewModel.language,
     );
@@ -88,7 +87,9 @@ class _BookingViewState extends State<BookingView> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text(AppStrings.bookingConfirmed)));
+      ..showSnackBar(
+        const SnackBar(content: Text('¡Listo! Tu circuito quedó agendado')),
+      );
     context.go(Routes.home);
   }
 
@@ -103,7 +104,7 @@ class _BookingViewState extends State<BookingView> {
         foregroundColor: AppColors.white,
         centerTitle: true,
         title: Text(
-          AppStrings.schedule,
+          'Agendar',
           style: AppTextStyles.title.copyWith(color: AppColors.white),
         ),
         leading: IconButton(
@@ -121,19 +122,19 @@ class _BookingViewState extends State<BookingView> {
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
-                Text(AppStrings.bookingDetails, style: AppTextStyles.title),
+                Text('Detalles de la reserva', style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 BookingCard(
                   children: [
                     BookingFieldRow(
                       icon: Icons.calendar_month_outlined,
-                      label: AppStrings.date,
+                      label: 'Fecha',
                       value: Formatters.shortDate(viewModel.date),
                       onTap: _pickDate,
                     ),
                     BookingFieldRow(
                       icon: Icons.group_outlined,
-                      label: AppStrings.group,
+                      label: 'Grupo',
                       value: Formatters.groupLabel(
                         adults: viewModel.adults,
                         children: viewModel.children,
@@ -142,13 +143,13 @@ class _BookingViewState extends State<BookingView> {
                     ),
                     BookingFieldRow(
                       icon: Icons.schedule,
-                      label: AppStrings.startTime,
+                      label: 'Hora inicial',
                       value: viewModel.startTime,
                       onTap: _pickTime,
                     ),
                     BookingFieldRow(
                       icon: Icons.translate,
-                      label: AppStrings.language,
+                      label: 'Idioma',
                       value: viewModel.language,
                       showDivider: false,
                       onTap: _pickLanguage,
@@ -156,7 +157,7 @@ class _BookingViewState extends State<BookingView> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                Text(AppStrings.tourInfo, style: AppTextStyles.title),
+                Text('Información del recorrido', style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 _TourInfoCard(circuit: circuit),
                 const SizedBox(height: 20),
@@ -175,7 +176,7 @@ class _BookingViewState extends State<BookingView> {
                             : () => context.canPop()
                                   ? context.pop()
                                   : context.go(Routes.home),
-                        child: const Text(AppStrings.cancel),
+                        child: const Text('Cancelar'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -193,7 +194,7 @@ class _BookingViewState extends State<BookingView> {
                                   color: AppColors.buttonTextLight,
                                 ),
                               )
-                            : const Text(AppStrings.schedule),
+                            : const Text('Agendar'),
                       ),
                     ),
                   ],
@@ -228,27 +229,27 @@ class _TourInfoCard extends StatelessWidget {
         ),
         TourInfoBlock(
           icon: Icons.wb_sunny_outlined,
-          title: AppStrings.recommendations,
+          title: 'Recomendaciones',
           text: circuit.recommendations,
         ),
         TourInfoBlock(
           icon: Icons.schedule,
-          title: AppStrings.estimatedDuration,
+          title: 'Duración estimada',
           text: circuit.duration,
         ),
         TourInfoBlock(
           icon: Icons.location_on_outlined,
-          title: AppStrings.meetingPoint,
+          title: 'Punto de encuentro',
           text: circuit.meetingPoint,
         ),
         TourInfoBlock(
           icon: Icons.check_circle_outline,
-          title: AppStrings.includes,
+          title: 'Incluye',
           text: circuit.includes,
         ),
         TourInfoBlock(
           icon: Icons.military_tech_outlined,
-          title: AppStrings.badges,
+          title: 'Insignias',
           text: circuit.badgesNote,
           onTap: () => ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
@@ -258,7 +259,7 @@ class _TourInfoCard extends StatelessWidget {
         ),
         TourInfoBlock(
           icon: Icons.info_outline,
-          title: AppStrings.tourNotes,
+          title: 'Notas del recorrido',
           text: circuit.notes,
         ),
       ],

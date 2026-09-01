@@ -44,4 +44,10 @@ abstract final class AppColors {
   static const Color chipCulture = Color(0xFF7B5EA7);
   static const Color star = Color(0xFFF5A623);
   static const Color placeholder = Color(0xFFEDE7D6);
+
+  // ── Medallas (insignias y niveles) ────────────────────────────────────────
+  static const Color medalNone = Color(0xFFC7C0B0);
+  static const Color medalBronze = Color(0xFFB08D57);
+  static const Color medalSilver = Color(0xFFAEB4BD);
+  static const Color medalGold = Color(0xFFE0B84C);
 }

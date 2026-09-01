@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// Pestañas de descubrimiento del home.
 enum DiscoverTab {
-  forYou(AppStrings.tabForYou, Icons.location_on_outlined),
-  circuits(AppStrings.tabCircuits, Icons.map_outlined),
-  events(AppStrings.tabEvents, Icons.calendar_month_outlined);
+  forYou('Para ti', Icons.location_on_outlined),
+  circuits('Circuitos', Icons.map_outlined),
+  events('Eventos', Icons.calendar_month_outlined);
 
   const DiscoverTab(this.label, this.icon);
 

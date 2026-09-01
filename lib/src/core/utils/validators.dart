@@ -1,5 +1,3 @@
-import '../constants/app_strings.dart';
-
 /// Validadores reutilizables para los formularios de la app.
 abstract final class Validators {
   static final RegExp _emailRegExp = RegExp(
@@ -8,15 +6,15 @@ abstract final class Validators {
 
   static String? email(String? value) {
     final text = value?.trim() ?? '';
-    if (text.isEmpty) return AppStrings.emailRequired;
-    if (!_emailRegExp.hasMatch(text)) return AppStrings.emailInvalid;
+    if (text.isEmpty) return 'Ingresa tu correo electrónico';
+    if (!_emailRegExp.hasMatch(text)) return 'El correo no es válido';
     return null;
   }
 
   static String? password(String? value, {int minLength = 6}) {
     final text = value ?? '';
-    if (text.isEmpty) return AppStrings.passwordRequired;
-    if (text.length < minLength) return AppStrings.passwordTooShort;
+    if (text.isEmpty) return 'Ingresa tu contraseña';
+    if (text.length < minLength) return 'Mínimo 6 caracteres';
     return null;
   }
 }

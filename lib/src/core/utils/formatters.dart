@@ -1,8 +1,18 @@
 /// Formatos de presentación (moneda, fechas, horas) en un solo lugar.
 abstract final class Formatters {
   static const List<String> _months = [
-    'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-    'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+    'ene',
+    'feb',
+    'mar',
+    'abr',
+    'may',
+    'jun',
+    'jul',
+    'ago',
+    'sep',
+    'oct',
+    'nov',
+    'dic',
   ];
 
   /// `250` -> `C$ 250`

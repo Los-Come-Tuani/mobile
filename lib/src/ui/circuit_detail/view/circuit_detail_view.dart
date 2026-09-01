@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -15,13 +15,13 @@ import '../../widgets/bookmark_button.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
+import '../../widgets/open_with_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../../widgets/section_header.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
-import '../widgets/open_with_sheet.dart';
 
 /// Detalle de un circuito, con la acción de agendar.
 class CircuitDetailView extends StatefulWidget {
@@ -46,12 +46,20 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _openInMaps() async {
+  /// Abre el punto de encuentro del circuito (no una parada puntual) en la
+  /// app de navegación elegida.
+  Future<void> _openInMaps(Circuit circuit) async {
     final selection = await showOpenWithSheet(context);
     if (selection == null || !mounted) return;
 
-    // TODO: abrir la app real con url_launcher usando lat/lng del circuito.
-    _notifySoon('Abriendo el circuito en ${selection.app.label}...');
+    final uri = selection.app.locationUri(
+      latitude: circuit.latitude,
+      longitude: circuit.longitude,
+    );
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && mounted) {
+      _notifySoon('No se pudo abrir ${selection.app.label}');
+    }
   }
 
   @override
@@ -67,12 +75,13 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
             )
           : circuit == null
           ? _ErrorState(
-              message: viewModel.errorMessage ?? AppStrings.genericError,
+              message:
+                  viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
             )
           : _DetailContent(
               circuit: circuit,
               stops: viewModel.stops,
-              onOpenInMaps: _openInMaps,
+              onOpenInMaps: () => _openInMaps(circuit),
               onDownload: () =>
                   _notifySoon('Descargar sin conexión: próximamente'),
               onSeeAllComments: () =>
@@ -185,13 +194,13 @@ class _DetailContent extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               PrimaryButton(
-                label: AppStrings.scheduleCircuit,
+                label: 'Agendar circuito',
                 icon: Icons.calendar_month_outlined,
                 onPressed: () => context.push(Routes.bookingPath(circuit.id)),
               ),
               const SizedBox(height: 20),
               if (stops.isNotEmpty) ...[
-                SectionHeader(title: '${AppStrings.stops} (${stops.length})'),
+                SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
                 const SizedBox(height: 10),
                 for (var i = 0; i < stops.length; i++)
                   StopListTile(
@@ -204,8 +213,8 @@ class _DetailContent extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               SectionHeader(
-                title: '${AppStrings.comments} (${circuit.reviewsCount})',
-                actionLabel: AppStrings.seeAll,
+                title: 'Comentarios (${circuit.reviewsCount})',
+                actionLabel: 'Ver todos',
                 onActionPressed: onSeeAllComments,
               ),
               for (final comment in comments) CommentTile(comment: comment),
@@ -228,7 +237,10 @@ class _MetaRow extends StatelessWidget {
     final items = <({IconData icon, String label})>[
       (icon: Icons.schedule, label: circuit.duration),
       (icon: Icons.location_on_outlined, label: '${circuit.stops} paradas'),
-      (icon: Icons.military_tech_outlined, label: '${circuit.badges} insignias'),
+      (
+        icon: Icons.military_tech_outlined,
+        label: '${circuit.badges} insignias',
+      ),
     ];
 
     return IntrinsicHeight(

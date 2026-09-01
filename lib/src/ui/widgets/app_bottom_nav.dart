@@ -6,9 +6,6 @@ import '../../core/theme/app_text_styles.dart';
 import '../../router/routes.dart';
 
 /// Barra inferior de la app.
-///
-/// Sólo "Inicio" tiene pantalla; el resto avisa que está en construcción
-/// para no dejar botones muertos en la demo.
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({super.key, this.currentIndex = 0});
 
@@ -16,22 +13,26 @@ class AppBottomNav extends StatelessWidget {
 
   static const List<({IconData icon, String label})> _items = [
     (icon: Icons.home_outlined, label: 'Inicio'),
-    (icon: Icons.explore_outlined, label: 'Mis viajes'),
+    (icon: Icons.explore_outlined, label: 'Viajes'),
     (icon: Icons.bookmark_border, label: 'Guardados'),
+    (icon: Icons.confirmation_number_outlined, label: 'Cupones'),
     (icon: Icons.person_outline, label: 'Perfil'),
   ];
 
   void _onTap(BuildContext context, int index) {
     if (index == currentIndex) return;
-    if (index == 0) {
-      context.go(Routes.home);
-      return;
+    switch (index) {
+      case 0:
+        context.go(Routes.home);
+      case 1:
+        context.go(Routes.myTrips);
+      case 2:
+        context.go(Routes.saved);
+      case 3:
+        context.go(Routes.coupons);
+      case 4:
+        context.go(Routes.profile);
     }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('${_items[index].label}: próximamente')),
-      );
   }
 
   @override

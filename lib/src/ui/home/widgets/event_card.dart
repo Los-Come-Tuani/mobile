@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/event_item.dart';
+import '../../widgets/bookmark_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/remote_image.dart';
 import 'content_card.dart';
@@ -57,6 +58,17 @@ class EventCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                ),
+              ),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: AppColors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: BookmarkButton(itemId: event.id, size: 18),
                 ),
               ),
             ],

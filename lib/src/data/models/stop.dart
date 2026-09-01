@@ -40,7 +40,8 @@ class Stop {
   String get coverImage => images.isEmpty ? '' : images.first;
 
   factory Stop.fromJson(Map<String, dynamic> json) {
-    final coordinates = json['coordinates'] as Map<String, dynamic>? ?? const {};
+    final coordinates =
+        json['coordinates'] as Map<String, dynamic>? ?? const {};
 
     return Stop(
       id: json['id'] as String? ?? '',

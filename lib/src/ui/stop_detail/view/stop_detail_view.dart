@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -10,11 +10,12 @@ import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
-import '../../widgets/bookmark_button.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
+import '../../widgets/item_options_sheet.dart';
+import '../../widgets/open_with_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../viewmodels/stop_detail_viewmodel.dart';
@@ -51,18 +52,73 @@ class _StopDetailViewState extends State<StopDetailView> {
           : _StopContent(
               stop: stop,
               circuitsWithStop: viewModel.circuitsWithStop,
+              hasClaimedBadge: viewModel.hasClaimedBadge,
+              onClaimBadge: viewModel.claimBadge,
             ),
     );
   }
 }
 
 class _StopContent extends StatelessWidget {
-  const _StopContent({required this.stop, required this.circuitsWithStop});
+  const _StopContent({
+    required this.stop,
+    required this.circuitsWithStop,
+    required this.hasClaimedBadge,
+    required this.onClaimBadge,
+  });
 
   final Stop stop;
   final List<CircuitCollection> circuitsWithStop;
+  final bool hasClaimedBadge;
+
+  /// Reclama la insignia de la categoría de esta parada. Devuelve `true`
+  /// si quedó reclamada ahora.
+  final bool Function() onClaimBadge;
 
   static const double _galleryHeight = 240;
+
+  void _claimBadge(BuildContext context) {
+    final claimed = onClaimBadge();
+    if (!claimed) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('¡Insignia de ${stop.category} obtenida!')),
+      );
+  }
+
+  /// Guardar o añadir a un circuito, detrás del botón de "más".
+  Future<void> _openOptions(BuildContext context) async {
+    final wantsAddToCircuit = await showItemOptionsSheet(
+      context,
+      itemId: stop.id,
+      showAddToCircuit: true,
+    );
+    if (wantsAddToCircuit != true || !context.mounted) return;
+
+    await showAddToCircuitSheet(context, stopId: stop.id, stopName: stop.name);
+  }
+
+  /// Abre esta parada puntual (no el circuito) en la app de navegación
+  /// elegida, usando sus propias coordenadas.
+  Future<void> _openInMaps(BuildContext context) async {
+    final selection = await showOpenWithSheet(context);
+    if (selection == null || !context.mounted) return;
+
+    final uri = selection.app.locationUri(
+      latitude: stop.latitude,
+      longitude: stop.longitude,
+    );
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text('No se pudo abrir ${selection.app.label}')),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,12 +144,10 @@ class _StopContent extends StatelessWidget {
                         : context.go(Routes.home),
                   ),
                   const Spacer(),
-                  DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: AppColors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: BookmarkButton(itemId: stop.id, size: 20),
+                  CircleIconButton(
+                    icon: Icons.more_vert,
+                    tooltip: 'Más opciones',
+                    onPressed: () => _openOptions(context),
                   ),
                 ],
               ),
@@ -102,6 +156,17 @@ class _StopContent extends StatelessWidget {
               bottom: 12,
               left: 16,
               child: CategoryChip(category: stop.category),
+            ),
+            Positioned(
+              bottom: 12,
+              right: 16,
+              child: CircleIconButton(
+                icon: Icons.location_on,
+                tooltip: 'Ver en el mapa',
+                color: AppColors.primary30,
+                size: 44,
+                onPressed: () => _openInMaps(context),
+              ),
             ),
           ],
         ),
@@ -112,10 +177,7 @@ class _StopContent extends StatelessWidget {
             children: [
               Text(stop.name, style: AppTextStyles.headline),
               const SizedBox(height: 8),
-              RatingStars(
-                rating: stop.rating,
-                reviewsCount: stop.reviewsCount,
-              ),
+              RatingStars(rating: stop.rating, reviewsCount: stop.reviewsCount),
               const SizedBox(height: 12),
               IconLabel(
                 icon: Icons.location_on_outlined,
@@ -126,27 +188,13 @@ class _StopContent extends StatelessWidget {
                 style: AppTextStyles.bodySmall,
               ),
               const SizedBox(height: 6),
-              Row(
-                children: [
-                  IconLabel(
-                    icon: Icons.schedule,
-                    label: stop.duration,
-                    iconColor: AppColors.primary30,
-                    color: AppColors.primaryText,
-                    iconSize: 16,
-                    style: AppTextStyles.bodySmall,
-                  ),
-                  if (stop.hasBadge) ...[
-                    const SizedBox(width: 16),
-                    const IconLabel(
-                      icon: Icons.military_tech_outlined,
-                      label: 'Otorga insignia',
-                      iconColor: AppColors.primary30,
-                      color: AppColors.primaryText,
-                      iconSize: 16,
-                    ),
-                  ],
-                ],
+              IconLabel(
+                icon: Icons.schedule,
+                label: stop.duration,
+                iconColor: AppColors.primary30,
+                color: AppColors.primaryText,
+                iconSize: 16,
+                style: AppTextStyles.bodySmall,
               ),
               const SizedBox(height: 16),
               Text(stop.description, style: AppTextStyles.bodySmall),
@@ -154,9 +202,17 @@ class _StopContent extends StatelessWidget {
                 const SizedBox(height: 16),
                 _TipCard(tip: stop.tip),
               ],
+              if (stop.hasBadge) ...[
+                const SizedBox(height: 16),
+                _BadgeCard(
+                  category: stop.category,
+                  isClaimed: hasClaimedBadge,
+                  onClaim: () => _claimBadge(context),
+                ),
+              ],
               const SizedBox(height: 20),
               PrimaryButton(
-                label: AppStrings.addToCircuit,
+                label: 'Añadir a un circuito',
                 icon: Icons.playlist_add,
                 onPressed: () => showAddToCircuitSheet(
                   context,
@@ -166,7 +222,7 @@ class _StopContent extends StatelessWidget {
               ),
               if (circuitsWithStop.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text(AppStrings.savedInCircuits, style: AppTextStyles.title),
+                Text('Guardado en', style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -181,6 +237,54 @@ class _StopContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Invita a reclamar la insignia de esta parada, o confirma que ya se hizo.
+class _BadgeCard extends StatelessWidget {
+  const _BadgeCard({
+    required this.category,
+    required this.isClaimed,
+    required this.onClaim,
+  });
+
+  final String category;
+  final bool isClaimed;
+  final VoidCallback onClaim;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isClaimed
+            ? AppColors.accentSecondaryGreen.withValues(alpha: 0.08)
+            : AppColors.primary30.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isClaimed ? Icons.military_tech : Icons.military_tech_outlined,
+            color: isClaimed
+                ? AppColors.accentSecondaryGreen
+                : AppColors.primary30,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              isClaimed
+                  ? 'Insignia de $category obtenida'
+                  : 'Esta parada otorga una insignia de $category',
+              style: AppTextStyles.bodySmall,
+            ),
+          ),
+          if (!isClaimed)
+            TextButton(onPressed: onClaim, child: const Text('Reclamar')),
+        ],
+      ),
     );
   }
 }
@@ -213,7 +317,7 @@ class _TipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(AppStrings.recommendations, style: AppTextStyles.infoLabel),
+                Text('Recomendaciones', style: AppTextStyles.infoLabel),
                 const SizedBox(height: 2),
                 Text(tip, style: AppTextStyles.caption),
               ],

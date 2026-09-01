@@ -1,7 +1,7 @@
-import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/circuit.dart';
+import '../../models/coupon.dart';
 import '../../models/event_item.dart';
 import '../../models/place.dart';
 import '../../models/stop.dart';
@@ -84,13 +84,31 @@ class TourRepository {
     });
   }
 
+  Future<Result<EventItem>> getEventById(String id) async {
+    return _guard('getEventById', () async {
+      final rows = await _datasource.readList('events.json');
+      final row = rows.firstWhere(
+        (e) => e['id'] == id,
+        orElse: () => throw StateError('Evento no encontrado: $id'),
+      );
+      return EventItem.fromJson(row);
+    });
+  }
+
+  Future<Result<List<Coupon>>> getCoupons() async {
+    return _guard('getCoupons', () async {
+      final rows = await _datasource.readList('coupons.json');
+      return rows.map(Coupon.fromJson).toList(growable: false);
+    });
+  }
+
   /// Envuelve la lectura para que la UI nunca reciba una excepción suelta.
   Future<Result<T>> _guard<T>(String tag, Future<T> Function() action) async {
     try {
       return Result.ok(await action());
     } catch (e, st) {
       log.e('$tag: $e', error: e, stackTrace: st);
-      return Result.failure(AppStrings.genericError, e);
+      return Result.failure('Algo salió mal, intenta de nuevo', e);
     }
   }
 }

@@ -43,6 +43,7 @@ class Circuit {
   final String city;
   final double rating;
   final int reviewsCount;
+
   /// Ids de las paradas del recorrido, en orden.
   final List<String> stopIds;
   final String duration;

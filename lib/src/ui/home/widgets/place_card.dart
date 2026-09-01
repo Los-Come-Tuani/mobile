@@ -8,17 +8,25 @@ import 'content_card.dart';
 
 /// Tarjeta de la sección "Lugares destacados".
 class PlaceCard extends StatelessWidget {
-  const PlaceCard({super.key, required this.place, this.onTap});
+  const PlaceCard({
+    super.key,
+    required this.place,
+    this.onTap,
+    this.width = cardWidth,
+  });
 
   static const double cardWidth = 200;
 
   final Place place;
   final VoidCallback? onTap;
 
+  /// `double.infinity` para usar la tarjeta en una lista vertical.
+  final double width;
+
   @override
   Widget build(BuildContext context) {
     return ContentCard(
-      width: cardWidth,
+      width: width,
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

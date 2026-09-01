@@ -6,11 +6,7 @@ import 'remote_image.dart';
 /// Carrusel de fotos con indicador de página, usado en los detalles de
 /// circuito y de parada.
 class ImageGallery extends StatefulWidget {
-  const ImageGallery({
-    super.key,
-    required this.images,
-    required this.height,
-  });
+  const ImageGallery({super.key, required this.images, required this.height});
 
   final List<String> images;
   final double height;

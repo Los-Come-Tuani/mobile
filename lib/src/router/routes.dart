@@ -5,6 +5,11 @@ abstract final class Routes {
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
+  static const myTrips = '/my-trips';
+  static const saved = '/saved';
+  static const coupons = '/coupons';
+  static const medals = '/medals';
+  static const profile = '/profile';
 
   /// Detalle de un circuito: `/circuit/:id`
   static const circuitDetail = '/circuit/:$circuitId';
@@ -15,24 +20,24 @@ abstract final class Routes {
   /// Detalle de una parada: `/stop/:id`
   static const stopDetail = '/stop/:$stopId';
 
+  /// Detalle de un evento: `/event/:id`
+  static const eventDetail = '/event/:$eventId';
+
   /// Circuito creado por el usuario: `/my-circuit/:id`
   static const myCircuit = '/my-circuit/:$collectionId';
 
   /// Nombres de los parámetros de ruta.
   static const circuitId = 'circuitId';
   static const stopId = 'stopId';
+  static const eventId = 'eventId';
   static const collectionId = 'collectionId';
 
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
   static String stopDetailPath(String id) => '/stop/$id';
+  static String eventDetailPath(String id) => '/event/$id';
   static String myCircuitPath(String id) => '/my-circuit/$id';
 
   /// Rutas accesibles sin sesión iniciada.
-  static const Set<String> public = {
-    welcome,
-    login,
-    register,
-    forgotPassword,
-  };
+  static const Set<String> public = {welcome, login, register, forgotPassword};
 }

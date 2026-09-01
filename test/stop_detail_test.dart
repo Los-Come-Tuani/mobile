@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_plan_mobile/src/core/constants/app_strings.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
@@ -50,8 +50,12 @@ void main() {
             value: collections,
           ),
           ChangeNotifierProvider<StopDetailViewModel>(
-            create: (_) =>
-                StopDetailViewModel(tourRepository, collections, stopId),
+            create: (_) => StopDetailViewModel(
+              tourRepository,
+              collections,
+              BadgesRepository(),
+              stopId,
+            ),
           ),
         ],
         child: const MaterialApp(home: StopDetailView()),
@@ -68,14 +72,14 @@ void main() {
     expect(find.text('Catedral de Granada'), findsOneWidget);
     expect(find.text('Parque Central, Granada'), findsOneWidget);
     // Ya viene dentro del circuito de Granada.
-    expect(find.text(AppStrings.savedInCircuits), findsOneWidget);
+    expect(find.text('Guardado en'), findsOneWidget);
     expect(find.text('Granada Histórica'), findsOneWidget);
   });
 
   testWidgets('La hoja añade la parada a otro circuito', (tester) async {
     await pumpStopDetail(tester, 'granada-catedral');
 
-    await tapVisible(tester, find.text(AppStrings.addToCircuit.toUpperCase()));
+    await tapVisible(tester, find.text('AÑADIR A UN CIRCUITO'));
 
     // La hoja lista los circuitos y la opción de crear uno nuevo.
     expect(find.text('Crear circuito nuevo'), findsOneWidget);
@@ -96,15 +100,13 @@ void main() {
   testWidgets('Se crea un circuito nuevo desde la hoja', (tester) async {
     await pumpStopDetail(tester, 'ometepe-ojo-de-agua');
 
-    await tapVisible(tester, find.text(AppStrings.addToCircuit.toUpperCase()));
+    await tapVisible(tester, find.text('AÑADIR A UN CIRCUITO'));
     await tapVisible(tester, find.text('Crear circuito nuevo'));
 
     await tester.enterText(find.byType(TextField), 'Fin de semana en el sur');
     await tapVisible(tester, find.text('Crear'));
 
     expect(collections.userCollections, hasLength(1));
-    expect(collections.userCollections.first.stopIds, [
-      'ometepe-ojo-de-agua',
-    ]);
+    expect(collections.userCollections.first.stopIds, ['ometepe-ojo-de-agua']);
   });
 }

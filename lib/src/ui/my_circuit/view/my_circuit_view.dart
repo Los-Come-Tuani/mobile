@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -60,7 +59,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
-        title: Text(collection?.title ?? AppStrings.myCircuits),
+        title: Text(collection?.title ?? 'Mis circuitos'),
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy
@@ -87,7 +86,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          AppStrings.emptyCircuit,
+                          'Este circuito todavía no tiene paradas',
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodySmall,
                         ),

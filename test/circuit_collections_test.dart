@@ -61,10 +61,7 @@ void main() {
     repository.addListener(() => notifications++);
 
     repository.createCollection('Ruta libre');
-    repository.toggleStop(
-      circuitId: 'leon-colonial',
-      stopId: 'granada-muelle',
-    );
+    repository.toggleStop(circuitId: 'leon-colonial', stopId: 'granada-muelle');
 
     expect(notifications, 2);
   });

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../router/routes.dart';
 import '../viewmodels/home_viewmodel.dart';
 
 /// Menú lateral del home. Es el único lugar desde donde se cierra sesión.
@@ -60,11 +62,37 @@ class HomeMenuDrawer extends StatelessWidget {
               ),
             ),
             const Divider(color: AppColors.divider, height: 1),
-            const _MenuItem(icon: Icons.person_outline, label: 'Mi perfil'),
-            const _MenuItem(icon: Icons.bookmark_border, label: 'Guardados'),
-            const _MenuItem(
+            _MenuItem(
+              icon: Icons.person_outline,
+              label: 'Mi perfil',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.profile);
+              },
+            ),
+            _MenuItem(
+              icon: Icons.bookmark_border,
+              label: 'Guardados',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.saved);
+              },
+            ),
+            _MenuItem(
               icon: Icons.military_tech_outlined,
-              label: 'Mis insignias',
+              label: 'Mis medallas',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.medals);
+              },
+            ),
+            _MenuItem(
+              icon: Icons.confirmation_number_outlined,
+              label: 'Cupones',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.coupons);
+              },
             ),
             const _MenuItem(icon: Icons.settings_outlined, label: 'Ajustes'),
             const Spacer(),
@@ -87,22 +115,25 @@ class HomeMenuDrawer extends StatelessWidget {
 }
 
 class _MenuItem extends StatelessWidget {
-  const _MenuItem({required this.icon, required this.label});
+  const _MenuItem({required this.icon, required this.label, this.onTap});
 
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primaryText),
       title: Text(label, style: AppTextStyles.body),
-      onTap: () {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text('$label: próximamente')));
-      },
+      onTap:
+          onTap ??
+          () {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text('$label: próximamente')));
+          },
     );
   }
 }

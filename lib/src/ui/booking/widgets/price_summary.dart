@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -25,18 +24,15 @@ class PriceSummary extends StatelessWidget {
         ),
         _Line(
           icon: Icons.child_care_outlined,
-          label: '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
+          label:
+              '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
           amount: viewModel.childrenTotal,
         ),
         const Divider(height: 20, thickness: 1, color: AppColors.divider),
-        _Line(label: AppStrings.subtotal, amount: viewModel.subtotal),
-        _Line(label: AppStrings.serviceFee, amount: viewModel.serviceFee),
+        _Line(label: 'Subtotal', amount: viewModel.subtotal),
+        _Line(label: 'Servicio (20%)', amount: viewModel.serviceFee),
         const SizedBox(height: 6),
-        _Line(
-          label: AppStrings.total,
-          amount: viewModel.total,
-          highlight: true,
-        ),
+        _Line(label: 'Total', amount: viewModel.total, highlight: true),
       ],
     );
   }

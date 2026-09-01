@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -45,7 +44,7 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(AppStrings.group, style: AppTextStyles.title),
+            Text('Grupo', style: AppTextStyles.title),
             const SizedBox(height: 16),
             _CounterRow(
               label: 'Adultos',
@@ -63,7 +62,7 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text(AppStrings.cancel),
+                    child: const Text('Cancelar'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -71,11 +70,10 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
                   child: ElevatedButton(
                     onPressed: _adults + _children == 0
                         ? null
-                        : () => Navigator.of(context).pop((
-                            adults: _adults,
-                            children: _children,
-                          )),
-                    child: const Text(AppStrings.accept),
+                        : () => Navigator.of(
+                            context,
+                          ).pop((adults: _adults, children: _children)),
+                    child: const Text('Aceptar'),
                   ),
                 ),
               ],

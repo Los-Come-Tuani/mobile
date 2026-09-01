@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../../router/routes.dart';
@@ -50,7 +49,9 @@ class _RegisterViewState extends State<RegisterView> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(viewModel.errorMessage ?? AppStrings.genericError),
+          content: Text(
+            viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+          ),
         ),
       );
     }
@@ -98,7 +99,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 16),
                       AppTextField(
-                        hint: AppStrings.email,
+                        hint: 'Correo electrónico',
                         controller: _emailController,
                         validator: Validators.email,
                         keyboardType: TextInputType.emailAddress,
@@ -107,7 +108,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 16),
                       AppTextField(
-                        hint: AppStrings.password,
+                        hint: 'Contraseña',
                         controller: _passwordController,
                         validator: Validators.password,
                         isPassword: true,
@@ -117,7 +118,7 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                       const SizedBox(height: 24),
                       PrimaryButton(
-                        label: AppStrings.register,
+                        label: 'Crear cuenta',
                         isLoading: isBusy,
                         onPressed: _submit,
                       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -52,6 +51,9 @@ class _HomeViewState extends State<HomeView> {
   void _openCircuit(Circuit circuit) =>
       context.push(Routes.circuitDetailPath(circuit.id));
 
+  void _openEvent(EventItem event) =>
+      context.push(Routes.eventDetailPath(event.id));
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomeViewModel>();
@@ -71,7 +73,7 @@ class _HomeViewState extends State<HomeView> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
                 child: AppSearchField(
-                  hint: AppStrings.searchHint,
+                  hint: '¿Qué quieres descubrir?',
                   controller: _searchController,
                   onChanged: viewModel.onQueryChanged,
                 ),
@@ -106,12 +108,12 @@ class _HomeViewState extends State<HomeView> {
           onCircuitTap: _openCircuit,
         ),
         _PlacesSection(places: viewModel.places),
-        _EventsSection(events: viewModel.events),
+        _EventsSection(events: viewModel.events, onEventTap: _openEvent),
       ],
       DiscoverTab.circuits => [
         Padding(
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
-          child: const SectionHeader(title: AppStrings.sectionCircuits),
+          child: const SectionHeader(title: 'Circuitos completos'),
         ),
         for (final circuit in viewModel.circuits)
           Padding(
@@ -126,12 +128,16 @@ class _HomeViewState extends State<HomeView> {
       DiscoverTab.events => [
         Padding(
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
-          child: const SectionHeader(title: AppStrings.sectionEvents),
+          child: const SectionHeader(title: 'Eventos Próximos'),
         ),
         for (final event in viewModel.events)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: EventCard(event: event, width: double.infinity),
+            child: EventCard(
+              event: event,
+              width: double.infinity,
+              onTap: () => _openEvent(event),
+            ),
           ),
       ],
     };
@@ -189,13 +195,12 @@ class _MyCircuitsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: AppStrings.myCircuits,
+      title: 'Mis circuitos',
       height: 132,
       itemCount: collections.length,
       itemBuilder: (context, index) => MyCircuitCard(
         collection: collections[index],
-        onTap: () =>
-            context.push(Routes.myCircuitPath(collections[index].id)),
+        onTap: () => context.push(Routes.myCircuitPath(collections[index].id)),
       ),
     );
   }
@@ -210,7 +215,7 @@ class _CircuitsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: AppStrings.sectionCircuits,
+      title: 'Circuitos completos',
       height: 244,
       itemCount: circuits.length,
       itemBuilder: (context, index) => CircuitCard(
@@ -229,7 +234,7 @@ class _PlacesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: AppStrings.sectionPlaces,
+      title: 'Lugares destacados',
       height: 186,
       itemCount: places.length,
       itemBuilder: (context, index) => PlaceCard(place: places[index]),
@@ -238,17 +243,21 @@ class _PlacesSection extends StatelessWidget {
 }
 
 class _EventsSection extends StatelessWidget {
-  const _EventsSection({required this.events});
+  const _EventsSection({required this.events, required this.onEventTap});
 
   final List<EventItem> events;
+  final ValueChanged<EventItem> onEventTap;
 
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: AppStrings.sectionEvents,
+      title: 'Eventos Próximos',
       height: 194,
       itemCount: events.length,
-      itemBuilder: (context, index) => EventCard(event: events[index]),
+      itemBuilder: (context, index) => EventCard(
+        event: events[index],
+        onTap: () => onEventTap(events[index]),
+      ),
     );
   }
 }
@@ -276,14 +285,10 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
       child: Column(
         children: [
-          const Icon(
-            Icons.travel_explore,
-            size: 48,
-            color: AppColors.hintText,
-          ),
+          const Icon(Icons.travel_explore, size: 48, color: AppColors.hintText),
           const SizedBox(height: 12),
           Text(
-            AppStrings.emptyResults,
+            'No encontramos resultados para tu búsqueda',
             textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall,
           ),

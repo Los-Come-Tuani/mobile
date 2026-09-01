@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
@@ -60,7 +59,10 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                Text(AppStrings.forgotPassword, style: AppTextStyles.headline),
+                Text(
+                  '¿Olvidaste tu contraseña?',
+                  style: AppTextStyles.headline,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Ingresa tu correo y te enviaremos las instrucciones.',
@@ -68,7 +70,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                 ),
                 const SizedBox(height: 24),
                 AppTextField(
-                  hint: AppStrings.email,
+                  hint: 'Correo electrónico',
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,

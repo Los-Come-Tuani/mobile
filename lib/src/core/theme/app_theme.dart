@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_text_styles.dart';
 
-/// Tema global. 
+/// Tema global.
 abstract final class AppTheme {
   /// Radio de esquinas de botones y campos.
   static const double radius = 10;

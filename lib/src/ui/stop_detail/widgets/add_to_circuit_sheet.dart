@@ -144,10 +144,7 @@ class _NewCircuitRow extends StatelessWidget {
         'Crear circuito nuevo',
         style: AppTextStyles.body.copyWith(color: AppColors.primary30),
       ),
-      subtitle: Text(
-        'Y añadir esta parada ahí',
-        style: AppTextStyles.caption,
-      ),
+      subtitle: Text('Y añadir esta parada ahí', style: AppTextStyles.caption),
     );
   }
 }
@@ -244,7 +241,9 @@ class _NewCircuitDialogState extends State<_NewCircuitDialog> {
         textCapitalization: TextCapitalization.sentences,
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => _submit(),
-        decoration: const InputDecoration(hintText: 'Ej. Fin de semana en el sur'),
+        decoration: const InputDecoration(
+          hintText: 'Ej. Fin de semana en el sur',
+        ),
       ),
       actions: [
         TextButton(

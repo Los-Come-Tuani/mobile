@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_plan_mobile/src/core/constants/app_strings.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
@@ -35,10 +34,7 @@ void main() {
     expect(find.text('Granada, entre historias y sabores'), findsOneWidget);
     expect(find.text('6 paradas'), findsOneWidget);
     expect(find.text('C\$ 250 p. adulta'), findsOneWidget);
-    expect(
-      find.text(AppStrings.scheduleCircuit.toUpperCase()),
-      findsOneWidget,
-    );
+    expect(find.text('AGENDAR CIRCUITO'), findsOneWidget);
     // La lista de paradas del recorrido.
     expect(find.text('Paradas del recorrido (6)'), findsOneWidget);
     expect(find.text('Catedral de Granada'), findsOneWidget);

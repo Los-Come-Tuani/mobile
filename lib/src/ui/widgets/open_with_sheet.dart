@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/app_theme.dart';
 
-/// Apps de navegación soportadas para abrir el circuito.
+/// Apps de navegación soportadas para abrir una ubicación puntual
+/// (una parada o el punto de encuentro de un circuito).
 enum NavigationApp {
   googleMaps('Google Maps', Icons.map_outlined, AppColors.accentSecondaryGreen),
   waze('Waze', Icons.navigation_outlined, AppColors.chipCity);
@@ -15,6 +15,19 @@ enum NavigationApp {
   final String label;
   final IconData icon;
   final Color color;
+
+  /// URL para abrir esa app exactamente en `latitude, longitude`, con un
+  /// marcador ahí — no una ruta ni un circuito completo.
+  Uri locationUri({required double latitude, required double longitude}) {
+    return switch (this) {
+      NavigationApp.googleMaps => Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+      ),
+      NavigationApp.waze => Uri.parse(
+        'https://waze.com/ul?ll=$latitude,$longitude&navigate=yes',
+      ),
+    };
+  }
 }
 
 /// Resultado de la hoja: app elegida y si debe recordarse.
@@ -63,7 +76,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(AppStrings.openWith, style: AppTextStyles.title),
+            Text('Abrir circuito con...', style: AppTextStyles.title),
             const SizedBox(height: 20),
             for (final app in NavigationApp.values) ...[
               _AppOption(
@@ -85,7 +98,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                       setState(() => _remember = value ?? false),
                 ),
                 Text(
-                  AppStrings.alwaysUseThisOption,
+                  'Usar siempre esta opción',
                   style: AppTextStyles.bodySmall,
                 ),
               ],
@@ -100,17 +113,16 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                       foregroundColor: AppColors.primary30,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text(AppStrings.cancel),
+                    child: const Text('Cancelar'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop((
-                      app: _selected,
-                      remember: _remember,
-                    )),
-                    child: const Text(AppStrings.accept),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pop((app: _selected, remember: _remember)),
+                    child: const Text('Aceptar'),
                   ),
                 ),
               ],

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
@@ -50,7 +49,11 @@ class _LoginViewState extends State<LoginView> {
       context.go(Routes.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(viewModel.errorMessage ?? AppStrings.genericError)),
+        SnackBar(
+          content: Text(
+            viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+          ),
+        ),
       );
     }
   }
@@ -92,7 +95,7 @@ class _LoginViewState extends State<LoginView> {
                               children: [
                                 const SizedBox(height: 32),
                                 AppTextField(
-                                  hint: AppStrings.email,
+                                  hint: 'Correo electrónico',
                                   controller: _emailController,
                                   validator: Validators.email,
                                   keyboardType: TextInputType.emailAddress,
@@ -101,7 +104,7 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                                 const SizedBox(height: 16),
                                 AppTextField(
-                                  hint: AppStrings.password,
+                                  hint: 'Contraseña',
                                   controller: _passwordController,
                                   validator: Validators.password,
                                   isPassword: true,
@@ -111,7 +114,7 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                                 const SizedBox(height: 24),
                                 PrimaryButton(
-                                  label: AppStrings.login,
+                                  label: 'Iniciar sesión',
                                   isLoading: isBusy,
                                   onPressed: _submit,
                                 ),
@@ -119,15 +122,16 @@ class _LoginViewState extends State<LoginView> {
                                 TextButton(
                                   onPressed: isBusy
                                       ? null
-                                      : () => context.push(Routes.forgotPassword),
+                                      : () =>
+                                            context.push(Routes.forgotPassword),
                                   child: Text(
-                                    AppStrings.forgotPassword,
+                                    '¿Olvidaste tu contraseña?',
                                     style: AppTextStyles.link,
                                   ),
                                 ),
                                 const Spacer(),
                                 SecondaryButton(
-                                  label: AppStrings.register,
+                                  label: 'Crear cuenta',
                                   onPressed: isBusy
                                       ? null
                                       : () => context.push(Routes.register),

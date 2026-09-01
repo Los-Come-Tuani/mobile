@@ -38,10 +38,7 @@ class MyCircuitViewModel extends BaseViewModel {
 
   /// Quita la parada del circuito (deshacer disponible desde la vista).
   void removeStop(String stopId) {
-    _collectionsRepository.toggleStop(
-      circuitId: collectionId,
-      stopId: stopId,
-    );
+    _collectionsRepository.toggleStop(circuitId: collectionId, stopId: stopId);
   }
 
   void addStopBack(String stopId) => removeStop(stopId);

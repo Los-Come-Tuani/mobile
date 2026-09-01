@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/user.dart';
@@ -32,12 +31,12 @@ class AuthRepository extends ChangeNotifier {
     } on DioException catch (e, st) {
       log.e('login: ${e.message}', error: e, stackTrace: st);
       if (e.response?.statusCode == 401) {
-        return const Result.failure(AppStrings.invalidCredentials);
+        return const Result.failure('Correo o contraseña incorrectos');
       }
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('login: $e', error: e, stackTrace: st);
-      return Result.failure(AppStrings.genericError, e);
+      return Result.failure('Algo salió mal, intenta de nuevo', e);
     }
   }
 
@@ -65,7 +64,7 @@ class AuthRepository extends ChangeNotifier {
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('register: $e', error: e, stackTrace: st);
-      return Result.failure(AppStrings.genericError, e);
+      return Result.failure('Algo salió mal, intenta de nuevo', e);
     }
   }
 

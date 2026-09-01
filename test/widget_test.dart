@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:k_plan_mobile/src/core/constants/app_strings.dart';
 import 'package:k_plan_mobile/src/core/theme/app_theme.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
@@ -24,9 +23,9 @@ void main() {
   testWidgets('Welcome muestra el título y las dos acciones', (tester) async {
     await tester.pumpWidget(_wrap(const WelcomeView()));
 
-    expect(find.text(AppStrings.welcomeTitle), findsOneWidget);
-    expect(find.text(AppStrings.login.toUpperCase()), findsOneWidget);
-    expect(find.text(AppStrings.register.toUpperCase()), findsOneWidget);
+    expect(find.text('Bienvenido'), findsOneWidget);
+    expect(find.text('INICIAR SESIÓN'), findsOneWidget);
+    expect(find.text('CREAR CUENTA'), findsOneWidget);
   });
 
   testWidgets('Login valida los campos vacíos', (tester) async {
@@ -40,11 +39,11 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text(AppStrings.login.toUpperCase()));
+    await tester.tap(find.text('INICIAR SESIÓN'));
     await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.emailRequired), findsOneWidget);
-    expect(find.text(AppStrings.passwordRequired), findsOneWidget);
+    expect(find.text('Ingresa tu correo electrónico'), findsOneWidget);
+    expect(find.text('Ingresa tu contraseña'), findsOneWidget);
   });
 
   testWidgets('Home carga los circuitos del JSON de prueba', (tester) async {
@@ -70,8 +69,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(AppStrings.sectionCircuits), findsOneWidget);
-    expect(find.text(AppStrings.sectionPlaces), findsOneWidget);
+    expect(find.text('Circuitos completos'), findsOneWidget);
+    expect(find.text('Lugares destacados'), findsOneWidget);
     expect(find.text('Granada Histórica'), findsOneWidget);
   });
 }
