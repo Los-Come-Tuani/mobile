@@ -1,5 +1,6 @@
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
+import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit.dart';
@@ -11,17 +12,19 @@ class CircuitDetailViewModel extends BaseViewModel {
     this._tourRepository,
     this._collectionsRepository,
     this._activeTripRepository,
+    this._badgesRepository,
     this.circuitId,
   ) {
     // Si el usuario añade una parada a este circuito desde otra pantalla,
     // la lista se refresca sola.
     _collectionsRepository.addListener(_onCollectionsChanged);
-    _activeTripRepository.addListener(safeNotify);
+    _activeTripRepository.addListener(_onActiveTripChanged);
   }
 
   final TourRepository _tourRepository;
   final CircuitCollectionsRepository _collectionsRepository;
   final ActiveTripRepository _activeTripRepository;
+  final BadgesRepository _badgesRepository;
   final String circuitId;
 
   Circuit? _circuit;
@@ -81,10 +84,29 @@ class CircuitDetailViewModel extends BaseViewModel {
 
   void endTrip() => _activeTripRepository.end();
 
+  /// Si el circuito es oficial y se acaba de completar (todas las paradas
+  /// con check-in), otorga la insignia extra de "Circuitos oficiales".
+  /// `claim()` es idempotente por `stopId`, así que sólo se otorga una vez
+  /// aunque el turista siga entrando y saliendo de la pantalla.
+  void _onActiveTripChanged() {
+    final circuit = _circuit;
+    if (circuit != null &&
+        circuit.isOfficial &&
+        isTripActive &&
+        _stops.isNotEmpty &&
+        checkedInCount == _stops.length) {
+      _badgesRepository.claim(
+        stopId: 'circuit-bonus-${circuit.id}',
+        category: 'Circuitos oficiales',
+      );
+    }
+    safeNotify();
+  }
+
   @override
   void dispose() {
     _collectionsRepository.removeListener(_onCollectionsChanged);
-    _activeTripRepository.removeListener(safeNotify);
+    _activeTripRepository.removeListener(_onActiveTripChanged);
     super.dispose();
   }
 }

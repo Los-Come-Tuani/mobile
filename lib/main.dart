@@ -10,6 +10,10 @@ import 'src/data/datasources/repository/auth_repository.dart';
 import 'src/data/datasources/repository/badges_repository.dart';
 import 'src/data/datasources/repository/bookings_repository.dart';
 import 'src/data/datasources/repository/circuit_collections_repository.dart';
+import 'src/data/datasources/repository/group_session_repository.dart';
+import 'src/data/datasources/repository/guide_chat_repository.dart';
+import 'src/data/datasources/repository/guide_repository.dart';
+import 'src/data/datasources/repository/guide_request_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
 import 'src/router/router.dart';
@@ -62,6 +66,24 @@ class _KPlanAppState extends State<KPlanApp> {
         // El circuito que el usuario está recorriendo ahora, si hay uno.
         ChangeNotifierProvider<ActiveTripRepository>(
           create: (_) => ActiveTripRepository(),
+        ),
+        // Catálogo de guías turísticos disponibles para solicitar en vivo.
+        Provider<GuideRepository>(create: (_) => GuideRepository()),
+        // La solicitud de guía en vivo en curso, si hay una (búsqueda o
+        // encontrado). El "guía acepta" se simula: no hay app del lado del
+        // guía todavía.
+        ChangeNotifierProvider<GuideRequestRepository>(
+          create: (context) =>
+              GuideRequestRepository(context.read<GuideRepository>()),
+        ),
+        // Chat simulado con el guía de la solicitud activa.
+        ChangeNotifierProvider<GuideChatRepository>(
+          create: (_) => GuideChatRepository(),
+        ),
+        // Salidas de grupo programadas por las alcaldías en circuitos
+        // oficiales.
+        ChangeNotifierProvider<GroupSessionRepository>(
+          create: (_) => GroupSessionRepository(),
         ),
       ],
       child: MaterialApp.router(

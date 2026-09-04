@@ -144,11 +144,13 @@
     "recommendations": "Lleva sombrero y agua, el sol de León es fuerte al mediodía",
     "meetingPoint": "Parque Central de León, frente a la Catedral",
     "includes": "Guía certificado, entrada a museos y subida a los techos de la Catedral",
-    "badgesNote": "Este recorrido contiene un total de 2 insignias coleccionables",
+    "badgesNote": "Este recorrido contiene un total de 2 insignias coleccionables, más 1 insignia extra de \"Circuitos oficiales\" al completarlo",
     "notes": "La subida a los techos de la Catedral se hace descalzo",
     "languages": ["Español", "Inglés", "Francés"],
     "startTimes": ["9:00 a.m.", "3:00 p.m."],
     "location": { "latitude": 12.4345, "longitude": -86.8780 },
+    "isOfficial": true,
+    "organizer": "Alcaldía de León",
     "comments": [
       {
         "author": "Diana C.",

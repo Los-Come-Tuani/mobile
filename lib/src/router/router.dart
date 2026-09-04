@@ -7,17 +7,27 @@ import '../data/datasources/repository/auth_repository.dart';
 import '../data/datasources/repository/badges_repository.dart';
 import '../data/datasources/repository/bookings_repository.dart';
 import '../data/datasources/repository/circuit_collections_repository.dart';
+import '../data/datasources/repository/guide_chat_repository.dart';
+import '../data/datasources/repository/guide_repository.dart';
+import '../data/datasources/repository/guide_request_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
 import '../ui/circuit_detail/viewmodels/circuit_detail_viewmodel.dart';
+import '../ui/circuit_detail/widgets/guide_request_sheet.dart';
 import '../ui/coupons/view/coupons_view.dart';
 import '../ui/coupons/viewmodels/coupons_viewmodel.dart';
 import '../ui/event_detail/view/event_detail_view.dart';
 import '../ui/event_detail/viewmodels/event_detail_viewmodel.dart';
 import '../ui/forgot_password/view/forgot_password_view.dart';
+import '../ui/guide_chat/view/guide_chat_view.dart';
+import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
+import '../ui/guide_profile/view/guide_profile_view.dart';
+import '../ui/guide_profile/viewmodels/guide_profile_viewmodel.dart';
+import '../ui/guide_request/view/guide_searching_view.dart';
+import '../ui/guide_request/viewmodels/guide_request_viewmodel.dart';
 import '../ui/home/view/home_view.dart';
 import '../ui/home/viewmodels/home_viewmodel.dart';
 import '../ui/login/view/login_view.dart';
@@ -89,6 +99,7 @@ GoRouter createRouter(AuthRepository authRepository) {
             context.read<CircuitCollectionsRepository>(),
             context.read<BadgesRepository>(),
             context.read<BookingsRepository>(),
+            context.read<GuideRequestRepository>(),
           ),
           child: const HomeView(),
         ),
@@ -102,6 +113,7 @@ GoRouter createRouter(AuthRepository authRepository) {
               context.read<TourRepository>(),
               context.read<CircuitCollectionsRepository>(),
               context.read<ActiveTripRepository>(),
+              context.read<BadgesRepository>(),
               id,
             ),
             child: const CircuitDetailView(),
@@ -119,6 +131,23 @@ GoRouter createRouter(AuthRepository authRepository) {
                   id,
                 ),
                 child: const BookingView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Routes.guideRequestSegment,
+            builder: (context, state) {
+              final id = state.pathParameters[Routes.circuitId] ?? '';
+              return ChangeNotifierProvider<GuideRequestViewModel>(
+                create: (context) => GuideRequestViewModel(
+                  context.read<TourRepository>(),
+                  context.read<GuideRequestRepository>(),
+                  context.read<GuideChatRepository>(),
+                  id,
+                ),
+                child: GuideSearchingView(
+                  selection: state.extra as GuideRequestSelection?,
+                ),
               );
             },
           ),
@@ -150,6 +179,30 @@ GoRouter createRouter(AuthRepository authRepository) {
             child: const EventDetailView(),
           );
         },
+      ),
+      GoRoute(
+        path: Routes.guideProfile,
+        builder: (context, state) {
+          final id = state.pathParameters[Routes.guideId] ?? '';
+          return ChangeNotifierProvider<GuideProfileViewModel>(
+            create: (context) => GuideProfileViewModel(
+              context.read<GuideRepository>(),
+              context.read<GuideRequestRepository>(),
+              id,
+            ),
+            child: const GuideProfileView(),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.guideChat,
+        builder: (context, state) => ChangeNotifierProvider<GuideChatViewModel>(
+          create: (context) => GuideChatViewModel(
+            context.read<GuideRequestRepository>(),
+            context.read<GuideChatRepository>(),
+          ),
+          child: const GuideChatView(),
+        ),
       ),
       GoRoute(
         path: Routes.myCircuit,

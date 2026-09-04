@@ -3,11 +3,13 @@ import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
+import '../../../data/datasources/repository/guide_request_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/booking.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/event_item.dart';
+import '../../../data/models/guide_request.dart';
 import '../../../data/models/place.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/user.dart';
@@ -21,11 +23,13 @@ class HomeViewModel extends BaseViewModel {
     this._collectionsRepository,
     this._badgesRepository,
     this._bookingsRepository,
+    this._guideRequestRepository,
   ) {
     // Los circuitos que el usuario cree desde una parada aparecen aquí.
     _collectionsRepository.addListener(safeNotify);
     _badgesRepository.addListener(safeNotify);
     _bookingsRepository.addListener(safeNotify);
+    _guideRequestRepository.addListener(safeNotify);
   }
 
   final TourRepository _tourRepository;
@@ -33,6 +37,7 @@ class HomeViewModel extends BaseViewModel {
   final CircuitCollectionsRepository _collectionsRepository;
   final BadgesRepository _badgesRepository;
   final BookingsRepository _bookingsRepository;
+  final GuideRequestRepository _guideRequestRepository;
 
   List<Circuit> _circuits = const [];
   List<Place> _places = const [];
@@ -61,6 +66,17 @@ class HomeViewModel extends BaseViewModel {
 
   /// La reserva futura más próxima, para el aviso de "próximo viaje".
   Booking? get nextBooking => _bookingsRepository.nextUpcoming;
+
+  /// La solicitud de guía en vivo en curso (buscando o ya encontrado), para
+  /// no perderla de vista si el turista sale de la pantalla de búsqueda.
+  GuideRequest? get activeGuideRequest {
+    final request = _guideRequestRepository.activeRequest;
+    if (request == null) return null;
+    final isVisible =
+        request.status == GuideRequestStatus.searching ||
+        request.status == GuideRequestStatus.matched;
+    return isVisible ? request : null;
+  }
 
   /// Listas ya filtradas por el buscador: la vista sólo pinta.
   List<Circuit> get circuits => _circuits
@@ -159,6 +175,7 @@ class HomeViewModel extends BaseViewModel {
     _collectionsRepository.removeListener(safeNotify);
     _badgesRepository.removeListener(safeNotify);
     _bookingsRepository.removeListener(safeNotify);
+    _guideRequestRepository.removeListener(safeNotify);
     super.dispose();
   }
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
 import 'package:k_plan_mobile/src/ui/circuit_detail/view/circuit_detail_view.dart';
@@ -19,11 +22,15 @@ void main() {
           ChangeNotifierProvider<SavedRepository>(
             create: (_) => SavedRepository(),
           ),
+          ChangeNotifierProvider<GuideRequestRepository>(
+            create: (_) => GuideRequestRepository(GuideRepository()),
+          ),
           ChangeNotifierProvider<CircuitDetailViewModel>(
             create: (_) => CircuitDetailViewModel(
               tourRepository,
               CircuitCollectionsRepository(tourRepository),
               ActiveTripRepository(),
+              BadgesRepository(),
               'granada-historias-sabores',
             ),
           ),

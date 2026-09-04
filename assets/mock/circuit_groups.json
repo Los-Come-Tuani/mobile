@@ -1,0 +1,46 @@
+[
+  {
+    "id": "group-leon-1",
+    "circuitId": "leon-colonial",
+    "date": "2026-09-12",
+    "startTime": "9:00 a.m.",
+    "capacity": 12,
+    "joinedCount": 6,
+    "guideName": "Rosa Talavera",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-rosa/300/300",
+    "guideRating": 4.7
+  },
+  {
+    "id": "group-leon-2",
+    "circuitId": "leon-colonial",
+    "date": "2026-09-12",
+    "startTime": "3:00 p.m.",
+    "capacity": 12,
+    "joinedCount": 11,
+    "guideName": "Iván Solís",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-ivan/300/300",
+    "guideRating": 4.5
+  },
+  {
+    "id": "group-leon-3",
+    "circuitId": "leon-colonial",
+    "date": "2026-09-19",
+    "startTime": "9:00 a.m.",
+    "capacity": 15,
+    "joinedCount": 3,
+    "guideName": "Rosa Talavera",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-rosa/300/300",
+    "guideRating": 4.7
+  },
+  {
+    "id": "group-leon-4",
+    "circuitId": "leon-colonial",
+    "date": "2026-09-20",
+    "startTime": "3:00 p.m.",
+    "capacity": 10,
+    "joinedCount": 10,
+    "guideName": "Mayela Reyes",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-mayela/300/300",
+    "guideRating": 4.9
+  }
+]

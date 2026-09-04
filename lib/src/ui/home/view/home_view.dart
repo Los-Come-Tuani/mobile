@@ -10,6 +10,7 @@ import '../../../data/models/booking.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/event_item.dart';
+import '../../../data/models/guide_request.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
@@ -114,6 +115,20 @@ class _HomeViewState extends State<HomeView> {
             onTap: () => context.push(
               Routes.circuitDetailPath(viewModel.nextBooking!.circuitId),
             ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (viewModel.activeGuideRequest != null) ...[
+          _GuideRequestBanner(
+            request: viewModel.activeGuideRequest!,
+            onTap: () {
+              final request = viewModel.activeGuideRequest!;
+              if (request.status == GuideRequestStatus.matched) {
+                context.push(Routes.guideChat);
+              } else {
+                context.push(Routes.guideRequestPath(request.circuitId));
+              }
+            },
           ),
           const SizedBox(height: 12),
         ],
@@ -326,6 +341,81 @@ class _UpcomingTripBanner extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         'Toca para ver los detalles del circuito',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Aviso de la solicitud de guía en vivo en curso: buscando o ya
+/// encontrado, para no perderla de vista al salir de esa pantalla.
+class _GuideRequestBanner extends StatelessWidget {
+  const _GuideRequestBanner({required this.request, required this.onTap});
+
+  final GuideRequest request;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isMatched = request.status == GuideRequestStatus.matched;
+
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Material(
+        color: AppColors.primary30,
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isMatched ? Icons.chat_bubble_outline : Icons.person_search,
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isMatched
+                            ? 'Tienes un guía para ${request.circuitTitle}'
+                            : 'Buscando guía para ${request.circuitTitle}…',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isMatched
+                            ? 'Toca para chatear con él'
+                            : 'Toca para ver el estado de la búsqueda',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.white.withValues(alpha: 0.85),
                         ),

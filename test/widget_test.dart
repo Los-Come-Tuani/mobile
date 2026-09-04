@@ -5,6 +5,8 @@ import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.da
 import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
 import 'package:k_plan_mobile/src/ui/home/view/home_view.dart';
@@ -65,6 +67,7 @@ void main() {
                 CircuitCollectionsRepository(tourRepository),
                 BadgesRepository(),
                 BookingsRepository(),
+                GuideRequestRepository(GuideRepository()),
               );
             },
           ),

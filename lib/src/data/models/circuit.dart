@@ -29,6 +29,8 @@ class Circuit {
     required this.latitude,
     required this.longitude,
     required this.comments,
+    this.isOfficial = false,
+    this.organizer = '',
   });
 
   final String id;
@@ -64,6 +66,14 @@ class Circuit {
   final double latitude;
   final double longitude;
   final List<CircuitComment> comments;
+
+  /// `true` si lo organiza una alcaldía: sólo estos circuitos ofrecen
+  /// "unirse a un grupo" y dan una insignia extra al completarlos.
+  final bool isOfficial;
+
+  /// Nombre de quien lo organiza (p. ej. "Alcaldía de León"), sólo tiene
+  /// sentido cuando [isOfficial] es `true`.
+  final String organizer;
 
   String get coverImage => images.isEmpty ? '' : images.first;
 
@@ -104,6 +114,8 @@ class Circuit {
       comments: (json['comments'] as List<dynamic>? ?? const [])
           .map((e) => CircuitComment.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
+      isOfficial: json['isOfficial'] as bool? ?? false,
+      organizer: json['organizer'] as String? ?? '',
     );
   }
 
