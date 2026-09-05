@@ -70,7 +70,7 @@ const List<String> badgeCategories = [
   'Gastronomía',
   'Naturaleza',
   'Aventura',
-  'Circuitos oficiales',
+  'Circuitos creativos',
 ];
 
 /// Icono por categoría, para la grilla de medallas.
@@ -81,7 +81,7 @@ IconData iconForBadgeCategory(String category) {
     'Gastronomía' => Icons.restaurant_outlined,
     'Naturaleza' => Icons.eco_outlined,
     'Aventura' => Icons.terrain_outlined,
-    'Circuitos oficiales' => Icons.verified_outlined,
+    'Circuitos creativos' => Icons.account_balance_outlined,
     _ => Icons.military_tech_outlined,
   };
 }

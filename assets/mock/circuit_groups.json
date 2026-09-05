@@ -42,5 +42,49 @@
     "guideName": "Mayela Reyes",
     "guidePhotoUrl": "https://picsum.photos/seed/municipal-mayela/300/300",
     "guideRating": 4.9
+  },
+  {
+    "id": "group-masaya-1",
+    "circuitId": "masaya-artesanias-volcan",
+    "date": "2026-09-13",
+    "startTime": "9:00 a.m.",
+    "capacity": 15,
+    "joinedCount": 5,
+    "guideName": "Carlos Membreño",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-carlos/300/300",
+    "guideRating": 4.6
+  },
+  {
+    "id": "group-masaya-2",
+    "circuitId": "masaya-artesanias-volcan",
+    "date": "2026-09-20",
+    "startTime": "2:00 p.m.",
+    "capacity": 15,
+    "joinedCount": 12,
+    "guideName": "Xiomara Vado",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-xiomara/300/300",
+    "guideRating": 4.8
+  },
+  {
+    "id": "group-esteli-1",
+    "circuitId": "esteli-murales-tabaco",
+    "date": "2026-09-14",
+    "startTime": "9:00 a.m.",
+    "capacity": 12,
+    "joinedCount": 4,
+    "guideName": "Pedro Rugama",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-pedro/300/300",
+    "guideRating": 4.7
+  },
+  {
+    "id": "group-esteli-2",
+    "circuitId": "esteli-murales-tabaco",
+    "date": "2026-09-21",
+    "startTime": "3:00 p.m.",
+    "capacity": 12,
+    "joinedCount": 9,
+    "guideName": "Lucía Blandón",
+    "guidePhotoUrl": "https://picsum.photos/seed/municipal-lucia/300/300",
+    "guideRating": 4.9
   }
 ]

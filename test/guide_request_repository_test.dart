@@ -19,6 +19,7 @@ const _localGuide = TourGuide(
   yearsExperience: 1,
   specialties: [],
   reviews: [],
+  hasTransport: true,
 );
 
 const _bilingualGuide = TourGuide(
@@ -93,6 +94,9 @@ void main() {
       timeLimit: const Duration(seconds: 5),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
 
     expect(repository.hasActiveRequest, isTrue);
@@ -112,6 +116,9 @@ void main() {
       timeLimit: const Duration(seconds: 30),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
 
     await Future<void>.delayed(const Duration(seconds: 4));
@@ -137,6 +144,9 @@ void main() {
         timeLimit: const Duration(seconds: 30),
         guideTier: GuideTier.bilingual,
         includeTranslator: false,
+        serviceHours: 5,
+        transportOption: TransportOption.onFoot,
+        touristProvidesLodging: false,
         touristLanguage: 'Inglés',
       );
 
@@ -163,6 +173,9 @@ void main() {
       timeLimit: const Duration(seconds: 30),
       guideTier: GuideTier.none,
       includeTranslator: true,
+      serviceHours: 3,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
       touristLanguage: 'Inglés',
     );
 
@@ -186,6 +199,9 @@ void main() {
       timeLimit: const Duration(seconds: 30),
       guideTier: GuideTier.local,
       includeTranslator: true,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
       touristLanguage: 'Inglés',
     );
 
@@ -211,6 +227,9 @@ void main() {
       timeLimit: const Duration(seconds: 30),
       guideTier: GuideTier.bilingual,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
       touristLanguage: 'Inglés',
     );
 
@@ -232,6 +251,9 @@ void main() {
       timeLimit: const Duration(milliseconds: 100),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
 
     await Future<void>.delayed(const Duration(milliseconds: 300));
@@ -252,6 +274,9 @@ void main() {
       timeLimit: const Duration(milliseconds: 100),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
     repository.cancel();
 
@@ -261,4 +286,73 @@ void main() {
     await Future<void>.delayed(const Duration(seconds: 1));
     expect(repository.activeRequest?.status, GuideRequestStatus.cancelled);
   });
+
+  test(
+    'transporte del guía sólo empareja con quien tenga transporte',
+    () async {
+      // El único guía disponible no tiene transporte: no puede cubrir el
+      // pedido, igual que si no hablara el idioma pedido.
+      const guideSinTransporte = TourGuide(
+        id: 'guide-sin-transporte',
+        name: 'Guía sin transporte',
+        photoUrl: '',
+        rating: 4.5,
+        reviewsCount: 10,
+        languages: ['Español'],
+        bio: '',
+        yearsExperience: 1,
+        specialties: [],
+        reviews: [],
+      );
+      final repository = GuideRequestRepository(
+        _FakeGuideRepository([guideSinTransporte]),
+        random: _FixedRandom(),
+      );
+
+      repository.request(
+        circuitId: 'circuit-1',
+        circuitTitle: 'Circuito de prueba',
+        suggestedPrice: 300,
+        timeLimit: const Duration(seconds: 30),
+        guideTier: GuideTier.local,
+        includeTranslator: false,
+        serviceHours: 5,
+        transportOption: TransportOption.guideProvides,
+        touristProvidesLodging: false,
+      );
+
+      await Future<void>.delayed(const Duration(seconds: 4));
+
+      expect(repository.activeRequest?.status, GuideRequestStatus.expired);
+    },
+    timeout: const Timeout(Duration(seconds: 15)),
+  );
+
+  test(
+    'transporte del guía empareja con quien sí tenga transporte',
+    () async {
+      final repository = GuideRequestRepository(
+        _FakeGuideRepository([_localGuide]),
+        random: _FixedRandom(),
+      );
+
+      repository.request(
+        circuitId: 'circuit-1',
+        circuitTitle: 'Circuito de prueba',
+        suggestedPrice: 300,
+        timeLimit: const Duration(seconds: 30),
+        guideTier: GuideTier.local,
+        includeTranslator: false,
+        serviceHours: 5,
+        transportOption: TransportOption.guideProvides,
+        touristProvidesLodging: false,
+      );
+
+      await Future<void>.delayed(const Duration(seconds: 4));
+
+      expect(repository.activeRequest?.status, GuideRequestStatus.matched);
+      expect(repository.activeRequest?.guide?.id, 'guide-local');
+    },
+    timeout: const Timeout(Duration(seconds: 15)),
+  );
 }

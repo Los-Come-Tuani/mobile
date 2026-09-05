@@ -31,6 +31,15 @@ void main() {
   }
 
   Future<void> pumpStopDetail(WidgetTester tester, String stopId) async {
+    // Pantalla más alta que la real: con más circuitos en el catálogo, la
+    // hoja "Añadir a un circuito" ya no entra completa en el tamaño de
+    // prueba por defecto (800x600) y haría falta scrollear para tocar cada
+    // fila.
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     tourRepository = TourRepository();
     collections = CircuitCollectionsRepository(tourRepository);
 

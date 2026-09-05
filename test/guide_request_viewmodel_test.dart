@@ -24,6 +24,9 @@ void main() {
       timeLimit: const Duration(minutes: 5),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
 
     expect(viewModel.status, GuideRequestStatus.searching);
@@ -46,6 +49,9 @@ void main() {
       timeLimit: const Duration(milliseconds: 1),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
@@ -67,6 +73,9 @@ void main() {
       timeLimit: const Duration(minutes: 5),
       guideTier: GuideTier.local,
       includeTranslator: false,
+      serviceHours: 5,
+      transportOption: TransportOption.onFoot,
+      touristProvidesLodging: false,
     );
     viewModel.cancel();
 

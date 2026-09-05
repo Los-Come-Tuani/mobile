@@ -46,7 +46,10 @@ class GuideRequestRepository extends ChangeNotifier {
   /// [guideTier] pide (o no) un guía, y [includeTranslator] agrega (o no)
   /// un traductor aparte; al menos uno de los dos debe estar activo.
   /// [touristLanguage] es obligatorio si se pidió guía bilingüe o
-  /// traductor.
+  /// traductor. [serviceHours] es cuántas horas se reserva el servicio,
+  /// [transportOption] quién pone el transporte (sólo relevante si hay
+  /// guía) y [touristProvidesLodging] si el turista le da alojamiento al
+  /// guía (sólo relevante si el servicio dura más de un día).
   void request({
     required String circuitId,
     required String circuitTitle,
@@ -54,6 +57,9 @@ class GuideRequestRepository extends ChangeNotifier {
     required Duration timeLimit,
     required GuideTier guideTier,
     required bool includeTranslator,
+    required int serviceHours,
+    required TransportOption transportOption,
+    required bool touristProvidesLodging,
     String? touristLanguage,
   }) {
     _cancelTimers();
@@ -68,6 +74,9 @@ class GuideRequestRepository extends ChangeNotifier {
       status: GuideRequestStatus.searching,
       guideTier: guideTier,
       includeTranslator: includeTranslator,
+      serviceHours: serviceHours,
+      transportOption: transportOption,
+      touristProvidesLodging: touristProvidesLodging,
       touristLanguage: touristLanguage,
     );
     notifyListeners();
@@ -107,6 +116,9 @@ class GuideRequestRepository extends ChangeNotifier {
       var pool = candidates.where((g) => g.role.canGuide);
       if (request.guideTier == GuideTier.bilingual) {
         pool = pool.where((g) => g.languages.contains(request.touristLanguage));
+      }
+      if (request.transportOption == TransportOption.guideProvides) {
+        pool = pool.where((g) => g.hasTransport);
       }
       final options = pool.toList();
       if (options.isEmpty) {

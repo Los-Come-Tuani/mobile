@@ -8,12 +8,26 @@ import '../../../core/utils/medal_tiers.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../viewmodels/medals_viewmodel.dart';
 
-/// Medallas ganadas: una general y una por cada categoría de parada.
+/// Medallas ganadas: una general, una por cada categoría de parada, y una
+/// por cada ciudad creativa cuyo circuito ya se completó.
 ///
 /// Se calculan sobre el histórico de insignias, así que gastarlas en
 /// Cupones no hace bajar de medalla.
-class MedalsView extends StatelessWidget {
+class MedalsView extends StatefulWidget {
   const MedalsView({super.key});
+
+  @override
+  State<MedalsView> createState() => _MedalsViewState();
+}
+
+class _MedalsViewState extends State<MedalsView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<MedalsViewModel>().load();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +62,24 @@ class MedalsView extends StatelessWidget {
                 earned: viewModel.earnedIn(category),
               ),
             ),
+          if (viewModel.creativeCircuitCities.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text('Medallas de ciudades creativas', style: AppTextStyles.title),
+            const SizedBox(height: 4),
+            Text(
+              'Se ganan al completar un circuito creativo de esa ciudad.',
+              style: AppTextStyles.caption,
+            ),
+            const SizedBox(height: 12),
+            for (final city in viewModel.creativeCircuitCities)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _CityMedalTile(
+                  city: city,
+                  earned: viewModel.hasCityMedal(city),
+                ),
+              ),
+          ],
         ],
       ),
     );
@@ -221,6 +253,64 @@ class _CategoryMedalTile extends StatelessWidget {
                 color: tier.color,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Medalla de una ciudad creativa: binaria (ganada o no), a diferencia de
+/// las de categoría que tienen niveles.
+class _CityMedalTile extends StatelessWidget {
+  const _CityMedalTile({required this.city, required this.earned});
+
+  final String city;
+  final bool earned;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = earned ? AppColors.medalGold : AppColors.medalNone;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.account_balance, size: 22, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(city, style: AppTextStyles.cardTitle),
+                const SizedBox(height: 2),
+                Text(
+                  earned
+                      ? 'Medalla ganada'
+                      : 'Completa un circuito creativo de $city',
+                  style: AppTextStyles.caption,
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            earned ? Icons.military_tech : Icons.lock_outline,
+            size: 20,
+            color: color,
           ),
         ],
       ),

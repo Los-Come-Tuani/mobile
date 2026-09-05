@@ -1,6 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_chat_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
+import 'package:k_plan_mobile/src/data/models/guide_request.dart';
 import 'package:k_plan_mobile/src/ui/booking/viewmodels/booking_viewmodel.dart';
 
 void main() {
@@ -10,6 +14,8 @@ void main() {
     final viewModel = BookingViewModel(
       TourRepository(),
       BookingsRepository(),
+      GuideRequestRepository(GuideRepository()),
+      GuideChatRepository(),
       'granada-historias-sabores',
     );
     await viewModel.load();
@@ -25,6 +31,8 @@ void main() {
     final viewModel = BookingViewModel(
       TourRepository(),
       BookingsRepository(),
+      GuideRequestRepository(GuideRepository()),
+      GuideChatRepository(),
       'granada-historias-sabores',
     );
     await viewModel.load();
@@ -40,6 +48,8 @@ void main() {
     final viewModel = BookingViewModel(
       TourRepository(),
       bookingsRepository,
+      GuideRequestRepository(GuideRepository()),
+      GuideChatRepository(),
       'granada-historias-sabores',
     );
     await viewModel.load();
@@ -58,6 +68,8 @@ void main() {
     final viewModel = BookingViewModel(
       TourRepository(),
       BookingsRepository(),
+      GuideRequestRepository(GuideRepository()),
+      GuideChatRepository(),
       'leon-colonial',
     );
     await viewModel.load();
@@ -68,4 +80,42 @@ void main() {
     expect(viewModel.subtotal, 600);
     expect(viewModel.total, 720);
   });
+
+  test(
+    'pedir guía suma su precio al subtotal y publica la solicitud al '
+    'confirmar',
+    () async {
+      final guideRequestRepository = GuideRequestRepository(GuideRepository());
+      final viewModel = BookingViewModel(
+        TourRepository(),
+        BookingsRepository(),
+        guideRequestRepository,
+        GuideChatRepository(),
+        'granada-historias-sabores',
+      );
+      await viewModel.load();
+
+      expect(viewModel.hasGuideRequest, isFalse);
+
+      viewModel.setGuideSelection((
+        price: 700,
+        timeLimit: const Duration(hours: 24),
+        guideTier: GuideTier.local,
+        includeTranslator: false,
+        serviceHours: 5,
+        transportOption: TransportOption.onFoot,
+        touristProvidesLodging: false,
+        touristLanguage: null,
+      ));
+
+      expect(viewModel.hasGuideRequest, isTrue);
+      // 2 adultos x C$250 + C$700 de guía = C$1200.
+      expect(viewModel.subtotal, 1200);
+
+      await viewModel.confirm();
+
+      expect(guideRequestRepository.hasActiveRequest, isTrue);
+      expect(guideRequestRepository.activeRequest?.suggestedPrice, 700);
+    },
+  );
 }

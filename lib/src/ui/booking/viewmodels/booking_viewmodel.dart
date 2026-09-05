@@ -1,19 +1,31 @@
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
+import '../../../data/datasources/repository/guide_chat_repository.dart';
+import '../../../data/datasources/repository/guide_request_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit.dart';
+import '../../../data/models/guide_request.dart';
+import '../../circuit_detail/widgets/guide_request_sheet.dart';
 import '../../core/base_viewmodel.dart';
 
 /// Estado de la reserva que el usuario está armando.
+///
+/// Agendar un circuito es también donde se pide guía o traductor: son
+/// parte de la misma "oferta" — cuánta gente va, a qué hora, y si además se
+/// necesita guía/traductor para ese recorrido.
 class BookingViewModel extends BaseViewModel {
   BookingViewModel(
     this._tourRepository,
     this._bookingsRepository,
+    this._guideRequestRepository,
+    this._guideChatRepository,
     this.circuitId,
   );
 
   final TourRepository _tourRepository;
   final BookingsRepository _bookingsRepository;
+  final GuideRequestRepository _guideRequestRepository;
+  final GuideChatRepository _guideChatRepository;
   final String circuitId;
 
   /// Porcentaje de servicio que se cobra sobre el subtotal.
@@ -29,6 +41,9 @@ class BookingViewModel extends BaseViewModel {
   int _adults = 2;
   int _children = 0;
   bool _isSaving = false;
+
+  /// `null` mientras el turista no pida guía ni traductor para este viaje.
+  GuideRequestSelection? _guideSelection;
 
   Circuit? get circuit => _circuit;
   DateTime get date => _date;
@@ -46,9 +61,34 @@ class BookingViewModel extends BaseViewModel {
   DateTime get lastSelectableDate =>
       DateTime.now().add(const Duration(days: 365));
 
+  GuideRequestSelection? get guideSelection => _guideSelection;
+
+  bool get hasGuideRequest => _guideSelection != null;
+
+  /// Texto corto para la fila "Guía o traductor" del formulario.
+  String get guideSummary {
+    final selection = _guideSelection;
+    if (selection == null) return 'Sin guía ni traductor';
+
+    final parts = <String>[];
+    switch (selection.guideTier) {
+      case GuideTier.local:
+        parts.add('Guía local');
+      case GuideTier.bilingual:
+        parts.add('Guía + ${selection.touristLanguage}');
+      case GuideTier.none:
+        break;
+    }
+    if (selection.includeTranslator) {
+      parts.add('Traductor de ${selection.touristLanguage}');
+    }
+    return '${parts.join(' + ')} · ${selection.serviceHours}h';
+  }
+
   num get adultsTotal => (_circuit?.priceAdult ?? 0) * _adults;
   num get childrenTotal => (_circuit?.priceChild ?? 0) * _children;
-  num get subtotal => adultsTotal + childrenTotal;
+  num get guidePrice => _guideSelection?.price ?? 0;
+  num get subtotal => adultsTotal + childrenTotal + guidePrice;
   num get serviceFee => subtotal * serviceRate;
   num get total => subtotal + serviceFee;
 
@@ -94,8 +134,15 @@ class BookingViewModel extends BaseViewModel {
     safeNotify();
   }
 
+  void setGuideSelection(GuideRequestSelection? selection) {
+    _guideSelection = selection;
+    safeNotify();
+  }
+
   /// Confirma la reserva y la guarda en [BookingsRepository], que es lo
-  /// que hace aparecer el aviso de "próximo viaje" en el home.
+  /// que hace aparecer el aviso de "próximo viaje" en el home. Si además
+  /// se pidió guía o traductor, publica esa solicitud (queda abierta 24h,
+  /// como una oferta de trabajo) en [GuideRequestRepository].
   ///
   /// TODO: enviar a `ApiRoutes` cuando exista el endpoint de reservas;
   /// por ahora sólo simula el guardado remoto.
@@ -115,6 +162,24 @@ class BookingViewModel extends BaseViewModel {
       adults: _adults,
       children: _children,
     );
+
+    final guideSelection = _guideSelection;
+    if (guideSelection != null) {
+      // Cada solicitud nueva empieza un chat en blanco.
+      _guideChatRepository.reset();
+      _guideRequestRepository.request(
+        circuitId: circuitId,
+        circuitTitle: _circuit!.shortTitle,
+        suggestedPrice: guideSelection.price,
+        timeLimit: guideSelection.timeLimit,
+        guideTier: guideSelection.guideTier,
+        includeTranslator: guideSelection.includeTranslator,
+        serviceHours: guideSelection.serviceHours,
+        transportOption: guideSelection.transportOption,
+        touristProvidesLodging: guideSelection.touristProvidesLodging,
+        touristLanguage: guideSelection.touristLanguage,
+      );
+    }
 
     _isSaving = false;
     safeNotify();

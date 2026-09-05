@@ -81,7 +81,7 @@ class _KPlanAppState extends State<KPlanApp> {
           create: (_) => GuideChatRepository(),
         ),
         // Salidas de grupo programadas por las alcaldías en circuitos
-        // oficiales.
+        // creativos.
         ChangeNotifierProvider<GroupSessionRepository>(
           create: (_) => GroupSessionRepository(),
         ),

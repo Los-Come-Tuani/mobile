@@ -12,7 +12,7 @@ import '../../widgets/rating_stars.dart';
 import '../../widgets/remote_image.dart';
 
 /// Hoja con las salidas de grupo programadas por la alcaldía para un
-/// circuito oficial. Devuelve la sesión a la que se unió el turista, o
+/// circuito creativo. Devuelve la sesión a la que se unió el turista, o
 /// `null` si cerró sin unirse.
 Future<CircuitGroupSession?> showGroupSessionsSheet(
   BuildContext context, {

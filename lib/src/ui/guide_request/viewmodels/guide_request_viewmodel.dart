@@ -50,6 +50,9 @@ class GuideRequestViewModel extends BaseViewModel {
     required Duration timeLimit,
     required GuideTier guideTier,
     required bool includeTranslator,
+    required int serviceHours,
+    required TransportOption transportOption,
+    required bool touristProvidesLodging,
     String? touristLanguage,
   }) {
     if (_circuit == null) return;
@@ -62,6 +65,9 @@ class GuideRequestViewModel extends BaseViewModel {
       timeLimit: timeLimit,
       guideTier: guideTier,
       includeTranslator: includeTranslator,
+      serviceHours: serviceHours,
+      transportOption: transportOption,
+      touristProvidesLodging: touristProvidesLodging,
       touristLanguage: touristLanguage,
     );
   }

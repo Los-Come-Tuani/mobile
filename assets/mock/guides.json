@@ -10,6 +10,7 @@
     "yearsExperience": 6,
     "specialties": ["Historia colonial", "Gastronomía"],
     "role": "guide",
+    "hasTransport": true,
     "reviews": [
       {
         "author": "Carlos M.",
@@ -36,6 +37,7 @@
     "yearsExperience": 9,
     "specialties": ["Arquitectura", "Leyendas locales"],
     "role": "both",
+    "hasTransport": false,
     "reviews": [
       {
         "author": "Sophie L.",
@@ -62,6 +64,7 @@
     "yearsExperience": 5,
     "specialties": ["Cultura viva", "Arte urbano"],
     "role": "guide",
+    "hasTransport": true,
     "reviews": [
       {
         "author": "Daniel K.",
@@ -94,6 +97,7 @@
     "yearsExperience": 4,
     "specialties": ["Volcanes", "Senderismo"],
     "role": "guide",
+    "hasTransport": false,
     "reviews": [
       {
         "author": "Patricia N.",
@@ -120,6 +124,7 @@
     "yearsExperience": 3,
     "specialties": ["Gastronomía", "Mercados locales"],
     "role": "guide",
+    "hasTransport": true,
     "reviews": [
       {
         "author": "Tom H.",
@@ -146,6 +151,7 @@
     "yearsExperience": 2,
     "specialties": ["Ciudad", "Fotografía"],
     "role": "guide",
+    "hasTransport": false,
     "reviews": [
       {
         "author": "Diego R.",
@@ -172,6 +178,7 @@
     "yearsExperience": 8,
     "specialties": ["Traducción simultánea"],
     "role": "translator",
+    "hasTransport": false,
     "reviews": [
       {
         "author": "Werner K.",
@@ -198,6 +205,7 @@
     "yearsExperience": 5,
     "specialties": ["Traducción simultánea"],
     "role": "translator",
+    "hasTransport": false,
     "reviews": [
       {
         "author": "Marco B.",

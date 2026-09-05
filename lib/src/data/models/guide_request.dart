@@ -28,6 +28,20 @@ enum GuideTier {
   bilingual,
 }
 
+/// Quién pone el transporte durante el recorrido con el guía. Sólo aplica
+/// cuando se pide guía (no tiene sentido para un traductor solo).
+enum TransportOption {
+  /// El recorrido es a pie, sin transporte.
+  onFoot,
+
+  /// El turista pone el transporte.
+  touristProvides,
+
+  /// El guía pone el transporte (si tiene) — sólo empareja con guías que
+  /// tengan [TourGuide.hasTransport].
+  guideProvides,
+}
+
 /// Una solicitud de guía y/o traductor en vivo para un circuito.
 ///
 /// Vive sólo en memoria (en [GuideRequestRepository]): no hay backend real
@@ -43,6 +57,9 @@ class GuideRequest {
     required this.status,
     required this.guideTier,
     required this.includeTranslator,
+    required this.serviceHours,
+    required this.transportOption,
+    required this.touristProvidesLodging,
     this.touristLanguage,
     this.guide,
     this.translator,
@@ -58,6 +75,18 @@ class GuideRequest {
 
   final GuideTier guideTier;
   final bool includeTranslator;
+
+  /// Cuántas horas se reserva el servicio: más de 4h si se pide guía, más
+  /// de 2h si se pide sólo traductor.
+  final int serviceHours;
+
+  /// Quién pone el transporte (sólo relevante si hay guía).
+  final TransportOption transportOption;
+
+  /// `true` si el turista le da alojamiento al guía. Sólo tiene sentido
+  /// cuando el servicio dura más de un día (`serviceHours > 24`) y hay
+  /// guía: en ese caso baja el precio.
+  final bool touristProvidesLodging;
 
   /// Idioma del turista: requerido si [guideTier] es bilingüe o si se pidió
   /// traductor.
@@ -91,6 +120,9 @@ class GuideRequest {
       status: status ?? this.status,
       guideTier: guideTier,
       includeTranslator: includeTranslator,
+      serviceHours: serviceHours,
+      transportOption: transportOption,
+      touristProvidesLodging: touristProvidesLodging,
       touristLanguage: touristLanguage,
       guide: guide ?? this.guide,
       translator: translator ?? this.translator,

@@ -53,6 +53,9 @@ class _GuideSearchingViewState extends State<GuideSearchingView> {
           timeLimit: selection.timeLimit,
           guideTier: selection.guideTier,
           includeTranslator: selection.includeTranslator,
+          serviceHours: selection.serviceHours,
+          transportOption: selection.transportOption,
+          touristProvidesLodging: selection.touristProvidesLodging,
           touristLanguage: selection.touristLanguage,
         );
       }
@@ -207,6 +210,12 @@ class _SearchingState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppTextStyles.bodySmall,
             ),
+            const SizedBox(height: 4),
+            Text(
+              _describeExtras(request),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.caption,
+            ),
             const SizedBox(height: 32),
             OutlinedButton(onPressed: onCancel, child: const Text('Cancelar')),
           ],
@@ -356,7 +365,30 @@ String _describeRequest(GuideRequest request) {
   return parts.isEmpty ? 'guía' : parts.join(' + ');
 }
 
+/// Línea con los detalles de la publicación: horas, transporte y
+/// alojamiento, más el plazo fijo de 24h — como el detalle de una oferta de
+/// trabajo.
+String _describeExtras(GuideRequest request) {
+  final parts = <String>['${request.serviceHours}h de servicio'];
+  if (request.guideTier != GuideTier.none) {
+    parts.add(switch (request.transportOption) {
+      TransportOption.onFoot => 'a pie',
+      TransportOption.touristProvides => 'transporte del turista',
+      TransportOption.guideProvides => 'transporte del guía',
+    });
+    if (request.touristProvidesLodging) parts.add('con alojamiento');
+  }
+  return '${parts.join(' · ')} · vence en 24h si nadie responde';
+}
+
+/// `remaining` puede llegar a 24h: se muestra en horas y minutos mientras
+/// falte una hora o más, y en minutos y segundos por debajo de eso.
 String _formatCountdown(Duration d) {
+  if (d.inHours >= 1) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    return '${hours}h ${minutes}m';
+  }
   final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
   final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
   return '$minutes:$seconds';

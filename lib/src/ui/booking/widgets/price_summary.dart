@@ -28,6 +28,12 @@ class PriceSummary extends StatelessWidget {
               '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
           amount: viewModel.childrenTotal,
         ),
+        if (viewModel.hasGuideRequest)
+          _Line(
+            icon: Icons.person_pin_circle_outlined,
+            label: viewModel.guideSummary,
+            amount: viewModel.guidePrice,
+          ),
         const Divider(height: 20, thickness: 1, color: AppColors.divider),
         _Line(label: 'Subtotal', amount: viewModel.subtotal),
         _Line(label: 'Servicio (20%)', amount: viewModel.serviceFee),

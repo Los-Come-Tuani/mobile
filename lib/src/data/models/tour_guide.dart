@@ -32,6 +32,7 @@ class TourGuide {
     required this.specialties,
     required this.reviews,
     this.role = GuideRole.guide,
+    this.hasTransport = false,
   });
 
   final String id;
@@ -45,6 +46,10 @@ class TourGuide {
   final List<String> specialties;
   final List<GuideReview> reviews;
   final GuideRole role;
+
+  /// `true` si el guía tiene transporte propio para ofrecerlo en el
+  /// recorrido (ver [TransportOption.guideProvides]).
+  final bool hasTransport;
 
   /// Inicial para el avatar cuando no hay foto.
   String get initial => name.isEmpty ? '?' : name.substring(0, 1).toUpperCase();
@@ -64,6 +69,7 @@ class TourGuide {
           .map((e) => GuideReview.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
       role: GuideRole.fromJson(json['role'] as String?),
+      hasTransport: json['hasTransport'] as bool? ?? false,
     );
   }
 

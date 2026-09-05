@@ -5,7 +5,7 @@ import '../../../core/utils/result.dart';
 import '../../models/circuit_group_session.dart';
 import '../local/mock_datasource.dart';
 
-/// Salidas de grupo programadas por las alcaldías para circuitos oficiales.
+/// Salidas de grupo programadas por las alcaldías para circuitos creativos.
 ///
 /// Se siembra desde `circuit_groups.json` en la primera lectura (mismo
 /// patrón que [CircuitCollectionsRepository]: catálogo + mutación en

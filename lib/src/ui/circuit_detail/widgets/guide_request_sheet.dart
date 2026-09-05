@@ -5,46 +5,80 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/guide_request.dart';
 
-/// Lo que armó el turista: precio ofrecido, tiempo límite de búsqueda y qué
-/// tipo de guía y/o traductor pidió.
+/// Lo que armó el turista: precio calculado, horas del servicio, qué tipo
+/// de guía y/o traductor pidió, quién pone el transporte y si incluye
+/// alojamiento para el guía. El tiempo límite de la publicación siempre es
+/// fijo (24h), como una oferta de trabajo.
 typedef GuideRequestSelection = ({
   num price,
   Duration timeLimit,
   GuideTier guideTier,
   bool includeTranslator,
+  int serviceHours,
+  TransportOption transportOption,
+  bool touristProvidesLodging,
   String? touristLanguage,
 });
 
-/// Pasos del contador de precio.
-const _priceStep = 25;
+/// La solicitud queda publicada 24h, como una oferta de trabajo, sin que el
+/// turista elija un tiempo límite más corto.
+const _searchTimeLimit = Duration(hours: 24);
 
-/// Opciones de tiempo límite de búsqueda.
-const _timeLimitOptions = [
-  Duration(minutes: 3),
-  Duration(minutes: 5),
-  Duration(minutes: 10),
-];
+/// Más de un día de servicio: a partir de ahí se pregunta por alojamiento.
+const _multiDayThresholdHours = 24;
+
+/// Paso del stepper de horas.
+const _hoursStep = 1;
 
 /// Idiomas que puede pedir el turista para un guía bilingüe o un traductor.
 const _touristLanguages = ['Inglés', 'Francés', 'Alemán', 'Portugués', 'Italiano'];
 
-/// Multiplicador sobre el precio adulto del circuito, según lo que se pida.
-double _priceMultiplier(GuideTier tier, bool includeTranslator) {
+/// Mínimo de horas reservables: más de 4h si hay guía, más de 2h si sólo
+/// hay traductor.
+int _minHours(GuideTier tier, bool includeTranslator) {
+  if (tier != GuideTier.none) return 5;
+  if (includeTranslator) return 3;
+  return 1;
+}
+
+/// Tarifa por hora según lo que se pida, en vez de un múltiplo del precio
+/// del circuito: esto ahora es un servicio aparte, cobrado por horas.
+num _hourlyRate(GuideTier tier, bool includeTranslator) {
   return switch ((tier, includeTranslator)) {
-    (GuideTier.bilingual, _) => 1.6,
-    (GuideTier.local, true) => 1.4,
-    (GuideTier.none, true) => 0.8,
-    (GuideTier.local, false) => 1.0,
-    (GuideTier.none, false) => 1.0,
+    (GuideTier.bilingual, _) => 200,
+    (GuideTier.local, true) => 210,
+    (GuideTier.local, false) => 140,
+    (GuideTier.none, true) => 90,
+    (GuideTier.none, false) => 0,
   };
 }
 
-/// Hoja para armar la solicitud: precio ofrecido (como la tarifa de
-/// inDrive), tiempo límite de búsqueda, y tipo de guía y/o traductor.
-Future<GuideRequestSelection?> showGuideRequestSheet(
-  BuildContext context, {
-  required num suggestedPrice,
+/// Precio total: tarifa por hora × horas, más el extra si el guía pone el
+/// transporte, menos el descuento si el turista le da alojamiento al guía.
+num _calculatePrice({
+  required GuideTier tier,
+  required bool includeTranslator,
+  required int hours,
+  required TransportOption transport,
+  required bool touristProvidesLodging,
 }) {
+  var price = _hourlyRate(tier, includeTranslator) * hours;
+  if (tier != GuideTier.none && transport == TransportOption.guideProvides) {
+    price *= 1.15;
+  }
+  if (tier != GuideTier.none &&
+      hours > _multiDayThresholdHours &&
+      touristProvidesLodging) {
+    price *= 0.90;
+  }
+  return price.round();
+}
+
+/// Hoja para armar la solicitud: como publicar una oferta de trabajo — se
+/// elige qué se necesita, por cuántas horas, quién pone el transporte y (si
+/// dura más de un día) si se incluye alojamiento para el guía. El precio se
+/// calcula solo y la publicación queda abierta 24h.
+Future<GuideRequestSelection?> showGuideRequestSheet(BuildContext context) {
   return showModalBottomSheet<GuideRequestSelection>(
     context: context,
     backgroundColor: AppColors.white,
@@ -52,25 +86,24 @@ Future<GuideRequestSelection?> showGuideRequestSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => _GuideRequestSheet(suggestedPrice: suggestedPrice),
+    builder: (context) => const _GuideRequestSheet(),
   );
 }
 
 class _GuideRequestSheet extends StatefulWidget {
-  const _GuideRequestSheet({required this.suggestedPrice});
-
-  final num suggestedPrice;
+  const _GuideRequestSheet();
 
   @override
   State<_GuideRequestSheet> createState() => _GuideRequestSheetState();
 }
 
 class _GuideRequestSheetState extends State<_GuideRequestSheet> {
-  late num _price = widget.suggestedPrice;
-  Duration _timeLimit = _timeLimitOptions.first;
   GuideTier _guideTier = GuideTier.local;
   bool _includeTranslator = false;
   String _touristLanguage = _touristLanguages.first;
+  late int _hours = _minHours(_guideTier, _includeTranslator);
+  TransportOption _transport = TransportOption.onFoot;
+  bool _touristProvidesLodging = false;
 
   bool get _needsLanguage =>
       _guideTier == GuideTier.bilingual || _includeTranslator;
@@ -78,22 +111,53 @@ class _GuideRequestSheetState extends State<_GuideRequestSheet> {
   bool get _canSubmit =>
       _guideTier != GuideTier.none || _includeTranslator;
 
+  bool get _hasGuide => _guideTier != GuideTier.none;
+
+  bool get _isMultiDay => _hours > _multiDayThresholdHours;
+
+  num get _price => _calculatePrice(
+    tier: _guideTier,
+    includeTranslator: _includeTranslator,
+    hours: _hours,
+    transport: _transport,
+    touristProvidesLodging: _touristProvidesLodging,
+  );
+
+  /// Sube las horas al nuevo mínimo si quedaron por debajo al cambiar el
+  /// tier o el traductor.
+  void _clampHours() {
+    final min = _minHours(_guideTier, _includeTranslator);
+    if (_hours < min) _hours = min;
+  }
+
   void _setGuideTier(GuideTier tier) {
     setState(() {
       _guideTier = tier;
       // Un guía bilingüe ya cubre la traducción: el traductor aparte deja
       // de tener sentido.
       if (tier == GuideTier.bilingual) _includeTranslator = false;
-      _price = (widget.suggestedPrice * _priceMultiplier(tier, _includeTranslator))
-          .round();
+      // Sin guía no tiene sentido elegir transporte ni alojamiento.
+      if (tier == GuideTier.none) {
+        _transport = TransportOption.onFoot;
+        _touristProvidesLodging = false;
+      }
+      _clampHours();
     });
   }
 
   void _setIncludeTranslator(bool value) {
     setState(() {
       _includeTranslator = value;
-      _price = (widget.suggestedPrice * _priceMultiplier(_guideTier, value))
-          .round();
+      _clampHours();
+    });
+  }
+
+  void _setHours(int value) {
+    final min = _minHours(_guideTier, _includeTranslator);
+    if (value < min) return;
+    setState(() {
+      _hours = value;
+      if (!_isMultiDay) _touristProvidesLodging = false;
     });
   }
 
@@ -115,8 +179,8 @@ class _GuideRequestSheetState extends State<_GuideRequestSheet> {
               Text('Solicitar guía o traductor', style: AppTextStyles.title),
               const SizedBox(height: 4),
               Text(
-                'Elige qué necesitas, ofrece un precio y cuánto tiempo '
-                'buscar.',
+                'Publica lo que necesitas, como una oferta: queda abierta '
+                '24 horas hasta que alguien la tome.',
                 style: AppTextStyles.caption,
               ),
               const SizedBox(height: 20),
@@ -159,37 +223,75 @@ class _GuideRequestSheetState extends State<_GuideRequestSheet> {
                 ),
               ],
               const SizedBox(height: 20),
-              Text('Precio que ofreces', style: AppTextStyles.body),
-              const SizedBox(height: 8),
-              _PriceStepper(
-                price: _price,
-                onChanged: (value) => setState(() => _price = value),
+              Text('Duración del servicio', style: AppTextStyles.body),
+              const SizedBox(height: 2),
+              Text(
+                _hasGuide
+                    ? 'Mínimo 5 horas con guía.'
+                    : 'Mínimo 3 horas sólo con traductor.',
+                style: AppTextStyles.caption,
               ),
-              const SizedBox(height: 20),
-              Text('Tiempo límite de búsqueda', style: AppTextStyles.body),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final option in _timeLimitOptions)
-                    ChoiceChip(
-                      label: Text('${option.inMinutes} min'),
-                      selected: _timeLimit == option,
-                      selectedColor: AppColors.primary30,
-                      labelStyle: AppTextStyles.caption.copyWith(
-                        color: _timeLimit == option
-                            ? AppColors.white
-                            : AppColors.primaryText,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      side: BorderSide(
-                        color: _timeLimit == option
-                            ? AppColors.primary30
-                            : AppColors.divider,
-                      ),
-                      onSelected: (_) => setState(() => _timeLimit = option),
+              _HoursStepper(
+                hours: _hours,
+                minHours: _minHours(_guideTier, _includeTranslator),
+                onChanged: _setHours,
+              ),
+              if (_hasGuide) ...[
+                const SizedBox(height: 20),
+                Text('Transporte', style: AppTextStyles.body),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _transportChip('A pie', TransportOption.onFoot),
+                    _transportChip(
+                      'Yo pongo el transporte',
+                      TransportOption.touristProvides,
                     ),
-                ],
+                    _transportChip(
+                      'Que lo ponga el guía',
+                      TransportOption.guideProvides,
+                    ),
+                  ],
+                ),
+              ],
+              if (_hasGuide && _isMultiDay) ...[
+                const SizedBox(height: 12),
+                CheckboxListTile(
+                  value: _touristProvidesLodging,
+                  onChanged: (value) =>
+                      setState(() => _touristProvidesLodging = value ?? false),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: AppColors.primary30,
+                  title: Text(
+                    '¿Le darás alojamiento al guía?',
+                    style: AppTextStyles.body,
+                  ),
+                  subtitle: Text(
+                    'Más de un día de recorrido: si le das alojamiento, el '
+                    'precio baja.',
+                    style: AppTextStyles.caption,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              Text('Precio estimado', style: AppTextStyles.body),
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.primary30.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  Formatters.currency(_price),
+                  style: AppTextStyles.title,
+                ),
               ),
               const SizedBox(height: 24),
               Row(
@@ -206,15 +308,19 @@ class _GuideRequestSheetState extends State<_GuideRequestSheet> {
                       onPressed: _canSubmit
                           ? () => Navigator.of(context).pop((
                               price: _price,
-                              timeLimit: _timeLimit,
+                              timeLimit: _searchTimeLimit,
                               guideTier: _guideTier,
                               includeTranslator: _includeTranslator,
+                              serviceHours: _hours,
+                              transportOption: _transport,
+                              touristProvidesLodging:
+                                  _isMultiDay && _touristProvidesLodging,
                               touristLanguage: _needsLanguage
                                   ? _touristLanguage
                                   : null,
                             ))
                           : null,
-                      child: const Text('Buscar'),
+                      child: const Text('Publicar solicitud'),
                     ),
                   ),
                 ],
@@ -240,13 +346,33 @@ class _GuideRequestSheetState extends State<_GuideRequestSheet> {
       onSelected: (_) => _setGuideTier(tier),
     );
   }
+
+  Widget _transportChip(String label, TransportOption option) {
+    final selected = _transport == option;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      selectedColor: AppColors.primary30,
+      labelStyle: AppTextStyles.caption.copyWith(
+        color: selected ? AppColors.white : AppColors.primaryText,
+        fontWeight: FontWeight.w600,
+      ),
+      side: BorderSide(color: selected ? AppColors.primary30 : AppColors.divider),
+      onSelected: (_) => setState(() => _transport = option),
+    );
+  }
 }
 
-class _PriceStepper extends StatelessWidget {
-  const _PriceStepper({required this.price, required this.onChanged});
+class _HoursStepper extends StatelessWidget {
+  const _HoursStepper({
+    required this.hours,
+    required this.minHours,
+    required this.onChanged,
+  });
 
-  final num price;
-  final ValueChanged<num> onChanged;
+  final int hours;
+  final int minHours;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -255,13 +381,13 @@ class _PriceStepper extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
           color: AppColors.primary30,
-          onPressed: price <= _priceStep
+          onPressed: hours <= minHours
               ? null
-              : () => onChanged(price - _priceStep),
+              : () => onChanged(hours - _hoursStep),
         ),
         Expanded(
           child: Text(
-            Formatters.currency(price),
+            '$hours h',
             textAlign: TextAlign.center,
             style: AppTextStyles.title,
           ),
@@ -269,7 +395,7 @@ class _PriceStepper extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
           color: AppColors.primary30,
-          onPressed: () => onChanged(price + _priceStep),
+          onPressed: () => onChanged(hours + _hoursStep),
         ),
       ],
     );

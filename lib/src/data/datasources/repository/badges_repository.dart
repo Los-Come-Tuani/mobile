@@ -15,6 +15,7 @@ class BadgesRepository extends ChangeNotifier {
   final Map<String, int> _earnedByCategory = {};
   final Set<String> _claimedStopIds = {};
   final Set<String> _redeemedCouponIds = {};
+  final Set<String> _cityMedalsEarned = {};
   int _spent = 0;
 
   Map<String, int> get earnedByCategory => Map.unmodifiable(_earnedByCategory);
@@ -32,6 +33,22 @@ class BadgesRepository extends ChangeNotifier {
   bool hasClaimed(String stopId) => _claimedStopIds.contains(stopId);
 
   bool isRedeemed(String couponId) => _redeemedCouponIds.contains(couponId);
+
+  /// Ciudades cuya medalla de "circuito creativo" ya se ganó.
+  Set<String> get cityMedalsEarned => Set.unmodifiable(_cityMedalsEarned);
+
+  bool hasCityMedal(String city) => _cityMedalsEarned.contains(city);
+
+  /// Otorga la medalla de [city] por completar un circuito creativo de esa
+  /// ciudad. Idempotente: cada ciudad da su medalla una sola vez. Devuelve
+  /// `true` si quedó otorgada ahora.
+  bool claimCityMedal(String city) {
+    if (city.isEmpty || _cityMedalsEarned.contains(city)) return false;
+
+    _cityMedalsEarned.add(city);
+    notifyListeners();
+    return true;
+  }
 
   /// Reclama la insignia de una parada. Idempotente: una parada sólo
   /// otorga su insignia una vez. Devuelve `true` si quedó reclamada ahora.

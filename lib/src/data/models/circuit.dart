@@ -29,7 +29,7 @@ class Circuit {
     required this.latitude,
     required this.longitude,
     required this.comments,
-    this.isOfficial = false,
+    this.isCreativeCircuit = false,
     this.organizer = '',
   });
 
@@ -67,12 +67,14 @@ class Circuit {
   final double longitude;
   final List<CircuitComment> comments;
 
-  /// `true` si lo organiza una alcaldía: sólo estos circuitos ofrecen
-  /// "unirse a un grupo" y dan una insignia extra al completarlos.
-  final bool isOfficial;
+  /// `true` si es un circuito creativo: preestablecido por una alcaldía.
+  /// Son los únicos que se pueden hacer en grupo (a menos que haya otros
+  /// especiales) y dan insignias extra, más una medalla de esa ciudad, al
+  /// completarlos.
+  final bool isCreativeCircuit;
 
   /// Nombre de quien lo organiza (p. ej. "Alcaldía de León"), sólo tiene
-  /// sentido cuando [isOfficial] es `true`.
+  /// sentido cuando [isCreativeCircuit] es `true`.
   final String organizer;
 
   String get coverImage => images.isEmpty ? '' : images.first;
@@ -114,7 +116,7 @@ class Circuit {
       comments: (json['comments'] as List<dynamic>? ?? const [])
           .map((e) => CircuitComment.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
-      isOfficial: json['isOfficial'] as bool? ?? false,
+      isCreativeCircuit: json['isCreativeCircuit'] as bool? ?? false,
       organizer: json['organizer'] as String? ?? '',
     );
   }

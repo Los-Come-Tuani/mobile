@@ -8,7 +8,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
-import '../../../data/datasources/repository/guide_request_repository.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
@@ -25,7 +24,6 @@ import '../../widgets/section_header.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/group_sessions_sheet.dart';
-import '../widgets/guide_request_sheet.dart';
 import '../widgets/start_trip_sheet.dart';
 
 /// Detalle de un circuito, con la acción de agendar.
@@ -91,25 +89,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     }
   }
 
-  /// Abre la hoja de solicitud (precio + tiempo límite) y, si el turista
-  /// confirma, arranca la búsqueda en la pantalla de "Buscando guía…".
-  Future<void> _requestGuide(Circuit circuit) async {
-    final selection = await showGuideRequestSheet(
-      context,
-      suggestedPrice: circuit.priceAdult,
-    );
-    if (selection == null || !mounted) return;
-    context.push(Routes.guideRequestPath(circuit.id), extra: selection);
-  }
-
-  /// Ya hay una solicitud en curso (de este circuito o de otro, sólo puede
-  /// haber una a la vez): se retoma en vez de abrir una nueva.
-  void _resumeGuideRequest() {
-    final activeRequest = context.read<GuideRequestRepository>().activeRequest;
-    if (activeRequest == null) return;
-    context.push(Routes.guideRequestPath(activeRequest.circuitId));
-  }
-
   /// Sólo disponible en circuitos oficiales: unirse no negocia precio, así
   /// que sólo hace falta guardar la reserva y avisar.
   Future<void> _joinGroup(Circuit circuit) async {
@@ -160,7 +139,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<CircuitDetailViewModel>();
     final circuit = viewModel.circuit;
-    final hasGuideRequest = context.watch<GuideRequestRepository>().hasActiveRequest;
 
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
@@ -178,7 +156,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
               stops: viewModel.stops,
               isTripActive: viewModel.isTripActive,
               checkedInCount: viewModel.checkedInCount,
-              hasGuideRequest: hasGuideRequest,
               onOpenInMaps: () => _openInMaps(circuit),
               onDownload: () =>
                   _notifySoon('Descargar sin conexión: próximamente'),
@@ -186,8 +163,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                   _notifySoon('Todas las reseñas: próximamente'),
               onStartTrip: () => _startTrip(viewModel.stops),
               onEndTrip: _endTrip,
-              onRequestGuide: () => _requestGuide(circuit),
-              onResumeGuideRequest: _resumeGuideRequest,
               onJoinGroup: () => _joinGroup(circuit),
             ),
     );
@@ -200,14 +175,11 @@ class _DetailContent extends StatelessWidget {
     required this.stops,
     required this.isTripActive,
     required this.checkedInCount,
-    required this.hasGuideRequest,
     required this.onOpenInMaps,
     required this.onDownload,
     required this.onSeeAllComments,
     required this.onStartTrip,
     required this.onEndTrip,
-    required this.onRequestGuide,
-    required this.onResumeGuideRequest,
     required this.onJoinGroup,
   });
 
@@ -215,14 +187,11 @@ class _DetailContent extends StatelessWidget {
   final List<Stop> stops;
   final bool isTripActive;
   final int checkedInCount;
-  final bool hasGuideRequest;
   final VoidCallback onOpenInMaps;
   final VoidCallback onDownload;
   final VoidCallback onSeeAllComments;
   final VoidCallback onStartTrip;
   final VoidCallback onEndTrip;
-  final VoidCallback onRequestGuide;
-  final VoidCallback onResumeGuideRequest;
   final VoidCallback onJoinGroup;
 
   static const double _galleryHeight = 260;
@@ -300,7 +269,8 @@ class _DetailContent extends StatelessWidget {
                     rating: circuit.rating,
                     reviewsCount: circuit.reviewsCount,
                   ),
-                  if (circuit.isOfficial) _OfficialChip(organizer: circuit.organizer),
+                  if (circuit.isCreativeCircuit)
+                    _CreativeCircuitChip(organizer: circuit.organizer),
                 ],
               ),
               const SizedBox(height: 14),
@@ -343,7 +313,7 @@ class _DetailContent extends StatelessWidget {
                   label: const Text('Comenzar viaje'),
                 ),
               const SizedBox(height: 12),
-              if (circuit.isOfficial) ...[
+              if (circuit.isCreativeCircuit) ...[
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.primary30),
@@ -355,24 +325,6 @@ class _DetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ],
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.primary30),
-                  foregroundColor: AppColors.primary30,
-                ),
-                onPressed: hasGuideRequest ? onResumeGuideRequest : onRequestGuide,
-                icon: Icon(
-                  hasGuideRequest
-                      ? Icons.person_search
-                      : Icons.person_pin_circle_outlined,
-                ),
-                label: Text(
-                  hasGuideRequest
-                      ? 'Ver solicitud de guía en curso'
-                      : 'Solicitar guía o traductor',
-                ),
-              ),
-              const SizedBox(height: 20),
               if (stops.isNotEmpty) ...[
                 SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
                 const SizedBox(height: 10),
@@ -400,11 +352,11 @@ class _DetailContent extends StatelessWidget {
   }
 }
 
-/// Distintivo de circuito oficial (organizado por una alcaldía): sólo estos
-/// circuitos ofrecen "unirse a un grupo" y dan la insignia extra al
-/// completarlos.
-class _OfficialChip extends StatelessWidget {
-  const _OfficialChip({required this.organizer});
+/// Distintivo de circuito creativo (preestablecido por una alcaldía): sólo
+/// estos circuitos se pueden hacer en grupo y dan insignias extra (y una
+/// medalla de ciudad) al completarlos.
+class _CreativeCircuitChip extends StatelessWidget {
+  const _CreativeCircuitChip({required this.organizer});
 
   final String organizer;
 
@@ -419,10 +371,12 @@ class _OfficialChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.verified, size: 13, color: AppColors.white),
+          const Icon(Icons.account_balance, size: 13, color: AppColors.white),
           const SizedBox(width: 4),
           Text(
-            organizer.isEmpty ? 'Oficial' : 'Oficial · $organizer',
+            organizer.isEmpty
+                ? 'Circuito creativo'
+                : 'Circuito creativo · $organizer',
             style: AppTextStyles.caption.copyWith(
               color: AppColors.white,
               fontWeight: FontWeight.w600,

@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/circuit.dart';
 import '../../../router/routes.dart';
+import '../../circuit_detail/widgets/guide_request_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/options_sheet.dart';
 import '../viewmodels/booking_viewmodel.dart';
@@ -81,16 +82,40 @@ class _BookingViewState extends State<BookingView> {
     if (picked != null) _viewModel.setLanguage(picked);
   }
 
+  /// Se pide desde la misma agenda: cuánta gente va, a qué hora, y si
+  /// además se necesita guía o traductor para ese recorrido.
+  Future<void> _pickGuide() async {
+    final selection = await showGuideRequestSheet(context);
+    if (selection != null) _viewModel.setGuideSelection(selection);
+  }
+
   Future<void> _confirm() async {
-    final ok = await _viewModel.confirm();
+    final viewModel = _viewModel;
+    final hadGuideRequest = viewModel.hasGuideRequest;
+    final circuitId = viewModel.circuitId;
+    final ok = await viewModel.confirm();
     if (!mounted || !ok) return;
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(content: Text('¡Listo! Tu circuito quedó agendado')),
+        SnackBar(
+          content: Text(
+            hadGuideRequest
+                ? '¡Listo! Tu circuito quedó agendado y tu solicitud de '
+                      'guía/traductor está publicada'
+                : '¡Listo! Tu circuito quedó agendado',
+          ),
+        ),
       );
-    context.go(Routes.home);
+
+    // Si además se pidió guía o traductor, se pasa a ver el estado de esa
+    // publicación (queda abierta 24h); si no, directo al home.
+    if (hadGuideRequest) {
+      context.pushReplacement(Routes.guideRequestPath(circuitId));
+    } else {
+      context.go(Routes.home);
+    }
   }
 
   @override
@@ -151,8 +176,14 @@ class _BookingViewState extends State<BookingView> {
                       icon: Icons.translate,
                       label: 'Idioma',
                       value: viewModel.language,
-                      showDivider: false,
                       onTap: _pickLanguage,
+                    ),
+                    BookingFieldRow(
+                      icon: Icons.person_pin_circle_outlined,
+                      label: 'Guía o traductor',
+                      value: viewModel.guideSummary,
+                      showDivider: false,
+                      onTap: _pickGuide,
                     ),
                   ],
                 ),

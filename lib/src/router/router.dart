@@ -128,6 +128,8 @@ GoRouter createRouter(AuthRepository authRepository) {
                 create: (context) => BookingViewModel(
                   context.read<TourRepository>(),
                   context.read<BookingsRepository>(),
+                  context.read<GuideRequestRepository>(),
+                  context.read<GuideChatRepository>(),
                   id,
                 ),
                 child: const BookingView(),
@@ -249,8 +251,10 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.medals,
         builder: (context, state) => ChangeNotifierProvider<MedalsViewModel>(
-          create: (context) =>
-              MedalsViewModel(context.read<BadgesRepository>()),
+          create: (context) => MedalsViewModel(
+            context.read<BadgesRepository>(),
+            context.read<TourRepository>(),
+          ),
           child: const MedalsView(),
         ),
       ),
