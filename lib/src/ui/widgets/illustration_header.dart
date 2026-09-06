@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 
 /// Banda ilustrada superior de las pantallas de onboarding / auth.
 ///
-/// Si el asset todavía no está en `assets/images/`, dibuja un marcador de
+/// Acepta tanto rutas rasterizadas (`.png`, `.jpg`) como vectoriales (`.svg`);
+/// si el asset todavía no está en `assets/images/`, dibuja un marcador de
 /// posición con la paleta de la marca en vez de reventar en tiempo de build.
 class IllustrationHeader extends StatelessWidget {
   const IllustrationHeader({
@@ -18,15 +20,26 @@ class IllustrationHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSvg = asset.toLowerCase().endsWith('.svg');
+
     return SizedBox(
       width: double.infinity,
       height: height,
-      child: Image.asset(
-        asset,
-        fit: BoxFit.cover,
-        alignment: Alignment.bottomCenter,
-        errorBuilder: (context, error, stackTrace) => const _MissingArtwork(),
-      ),
+      child: isSvg
+          ? SvgPicture.asset(
+              asset,
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+              errorBuilder: (context, error, stackTrace) =>
+                  const _MissingArtwork(),
+            )
+          : Image.asset(
+              asset,
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+              errorBuilder: (context, error, stackTrace) =>
+                  const _MissingArtwork(),
+            ),
     );
   }
 }

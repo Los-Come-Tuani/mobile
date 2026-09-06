@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 
 /// Barra superior naranja del home: logo, notificaciones y menú.
 class HomeTopBar extends StatelessWidget implements PreferredSizeWidget {
@@ -24,16 +25,14 @@ class HomeTopBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: AppColors.white,
       elevation: 0,
       titleSpacing: 20,
-      title: Text(
-        "k'plan",
-        style: AppTextStyles.headline.copyWith(
-          color: AppColors.white,
-          fontSize: 24,
-        ),
+      title: SvgPicture.asset(
+        AppAssets.logoTipoClaro,
+        height: 28,
+        alignment: Alignment.centerLeft,
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_none),
+          icon: const Icon(Icons.notifications_none, color: AppColors.white),
           tooltip: 'Notificaciones',
           onPressed: onNotificationsPressed,
         ),
