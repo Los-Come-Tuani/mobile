@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -13,7 +12,6 @@ import '../../circuit_detail/widgets/start_trip_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
-import '../../widgets/open_with_sheet.dart';
 import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/section_header.dart';
@@ -95,24 +93,21 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     );
   }
 
+  /// El mapa del circuito: su recorrido o, si se está siguiendo, el viaje.
+  void _openMap() => context.push(
+    Routes.myCircuitMapPath(context.read<MyCircuitViewModel>().collectionId),
+  );
+
   /// Elige la parada de arranque, empieza el viaje con el itinerario
-  /// recalculado desde ahora y ofrece abrirla en el mapa.
+  /// recalculado desde ahora y abre el mapa del viaje.
   Future<void> _startTrip() async {
     final viewModel = context.read<MyCircuitViewModel>();
     final startStop = await showStartTripSheet(context, stops: viewModel.stops);
     if (startStop == null || !mounted) return;
 
     viewModel.startTrip(startStop);
-
-    final selection = await showOpenWithSheet(context);
-    if (selection != null && mounted) {
-      final uri = selection.app.locationUri(
-        latitude: startStop.latitude,
-        longitude: startStop.longitude,
-      );
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-    if (mounted) _notify('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    _notify('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    _openMap();
   }
 
   Future<void> _skipStop(ItineraryStop stop) async {
@@ -153,6 +148,14 @@ class _MyCircuitViewState extends State<MyCircuitView> {
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
         title: Text(collection?.title ?? 'Mis circuitos'),
+        actions: [
+          if (stops.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.map_outlined),
+              tooltip: 'Ver en el mapa',
+              onPressed: _openMap,
+            ),
+        ],
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy

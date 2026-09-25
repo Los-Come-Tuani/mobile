@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -11,6 +12,7 @@ import '../data/datasources/repository/group_session_repository.dart';
 import '../data/datasources/repository/guide_chat_repository.dart';
 import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
+import '../data/datasources/repository/location_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
 import '../data/datasources/repository/visit_log_repository.dart';
@@ -47,6 +49,8 @@ import '../ui/profile/view/profile_view.dart';
 import '../ui/profile/viewmodels/profile_viewmodel.dart';
 import '../ui/register/view/register_view.dart';
 import '../ui/register/viewmodels/register_viewmodel.dart';
+import '../ui/route_map/view/route_map_view.dart';
+import '../ui/route_map/viewmodels/route_map_viewmodel.dart';
 import '../ui/saved/view/saved_view.dart';
 import '../ui/saved/viewmodels/saved_viewmodel.dart';
 import '../ui/stop_detail/view/stop_detail_view.dart';
@@ -162,6 +166,12 @@ GoRouter createRouter(AuthRepository authRepository) {
               );
             },
           ),
+          GoRoute(
+            path: Routes.mapSegment,
+            builder: (context, state) => _routeMap(
+              CircuitMapSubject(state.pathParameters[Routes.circuitId] ?? ''),
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -189,6 +199,14 @@ GoRouter createRouter(AuthRepository authRepository) {
             child: const StopDetailView(),
           );
         },
+        routes: [
+          GoRoute(
+            path: Routes.mapSegment,
+            builder: (context, state) => _routeMap(
+              StopMapSubject(state.pathParameters[Routes.stopId] ?? ''),
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.eventDetail,
@@ -200,6 +218,14 @@ GoRouter createRouter(AuthRepository authRepository) {
             child: const EventDetailView(),
           );
         },
+        routes: [
+          GoRoute(
+            path: Routes.mapSegment,
+            builder: (context, state) => _routeMap(
+              EventMapSubject(state.pathParameters[Routes.eventId] ?? ''),
+            ),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.guideProfile,
@@ -276,6 +302,14 @@ GoRouter createRouter(AuthRepository authRepository) {
               );
             },
           ),
+          GoRoute(
+            path: Routes.mapSegment,
+            builder: (context, state) => _routeMap(
+              MyCircuitMapSubject(
+                state.pathParameters[Routes.collectionId] ?? '',
+              ),
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -341,5 +375,20 @@ GoRouter createRouter(AuthRepository authRepository) {
         ),
       ),
     ],
+  );
+}
+
+/// La pantalla del mapa de [subject]: la misma para circuitos, circuitos
+/// propios, paradas y eventos.
+Widget _routeMap(MapSubject subject) {
+  return ChangeNotifierProvider<RouteMapViewModel>(
+    create: (context) => RouteMapViewModel(
+      context.read<TourRepository>(),
+      context.read<CircuitCollectionsRepository>(),
+      context.read<ActiveTripRepository>(),
+      context.read<LocationRepository>(),
+      subject,
+    ),
+    child: const RouteMapView(),
   );
 }

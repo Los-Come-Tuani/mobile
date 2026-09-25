@@ -14,6 +14,8 @@ import 'src/data/datasources/repository/group_session_repository.dart';
 import 'src/data/datasources/repository/guide_chat_repository.dart';
 import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
+import 'src/data/datasources/repository/location_repository.dart';
+import 'src/data/datasources/repository/map_tiles_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
@@ -68,6 +70,12 @@ class _KPlanAppState extends State<KPlanApp> {
         ChangeNotifierProvider<ActiveTripRepository>(
           create: (_) => ActiveTripRepository(),
         ),
+        // Dónde está el turista, sólo mientras un mapa lo muestra.
+        ChangeNotifierProvider<LocationRepository>(
+          create: (_) => LocationRepository(),
+        ),
+        // Las calles del mapa (OpenFreeMap, gratis y sin API key).
+        Provider<MapTilesRepository>(create: (_) => MapTilesRepository()),
         // Catálogo de guías turísticos disponibles para solicitar en vivo.
         Provider<GuideRepository>(create: (_) => GuideRepository()),
         // La propuesta de trabajo para guía/traductor en curso, si hay una.

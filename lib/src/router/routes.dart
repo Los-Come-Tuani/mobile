@@ -22,6 +22,11 @@ abstract final class Routes {
   /// detalle: `/circuit/:id/group-slots`
   static const groupSlotsSegment = 'group-slots';
 
+  /// Sub-ruta del mapa, relativa al detalle de un circuito, de uno propio, de
+  /// una parada o de un evento: `/circuit/:id/map`, `/my-circuit/:id/map`,
+  /// `/stop/:id/map` y `/event/:id/map`.
+  static const mapSegment = 'map';
+
   /// Detalle de una parada: `/stop/:id`
   static const stopDetail = '/stop/:$stopId';
 
@@ -61,10 +66,14 @@ abstract final class Routes {
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
   static String groupSlotsPath(String id) => '/circuit/$id/group-slots';
+  static String circuitMapPath(String id) => '/circuit/$id/map';
   static String stopDetailPath(String id) => '/stop/$id';
+  static String stopMapPath(String id) => '/stop/$id/map';
   static String eventDetailPath(String id) => '/event/$id';
+  static String eventMapPath(String id) => '/event/$id/map';
   static String myCircuitPath(String id) => '/my-circuit/$id';
   static String myCircuitBookingPath(String id) => '/my-circuit/$id/booking';
+  static String myCircuitMapPath(String id) => '/my-circuit/$id/map';
   static String myCircuitAssistantPath(String id) =>
       '/my-circuit/$id/assistant';
   static String guideProfilePath(String id) => '/guide/$id';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -36,7 +37,10 @@ typedef OpenWithSelection = ({NavigationApp app, bool remember});
 /// Hoja "Abrir circuito con..." del diseño.
 ///
 /// Devuelve `null` si el usuario cancela.
-Future<OpenWithSelection?> showOpenWithSheet(BuildContext context) {
+Future<OpenWithSelection?> showOpenWithSheet(
+  BuildContext context, {
+  String title = 'Abrir circuito con...',
+}) {
   return showModalBottomSheet<OpenWithSelection>(
     context: context,
     backgroundColor: AppColors.white,
@@ -44,12 +48,41 @@ Future<OpenWithSelection?> showOpenWithSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => const _OpenWithSheet(),
+    builder: (context) => _OpenWithSheet(title: title),
   );
 }
 
+/// "Cómo llegar": pregunta con qué app de navegación ir a `latitude,
+/// longitude` y la abre ahí. Avisa si no se pudo.
+Future<void> openInNavigationApp(
+  BuildContext context, {
+  required double latitude,
+  required double longitude,
+}) async {
+  final selection = await showOpenWithSheet(
+    context,
+    title: 'Cómo llegar con...',
+  );
+  if (selection == null || !context.mounted) return;
+
+  final uri = selection.app.locationUri(
+    latitude: latitude,
+    longitude: longitude,
+  );
+  final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!opened && context.mounted) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text('No se pudo abrir ${selection.app.label}')),
+      );
+  }
+}
+
 class _OpenWithSheet extends StatefulWidget {
-  const _OpenWithSheet();
+  const _OpenWithSheet({required this.title});
+
+  final String title;
 
   @override
   State<_OpenWithSheet> createState() => _OpenWithSheetState();
@@ -76,7 +109,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text('Abrir circuito con...', style: AppTextStyles.title),
+            Text(widget.title, style: AppTextStyles.title),
             const SizedBox(height: 20),
             for (final app in NavigationApp.values) ...[
               _AppOption(

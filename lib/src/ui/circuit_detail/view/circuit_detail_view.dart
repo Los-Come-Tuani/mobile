@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -21,7 +20,6 @@ import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/itinerary_timeline.dart';
-import '../../widgets/open_with_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../../widgets/section_header.dart';
@@ -53,44 +51,21 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  /// Abre el punto de encuentro del circuito (no una parada puntual) en la
-  /// app de navegación elegida.
-  Future<void> _openInMaps(Circuit circuit) async {
-    final selection = await showOpenWithSheet(context);
-    if (selection == null || !mounted) return;
-
-    final uri = selection.app.locationUri(
-      latitude: circuit.latitude,
-      longitude: circuit.longitude,
-    );
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && mounted) {
-      _notifySoon('No se pudo abrir ${selection.app.label}');
-    }
-  }
+  /// El mapa del circuito: su recorrido o, si se está siguiendo, el viaje.
+  void _openMap(Circuit circuit) =>
+      context.push(Routes.circuitMapPath(circuit.id));
 
   /// Elige la parada de arranque, marca el circuito como "en curso" (con el
-  /// itinerario recalculado desde ahora) y ofrece abrirla en el mapa.
-  Future<void> _startTrip(List<Stop> stops) async {
+  /// itinerario recalculado desde ahora) y abre el mapa del viaje.
+  Future<void> _startTrip(Circuit circuit, List<Stop> stops) async {
     if (stops.isEmpty) return;
 
     final startStop = await showStartTripSheet(context, stops: stops);
     if (startStop == null || !mounted) return;
 
     context.read<CircuitDetailViewModel>().startTrip(startStop);
-
-    final selection = await showOpenWithSheet(context);
-    if (selection != null && mounted) {
-      final uri = selection.app.locationUri(
-        latitude: startStop.latitude,
-        longitude: startStop.longitude,
-      );
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-
-    if (mounted) {
-      _notifySoon('¡Viaje iniciado! Dirígete a ${startStop.name}');
-    }
+    _notifySoon('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    _openMap(circuit);
   }
 
   /// Si quedaron paradas sin visitar, pregunta por qué antes de cerrar.
@@ -147,12 +122,12 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                       progressOf: viewModel.tripProgressOf,
                     )
                   : null,
-              onOpenInMaps: () => _openInMaps(circuit),
+              onOpenInMaps: () => _openMap(circuit),
               onDownload: () =>
                   _notifySoon('Descargar sin conexión: próximamente'),
               onSeeAllComments: () =>
                   _notifySoon('Todas las reseñas: próximamente'),
-              onStartTrip: () => _startTrip(viewModel.stops),
+              onStartTrip: () => _startTrip(circuit, viewModel.stops),
               onEndTrip: _endTrip,
               onSkipStop: _skipStop,
             ),

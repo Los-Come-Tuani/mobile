@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -15,7 +14,6 @@ import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/item_options_sheet.dart';
-import '../../widgets/open_with_sheet.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
 
 /// Detalle de un evento próximo.
@@ -68,25 +66,10 @@ class _EventContent extends StatelessWidget {
   Future<void> _openOptions(BuildContext context) =>
       showItemOptionsSheet(context, itemId: event.id);
 
-  /// Abre la ubicación del evento (no un circuito) en la app de navegación
-  /// elegida, usando sus propias coordenadas.
-  Future<void> _openInMaps(BuildContext context) async {
-    final selection = await showOpenWithSheet(context);
-    if (selection == null || !context.mounted) return;
-
-    final uri = selection.app.locationUri(
-      latitude: event.latitude,
-      longitude: event.longitude,
-    );
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && context.mounted) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text('No se pudo abrir ${selection.app.label}')),
-        );
-    }
-  }
+  /// El mapa del lugar del evento (no de un circuito), desde donde se puede
+  /// abrir Google Maps o Waze para llegar.
+  void _openMap(BuildContext context) =>
+      context.push(Routes.eventMapPath(event.id));
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +117,7 @@ class _EventContent extends StatelessWidget {
                 tooltip: 'Ver en el mapa',
                 color: AppColors.primary30,
                 size: 44,
-                onPressed: () => _openInMaps(context),
+                onPressed: () => _openMap(context),
               ),
             ),
           ],
