@@ -22,6 +22,19 @@ class BookingsRepository extends ChangeNotifier {
     return upcoming.isEmpty ? null : upcoming.first;
   }
 
+  /// La reserva de [circuitId] para el día de [day], si hay una.
+  Booking? bookingFor(String circuitId, {required DateTime day}) {
+    for (final booking in _bookings) {
+      if (booking.circuitId == circuitId &&
+          booking.date.year == day.year &&
+          booking.date.month == day.month &&
+          booking.date.day == day.day) {
+        return booking;
+      }
+    }
+    return null;
+  }
+
   Booking add({
     required String circuitId,
     required String circuitTitle,

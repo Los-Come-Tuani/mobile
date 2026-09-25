@@ -1,4 +1,5 @@
 import '../../../core/utils/result.dart';
+import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
@@ -10,11 +11,21 @@ import '../../../data/models/circuit.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/event_item.dart';
 import '../../../data/models/guide_request.dart';
+import '../../../data/models/itinerary.dart';
 import '../../../data/models/place.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/user.dart';
 import '../../core/base_viewmodel.dart';
 import '../widgets/discover_tabs.dart';
+
+/// El viaje en curso, resumido para el aviso del home.
+typedef ActiveTripSummary = ({
+  String circuitId,
+  String title,
+  bool isUserCircuit,
+  ItineraryStop? nextStop,
+  Duration delay,
+});
 
 class HomeViewModel extends BaseViewModel {
   HomeViewModel(
@@ -24,12 +35,14 @@ class HomeViewModel extends BaseViewModel {
     this._badgesRepository,
     this._bookingsRepository,
     this._guideRequestRepository,
+    this._activeTripRepository,
   ) {
     // Los circuitos que el usuario cree desde una parada aparecen aquí.
     _collectionsRepository.addListener(safeNotify);
     _badgesRepository.addListener(safeNotify);
     _bookingsRepository.addListener(safeNotify);
     _guideRequestRepository.addListener(safeNotify);
+    _activeTripRepository.addListener(safeNotify);
   }
 
   final TourRepository _tourRepository;
@@ -38,6 +51,7 @@ class HomeViewModel extends BaseViewModel {
   final BadgesRepository _badgesRepository;
   final BookingsRepository _bookingsRepository;
   final GuideRequestRepository _guideRequestRepository;
+  final ActiveTripRepository _activeTripRepository;
 
   List<Circuit> _circuits = const [];
   List<Place> _places = const [];
@@ -66,6 +80,20 @@ class HomeViewModel extends BaseViewModel {
 
   /// La reserva futura más próxima, para el aviso de "próximo viaje".
   Booking? get nextBooking => _bookingsRepository.nextUpcoming;
+
+  /// El viaje que el usuario está recorriendo ahora, para seguirlo sin
+  /// entrar al circuito: hacia dónde va y si va a tiempo.
+  ActiveTripSummary? get activeTrip {
+    final circuitId = _activeTripRepository.activeCircuitId;
+    if (circuitId == null) return null;
+    return (
+      circuitId: circuitId,
+      title: _activeTripRepository.title,
+      isUserCircuit: _activeTripRepository.isUserCircuit,
+      nextStop: _activeTripRepository.nextStop,
+      delay: _activeTripRepository.delay,
+    );
+  }
 
   /// La propuesta de trabajo en curso (recibiendo postulaciones o ya con
   /// alguien contratado), para no perderla de vista fuera de su pantalla.
@@ -176,6 +204,7 @@ class HomeViewModel extends BaseViewModel {
     _badgesRepository.removeListener(safeNotify);
     _bookingsRepository.removeListener(safeNotify);
     _guideRequestRepository.removeListener(safeNotify);
+    _activeTripRepository.removeListener(safeNotify);
     super.dispose();
   }
 

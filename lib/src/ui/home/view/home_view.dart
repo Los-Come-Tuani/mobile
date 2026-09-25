@@ -18,6 +18,7 @@ import '../../widgets/app_search_field.dart';
 import '../../widgets/category_filter_bar.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
+import '../../widgets/trip_progress.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/circuit_card.dart';
 import '../widgets/discover_tabs.dart';
@@ -109,6 +110,17 @@ class _HomeViewState extends State<HomeView> {
   List<Widget> _buildSections(HomeViewModel viewModel) {
     return switch (viewModel.tab) {
       DiscoverTab.forYou => [
+        if (viewModel.activeTrip case final trip?) ...[
+          _ActiveTripBanner(
+            trip: trip,
+            onTap: () => context.push(
+              trip.isUserCircuit
+                  ? Routes.myCircuitPath(trip.circuitId)
+                  : Routes.circuitDetailPath(trip.circuitId),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (viewModel.nextBooking != null) ...[
           _UpcomingTripBanner(
             booking: viewModel.nextBooking!,
@@ -285,6 +297,79 @@ class _CircuitsSection extends StatelessWidget {
       itemBuilder: (context, index) => CircuitCard(
         circuit: circuits[index],
         onTap: () => onCircuitTap(circuits[index]),
+      ),
+    );
+  }
+}
+
+/// Aviso del viaje que el usuario está recorriendo ahora: hacia qué parada
+/// va, a qué hora debería llegar y si va a tiempo.
+class _ActiveTripBanner extends StatelessWidget {
+  const _ActiveTripBanner({required this.trip, required this.onTap});
+
+  final ActiveTripSummary trip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final next = trip.nextStop;
+    final subtitle = next == null
+        ? 'Ya pasaste por todas las paradas · toca para finalizar'
+        : 'Siguiente: ${next.stop.name} · '
+              '${Formatters.clock(next.arrival)} · '
+              '${delayLabel(trip.delay).toLowerCase()}';
+
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Material(
+        color: AppColors.accentSecondaryBlue,
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radius),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.explore, color: AppColors.white),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Viaje en curso: ${trip.title}',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: AppColors.white),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

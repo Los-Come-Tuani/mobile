@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/core/theme/app_theme.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
@@ -68,6 +69,7 @@ void main() {
                 BadgesRepository(),
                 BookingsRepository(),
                 GuideRequestRepository(GuideRepository()),
+                ActiveTripRepository(),
               );
             },
           ),
