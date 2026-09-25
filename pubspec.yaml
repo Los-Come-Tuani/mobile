@@ -118,3 +118,13 @@ flutter_launcher_icons:
   adaptive_icon_foreground: assets/images/app_icon/app_icon_foreground.png
   adaptive_icon_foreground_inset: 0
   adaptive_icon_monochrome: assets/images/app_icon/app_icon_foreground.png
+
+# Splash nativo (imagotipo). Regenerar con: dart run flutter_native_splash:create
+# El color es el fondo crema de la app (AppColors.primary10).
+flutter_native_splash:
+  color: "#F8F4E6"
+  image: assets/images/splash/splash_logo.png
+  android_12:
+    color: "#F8F4E6"
+    image: assets/images/splash/splash_logo_android12.png
+  web: false
