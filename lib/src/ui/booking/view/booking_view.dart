@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/circuit.dart';
+import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/options_sheet.dart';
@@ -143,11 +144,8 @@ class _BookingViewState extends State<BookingView> {
         ),
       ),
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy || circuit == null
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
-          : ListView(
+      body: viewModel.isLoaded && !viewModel.isBusy
+          ? ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
                 Text('Detalles de la reserva', style: AppTextStyles.title),
@@ -175,12 +173,13 @@ class _BookingViewState extends State<BookingView> {
                       value: viewModel.startTime,
                       onTap: _pickTime,
                     ),
-                    BookingFieldRow(
-                      icon: Icons.translate,
-                      label: 'Idioma',
-                      value: viewModel.language,
-                      onTap: _pickLanguage,
-                    ),
+                    if (!viewModel.isUserCircuit)
+                      BookingFieldRow(
+                        icon: Icons.translate,
+                        label: 'Idioma',
+                        value: viewModel.language,
+                        onTap: _pickLanguage,
+                      ),
                     BookingFieldRow(
                       icon: Icons.person_pin_circle_outlined,
                       label: 'Guía o traductor',
@@ -200,7 +199,13 @@ class _BookingViewState extends State<BookingView> {
                 const SizedBox(height: 24),
                 Text('Información del recorrido', style: AppTextStyles.title),
                 const SizedBox(height: 10),
-                _TourInfoCard(circuit: circuit),
+                if (circuit != null)
+                  _TourInfoCard(circuit: circuit)
+                else
+                  _MyCircuitInfoCard(
+                    title: viewModel.title,
+                    stops: viewModel.stops,
+                  ),
                 const SizedBox(height: 20),
                 PriceSummary(viewModel: viewModel),
                 const SizedBox(height: 20),
@@ -237,6 +242,11 @@ class _BookingViewState extends State<BookingView> {
                   ],
                 ),
               ],
+            )
+          : viewModel.hasError && !viewModel.isBusy
+          ? _LoadError(message: viewModel.errorMessage!, onBack: _goBack)
+          : const Center(
+              child: CircularProgressIndicator(color: AppColors.primary30),
             ),
     );
   }
@@ -345,6 +355,78 @@ class _TourInfoCard extends StatelessWidget {
           text: circuit.notes,
         ),
       ],
+    );
+  }
+}
+
+/// Resumen de un circuito que armó el usuario: sus paradas, en orden.
+class _MyCircuitInfoCard extends StatelessWidget {
+  const _MyCircuitInfoCard({required this.title, required this.stops});
+
+  final String title;
+  final List<Stop> stops;
+
+  @override
+  Widget build(BuildContext context) {
+    return BookingCard(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: AppTextStyles.cardTitle),
+              const SizedBox(height: 4),
+              Text(
+                'Lo armaste tú, así que no tiene precio por persona: sólo '
+                'pagas el guía o traductor que contrates.',
+                style: AppTextStyles.caption,
+              ),
+            ],
+          ),
+        ),
+        for (var i = 0; i < stops.length; i++)
+          TourInfoBlock(
+            icon: Icons.location_on_outlined,
+            title: '${i + 1}. ${stops[i].name}',
+            text: stops[i].address,
+          ),
+      ],
+    );
+  }
+}
+
+class _LoadError extends StatelessWidget {
+  const _LoadError({required this.message, required this.onBack});
+
+  final String message;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: AppTheme.screenPadding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 44,
+              color: AppColors.hintText,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodySmall,
+            ),
+            const SizedBox(height: 16),
+            TextButton(onPressed: onBack, child: const Text('Volver')),
+          ],
+        ),
+      ),
     );
   }
 }

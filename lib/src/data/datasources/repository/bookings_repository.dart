@@ -29,6 +29,7 @@ class BookingsRepository extends ChangeNotifier {
     required String startTime,
     required int adults,
     required int children,
+    bool isUserCircuit = false,
     String? groupSessionId,
   }) {
     final booking = Booking(
@@ -39,6 +40,7 @@ class BookingsRepository extends ChangeNotifier {
       startTime: startTime,
       adults: adults,
       children: children,
+      isUserCircuit: isUserCircuit,
       groupSessionId: groupSessionId,
     );
     _bookings.add(booking);

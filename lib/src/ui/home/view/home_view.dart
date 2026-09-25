@@ -112,9 +112,14 @@ class _HomeViewState extends State<HomeView> {
         if (viewModel.nextBooking != null) ...[
           _UpcomingTripBanner(
             booking: viewModel.nextBooking!,
-            onTap: () => context.push(
-              Routes.circuitDetailPath(viewModel.nextBooking!.circuitId),
-            ),
+            onTap: () {
+              final booking = viewModel.nextBooking!;
+              context.push(
+                booking.isUserCircuit
+                    ? Routes.myCircuitPath(booking.circuitId)
+                    : Routes.circuitDetailPath(booking.circuitId),
+              );
+            },
           ),
           const SizedBox(height: 12),
         ],

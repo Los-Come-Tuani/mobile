@@ -17,24 +17,27 @@ class PriceSummary extends StatelessWidget {
     return BookingCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       children: [
-        _Line(
-          icon: Icons.person_outline,
-          label: Formatters.groupLabel(adults: viewModel.adults, children: 0),
-          amount: viewModel.adultsTotal,
-        ),
-        _Line(
-          icon: Icons.child_care_outlined,
-          label:
-              '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
-          amount: viewModel.childrenTotal,
-        ),
+        if (viewModel.hasPricePerPerson) ...[
+          _Line(
+            icon: Icons.person_outline,
+            label: Formatters.groupLabel(adults: viewModel.adults, children: 0),
+            amount: viewModel.adultsTotal,
+          ),
+          _Line(
+            icon: Icons.child_care_outlined,
+            label:
+                '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
+            amount: viewModel.childrenTotal,
+          ),
+        ],
         if (viewModel.hasGuideRequest)
           _Line(
             icon: Icons.person_pin_circle_outlined,
             label: 'Presupuesto: ${viewModel.guideSummary}',
             amount: viewModel.guidePrice,
           ),
-        const Divider(height: 20, thickness: 1, color: AppColors.divider),
+        if (viewModel.hasPricePerPerson || viewModel.hasGuideRequest)
+          const Divider(height: 20, thickness: 1, color: AppColors.divider),
         _Line(label: 'Subtotal', amount: viewModel.subtotal),
         _Line(label: 'Servicio (20%)', amount: viewModel.serviceFee),
         const SizedBox(height: 6),

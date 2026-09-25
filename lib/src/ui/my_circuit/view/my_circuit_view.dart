@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/primary_button.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
 
@@ -74,6 +75,22 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                   style: AppTextStyles.caption,
                 ),
                 const SizedBox(height: 16),
+                if (stops.isNotEmpty) ...[
+                  PrimaryButton(
+                    label: 'Agendar circuito',
+                    icon: Icons.calendar_month_outlined,
+                    onPressed: () => context.push(
+                      Routes.myCircuitBookingPath(viewModel.collectionId),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Como lo armaste tú, puedes publicar una propuesta para '
+                    'que guías o traductores se postulen.',
+                    style: AppTextStyles.caption,
+                  ),
+                  const SizedBox(height: 20),
+                ],
                 if (stops.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 48),

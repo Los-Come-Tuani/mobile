@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_chat_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
@@ -9,15 +10,21 @@ import 'package:k_plan_mobile/src/ui/booking/viewmodels/booking_viewmodel.dart';
 
 BookingViewModel _viewModel(
   String circuitId, {
+  TourRepository? tourRepository,
+  CircuitCollectionsRepository? collectionsRepository,
   BookingsRepository? bookingsRepository,
   GuideRequestRepository? guideRequestRepository,
+  bool isUserCircuit = false,
 }) {
+  final tours = tourRepository ?? TourRepository();
   return BookingViewModel(
-    TourRepository(),
+    tours,
+    collectionsRepository ?? CircuitCollectionsRepository(tours),
     bookingsRepository ?? BookingsRepository(),
     guideRequestRepository ?? GuideRequestRepository(GuideRepository()),
     GuideChatRepository(),
     circuitId,
+    isUserCircuit: isUserCircuit,
   );
 }
 
@@ -61,6 +68,7 @@ void main() {
       bookingsRepository.bookings.first.circuitId,
       'granada-historias-sabores',
     );
+    expect(bookingsRepository.bookings.first.isUserCircuit, isFalse);
   });
 
   test('los niños suman con su propia tarifa', () async {
@@ -109,4 +117,50 @@ void main() {
     expect(request?.terms.budget, 1150);
     guideRequestRepository.dispose();
   });
+
+  test(
+    'un circuito propio sólo cobra el guía y queda marcado en la reserva',
+    () async {
+      final tourRepository = TourRepository();
+      final collectionsRepository = CircuitCollectionsRepository(
+        tourRepository,
+      );
+      final bookingsRepository = BookingsRepository();
+      final guideRequestRepository = GuideRequestRepository(GuideRepository());
+      final myCircuit = collectionsRepository.createCollection(
+        'Mi ruta por Granada',
+        withStopId: 'granada-catedral',
+      );
+      final viewModel = _viewModel(
+        myCircuit.id,
+        tourRepository: tourRepository,
+        collectionsRepository: collectionsRepository,
+        bookingsRepository: bookingsRepository,
+        guideRequestRepository: guideRequestRepository,
+        isUserCircuit: true,
+      );
+      await viewModel.load();
+
+      expect(viewModel.title, 'Mi ruta por Granada');
+      expect(viewModel.hasPricePerPerson, isFalse);
+      expect(viewModel.availableTimes, isNotEmpty);
+      expect(viewModel.stops.map((s) => s.id), ['granada-catedral']);
+      expect(viewModel.total, 0);
+
+      viewModel.setGuideTerms(
+        const GuideRequestTerms(need: GuideNeed.localGuide, serviceHours: 5),
+      );
+      // Sólo el presupuesto del guía: C$700 + 20% de servicio.
+      expect(viewModel.total, 840);
+
+      await viewModel.confirm();
+      expect(bookingsRepository.bookings.single.isUserCircuit, isTrue);
+      expect(bookingsRepository.bookings.single.circuitId, myCircuit.id);
+      expect(
+        guideRequestRepository.activeRequest?.circuitTitle,
+        myCircuit.title,
+      );
+      guideRequestRepository.dispose();
+    },
+  );
 }

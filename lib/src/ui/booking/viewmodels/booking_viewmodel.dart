@@ -1,32 +1,42 @@
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
+import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/guide_chat_repository.dart';
 import '../../../data/datasources/repository/guide_request_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit.dart';
+import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/guide_request.dart';
+import '../../../data/models/stop.dart';
 import '../../core/base_viewmodel.dart';
 
 /// Estado de la reserva que el usuario está armando.
 ///
-/// Como el recorrido es privado, el guía o traductor se consigue publicando
-/// una propuesta de trabajo a la que los guías se postulan. Los circuitos
-/// creativos no pasan por aquí: se agendan inscribiéndose en un horario de
-/// grupo.
+/// Sirve para los circuitos del catálogo que no son creativos y para los que
+/// armó el usuario: en ambos el recorrido es privado, así que el guía o
+/// traductor se consigue publicando una propuesta de trabajo a la que los
+/// guías se postulan. Los circuitos creativos no pasan por aquí: se agendan
+/// inscribiéndose en un horario de grupo.
 class BookingViewModel extends BaseViewModel {
   BookingViewModel(
     this._tourRepository,
+    this._collectionsRepository,
     this._bookingsRepository,
     this._guideRequestRepository,
     this._guideChatRepository,
-    this.circuitId,
-  );
+    this.circuitId, {
+    this.isUserCircuit = false,
+  });
 
   final TourRepository _tourRepository;
+  final CircuitCollectionsRepository _collectionsRepository;
   final BookingsRepository _bookingsRepository;
   final GuideRequestRepository _guideRequestRepository;
   final GuideChatRepository _guideChatRepository;
   final String circuitId;
+
+  /// `true` si [circuitId] es un circuito que armó el usuario.
+  final bool isUserCircuit;
 
   /// Porcentaje de servicio que se cobra sobre el subtotal.
   static const double serviceRate = 0.20;
@@ -34,7 +44,20 @@ class BookingViewModel extends BaseViewModel {
   /// Mínimo de días de anticipación para agendar.
   static const int minDaysAhead = 1;
 
+  /// Horas de salida para los circuitos del usuario, que no traen las suyas.
+  static const List<String> userCircuitStartTimes = [
+    '7:00 a.m.',
+    '8:00 a.m.',
+    '9:00 a.m.',
+    '10:00 a.m.',
+    '1:00 p.m.',
+    '2:00 p.m.',
+    '3:00 p.m.',
+  ];
+
   Circuit? _circuit;
+  CircuitCollection? _collection;
+  List<Stop> _stops = const [];
   DateTime _date = DateTime.now().add(const Duration(days: minDaysAhead));
   String _startTime = '';
   String _language = '';
@@ -45,7 +68,17 @@ class BookingViewModel extends BaseViewModel {
   /// `null` mientras el turista no pida guía ni traductor para este viaje.
   GuideRequestTerms? _guideTerms;
 
+  /// Sólo para circuitos del catálogo.
   Circuit? get circuit => _circuit;
+
+  /// Paradas del circuito propio, para mostrar el recorrido.
+  List<Stop> get stops => _stops;
+
+  bool get isLoaded => isUserCircuit ? _collection != null : _circuit != null;
+
+  String get title =>
+      isUserCircuit ? (_collection?.title ?? '') : (_circuit?.shortTitle ?? '');
+
   DateTime get date => _date;
   String get startTime => _startTime;
   String get language => _language;
@@ -53,8 +86,14 @@ class BookingViewModel extends BaseViewModel {
   int get children => _children;
   bool get isSaving => _isSaving;
 
-  List<String> get availableTimes => _circuit?.startTimes ?? const [];
+  List<String> get availableTimes => isUserCircuit
+      ? userCircuitStartTimes
+      : (_circuit?.startTimes ?? const []);
   List<String> get availableLanguages => _circuit?.languages ?? const [];
+
+  /// Un circuito propio no tiene precio por persona: sólo se paga el guía o
+  /// traductor que se contrate.
+  bool get hasPricePerPerson => !isUserCircuit;
 
   DateTime get firstSelectableDate =>
       DateTime.now().add(const Duration(days: minDaysAhead));
@@ -86,12 +125,23 @@ class BookingViewModel extends BaseViewModel {
 
   /// No se puede agendar sin personas ni sin horario.
   bool get canConfirm =>
-      _circuit != null && (_adults + _children) > 0 && _startTime.isNotEmpty;
+      isLoaded && (_adults + _children) > 0 && _startTime.isNotEmpty;
 
   Future<void> load() async {
     setBusy(true);
     clearError();
 
+    if (isUserCircuit) {
+      await _loadUserCircuit();
+    } else {
+      await _loadCatalogCircuit();
+    }
+
+    setBusy(false);
+    safeNotify();
+  }
+
+  Future<void> _loadCatalogCircuit() async {
     switch (await _tourRepository.getCircuitById(circuitId)) {
       case Ok(:final value):
         _circuit = value;
@@ -100,9 +150,24 @@ class BookingViewModel extends BaseViewModel {
       case Failure(:final message):
         setError(message);
     }
+  }
 
-    setBusy(false);
-    safeNotify();
+  Future<void> _loadUserCircuit() async {
+    await _collectionsRepository.ensureLoaded();
+    final collection = _collectionsRepository.findById(circuitId);
+    if (collection == null) {
+      setError('No encontramos este circuito');
+      return;
+    }
+
+    _collection = collection;
+    _startTime = userCircuitStartTimes[2];
+    switch (await _tourRepository.getStopsByIds(collection.stopIds)) {
+      case Ok(:final value):
+        _stops = value;
+      case Failure(:final message):
+        setError(message);
+    }
   }
 
   void setDate(DateTime value) {
@@ -148,11 +213,12 @@ class BookingViewModel extends BaseViewModel {
 
     _bookingsRepository.add(
       circuitId: circuitId,
-      circuitTitle: _circuit!.shortTitle,
+      circuitTitle: title,
       date: _date,
       startTime: _startTime,
       adults: _adults,
       children: _children,
+      isUserCircuit: isUserCircuit,
     );
 
     final terms = _guideTerms;
@@ -161,7 +227,7 @@ class BookingViewModel extends BaseViewModel {
       _guideChatRepository.reset();
       _guideRequestRepository.publish(
         circuitId: circuitId,
-        circuitTitle: _circuit!.shortTitle,
+        circuitTitle: title,
         date: _date,
         startTime: _startTime,
         groupSize: _adults + _children,

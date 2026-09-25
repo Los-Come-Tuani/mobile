@@ -8,6 +8,7 @@ class Booking {
     required this.startTime,
     required this.adults,
     required this.children,
+    this.isUserCircuit = false,
     this.groupSessionId,
   });
 
@@ -18,6 +19,10 @@ class Booking {
   final String startTime;
   final int adults;
   final int children;
+
+  /// `true` si el circuito lo armó el usuario: no está en el catálogo, así
+  /// que se abre desde "Mis circuitos".
+  final bool isUserCircuit;
 
   /// Horario de grupo al que se inscribió, en un circuito creativo.
   final String? groupSessionId;

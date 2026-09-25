@@ -14,7 +14,8 @@ abstract final class Routes {
   /// Detalle de un circuito: `/circuit/:id`
   static const circuitDetail = '/circuit/:$circuitId';
 
-  /// Sub-ruta de agendar, relativa al detalle: `/circuit/:id/booking`
+  /// Sub-ruta de agendar, relativa al detalle de un circuito del catálogo
+  /// (`/circuit/:id/booking`) o de uno propio (`/my-circuit/:id/booking`).
   static const bookingSegment = 'booking';
 
   /// Sub-ruta de los horarios de grupo de un circuito creativo, relativa al
@@ -56,6 +57,7 @@ abstract final class Routes {
   static String stopDetailPath(String id) => '/stop/$id';
   static String eventDetailPath(String id) => '/event/$id';
   static String myCircuitPath(String id) => '/my-circuit/$id';
+  static String myCircuitBookingPath(String id) => '/my-circuit/$id/booking';
   static String guideProfilePath(String id) => '/guide/$id';
 
   /// Rutas accesibles sin sesión iniciada.

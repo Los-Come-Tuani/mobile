@@ -129,6 +129,7 @@ GoRouter createRouter(AuthRepository authRepository) {
               return ChangeNotifierProvider<BookingViewModel>(
                 create: (context) => BookingViewModel(
                   context.read<TourRepository>(),
+                  context.read<CircuitCollectionsRepository>(),
                   context.read<BookingsRepository>(),
                   context.read<GuideRequestRepository>(),
                   context.read<GuideChatRepository>(),
@@ -228,6 +229,26 @@ GoRouter createRouter(AuthRepository authRepository) {
             child: const MyCircuitView(),
           );
         },
+        routes: [
+          GoRoute(
+            path: Routes.bookingSegment,
+            builder: (context, state) {
+              final id = state.pathParameters[Routes.collectionId] ?? '';
+              return ChangeNotifierProvider<BookingViewModel>(
+                create: (context) => BookingViewModel(
+                  context.read<TourRepository>(),
+                  context.read<CircuitCollectionsRepository>(),
+                  context.read<BookingsRepository>(),
+                  context.read<GuideRequestRepository>(),
+                  context.read<GuideChatRepository>(),
+                  id,
+                  isUserCircuit: true,
+                ),
+                child: const BookingView(),
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.myTrips,
