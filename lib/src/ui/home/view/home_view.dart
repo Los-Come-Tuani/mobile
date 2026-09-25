@@ -121,14 +121,11 @@ class _HomeViewState extends State<HomeView> {
         if (viewModel.activeGuideRequest != null) ...[
           _GuideRequestBanner(
             request: viewModel.activeGuideRequest!,
-            onTap: () {
-              final request = viewModel.activeGuideRequest!;
-              if (request.status == GuideRequestStatus.matched) {
-                context.push(Routes.guideChat);
-              } else {
-                context.push(Routes.guideRequestPath(request.circuitId));
-              }
-            },
+            onTap: () => context.push(
+              viewModel.activeGuideRequest!.status == GuideRequestStatus.hired
+                  ? Routes.guideChat
+                  : Routes.guideProposal,
+            ),
           ),
           const SizedBox(height: 12),
         ],
@@ -358,8 +355,8 @@ class _UpcomingTripBanner extends StatelessWidget {
   }
 }
 
-/// Aviso de la solicitud de guía en vivo en curso: buscando o ya
-/// encontrado, para no perderla de vista al salir de esa pantalla.
+/// Aviso de la propuesta de trabajo en curso: cuántas postulaciones van o a
+/// quién se contrató, para no perderla de vista al salir de esa pantalla.
 class _GuideRequestBanner extends StatelessWidget {
   const _GuideRequestBanner({required this.request, required this.onTap});
 
@@ -368,7 +365,26 @@ class _GuideRequestBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMatched = request.status == GuideRequestStatus.matched;
+    final isHired = request.status == GuideRequestStatus.hired;
+    final count = request.applications.length;
+    final hiredNames = request.hired
+        .map((application) => application.guide.name.split(' ').first)
+        .join(' y ');
+    final (title, subtitle) = isHired
+        ? (
+            'Contrataste a $hiredNames para ${request.circuitTitle}',
+            'Toca para chatear',
+          )
+        : count == 0
+        ? (
+            'Tu propuesta para ${request.circuitTitle} está publicada',
+            'Esperando que los guías se postulen',
+          )
+        : (
+            '$count ${count == 1 ? 'postulación' : 'postulaciones'} para '
+                '${request.circuitTitle}',
+            'Toca para revisarlas y elegir',
+          );
 
     return Padding(
       padding: AppTheme.screenPadding,
@@ -391,7 +407,9 @@ class _GuideRequestBanner extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    isMatched ? Icons.chat_bubble_outline : Icons.person_search,
+                    isHired
+                        ? Icons.chat_bubble_outline
+                        : Icons.campaign_outlined,
                     color: AppColors.white,
                   ),
                 ),
@@ -401,9 +419,7 @@ class _GuideRequestBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isMatched
-                            ? 'Tienes un guía para ${request.circuitTitle}'
-                            : 'Buscando guía para ${request.circuitTitle}…',
+                        title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.body.copyWith(
@@ -413,9 +429,7 @@ class _GuideRequestBanner extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        isMatched
-                            ? 'Toca para chatear con él'
-                            : 'Toca para ver el estado de la búsqueda',
+                        subtitle,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.white.withValues(alpha: 0.85),
                         ),

@@ -31,7 +31,7 @@ class PriceSummary extends StatelessWidget {
         if (viewModel.hasGuideRequest)
           _Line(
             icon: Icons.person_pin_circle_outlined,
-            label: viewModel.guideSummary,
+            label: 'Presupuesto: ${viewModel.guideSummary}',
             amount: viewModel.guidePrice,
           ),
         const Divider(height: 20, thickness: 1, color: AppColors.divider),

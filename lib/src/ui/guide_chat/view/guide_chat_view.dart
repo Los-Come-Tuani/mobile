@@ -12,7 +12,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/guide_chat_viewmodel.dart';
 
-/// Chat simulado con el guía y/o traductor de la solicitud activa.
+/// Chat simulado con el guía y/o traductor contratados.
 class GuideChatView extends StatefulWidget {
   const GuideChatView({super.key});
 

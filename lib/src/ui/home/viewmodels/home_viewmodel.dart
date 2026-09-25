@@ -67,14 +67,14 @@ class HomeViewModel extends BaseViewModel {
   /// La reserva futura más próxima, para el aviso de "próximo viaje".
   Booking? get nextBooking => _bookingsRepository.nextUpcoming;
 
-  /// La solicitud de guía en vivo en curso (buscando o ya encontrado), para
-  /// no perderla de vista si el turista sale de la pantalla de búsqueda.
+  /// La propuesta de trabajo en curso (recibiendo postulaciones o ya con
+  /// alguien contratado), para no perderla de vista fuera de su pantalla.
   GuideRequest? get activeGuideRequest {
     final request = _guideRequestRepository.activeRequest;
     if (request == null) return null;
     final isVisible =
-        request.status == GuideRequestStatus.searching ||
-        request.status == GuideRequestStatus.matched;
+        request.status == GuideRequestStatus.open ||
+        request.status == GuideRequestStatus.hired;
     return isVisible ? request : null;
   }
 

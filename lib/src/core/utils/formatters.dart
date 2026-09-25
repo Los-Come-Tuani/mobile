@@ -47,6 +47,14 @@ abstract final class Formatters {
     return '$hour12:${minute.toString().padLeft(2, '0')} $suffix';
   }
 
+  /// Tiempo restante: `23 h 05 min`, `45 min` o `menos de 1 min`.
+  static String remaining(Duration value) {
+    if (value.inMinutes < 1) return 'menos de 1 min';
+    final minutes = value.inMinutes.remainder(60);
+    if (value.inHours == 0) return '$minutes min';
+    return '${value.inHours} h ${minutes.toString().padLeft(2, '0')} min';
+  }
+
   /// `1` -> `1 persona`, `4` -> `4 personas`.
   static String people(int count) =>
       '$count ${count == 1 ? 'persona' : 'personas'}';

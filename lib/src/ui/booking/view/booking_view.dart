@@ -8,12 +8,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/circuit.dart';
 import '../../../router/routes.dart';
-import '../../circuit_detail/widgets/guide_request_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/options_sheet.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../widgets/booking_card.dart';
 import '../widgets/group_picker_sheet.dart';
+import '../widgets/guide_proposal_sheet.dart';
 import '../widgets/price_summary.dart';
 
 /// Pantalla "Agendar": detalles de la reserva, información del recorrido
@@ -82,17 +82,19 @@ class _BookingViewState extends State<BookingView> {
     if (picked != null) _viewModel.setLanguage(picked);
   }
 
-  /// Se pide desde la misma agenda: cuánta gente va, a qué hora, y si
-  /// además se necesita guía o traductor para ese recorrido.
+  /// Se arma desde la misma agenda: la propuesta sale con la fecha, hora y
+  /// tamaño del grupo de esta reserva.
   Future<void> _pickGuide() async {
-    final selection = await showGuideRequestSheet(context);
-    if (selection != null) _viewModel.setGuideSelection(selection);
+    final terms = await showGuideProposalSheet(
+      context,
+      initial: _viewModel.guideTerms,
+    );
+    if (terms != null) _viewModel.setGuideTerms(terms);
   }
 
   Future<void> _confirm() async {
     final viewModel = _viewModel;
     final hadGuideRequest = viewModel.hasGuideRequest;
-    final circuitId = viewModel.circuitId;
     final ok = await viewModel.confirm();
     if (!mounted || !ok) return;
 
@@ -102,21 +104,23 @@ class _BookingViewState extends State<BookingView> {
         SnackBar(
           content: Text(
             hadGuideRequest
-                ? '¡Listo! Tu circuito quedó agendado y tu solicitud de '
-                      'guía/traductor está publicada'
+                ? '¡Listo! Tu circuito quedó agendado y tu propuesta ya '
+                      'está publicada para los guías'
                 : '¡Listo! Tu circuito quedó agendado',
           ),
         ),
       );
 
-    // Si además se pidió guía o traductor, se pasa a ver el estado de esa
-    // publicación (queda abierta 24h); si no, directo al home.
+    // Con propuesta, se pasa a ver las postulaciones que van llegando; si
+    // no, directo al home.
     if (hadGuideRequest) {
-      context.pushReplacement(Routes.guideRequestPath(circuitId));
+      context.pushReplacement(Routes.guideProposal);
     } else {
       context.go(Routes.home);
     }
   }
+
+  void _goBack() => context.canPop() ? context.pop() : context.go(Routes.home);
 
   @override
   Widget build(BuildContext context) {
@@ -135,8 +139,7 @@ class _BookingViewState extends State<BookingView> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: 'Regresar',
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go(Routes.home),
+          onPressed: _goBack,
         ),
       ),
       bottomNavigationBar: const AppBottomNav(),
@@ -181,12 +184,19 @@ class _BookingViewState extends State<BookingView> {
                     BookingFieldRow(
                       icon: Icons.person_pin_circle_outlined,
                       label: 'Guía o traductor',
-                      value: viewModel.guideSummary,
+                      value: viewModel.guideRowValue,
                       showDivider: false,
                       onTap: _pickGuide,
                     ),
                   ],
                 ),
+                if (viewModel.hasGuideRequest) ...[
+                  const SizedBox(height: 10),
+                  _ProposalNote(
+                    summary: viewModel.guideSummary,
+                    onRemove: () => viewModel.setGuideTerms(null),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 Text('Información del recorrido', style: AppTextStyles.title),
                 const SizedBox(height: 10),
@@ -202,11 +212,7 @@ class _BookingViewState extends State<BookingView> {
                           side: const BorderSide(color: AppColors.primary30),
                           foregroundColor: AppColors.primary30,
                         ),
-                        onPressed: viewModel.isSaving
-                            ? null
-                            : () => context.canPop()
-                                  ? context.pop()
-                                  : context.go(Routes.home),
+                        onPressed: viewModel.isSaving ? null : _goBack,
                         child: const Text('Cancelar'),
                       ),
                     ),
@@ -232,6 +238,51 @@ class _BookingViewState extends State<BookingView> {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// Qué se pide y qué pasa con la propuesta al agendar, con la opción de
+/// quitarla.
+class _ProposalNote extends StatelessWidget {
+  const _ProposalNote({required this.summary, required this.onRemove});
+
+  final String summary;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 8, 4, 8),
+      decoration: BoxDecoration(
+        color: AppColors.primary30.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.campaign_outlined,
+            size: 20,
+            color: AppColors.primary30,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(summary, style: AppTextStyles.cardTitle),
+                const SizedBox(height: 2),
+                Text(
+                  'Al agendar publicamos tu propuesta: los guías se postulan '
+                  'y tú eliges a quién contratar.',
+                  style: AppTextStyles.caption,
+                ),
+              ],
+            ),
+          ),
+          TextButton(onPressed: onRemove, child: const Text('Quitar')),
+        ],
+      ),
     );
   }
 }

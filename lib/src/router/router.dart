@@ -17,7 +17,6 @@ import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
 import '../ui/circuit_detail/viewmodels/circuit_detail_viewmodel.dart';
-import '../ui/circuit_detail/widgets/guide_request_sheet.dart';
 import '../ui/coupons/view/coupons_view.dart';
 import '../ui/coupons/viewmodels/coupons_viewmodel.dart';
 import '../ui/event_detail/view/event_detail_view.dart';
@@ -29,7 +28,7 @@ import '../ui/guide_chat/view/guide_chat_view.dart';
 import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
 import '../ui/guide_profile/view/guide_profile_view.dart';
 import '../ui/guide_profile/viewmodels/guide_profile_viewmodel.dart';
-import '../ui/guide_request/view/guide_searching_view.dart';
+import '../ui/guide_request/view/guide_proposal_view.dart';
 import '../ui/guide_request/viewmodels/guide_request_viewmodel.dart';
 import '../ui/home/view/home_view.dart';
 import '../ui/home/viewmodels/home_viewmodel.dart';
@@ -154,24 +153,16 @@ GoRouter createRouter(AuthRepository authRepository) {
               );
             },
           ),
-          GoRoute(
-            path: Routes.guideRequestSegment,
-            builder: (context, state) {
-              final id = state.pathParameters[Routes.circuitId] ?? '';
-              return ChangeNotifierProvider<GuideRequestViewModel>(
-                create: (context) => GuideRequestViewModel(
-                  context.read<TourRepository>(),
-                  context.read<GuideRequestRepository>(),
-                  context.read<GuideChatRepository>(),
-                  id,
-                ),
-                child: GuideSearchingView(
-                  selection: state.extra as GuideRequestSelection?,
-                ),
-              );
-            },
-          ),
         ],
+      ),
+      GoRoute(
+        path: Routes.guideProposal,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideRequestViewModel>(
+              create: (context) =>
+                  GuideRequestViewModel(context.read<GuideRequestRepository>()),
+              child: const GuideProposalView(),
+            ),
       ),
       GoRoute(
         path: Routes.stopDetail,

@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/guide_chat_message.dart';
 
-/// Chat simulado con los participantes (guía y/o traductor) de la
-/// solicitud activa.
+/// Chat simulado con quienes se contrató (guía y/o traductor) en la
+/// propuesta activa.
 ///
 /// No hay backend real ni nadie del otro lado todavía: cuando el turista
 /// escribe, se agenda una respuesta automática de uno de los participantes,
@@ -26,14 +26,14 @@ class GuideChatRepository extends ChangeNotifier {
 
   List<GuideChatMessage> get messages => List.unmodifiable(_messages);
 
-  /// Limpia el historial: se llama al iniciar una nueva solicitud.
+  /// Limpia el historial: se llama al publicar una nueva propuesta.
   void reset() {
     _messages.clear();
     notifyListeners();
   }
 
   /// [participantIds] son los ids de quienes pueden "contestar" (el guía
-  /// y/o el traductor de la solicitud activa).
+  /// y/o el traductor contratados).
   void sendFromTourist(String text, {required List<String> participantIds}) {
     final trimmed = text.trim();
     if (trimmed.isEmpty || participantIds.isEmpty) return;

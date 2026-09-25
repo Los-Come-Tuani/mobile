@@ -4,7 +4,7 @@ import '../../../data/models/guide_chat_message.dart';
 import '../../../data/models/tour_guide.dart';
 import '../../core/base_viewmodel.dart';
 
-/// Chat con los participantes (guía y/o traductor) de la solicitud activa.
+/// Chat con quienes se contrató (guía y/o traductor) en la propuesta activa.
 class GuideChatViewModel extends BaseViewModel {
   GuideChatViewModel(this._guideRequestRepository, this._guideChatRepository) {
     _guideChatRepository.addListener(safeNotify);
@@ -13,11 +13,21 @@ class GuideChatViewModel extends BaseViewModel {
   final GuideRequestRepository _guideRequestRepository;
   final GuideChatRepository _guideChatRepository;
 
-  /// Guía y/o traductor de la solicitud activa.
-  List<TourGuide> get participants =>
-      _guideRequestRepository.activeRequest?.matchedParticipants ?? const [];
+  /// Guía y/o traductor contratados.
+  List<TourGuide> get participants => [
+    for (final application
+        in _guideRequestRepository.activeRequest?.hired ?? const [])
+      application.guide,
+  ];
 
-  num? get agreedPrice => _guideRequestRepository.activeRequest?.suggestedPrice;
+  /// Lo acordado con las personas contratadas, o `null` si todavía no hay
+  /// nadie contratado.
+  num? get agreedPrice {
+    final request = _guideRequestRepository.activeRequest;
+    if (request == null || request.hired.isEmpty) return null;
+    return request.agreedPrice;
+  }
+
   List<GuideChatMessage> get messages => _guideChatRepository.messages;
 
   /// Nombre de quien envió [message], o `null` si fue el turista.

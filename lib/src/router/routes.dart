@@ -21,10 +21,6 @@ abstract final class Routes {
   /// detalle: `/circuit/:id/group-slots`
   static const groupSlotsSegment = 'group-slots';
 
-  /// Sub-ruta de solicitar guía en vivo, relativa al detalle:
-  /// `/circuit/:id/guide-request`
-  static const guideRequestSegment = 'guide-request';
-
   /// Detalle de una parada: `/stop/:id`
   static const stopDetail = '/stop/:$stopId';
 
@@ -37,10 +33,14 @@ abstract final class Routes {
   /// Perfil de un guía: `/guide/:id`
   static const guideProfile = '/guide/:$guideId';
 
-  /// Chat con el guía de la solicitud activa: `/guide-chat`.
+  /// Propuesta de trabajo para guía/traductor y sus postulaciones:
+  /// `/guide-proposal`.
   ///
-  /// No lleva id: siempre opera sobre la única solicitud activa de
+  /// No lleva id: siempre opera sobre la única propuesta activa de
   /// `GuideRequestRepository`.
+  static const guideProposal = '/guide-proposal';
+
+  /// Chat con quienes se contrató en la propuesta activa: `/guide-chat`.
   static const guideChat = '/guide-chat';
 
   /// Nombres de los parámetros de ruta.
@@ -53,8 +53,6 @@ abstract final class Routes {
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
   static String groupSlotsPath(String id) => '/circuit/$id/group-slots';
-  static String guideRequestPath(String circuitId) =>
-      '/circuit/$circuitId/guide-request';
   static String stopDetailPath(String id) => '/stop/$id';
   static String eventDetailPath(String id) => '/event/$id';
   static String myCircuitPath(String id) => '/my-circuit/$id';

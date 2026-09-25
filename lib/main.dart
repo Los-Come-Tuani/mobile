@@ -69,14 +69,13 @@ class _KPlanAppState extends State<KPlanApp> {
         ),
         // Catálogo de guías turísticos disponibles para solicitar en vivo.
         Provider<GuideRepository>(create: (_) => GuideRepository()),
-        // La solicitud de guía en vivo en curso, si hay una (búsqueda o
-        // encontrado). El "guía acepta" se simula: no hay app del lado del
-        // guía todavía.
+        // La propuesta de trabajo para guía/traductor en curso, si hay una.
+        // Las postulaciones se simulan: no hay app del lado del guía todavía.
         ChangeNotifierProvider<GuideRequestRepository>(
           create: (context) =>
               GuideRequestRepository(context.read<GuideRepository>()),
         ),
-        // Chat simulado con el guía de la solicitud activa.
+        // Chat simulado con quienes se contrató en la propuesta activa.
         ChangeNotifierProvider<GuideChatRepository>(
           create: (_) => GuideChatRepository(),
         ),

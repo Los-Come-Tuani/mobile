@@ -5,14 +5,14 @@ import '../../../data/datasources/repository/guide_request_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/guide_request.dart';
-import '../../circuit_detail/widgets/guide_request_sheet.dart';
 import '../../core/base_viewmodel.dart';
 
 /// Estado de la reserva que el usuario está armando.
 ///
-/// Agendar un circuito es también donde se pide guía o traductor: son
-/// parte de la misma "oferta" — cuánta gente va, a qué hora, y si además se
-/// necesita guía/traductor para ese recorrido.
+/// Como el recorrido es privado, el guía o traductor se consigue publicando
+/// una propuesta de trabajo a la que los guías se postulan. Los circuitos
+/// creativos no pasan por aquí: se agendan inscribiéndose en un horario de
+/// grupo.
 class BookingViewModel extends BaseViewModel {
   BookingViewModel(
     this._tourRepository,
@@ -43,7 +43,7 @@ class BookingViewModel extends BaseViewModel {
   bool _isSaving = false;
 
   /// `null` mientras el turista no pida guía ni traductor para este viaje.
-  GuideRequestSelection? _guideSelection;
+  GuideRequestTerms? _guideTerms;
 
   Circuit? get circuit => _circuit;
   DateTime get date => _date;
@@ -61,33 +61,25 @@ class BookingViewModel extends BaseViewModel {
   DateTime get lastSelectableDate =>
       DateTime.now().add(const Duration(days: 365));
 
-  GuideRequestSelection? get guideSelection => _guideSelection;
+  GuideRequestTerms? get guideTerms => _guideTerms;
 
-  bool get hasGuideRequest => _guideSelection != null;
+  bool get hasGuideRequest => _guideTerms != null;
 
-  /// Texto corto para la fila "Guía o traductor" del formulario.
+  /// Valor de la fila "Guía o traductor" del formulario.
+  String get guideRowValue => _guideTerms?.shortNeedLabel ?? 'Agregar';
+
+  /// Lo que se pide y por cuántas horas, para el aviso y el desglose.
   String get guideSummary {
-    final selection = _guideSelection;
-    if (selection == null) return 'Sin guía ni traductor';
-
-    final parts = <String>[];
-    switch (selection.guideTier) {
-      case GuideTier.local:
-        parts.add('Guía local');
-      case GuideTier.bilingual:
-        parts.add('Guía + ${selection.touristLanguage}');
-      case GuideTier.none:
-        break;
-    }
-    if (selection.includeTranslator) {
-      parts.add('Traductor de ${selection.touristLanguage}');
-    }
-    return '${parts.join(' + ')} · ${selection.serviceHours}h';
+    final terms = _guideTerms;
+    if (terms == null) return 'Sin guía ni traductor';
+    return '${terms.needLabel} · ${terms.serviceHours}h';
   }
 
   num get adultsTotal => (_circuit?.priceAdult ?? 0) * _adults;
   num get childrenTotal => (_circuit?.priceChild ?? 0) * _children;
-  num get guidePrice => _guideSelection?.price ?? 0;
+
+  /// Presupuesto publicado; el precio final depende de a quién se contrate.
+  num get guidePrice => _guideTerms?.budget ?? 0;
   num get subtotal => adultsTotal + childrenTotal + guidePrice;
   num get serviceFee => subtotal * serviceRate;
   num get total => subtotal + serviceFee;
@@ -134,15 +126,15 @@ class BookingViewModel extends BaseViewModel {
     safeNotify();
   }
 
-  void setGuideSelection(GuideRequestSelection? selection) {
-    _guideSelection = selection;
+  void setGuideTerms(GuideRequestTerms? terms) {
+    _guideTerms = terms;
     safeNotify();
   }
 
-  /// Confirma la reserva y la guarda en [BookingsRepository], que es lo
-  /// que hace aparecer el aviso de "próximo viaje" en el home. Si además
-  /// se pidió guía o traductor, publica esa solicitud (queda abierta 24h,
-  /// como una oferta de trabajo) en [GuideRequestRepository].
+  /// Confirma la reserva y la guarda en [BookingsRepository], que es lo que
+  /// hace aparecer el aviso de "próximo viaje" en el home. Si además se pidió
+  /// guía o traductor, publica la propuesta de trabajo con la fecha, hora y
+  /// tamaño del grupo para que los guías se postulen.
   ///
   /// TODO: enviar a `ApiRoutes` cuando exista el endpoint de reservas;
   /// por ahora sólo simula el guardado remoto.
@@ -163,21 +155,17 @@ class BookingViewModel extends BaseViewModel {
       children: _children,
     );
 
-    final guideSelection = _guideSelection;
-    if (guideSelection != null) {
-      // Cada solicitud nueva empieza un chat en blanco.
+    final terms = _guideTerms;
+    if (terms != null) {
+      // Cada propuesta nueva empieza un chat en blanco.
       _guideChatRepository.reset();
-      _guideRequestRepository.request(
+      _guideRequestRepository.publish(
         circuitId: circuitId,
         circuitTitle: _circuit!.shortTitle,
-        suggestedPrice: guideSelection.price,
-        timeLimit: guideSelection.timeLimit,
-        guideTier: guideSelection.guideTier,
-        includeTranslator: guideSelection.includeTranslator,
-        serviceHours: guideSelection.serviceHours,
-        transportOption: guideSelection.transportOption,
-        touristProvidesLodging: guideSelection.touristProvidesLodging,
-        touristLanguage: guideSelection.touristLanguage,
+        date: _date,
+        startTime: _startTime,
+        groupSize: _adults + _children,
+        terms: terms,
       );
     }
 
