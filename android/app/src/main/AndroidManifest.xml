@@ -2,6 +2,11 @@
     <!-- Cámara para escanear el código QR de una parada y confirmar la visita. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- Tiles del mapa, imágenes y fuentes. Sin esto sólo funciona en debug. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Ubicación del turista en el mapa mientras sigue su recorrido. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:label="K'Plan"
         android:name="${applicationName}"
