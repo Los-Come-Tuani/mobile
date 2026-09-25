@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
+import '../../booking/widgets/booking_card.dart';
+import '../../circuit_detail/widgets/start_trip_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/drop_reason_sheet.dart';
+import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/open_with_sheet.dart';
+import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
-import '../../widgets/stop_list_tile.dart';
+import '../../widgets/section_header.dart';
+import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
 
-/// Detalle de un circuito creado por el usuario: su lista de paradas.
+/// Detalle de un circuito creado por el usuario: cómo quiere hacer el día,
+/// el itinerario con la hora de cada parada y, si lo está recorriendo, el
+/// avance del viaje.
 class MyCircuitView extends StatefulWidget {
   const MyCircuitView({super.key});
 
@@ -28,10 +39,23 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     });
   }
 
-  void _removeStop(String stopId, String stopName) {
-    final viewModel = context.read<MyCircuitViewModel>();
-    viewModel.removeStop(stopId);
+  void _notify(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
 
+  /// Pregunta la razón antes de quitarla: es lo que el portal le muestra al
+  /// lugar.
+  Future<void> _removeStop(String stopId, String stopName) async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final reason = await showDropReasonSheet(
+      context,
+      title: '¿Por qué quitas $stopName?',
+    );
+    if (reason == null || !mounted) return;
+
+    final removal = viewModel.removeStop(stopId, reason);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -40,10 +64,76 @@ class _MyCircuitViewState extends State<MyCircuitView> {
           action: SnackBarAction(
             label: 'Deshacer',
             textColor: AppColors.primary10,
-            onPressed: () => viewModel.addStopBack(stopId),
+            onPressed: () => viewModel.restoreStop(removal),
           ),
         ),
       );
+  }
+
+  Future<void> _pickStartTime() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final picked = await showOptionsSheet(
+      context,
+      title: 'Hora de salida',
+      options: viewModel.startTimes,
+      selected: viewModel.startTime,
+    );
+    if (picked != null) viewModel.setStartTime(picked);
+  }
+
+  Future<void> _pickTravelMode() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final picked = await showOptionsSheet(
+      context,
+      title: '¿Cómo te vas a mover?',
+      options: [for (final mode in TravelMode.values) mode.label],
+      selected: viewModel.travelMode.label,
+    );
+    if (picked == null) return;
+    viewModel.setTravelMode(
+      TravelMode.values.firstWhere((mode) => mode.label == picked),
+    );
+  }
+
+  /// Elige la parada de arranque, empieza el viaje con el itinerario
+  /// recalculado desde ahora y ofrece abrirla en el mapa.
+  Future<void> _startTrip() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final startStop = await showStartTripSheet(context, stops: viewModel.stops);
+    if (startStop == null || !mounted) return;
+
+    viewModel.startTrip(startStop);
+
+    final selection = await showOpenWithSheet(context);
+    if (selection != null && mounted) {
+      final uri = selection.app.locationUri(
+        latitude: startStop.latitude,
+        longitude: startStop.longitude,
+      );
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+    if (mounted) _notify('¡Viaje iniciado! Dirígete a ${startStop.name}');
+  }
+
+  Future<void> _skipStop(ItineraryStop stop) async {
+    final reason = await showDropReasonSheet(
+      context,
+      title: '¿Por qué saltas ${stop.stop.name}?',
+    );
+    if (reason == null || !mounted) return;
+    context.read<MyCircuitViewModel>().skipStop(stop.stop.id, reason);
+  }
+
+  Future<void> _endTrip() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final reasons = await askTripEndReasons(
+      context,
+      pending: viewModel.pendingTripStops,
+    );
+    if (reasons == null || !mounted) return;
+
+    viewModel.endTrip(reasons);
+    _notify('Viaje finalizado');
   }
 
   @override
@@ -51,6 +141,8 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     final viewModel = context.watch<MyCircuitViewModel>();
     final collection = viewModel.collection;
     final stops = viewModel.stops;
+    final itinerary = viewModel.itinerary;
+    final tripPlan = viewModel.tripPlan;
 
     return Scaffold(
       appBar: AppBar(
@@ -75,59 +167,169 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                   style: AppTextStyles.caption,
                 ),
                 const SizedBox(height: 16),
-                if (stops.isNotEmpty) ...[
-                  PrimaryButton(
-                    label: 'Agendar circuito',
-                    icon: Icons.calendar_month_outlined,
-                    onPressed: () => context.push(
-                      Routes.myCircuitBookingPath(viewModel.collectionId),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Como lo armaste tú, puedes publicar una propuesta para '
-                    'que guías o traductores se postulen.',
-                    style: AppTextStyles.caption,
+                if (viewModel.isTripActive) ...[
+                  TripProgressCard(
+                    checkedInCount: viewModel.checkedInCount,
+                    totalCount: stops.length,
+                    nextStop: viewModel.nextTripStop,
+                    delay: viewModel.tripDelay,
+                    onEndTrip: _endTrip,
                   ),
                   const SizedBox(height: 20),
-                ],
-                if (stops.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 48),
-                    child: Column(
+                  if (tripPlan != null) ...[
+                    const SectionHeader(title: 'Tu recorrido de hoy'),
+                    const SizedBox(height: 10),
+                    TripTimeline(
+                      plan: tripPlan,
+                      progressOf: viewModel.tripProgressOf,
+                      delay: viewModel.tripDelay,
+                      onSkip: _skipStop,
+                      onStopTap: (stop) =>
+                          context.push(Routes.stopDetailPath(stop.id)),
+                    ),
+                  ],
+                ] else ...[
+                  if (stops.isNotEmpty) ...[
+                    PrimaryButton(
+                      label: 'Agendar circuito',
+                      icon: Icons.calendar_month_outlined,
+                      onPressed: () => context.push(
+                        Routes.myCircuitBookingPath(viewModel.collectionId),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Como lo armaste tú, puedes publicar una propuesta para '
+                      'que guías o traductores se postulen.',
+                      style: AppTextStyles.caption,
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.primary30),
+                        foregroundColor: AppColors.primary30,
+                      ),
+                      onPressed: _startTrip,
+                      icon: const Icon(Icons.explore_outlined),
+                      label: const Text('Comenzar viaje'),
+                    ),
+                    const SizedBox(height: 16),
+                    _AssistantPromo(
+                      onTap: () => context.push(
+                        Routes.myCircuitAssistantPath(viewModel.collectionId),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text('Tu día', style: AppTextStyles.title),
+                    const SizedBox(height: 10),
+                    BookingCard(
                       children: [
-                        const Icon(
-                          Icons.route_outlined,
-                          size: 44,
-                          color: AppColors.hintText,
+                        BookingFieldRow(
+                          icon: Icons.schedule,
+                          label: 'Hora de salida',
+                          value: viewModel.startTime,
+                          onTap: _pickStartTime,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Este circuito todavía no tiene paradas',
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.bodySmall,
+                        BookingFieldRow(
+                          icon: viewModel.travelMode == TravelMode.walking
+                              ? Icons.directions_walk
+                              : Icons.directions_car_outlined,
+                          label: 'Transporte',
+                          value: viewModel.travelMode.label,
+                          showDivider: false,
+                          onTap: _pickTravelMode,
                         ),
                       ],
                     ),
-                  )
-                else
-                  for (var i = 0; i < stops.length; i++)
-                    StopListTile(
-                      stop: stops[i],
-                      position: i + 1,
-                      showConnector: i < stops.length - 1,
-                      onTap: () =>
-                          context.push(Routes.stopDetailPath(stops[i].id)),
-                      trailing: IconButton(
+                    const SizedBox(height: 20),
+                  ],
+                  if (itinerary == null)
+                    const _EmptyState()
+                  else ...[
+                    ItinerarySummary(itinerary: itinerary),
+                    const SizedBox(height: 12),
+                    ItineraryTimeline(
+                      itinerary: itinerary,
+                      onStopTap: (stop) =>
+                          context.push(Routes.stopDetailPath(stop.id)),
+                      trailingBuilder: (stop) => IconButton(
                         icon: const Icon(Icons.close, size: 18),
                         color: AppColors.secondaryText,
                         tooltip: 'Quitar del circuito',
                         onPressed: () =>
-                            _removeStop(stops[i].id, stops[i].name),
+                            _removeStop(stop.stop.id, stop.stop.name),
                       ),
                     ),
+                  ],
+                ],
               ],
             ),
+    );
+  }
+}
+
+/// Invita a que el asistente ordene el día, calcule los horarios y proponga
+/// cambios.
+class _AssistantPromo extends StatelessWidget {
+  const _AssistantPromo({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary30.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(AppTheme.radius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome, color: AppColors.primary30),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Organizar con IA', style: AppTextStyles.cardTitle),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Te pregunta cómo quieres tu día, calcula los traslados '
+                      'y te sugiere qué quitar o agregar.',
+                      style: AppTextStyles.caption,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.primary30),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        children: [
+          const Icon(Icons.route_outlined, size: 44, color: AppColors.hintText),
+          const SizedBox(height: 12),
+          Text(
+            'Este circuito todavía no tiene paradas',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall,
+          ),
+        ],
+      ),
     );
   }
 }

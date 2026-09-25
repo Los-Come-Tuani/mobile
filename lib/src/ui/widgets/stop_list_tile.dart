@@ -18,6 +18,10 @@ class StopListTile extends StatelessWidget {
     this.onTap,
     this.trailing,
     this.showConnector = true,
+    this.timeRange,
+    this.marker,
+    this.footer,
+    this.dimmed = false,
   });
 
   final Stop stop;
@@ -30,30 +34,46 @@ class StopListTile extends StatelessWidget {
   /// Línea vertical que une esta parada con la siguiente.
   final bool showConnector;
 
+  /// Franja horaria del itinerario ("8:30 – 9:00 a.m."), sobre el nombre.
+  final String? timeRange;
+
+  /// Reemplaza el círculo con el número (p. ej. un check si ya se visitó).
+  final Widget? marker;
+
+  /// Línea extra al pie de la tarjeta, como el estado en un viaje en curso.
+  final Widget? footer;
+
+  /// Atenúa la tarjeta, para una parada que se saltó.
+  final bool dimmed;
+
   @override
   Widget build(BuildContext context) {
+    final timeRange = this.timeRange;
+    final footer = this.footer;
+
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Column(
             children: [
-              Container(
-                width: 26,
-                height: 26,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary30,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$position',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+              marker ??
+                  Container(
+                    width: 26,
+                    height: 26,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary30,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$position',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
-              ),
               if (showConnector)
                 const Expanded(
                   child: VerticalDivider(
@@ -68,70 +88,87 @@ class StopListTile extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Material(
-                color: AppColors.card,
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppTheme.radius),
-                  side: const BorderSide(color: AppColors.divider),
-                ),
-                child: InkWell(
-                  onTap: onTap,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
-                        RemoteImage(
-                          url: stop.coverImage,
-                          width: 56,
-                          height: 56,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                stop.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.cardTitle,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                stop.address,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.caption,
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  IconLabel(
-                                    icon: Icons.schedule,
-                                    label: stop.duration,
-                                  ),
-                                  if (stop.hasBadge) ...[
-                                    const SizedBox(width: 10),
-                                    const IconLabel(
-                                      icon: Icons.military_tech_outlined,
-                                      label: 'Insignia',
-                                      color: AppColors.primary30,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
+              child: Opacity(
+                opacity: dimmed ? 0.55 : 1,
+                child: Material(
+                  color: AppColors.card,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radius),
+                    side: const BorderSide(color: AppColors.divider),
+                  ),
+                  child: InkWell(
+                    onTap: onTap,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        children: [
+                          RemoteImage(
+                            url: stop.coverImage,
+                            width: 56,
+                            height: 56,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ),
-                        trailing ??
-                            const Icon(
-                              Icons.chevron_right,
-                              size: 20,
-                              color: AppColors.secondaryText,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (timeRange != null) ...[
+                                  Text(
+                                    timeRange,
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.primary30,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                ],
+                                Text(
+                                  stop.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.cardTitle,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  stop.address,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.caption,
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    IconLabel(
+                                      icon: Icons.schedule,
+                                      label: stop.duration,
+                                    ),
+                                    if (stop.hasBadge) ...[
+                                      const SizedBox(width: 10),
+                                      const IconLabel(
+                                        icon: Icons.military_tech_outlined,
+                                        label: 'Insignia',
+                                        color: AppColors.primary30,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                if (footer != null) ...[
+                                  const SizedBox(height: 6),
+                                  footer,
+                                ],
+                              ],
                             ),
-                      ],
+                          ),
+                          trailing ??
+                              const Icon(
+                                Icons.chevron_right,
+                                size: 20,
+                                color: AppColors.secondaryText,
+                              ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

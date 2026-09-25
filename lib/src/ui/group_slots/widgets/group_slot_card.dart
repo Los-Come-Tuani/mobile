@@ -20,9 +20,13 @@ class GroupSlotCard extends StatelessWidget {
     required this.isEnrolling,
     required this.onEnroll,
     required this.onViewGuide,
+    this.endsAt,
   });
 
   final CircuitGroupSession session;
+
+  /// Hora aproximada en que termina el recorrido ("12:05 p.m.").
+  final String? endsAt;
 
   /// Personas del grupo del turista, para saber si caben.
   final int groupSize;
@@ -56,7 +60,17 @@ class GroupSlotCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(session.startTime, style: AppTextStyles.title),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(session.startTime, style: AppTextStyles.title),
+                    if (endsAt != null)
+                      Text(
+                        'Termina aprox. $endsAt',
+                        style: AppTextStyles.caption,
+                      ),
+                  ],
+                ),
               ),
               Text(
                 session.isFull

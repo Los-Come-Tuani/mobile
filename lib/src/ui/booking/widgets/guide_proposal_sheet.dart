@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -20,11 +22,18 @@ const _touristLanguages = [
 /// un día) si se incluye alojamiento para el guía. El presupuesto se calcula
 /// solo; cada guía lo acepta o propone su precio al postularse.
 ///
+/// Sin propuesta previa, arranca con las horas que cubren el itinerario
+/// ([suggestedHours]) y, si el recorrido pide vehículo ([requiresVehicle]),
+/// con el guía poniendo el transporte.
+///
 /// Devuelve las condiciones elegidas, o `null` si el turista cerró sin
 /// guardar.
 Future<GuideRequestTerms?> showGuideProposalSheet(
   BuildContext context, {
   GuideRequestTerms? initial,
+  int suggestedHours = 0,
+  Duration? itineraryDuration,
+  bool requiresVehicle = false,
 }) {
   return showModalBottomSheet<GuideRequestTerms>(
     context: context,
@@ -34,14 +43,27 @@ Future<GuideRequestTerms?> showGuideProposalSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => _GuideProposalSheet(initial: initial),
+    builder: (context) => _GuideProposalSheet(
+      initial: initial,
+      suggestedHours: suggestedHours,
+      itineraryDuration: itineraryDuration,
+      requiresVehicle: requiresVehicle,
+    ),
   );
 }
 
 class _GuideProposalSheet extends StatefulWidget {
-  const _GuideProposalSheet({this.initial});
+  const _GuideProposalSheet({
+    this.initial,
+    required this.suggestedHours,
+    required this.itineraryDuration,
+    required this.requiresVehicle,
+  });
 
   final GuideRequestTerms? initial;
+  final int suggestedHours;
+  final Duration? itineraryDuration;
+  final bool requiresVehicle;
 
   @override
   State<_GuideProposalSheet> createState() => _GuideProposalSheetState();
@@ -51,9 +73,14 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
   late GuideNeed _need = widget.initial?.need ?? GuideNeed.localGuide;
   late String _language =
       widget.initial?.touristLanguage ?? _touristLanguages.first;
-  late int _hours = widget.initial?.serviceHours ?? _need.minServiceHours;
+  late int _hours =
+      widget.initial?.serviceHours ??
+      math.max(_need.minServiceHours, widget.suggestedHours);
   late TransportOption _transport =
-      widget.initial?.transportOption ?? TransportOption.onFoot;
+      widget.initial?.transportOption ??
+      (widget.requiresVehicle
+          ? TransportOption.guideProvides
+          : TransportOption.onFoot);
   late bool _lodging = widget.initial?.touristProvidesLodging ?? false;
 
   GuideRequestTerms get _terms => GuideRequestTerms(
@@ -138,10 +165,14 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
               Text('Duración del servicio', style: AppTextStyles.body),
               const SizedBox(height: 2),
               Text(
-                _need.needsGuide
-                    ? 'Mínimo ${_need.minServiceHours} horas con guía.'
-                    : 'Mínimo ${_need.minServiceHours} horas sólo con '
-                          'traductor.',
+                [
+                  _need.needsGuide
+                      ? 'Mínimo ${_need.minServiceHours} horas con guía.'
+                      : 'Mínimo ${_need.minServiceHours} horas sólo con '
+                            'traductor.',
+                  if (widget.itineraryDuration case final duration?)
+                    'Tu itinerario dura ${Formatters.duration(duration)}.',
+                ].join(' '),
                 style: AppTextStyles.caption,
               ),
               const SizedBox(height: 8),
@@ -169,6 +200,28 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
                     ),
                   ],
                 ),
+                if (widget.requiresVehicle &&
+                    _transport == TransportOption.onFoot) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        size: 16,
+                        color: AppColors.star,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Este recorrido se hace en vehículo: a pie hay '
+                          'tramos muy largos y el día no alcanza.',
+                          style: AppTextStyles.caption,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
               if (_need.needsGuide && terms.isMultiDay) ...[
                 const SizedBox(height: 12),

@@ -179,10 +179,12 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
           )
           ..add(const SizedBox(height: 8));
       }
+      final itinerary = viewModel.itineraryFor(session);
       widgets
         ..add(
           GroupSlotCard(
             session: session,
+            endsAt: itinerary == null ? null : Formatters.clock(itinerary.end),
             groupSize: viewModel.groupSize,
             enrolledPeople: viewModel.enrolledPeopleIn(session),
             isEnrolling: viewModel.isEnrolling(session),

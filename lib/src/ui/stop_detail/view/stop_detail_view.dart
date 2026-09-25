@@ -215,6 +215,17 @@ class _StopContent extends StatelessWidget {
                 iconSize: 16,
                 style: AppTextStyles.bodySmall,
               ),
+              if (stop.hours case final hours?) ...[
+                const SizedBox(height: 6),
+                IconLabel(
+                  icon: Icons.storefront_outlined,
+                  label: 'Abierto de ${hours.label}',
+                  iconColor: AppColors.primary30,
+                  color: AppColors.primaryText,
+                  iconSize: 16,
+                  style: AppTextStyles.bodySmall,
+                ),
+              ],
               const SizedBox(height: 16),
               Text(stop.description, style: AppTextStyles.bodySmall),
               if (stop.tip.isNotEmpty) ...[

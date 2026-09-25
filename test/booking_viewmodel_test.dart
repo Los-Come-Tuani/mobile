@@ -5,7 +5,10 @@ import 'package:k_plan_mobile/src/data/datasources/repository/guide_chat_reposit
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/visit_log_repository.dart';
 import 'package:k_plan_mobile/src/data/models/guide_request.dart';
+import 'package:k_plan_mobile/src/data/models/itinerary.dart';
+import 'package:k_plan_mobile/src/data/models/visit_event.dart';
 import 'package:k_plan_mobile/src/ui/booking/viewmodels/booking_viewmodel.dart';
 
 BookingViewModel _viewModel(
@@ -14,6 +17,7 @@ BookingViewModel _viewModel(
   CircuitCollectionsRepository? collectionsRepository,
   BookingsRepository? bookingsRepository,
   GuideRequestRepository? guideRequestRepository,
+  VisitLogRepository? visitLogRepository,
   bool isUserCircuit = false,
 }) {
   final tours = tourRepository ?? TourRepository();
@@ -23,6 +27,7 @@ BookingViewModel _viewModel(
     bookingsRepository ?? BookingsRepository(),
     guideRequestRepository ?? GuideRequestRepository(GuideRepository()),
     GuideChatRepository(),
+    visitLogRepository ?? VisitLogRepository(),
     circuitId,
     isUserCircuit: isUserCircuit,
   );
@@ -70,6 +75,75 @@ void main() {
     );
     expect(bookingsRepository.bookings.first.isUserCircuit, isFalse);
   });
+
+  test('el itinerario de la reserva usa la hora elegida', () async {
+    final viewModel = _viewModel('granada-historias-sabores');
+    await viewModel.load();
+
+    expect(viewModel.startTime, '8:30 a.m.');
+    expect(viewModel.travelMode, TravelMode.walking);
+    expect(viewModel.itinerary?.stops, hasLength(6));
+    expect(
+      viewModel.itinerary?.totalDuration,
+      const Duration(hours: 4, minutes: 20),
+    );
+    // 4 h 20 min de recorrido: 5 h de servicio lo cubren.
+    expect(viewModel.suggestedServiceHours, 5);
+
+    viewModel.setStartTime('10:00 a.m.');
+    expect(viewModel.itinerary?.stops.first.arrival.hour, 10);
+  });
+
+  test('el transporte de la propuesta cambia los traslados', () async {
+    final viewModel = _viewModel('isla-de-ometepe');
+    await viewModel.load();
+
+    // Ometepe se recorre en vehículo.
+    expect(viewModel.requiresVehicle, isTrue);
+    expect(viewModel.travelMode, TravelMode.vehicle);
+
+    viewModel.setGuideTerms(
+      const GuideRequestTerms(need: GuideNeed.localGuide, serviceHours: 10),
+    );
+    expect(viewModel.travelMode, TravelMode.walking);
+    expect(viewModel.itinerary?.hasLongWalks, isTrue);
+
+    viewModel.setGuideTerms(
+      const GuideRequestTerms(
+        need: GuideNeed.localGuide,
+        serviceHours: 10,
+        transportOption: TransportOption.guideProvides,
+      ),
+    );
+    expect(viewModel.travelMode, TravelMode.vehicle);
+    expect(viewModel.itinerary?.hasLongWalks, isFalse);
+  });
+
+  test(
+    'confirmar registra a qué hora pasará el grupo por cada parada',
+    () async {
+      final visitLogRepository = VisitLogRepository();
+      final viewModel = _viewModel(
+        'granada-historias-sabores',
+        visitLogRepository: visitLogRepository,
+      );
+      await viewModel.load();
+      viewModel.setGroup(adults: 3, children: 1);
+
+      await viewModel.confirm();
+
+      final visits = visitLogRepository.events
+          .whereType<PlannedVisit>()
+          .toList();
+      expect(visits, hasLength(6));
+      expect(visits.first.stopId, 'granada-catedral');
+      expect(visits.first.groupSize, 4);
+      expect(visits.first.arrival.hour, 8);
+      expect(visits.first.arrival.minute, 30);
+      expect(visits.last.stopId, 'granada-muelle');
+      expect(visits.every((v) => v.bookingId == 'booking-1'), isTrue);
+    },
+  );
 
   test('los niños suman con su propia tarifa', () async {
     final viewModel = _viewModel('isla-de-ometepe');

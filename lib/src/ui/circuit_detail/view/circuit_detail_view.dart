@@ -8,19 +8,24 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/circuit.dart';
+import '../../../data/models/itinerary.dart';
 import '../../../data/models/stop.dart';
+import '../../../data/models/trip_progress.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_choice_chip.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/creative_circuit_badge.dart';
+import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
+import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/open_with_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
-import '../../widgets/stop_list_tile.dart';
 import '../../widgets/section_header.dart';
+import '../../widgets/trip_progress.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
 import '../widgets/start_trip_sheet.dart';
@@ -64,15 +69,15 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     }
   }
 
-  /// Elige la parada de arranque, marca el circuito como "en curso" y
-  /// ofrece abrirla en el mapa.
+  /// Elige la parada de arranque, marca el circuito como "en curso" (con el
+  /// itinerario recalculado desde ahora) y ofrece abrirla en el mapa.
   Future<void> _startTrip(List<Stop> stops) async {
     if (stops.isEmpty) return;
 
     final startStop = await showStartTripSheet(context, stops: stops);
     if (startStop == null || !mounted) return;
 
-    context.read<CircuitDetailViewModel>().startTrip();
+    context.read<CircuitDetailViewModel>().startTrip(startStop);
 
     final selection = await showOpenWithSheet(context);
     if (selection != null && mounted) {
@@ -88,30 +93,26 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     }
   }
 
+  /// Si quedaron paradas sin visitar, pregunta por qué antes de cerrar.
   Future<void> _endTrip() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: const Text('¿Finalizar viaje?'),
-        content: const Text(
-          'Se perderá el progreso de paradas confirmadas en este viaje.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Finalizar'),
-          ),
-        ],
-      ),
+    final viewModel = context.read<CircuitDetailViewModel>();
+    final reasons = await askTripEndReasons(
+      context,
+      pending: viewModel.pendingTripStops,
     );
-    if (confirmed == true && mounted) {
-      context.read<CircuitDetailViewModel>().endTrip();
-    }
+    if (reasons == null || !mounted) return;
+
+    viewModel.endTrip(reasons);
+    _notifySoon('Viaje finalizado');
+  }
+
+  Future<void> _skipStop(ItineraryStop stop) async {
+    final reason = await showDropReasonSheet(
+      context,
+      title: '¿Por qué saltas ${stop.stop.name}?',
+    );
+    if (reason == null || !mounted) return;
+    context.read<CircuitDetailViewModel>().skipStop(stop.stop.id, reason);
   }
 
   @override
@@ -133,8 +134,19 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
           : _DetailContent(
               circuit: circuit,
               stops: viewModel.stops,
-              isTripActive: viewModel.isTripActive,
-              checkedInCount: viewModel.checkedInCount,
+              itinerary: viewModel.itinerary,
+              startTimes: viewModel.startTimes,
+              startTime: viewModel.startTime,
+              onStartTimeSelected: viewModel.setStartTime,
+              trip: viewModel.isTripActive
+                  ? _TripState(
+                      plan: viewModel.tripPlan,
+                      nextStop: viewModel.nextTripStop,
+                      delay: viewModel.tripDelay,
+                      checkedInCount: viewModel.checkedInCount,
+                      progressOf: viewModel.tripProgressOf,
+                    )
+                  : null,
               onOpenInMaps: () => _openInMaps(circuit),
               onDownload: () =>
                   _notifySoon('Descargar sin conexión: próximamente'),
@@ -142,33 +154,61 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                   _notifySoon('Todas las reseñas: próximamente'),
               onStartTrip: () => _startTrip(viewModel.stops),
               onEndTrip: _endTrip,
+              onSkipStop: _skipStop,
             ),
     );
   }
+}
+
+/// El viaje en curso por este circuito, tal como lo pinta el detalle.
+class _TripState {
+  const _TripState({
+    required this.plan,
+    required this.nextStop,
+    required this.delay,
+    required this.checkedInCount,
+    required this.progressOf,
+  });
+
+  final Itinerary? plan;
+  final ItineraryStop? nextStop;
+  final Duration delay;
+  final int checkedInCount;
+  final TripStopProgress Function(String stopId) progressOf;
 }
 
 class _DetailContent extends StatelessWidget {
   const _DetailContent({
     required this.circuit,
     required this.stops,
-    required this.isTripActive,
-    required this.checkedInCount,
+    required this.itinerary,
+    required this.startTimes,
+    required this.startTime,
+    required this.onStartTimeSelected,
+    required this.trip,
     required this.onOpenInMaps,
     required this.onDownload,
     required this.onSeeAllComments,
     required this.onStartTrip,
     required this.onEndTrip,
+    required this.onSkipStop,
   });
 
   final Circuit circuit;
   final List<Stop> stops;
-  final bool isTripActive;
-  final int checkedInCount;
+  final Itinerary? itinerary;
+  final List<String> startTimes;
+  final String startTime;
+  final ValueChanged<String> onStartTimeSelected;
+
+  /// `null` si no se está recorriendo este circuito ahora.
+  final _TripState? trip;
   final VoidCallback onOpenInMaps;
   final VoidCallback onDownload;
   final VoidCallback onSeeAllComments;
   final VoidCallback onStartTrip;
   final VoidCallback onEndTrip;
+  final ValueChanged<ItineraryStop> onSkipStop;
 
   static const double _galleryHeight = 260;
 
@@ -249,7 +289,12 @@ class _DetailContent extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              _MetaRow(circuit: circuit),
+              _MetaRow(
+                circuit: circuit,
+                duration: itinerary == null
+                    ? circuit.duration
+                    : Formatters.duration(itinerary!.totalDuration),
+              ),
               if (circuit.isCreativeCircuit) ...[
                 const SizedBox(height: 16),
                 CreativeCircuitBanner(circuit: circuit),
@@ -285,10 +330,12 @@ class _DetailContent extends StatelessWidget {
                   onPressed: () => context.push(Routes.bookingPath(circuit.id)),
                 ),
               const SizedBox(height: 12),
-              if (isTripActive)
-                _TripProgressCard(
-                  checkedInCount: checkedInCount,
+              if (trip case final trip?)
+                TripProgressCard(
+                  checkedInCount: trip.checkedInCount,
                   totalCount: stops.length,
+                  nextStop: trip.nextStop,
+                  delay: trip.delay,
                   onEndTrip: onEndTrip,
                 )
               else if (stops.isNotEmpty)
@@ -302,17 +349,38 @@ class _DetailContent extends StatelessWidget {
                   label: const Text('Comenzar viaje'),
                 ),
               const SizedBox(height: 12),
-              if (stops.isNotEmpty) ...[
+              if (trip?.plan case final plan?) ...[
+                const SectionHeader(title: 'Tu recorrido de hoy'),
+                const SizedBox(height: 10),
+                TripTimeline(
+                  plan: plan,
+                  progressOf: trip!.progressOf,
+                  delay: trip!.delay,
+                  onSkip: onSkipStop,
+                  onStopTap: (stop) =>
+                      context.push(Routes.stopDetailPath(stop.id)),
+                ),
+                const SizedBox(height: 12),
+              ] else if (stops.isNotEmpty) ...[
                 SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
                 const SizedBox(height: 10),
-                for (var i = 0; i < stops.length; i++)
-                  StopListTile(
-                    stop: stops[i],
-                    position: i + 1,
-                    showConnector: i < stops.length - 1,
-                    onTap: () =>
-                        context.push(Routes.stopDetailPath(stops[i].id)),
+                if (startTimes.length > 1) ...[
+                  _StartTimePicker(
+                    times: startTimes,
+                    selected: startTime,
+                    onSelected: onStartTimeSelected,
                   ),
+                  const SizedBox(height: 10),
+                ],
+                if (itinerary case final itinerary?) ...[
+                  ItinerarySummary(itinerary: itinerary),
+                  const SizedBox(height: 12),
+                  ItineraryTimeline(
+                    itinerary: itinerary,
+                    onStopTap: (stop) =>
+                        context.push(Routes.stopDetailPath(stop.id)),
+                  ),
+                ],
                 const SizedBox(height: 12),
               ],
               SectionHeader(
@@ -329,72 +397,56 @@ class _DetailContent extends StatelessWidget {
   }
 }
 
-/// Progreso del viaje en curso: cuántas paradas ya se confirmaron por QR.
-class _TripProgressCard extends StatelessWidget {
-  const _TripProgressCard({
-    required this.checkedInCount,
-    required this.totalCount,
-    required this.onEndTrip,
+/// Con qué hora de salida se muestran los horarios de las paradas.
+class _StartTimePicker extends StatelessWidget {
+  const _StartTimePicker({
+    required this.times,
+    required this.selected,
+    required this.onSelected,
   });
 
-  final int checkedInCount;
-  final int totalCount;
-  final VoidCallback onEndTrip;
+  final List<String> times;
+  final String selected;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final progress = totalCount == 0 ? 0.0 : checkedInCount / totalCount;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.accentSecondaryGreen.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppTheme.radius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.explore, color: AppColors.accentSecondaryGreen),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Viaje en curso · $checkedInCount/$totalCount paradas '
-                  'confirmadas',
-                  style: AppTextStyles.bodySmall,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Si sales a las…', style: AppTextStyles.caption),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final time in times)
+              AppChoiceChip(
+                label: time,
+                selected: time == selected,
+                onSelected: () => onSelected(time),
               ),
-              TextButton(onPressed: onEndTrip, child: const Text('Finalizar')),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: AppColors.divider,
-              color: AppColors.accentSecondaryGreen,
-            ),
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
   }
 }
 
 /// Fila de datos rápidos: duración, paradas e insignias.
 class _MetaRow extends StatelessWidget {
-  const _MetaRow({required this.circuit});
+  const _MetaRow({required this.circuit, required this.duration});
 
   final Circuit circuit;
+
+  /// La del itinerario calculado, que incluye las paradas que añadió el
+  /// usuario.
+  final String duration;
 
   @override
   Widget build(BuildContext context) {
     final items = <({IconData icon, String label})>[
-      (icon: Icons.schedule, label: circuit.duration),
+      (icon: Icons.schedule, label: duration),
       (icon: Icons.location_on_outlined, label: '${circuit.stops} paradas'),
       (
         icon: Icons.military_tech_outlined,

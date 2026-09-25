@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/visit_log_repository.dart';
 import 'package:k_plan_mobile/src/ui/circuit_detail/view/circuit_detail_view.dart';
 import 'package:k_plan_mobile/src/ui/circuit_detail/viewmodels/circuit_detail_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -32,6 +34,8 @@ Future<void> _pumpDetail(WidgetTester tester, String circuitId) async {
             collections,
             ActiveTripRepository(),
             BadgesRepository(),
+            BookingsRepository(),
+            VisitLogRepository(),
             circuitId,
           ),
         ),
@@ -65,6 +69,29 @@ void main() {
     // Sólo se muestran las primeras reseñas.
     expect(find.text('Ana Carolina R.'), findsOneWidget);
     expect(find.text('Marcos J.'), findsNothing);
+  });
+
+  testWidgets('Las paradas muestran su horario según la hora de salida', (
+    tester,
+  ) async {
+    await _pumpDetail(tester, 'granada-historias-sabores');
+
+    // Saliendo a la primera hora publicada (8:30 a.m.).
+    expect(find.text('4 h 20 min'), findsWidgets);
+    expect(find.text('Termina aprox. 12:50 p.m.'), findsOneWidget);
+    expect(find.text('8:30 – 9:00 a.m.'), findsOneWidget);
+    expect(find.text('A pasos'), findsOneWidget);
+    // El tramo largo a pie queda avisado arriba.
+    expect(find.text('Para tener en cuenta'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('10:00 a.m.'));
+    await tester.pump();
+    await tester.tap(find.text('10:00 a.m.'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Termina aprox. 2:20 p.m.'), findsOneWidget);
+    expect(find.text('10:00 – 10:30 a.m.'), findsOneWidget);
   });
 
   testWidgets(

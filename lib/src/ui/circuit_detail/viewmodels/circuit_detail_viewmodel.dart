@@ -1,47 +1,77 @@
+import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/time_parser.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
+import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
+import '../../../data/datasources/repository/visit_log_repository.dart';
 import '../../../data/models/circuit.dart';
+import '../../../data/models/circuit_collection.dart';
+import '../../../data/models/itinerary.dart';
 import '../../../data/models/stop.dart';
 import '../../core/base_viewmodel.dart';
+import '../../core/trip_actions.dart';
 
-class CircuitDetailViewModel extends BaseViewModel {
+class CircuitDetailViewModel extends BaseViewModel with TripActions {
   CircuitDetailViewModel(
     this._tourRepository,
     this._collectionsRepository,
-    this._activeTripRepository,
+    this.activeTripRepository,
     this._badgesRepository,
+    this.bookingsRepository,
+    this.visitLogRepository,
     this.circuitId,
   ) {
     // Si el usuario añade una parada a este circuito desde otra pantalla,
     // la lista se refresca sola.
     _collectionsRepository.addListener(_onCollectionsChanged);
-    _activeTripRepository.addListener(_onActiveTripChanged);
+    activeTripRepository.addListener(_onActiveTripChanged);
   }
 
   final TourRepository _tourRepository;
   final CircuitCollectionsRepository _collectionsRepository;
-  final ActiveTripRepository _activeTripRepository;
   final BadgesRepository _badgesRepository;
   final String circuitId;
 
+  @override
+  final ActiveTripRepository activeTripRepository;
+  @override
+  final BookingsRepository bookingsRepository;
+  @override
+  final VisitLogRepository visitLogRepository;
+
   Circuit? _circuit;
   List<Stop> _stops = const [];
+  String _startTime = '';
+  Itinerary? _itinerary;
 
   Circuit? get circuit => _circuit;
   List<Stop> get stops => _stops;
 
+  /// Horas de salida que publica el circuito, para elegir con cuál ver el
+  /// itinerario.
+  List<String> get startTimes => _circuit?.startTimes ?? const [];
+  String get startTime => _startTime;
+
+  /// A qué hora se llega a cada parada saliendo a [startTime]; `null` si el
+  /// circuito no tiene paradas.
+  Itinerary? get itinerary => _itinerary;
+
   /// Sólo se muestran las primeras reseñas; el resto va en "Ver todos".
   static const int previewComments = 2;
 
-  /// `true` si este es el circuito que el usuario está recorriendo ahora.
-  bool get isTripActive => _activeTripRepository.isActiveTrip(circuitId);
-
-  /// Paradas de este circuito ya confirmadas (por QR) en el viaje en curso.
-  int get checkedInCount =>
-      _stops.where((s) => _activeTripRepository.isCheckedIn(s.id)).length;
+  @override
+  String get tripCircuitId => circuitId;
+  @override
+  String get tripTitle => _circuit?.shortTitle ?? '';
+  @override
+  List<Stop> get tripStops => _stops;
+  @override
+  TravelMode get tripTravelMode => _circuit?.travelMode ?? TravelMode.walking;
+  @override
+  Map<String, int> get tripLegMinutes => _circuit?.legMinutes ?? const {};
 
   Future<void> load() async {
     setBusy(true);
@@ -50,14 +80,37 @@ class CircuitDetailViewModel extends BaseViewModel {
     switch (await _tourRepository.getCircuitById(circuitId)) {
       case Ok(:final value):
         _circuit = value;
+        _startTime = value.startTimes.isEmpty
+            ? CircuitCollection.defaultStartTime
+            : value.startTimes.first;
         await _collectionsRepository.ensureLoaded();
         await _loadStops();
+        _replan();
       case Failure(:final message):
         setError(message);
     }
 
     setBusy(false);
     safeNotify();
+  }
+
+  void setStartTime(String value) {
+    if (_startTime == value) return;
+    _startTime = value;
+    _replan();
+    safeNotify();
+  }
+
+  void _replan() {
+    final circuit = _circuit;
+    _itinerary = circuit == null || _stops.isEmpty
+        ? null
+        : ItineraryPlanner.plan(
+            stops: _stops,
+            start: TimeParser.at(DateTime.now(), _startTime),
+            mode: circuit.travelMode,
+            legMinutes: circuit.legMinutes,
+          );
   }
 
   /// Las paradas salen de la colección, no del JSON, para incluir las que
@@ -77,12 +130,9 @@ class CircuitDetailViewModel extends BaseViewModel {
   Future<void> _onCollectionsChanged() async {
     if (_circuit == null) return;
     await _loadStops();
+    _replan();
     safeNotify();
   }
-
-  void startTrip() => _activeTripRepository.start(circuitId);
-
-  void endTrip() => _activeTripRepository.end();
 
   /// Si el circuito es creativo y se acaba de completar (todas las paradas
   /// con check-in), otorga las insignias extra de "Circuitos creativos" y
@@ -110,7 +160,7 @@ class CircuitDetailViewModel extends BaseViewModel {
   @override
   void dispose() {
     _collectionsRepository.removeListener(_onCollectionsChanged);
-    _activeTripRepository.removeListener(_onActiveTripChanged);
+    activeTripRepository.removeListener(_onActiveTripChanged);
     super.dispose();
   }
 }

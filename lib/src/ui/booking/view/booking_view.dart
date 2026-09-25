@@ -7,9 +7,10 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/circuit.dart';
-import '../../../data/models/stop.dart';
+import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/options_sheet.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../widgets/booking_card.dart';
@@ -73,24 +74,18 @@ class _BookingViewState extends State<BookingView> {
     if (picked != null) _viewModel.setStartTime(picked);
   }
 
-  Future<void> _pickLanguage() async {
-    final picked = await showOptionsSheet(
-      context,
-      title: 'Idioma',
-      options: _viewModel.availableLanguages,
-      selected: _viewModel.language,
-    );
-    if (picked != null) _viewModel.setLanguage(picked);
-  }
-
   /// Se arma desde la misma agenda: la propuesta sale con la fecha, hora y
-  /// tamaño del grupo de esta reserva.
+  /// tamaño del grupo de esta reserva, y las horas que cubren el itinerario.
   Future<void> _pickGuide() async {
+    final viewModel = _viewModel;
     final terms = await showGuideProposalSheet(
       context,
-      initial: _viewModel.guideTerms,
+      initial: viewModel.guideTerms,
+      suggestedHours: viewModel.suggestedServiceHours,
+      itineraryDuration: viewModel.itinerary?.totalDuration,
+      requiresVehicle: viewModel.requiresVehicle,
     );
-    if (terms != null) _viewModel.setGuideTerms(terms);
+    if (terms != null) viewModel.setGuideTerms(terms);
   }
 
   Future<void> _confirm() async {
@@ -173,13 +168,6 @@ class _BookingViewState extends State<BookingView> {
                       value: viewModel.startTime,
                       onTap: _pickTime,
                     ),
-                    if (!viewModel.isUserCircuit)
-                      BookingFieldRow(
-                        icon: Icons.translate,
-                        label: 'Idioma',
-                        value: viewModel.language,
-                        onTap: _pickLanguage,
-                      ),
                     BookingFieldRow(
                       icon: Icons.person_pin_circle_outlined,
                       label: 'Guía o traductor',
@@ -200,12 +188,16 @@ class _BookingViewState extends State<BookingView> {
                 Text('Información del recorrido', style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 if (circuit != null)
-                  _TourInfoCard(circuit: circuit)
+                  _TourInfoCard(
+                    circuit: circuit,
+                    itinerary: viewModel.itinerary,
+                  )
                 else
-                  _MyCircuitInfoCard(
-                    title: viewModel.title,
-                    stops: viewModel.stops,
-                  ),
+                  _MyCircuitInfoCard(title: viewModel.title),
+                if (viewModel.itinerary case final itinerary?) ...[
+                  const SizedBox(height: 12),
+                  _ItineraryCard(itinerary: itinerary),
+                ],
                 const SizedBox(height: 20),
                 PriceSummary(viewModel: viewModel),
                 const SizedBox(height: 20),
@@ -299,12 +291,15 @@ class _ProposalNote extends StatelessWidget {
 
 /// Bloque "Información del recorrido" armado desde los datos del circuito.
 class _TourInfoCard extends StatelessWidget {
-  const _TourInfoCard({required this.circuit});
+  const _TourInfoCard({required this.circuit, required this.itinerary});
 
   final Circuit circuit;
+  final Itinerary? itinerary;
 
   @override
   Widget build(BuildContext context) {
+    final itinerary = this.itinerary;
+
     return BookingCard(
       padding: const EdgeInsets.symmetric(vertical: 12),
       children: [
@@ -327,7 +322,10 @@ class _TourInfoCard extends StatelessWidget {
         TourInfoBlock(
           icon: Icons.schedule,
           title: 'Duración estimada',
-          text: circuit.duration,
+          text: itinerary == null
+              ? circuit.duration
+              : '${Formatters.duration(itinerary.totalDuration)} · termina '
+                    'aprox. a las ${Formatters.clock(itinerary.end)}',
         ),
         TourInfoBlock(
           icon: Icons.location_on_outlined,
@@ -359,39 +357,52 @@ class _TourInfoCard extends StatelessWidget {
   }
 }
 
-/// Resumen de un circuito que armó el usuario: sus paradas, en orden.
+/// Resumen de un circuito que armó el usuario; sus paradas van en el
+/// horario del día.
 class _MyCircuitInfoCard extends StatelessWidget {
-  const _MyCircuitInfoCard({required this.title, required this.stops});
+  const _MyCircuitInfoCard({required this.title});
 
   final String title;
-  final List<Stop> stops;
 
   @override
   Widget build(BuildContext context) {
     return BookingCard(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.all(14),
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: AppTextStyles.cardTitle),
-              const SizedBox(height: 4),
-              Text(
-                'Lo armaste tú, así que no tiene precio por persona: sólo '
-                'pagas el guía o traductor que contrates.',
-                style: AppTextStyles.caption,
-              ),
-            ],
-          ),
+        Text(title, style: AppTextStyles.cardTitle),
+        const SizedBox(height: 4),
+        Text(
+          'Lo armaste tú, así que no tiene precio por persona: sólo pagas el '
+          'guía o traductor que contrates.',
+          style: AppTextStyles.caption,
         ),
-        for (var i = 0; i < stops.length; i++)
-          TourInfoBlock(
-            icon: Icons.location_on_outlined,
-            title: '${i + 1}. ${stops[i].name}',
-            text: stops[i].address,
-          ),
+      ],
+    );
+  }
+}
+
+/// A qué hora se llega a cada parada con la fecha, la hora y el transporte
+/// elegidos. Cambia si se cambia la hora o el transporte de la propuesta.
+class _ItineraryCard extends StatelessWidget {
+  const _ItineraryCard({required this.itinerary});
+
+  final Itinerary itinerary;
+
+  @override
+  Widget build(BuildContext context) {
+    return BookingCard(
+      padding: const EdgeInsets.all(14),
+      children: [
+        Text('Horario del día', style: AppTextStyles.cardTitle),
+        const SizedBox(height: 4),
+        Text(
+          'Saliendo a las ${Formatters.clock(itinerary.start)} · '
+          '${itinerary.mode.label.toLowerCase()} · termina aprox. a las '
+          '${Formatters.clock(itinerary.end)}',
+          style: AppTextStyles.caption,
+        ),
+        const SizedBox(height: 12),
+        ItineraryTimeline(itinerary: itinerary, dense: true),
       ],
     );
   }
