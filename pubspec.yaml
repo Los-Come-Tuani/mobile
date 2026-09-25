@@ -50,6 +50,14 @@ dependencies:
   mobile_scanner: ^7.4.0
   qr_flutter: ^4.1.0
   flutter_svg: ^2.3.0
+  # Mapa propio: tiles vectoriales de OpenFreeMap (gratis, sin API key).
+  flutter_map: ^8.3.2
+  # Beta fijada exacta: es la línea que soporta flutter_map 8.
+  vector_map_tiles: 9.0.0-beta.13
+  vector_tile_renderer: ^6.1.0
+  latlong2: ^0.10.1
+  # Ubicación del turista en el mapa (GPS del teléfono).
+  geolocator: ^14.0.3
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +70,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  flutter_native_splash: ^2.4.8
+  flutter_native_splash: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
