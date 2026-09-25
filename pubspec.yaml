@@ -105,3 +105,16 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Icono de la app (isologo). Regenerar con: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_icon/app_icon.png
+  remove_alpha_ios: true
+  background_color_ios: "#F8F4E6"
+  # El PNG ya trae el margen de la zona segura del ícono adaptativo, por eso inset 0.
+  adaptive_icon_background: "#F8F4E6"
+  adaptive_icon_foreground: assets/images/app_icon/app_icon_foreground.png
+  adaptive_icon_foreground_inset: 0
+  adaptive_icon_monochrome: assets/images/app_icon/app_icon_foreground.png
