@@ -80,10 +80,11 @@ class _KPlanAppState extends State<KPlanApp> {
         ChangeNotifierProvider<GuideChatRepository>(
           create: (_) => GuideChatRepository(),
         ),
-        // Salidas de grupo programadas por las alcaldías en circuitos
-        // creativos.
+        // Horarios que publican los guías para hacer circuitos creativos en
+        // grupo.
         ChangeNotifierProvider<GroupSessionRepository>(
-          create: (_) => GroupSessionRepository(),
+          create: (context) =>
+              GroupSessionRepository(context.read<GuideRepository>()),
         ),
       ],
       child: MaterialApp.router(

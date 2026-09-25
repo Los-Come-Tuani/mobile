@@ -7,7 +7,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
@@ -24,7 +23,6 @@ import '../../widgets/stop_list_tile.dart';
 import '../../widgets/section_header.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
-import '../widgets/group_sessions_sheet.dart';
 import '../widgets/start_trip_sheet.dart';
 
 /// Detalle de un circuito, con la acción de agendar.
@@ -90,26 +88,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     }
   }
 
-  /// Sólo disponible en circuitos oficiales: unirse no negocia precio, así
-  /// que sólo hace falta guardar la reserva y avisar.
-  Future<void> _joinGroup(Circuit circuit) async {
-    final session = await showGroupSessionsSheet(context, circuit: circuit);
-    if (session == null || !mounted) return;
-
-    context.read<BookingsRepository>().add(
-      circuitId: circuit.id,
-      circuitTitle: circuit.shortTitle,
-      date: session.date,
-      startTime: session.startTime,
-      adults: 1,
-      children: 0,
-    );
-    _notifySoon(
-      'Te uniste al grupo del ${Formatters.shortDate(session.date)}, '
-      '${session.startTime}',
-    );
-  }
-
   Future<void> _endTrip() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -164,7 +142,6 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                   _notifySoon('Todas las reseñas: próximamente'),
               onStartTrip: () => _startTrip(viewModel.stops),
               onEndTrip: _endTrip,
-              onJoinGroup: () => _joinGroup(circuit),
             ),
     );
   }
@@ -181,7 +158,6 @@ class _DetailContent extends StatelessWidget {
     required this.onSeeAllComments,
     required this.onStartTrip,
     required this.onEndTrip,
-    required this.onJoinGroup,
   });
 
   final Circuit circuit;
@@ -193,7 +169,6 @@ class _DetailContent extends StatelessWidget {
   final VoidCallback onSeeAllComments;
   final VoidCallback onStartTrip;
   final VoidCallback onEndTrip;
-  final VoidCallback onJoinGroup;
 
   static const double _galleryHeight = 260;
 
@@ -294,11 +269,21 @@ class _DetailContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              PrimaryButton(
-                label: 'Agendar circuito',
-                icon: Icons.calendar_month_outlined,
-                onPressed: () => context.push(Routes.bookingPath(circuit.id)),
-              ),
+              // Los creativos no se agendan en privado: el turista se
+              // inscribe en un horario de grupo que publicó un guía.
+              if (circuit.isCreativeCircuit)
+                PrimaryButton(
+                  label: 'Ver horarios disponibles',
+                  icon: Icons.groups_outlined,
+                  onPressed: () =>
+                      context.push(Routes.groupSlotsPath(circuit.id)),
+                )
+              else
+                PrimaryButton(
+                  label: 'Agendar circuito',
+                  icon: Icons.calendar_month_outlined,
+                  onPressed: () => context.push(Routes.bookingPath(circuit.id)),
+                ),
               const SizedBox(height: 12),
               if (isTripActive)
                 _TripProgressCard(
@@ -317,18 +302,6 @@ class _DetailContent extends StatelessWidget {
                   label: const Text('Comenzar viaje'),
                 ),
               const SizedBox(height: 12),
-              if (circuit.isCreativeCircuit) ...[
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary30),
-                    foregroundColor: AppColors.primary30,
-                  ),
-                  onPressed: onJoinGroup,
-                  icon: const Icon(Icons.groups_outlined),
-                  label: const Text('Unirte a un grupo'),
-                ),
-                const SizedBox(height: 12),
-              ],
               if (stops.isNotEmpty) ...[
                 SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
                 const SizedBox(height: 10),

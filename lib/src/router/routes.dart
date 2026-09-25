@@ -17,6 +17,10 @@ abstract final class Routes {
   /// Sub-ruta de agendar, relativa al detalle: `/circuit/:id/booking`
   static const bookingSegment = 'booking';
 
+  /// Sub-ruta de los horarios de grupo de un circuito creativo, relativa al
+  /// detalle: `/circuit/:id/group-slots`
+  static const groupSlotsSegment = 'group-slots';
+
   /// Sub-ruta de solicitar guía en vivo, relativa al detalle:
   /// `/circuit/:id/guide-request`
   static const guideRequestSegment = 'guide-request';
@@ -30,7 +34,7 @@ abstract final class Routes {
   /// Circuito creado por el usuario: `/my-circuit/:id`
   static const myCircuit = '/my-circuit/:$collectionId';
 
-  /// Perfil del guía encontrado: `/guide/:id`
+  /// Perfil de un guía: `/guide/:id`
   static const guideProfile = '/guide/:$guideId';
 
   /// Chat con el guía de la solicitud activa: `/guide-chat`.
@@ -48,6 +52,7 @@ abstract final class Routes {
 
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
+  static String groupSlotsPath(String id) => '/circuit/$id/group-slots';
   static String guideRequestPath(String circuitId) =>
       '/circuit/$circuitId/guide-request';
   static String stopDetailPath(String id) => '/stop/$id';

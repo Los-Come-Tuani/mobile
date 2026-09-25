@@ -8,6 +8,7 @@ class Booking {
     required this.startTime,
     required this.adults,
     required this.children,
+    this.groupSessionId,
   });
 
   final String id;
@@ -17,4 +18,7 @@ class Booking {
   final String startTime;
   final int adults;
   final int children;
+
+  /// Horario de grupo al que se inscribió, en un circuito creativo.
+  final String? groupSessionId;
 }

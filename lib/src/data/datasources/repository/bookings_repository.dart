@@ -29,6 +29,7 @@ class BookingsRepository extends ChangeNotifier {
     required String startTime,
     required int adults,
     required int children,
+    String? groupSessionId,
   }) {
     final booking = Booking(
       id: 'booking-${_nextId++}',
@@ -38,6 +39,7 @@ class BookingsRepository extends ChangeNotifier {
       startTime: startTime,
       adults: adults,
       children: children,
+      groupSessionId: groupSessionId,
     );
     _bookings.add(booking);
     notifyListeners();

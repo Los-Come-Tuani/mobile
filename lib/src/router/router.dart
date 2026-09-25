@@ -7,6 +7,7 @@ import '../data/datasources/repository/auth_repository.dart';
 import '../data/datasources/repository/badges_repository.dart';
 import '../data/datasources/repository/bookings_repository.dart';
 import '../data/datasources/repository/circuit_collections_repository.dart';
+import '../data/datasources/repository/group_session_repository.dart';
 import '../data/datasources/repository/guide_chat_repository.dart';
 import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
@@ -22,6 +23,8 @@ import '../ui/coupons/viewmodels/coupons_viewmodel.dart';
 import '../ui/event_detail/view/event_detail_view.dart';
 import '../ui/event_detail/viewmodels/event_detail_viewmodel.dart';
 import '../ui/forgot_password/view/forgot_password_view.dart';
+import '../ui/group_slots/view/group_slots_view.dart';
+import '../ui/group_slots/viewmodels/group_slots_viewmodel.dart';
 import '../ui/guide_chat/view/guide_chat_view.dart';
 import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
 import '../ui/guide_profile/view/guide_profile_view.dart';
@@ -133,6 +136,21 @@ GoRouter createRouter(AuthRepository authRepository) {
                   id,
                 ),
                 child: const BookingView(),
+              );
+            },
+          ),
+          GoRoute(
+            path: Routes.groupSlotsSegment,
+            builder: (context, state) {
+              final id = state.pathParameters[Routes.circuitId] ?? '';
+              return ChangeNotifierProvider<GroupSlotsViewModel>(
+                create: (context) => GroupSlotsViewModel(
+                  context.read<TourRepository>(),
+                  context.read<GroupSessionRepository>(),
+                  context.read<BookingsRepository>(),
+                  id,
+                ),
+                child: const GroupSlotsView(),
               );
             },
           ),

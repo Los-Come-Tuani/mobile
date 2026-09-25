@@ -67,12 +67,17 @@ void main() {
     expect(find.text('Marcos J.'), findsNothing);
   });
 
-  testWidgets('Un circuito creativo se distingue de los demás', (tester) async {
-    await _pumpDetail(tester, 'leon-colonial');
+  testWidgets(
+    'Un circuito creativo se distingue y se agenda eligiendo un horario',
+    (tester) async {
+      await _pumpDetail(tester, 'leon-colonial');
 
-    expect(find.text('Circuito creativo'), findsOneWidget);
-    expect(find.text('Circuito creativo oficial'), findsOneWidget);
-    expect(find.text('+3 insignias extra'), findsOneWidget);
-    expect(find.text('Medalla de León'), findsOneWidget);
-  });
+      expect(find.text('Circuito creativo'), findsOneWidget);
+      expect(find.text('Circuito creativo oficial'), findsOneWidget);
+      expect(find.text('+3 insignias extra'), findsOneWidget);
+      expect(find.text('Medalla de León'), findsOneWidget);
+      expect(find.text('VER HORARIOS DISPONIBLES'), findsOneWidget);
+      expect(find.text('AGENDAR CIRCUITO'), findsNothing);
+    },
+  );
 }
