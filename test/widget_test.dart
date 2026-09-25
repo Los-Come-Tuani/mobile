@@ -8,6 +8,7 @@ import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repositor
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/location_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
 import 'package:k_plan_mobile/src/ui/home/view/home_view.dart';
@@ -70,6 +71,7 @@ void main() {
                 BookingsRepository(),
                 GuideRequestRepository(GuideRepository()),
                 ActiveTripRepository(),
+                LocationRepository(),
               );
             },
           ),

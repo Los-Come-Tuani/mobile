@@ -1,10 +1,12 @@
 import '../../../core/utils/result.dart';
+import '../../../core/utils/route_map_builder.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/guide_request_repository.dart';
+import '../../../data/datasources/repository/location_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/models/booking.dart';
 import '../../../data/models/circuit.dart';
@@ -13,18 +15,24 @@ import '../../../data/models/event_item.dart';
 import '../../../data/models/guide_request.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../data/models/place.dart';
+import '../../../data/models/route_map.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/user.dart';
+import '../../../data/models/user_location.dart';
 import '../../core/base_viewmodel.dart';
 import '../widgets/discover_tabs.dart';
 
-/// El viaje en curso, resumido para el aviso del home.
+/// El viaje en curso, resumido para el aviso del home. [map] es el recorrido
+/// del mini mapa (`null` si el viaje no trae plan) y [user], dónde está el
+/// turista si ya dio permiso de ubicación.
 typedef ActiveTripSummary = ({
   String circuitId,
   String title,
   bool isUserCircuit,
   ItineraryStop? nextStop,
   Duration delay,
+  RouteMap? map,
+  UserLocation? user,
 });
 
 class HomeViewModel extends BaseViewModel {
@@ -36,13 +44,16 @@ class HomeViewModel extends BaseViewModel {
     this._bookingsRepository,
     this._guideRequestRepository,
     this._activeTripRepository,
+    this._locationRepository,
   ) {
     // Los circuitos que el usuario cree desde una parada aparecen aquí.
     _collectionsRepository.addListener(safeNotify);
     _badgesRepository.addListener(safeNotify);
     _bookingsRepository.addListener(safeNotify);
     _guideRequestRepository.addListener(safeNotify);
-    _activeTripRepository.addListener(safeNotify);
+    _activeTripRepository.addListener(_onActiveTripChanged);
+    _locationRepository.addListener(safeNotify);
+    _syncLocationTracking();
   }
 
   final TourRepository _tourRepository;
@@ -52,6 +63,8 @@ class HomeViewModel extends BaseViewModel {
   final BookingsRepository _bookingsRepository;
   final GuideRequestRepository _guideRequestRepository;
   final ActiveTripRepository _activeTripRepository;
+  final LocationRepository _locationRepository;
+  bool _isTrackingLocation = false;
 
   List<Circuit> _circuits = const [];
   List<Place> _places = const [];
@@ -86,12 +99,21 @@ class HomeViewModel extends BaseViewModel {
   ActiveTripSummary? get activeTrip {
     final circuitId = _activeTripRepository.activeCircuitId;
     if (circuitId == null) return null;
+    final plan = _activeTripRepository.plan;
     return (
       circuitId: circuitId,
       title: _activeTripRepository.title,
       isUserCircuit: _activeTripRepository.isUserCircuit,
       nextStop: _activeTripRepository.nextStop,
       delay: _activeTripRepository.delay,
+      map: plan == null
+          ? null
+          : RouteMapBuilder.trip(
+              title: _activeTripRepository.title,
+              plan: plan,
+              progressOf: _activeTripRepository.progressOf,
+            ),
+      user: _locationRepository.location,
     );
   }
 
@@ -198,13 +220,33 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> logout() => _authRepository.logout();
 
+  void _onActiveTripChanged() {
+    _syncLocationTracking();
+    safeNotify();
+  }
+
+  /// El GPS sólo se escucha mientras haya un viaje en el mini mapa. Aquí
+  /// nunca se pide el permiso: si no lo dio, el mapa va sin su ubicación.
+  void _syncLocationTracking() {
+    final shouldTrack = _activeTripRepository.hasActiveTrip;
+    if (shouldTrack == _isTrackingLocation) return;
+    _isTrackingLocation = shouldTrack;
+    if (shouldTrack) {
+      _locationRepository.startTracking();
+    } else {
+      _locationRepository.stopTracking();
+    }
+  }
+
   @override
   void dispose() {
     _collectionsRepository.removeListener(safeNotify);
     _badgesRepository.removeListener(safeNotify);
     _bookingsRepository.removeListener(safeNotify);
     _guideRequestRepository.removeListener(safeNotify);
-    _activeTripRepository.removeListener(safeNotify);
+    _activeTripRepository.removeListener(_onActiveTripChanged);
+    _locationRepository.removeListener(safeNotify);
+    if (_isTrackingLocation) _locationRepository.stopTracking();
     super.dispose();
   }
 

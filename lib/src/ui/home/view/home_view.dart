@@ -20,6 +20,7 @@ import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/home_viewmodel.dart';
+import '../widgets/active_trip_map_card.dart';
 import '../widgets/circuit_card.dart';
 import '../widgets/discover_tabs.dart';
 import '../widgets/event_card.dart';
@@ -117,6 +118,11 @@ class _HomeViewState extends State<HomeView> {
               trip.isUserCircuit
                   ? Routes.myCircuitPath(trip.circuitId)
                   : Routes.circuitDetailPath(trip.circuitId),
+            ),
+            onOpenMap: () => context.push(
+              trip.isUserCircuit
+                  ? Routes.myCircuitMapPath(trip.circuitId)
+                  : Routes.circuitMapPath(trip.circuitId),
             ),
           ),
           const SizedBox(height: 12),
@@ -302,17 +308,28 @@ class _CircuitsSection extends StatelessWidget {
   }
 }
 
-/// Aviso del viaje que el usuario está recorriendo ahora: hacia qué parada
-/// va, a qué hora debería llegar y si va a tiempo.
+/// Aviso del viaje que el usuario está recorriendo ahora: el mini mapa del
+/// recorrido y, debajo, hacia qué parada va, a qué hora debería llegar y si
+/// va a tiempo.
 class _ActiveTripBanner extends StatelessWidget {
-  const _ActiveTripBanner({required this.trip, required this.onTap});
+  const _ActiveTripBanner({
+    required this.trip,
+    required this.onTap,
+    required this.onOpenMap,
+  });
 
   final ActiveTripSummary trip;
+
+  /// La franja de abajo: lleva al detalle del circuito.
   final VoidCallback onTap;
+  final VoidCallback onOpenMap;
+
+  static const double _mapHeight = 190;
 
   @override
   Widget build(BuildContext context) {
     final next = trip.nextStop;
+    final map = trip.map;
     final subtitle = next == null
         ? 'Ya pasaste por todas las paradas · toca para finalizar'
         : 'Siguiente: ${next.stop.name} · '
@@ -324,51 +341,64 @@ class _ActiveTripBanner extends StatelessWidget {
       child: Material(
         color: AppColors.accentSecondaryBlue,
         borderRadius: BorderRadius.circular(AppTheme.radius),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radius),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.white.withValues(alpha: 0.18),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.explore, color: AppColors.white),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            if (map != null)
+              SizedBox(
+                height: _mapHeight,
+                child: ActiveTripMap(
+                  map: map,
+                  user: trip.user,
+                  onTap: onOpenMap,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Viaje en curso: ${trip.title}',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+              ),
+            InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.white.withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.white.withValues(alpha: 0.85),
-                        ),
+                      child: const Icon(Icons.explore, color: AppColors.white),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Viaje en curso: ${trip.title}',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.body.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            subtitle,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const Icon(Icons.chevron_right, color: AppColors.white),
+                  ],
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.white),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

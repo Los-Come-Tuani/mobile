@@ -110,6 +110,7 @@ GoRouter createRouter(AuthRepository authRepository) {
             context.read<BookingsRepository>(),
             context.read<GuideRequestRepository>(),
             context.read<ActiveTripRepository>(),
+            context.read<LocationRepository>(),
           ),
           child: const HomeView(),
         ),
