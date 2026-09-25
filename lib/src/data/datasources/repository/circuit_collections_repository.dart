@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/result.dart';
 import '../../models/circuit_collection.dart';
+import '../../models/itinerary.dart';
 import 'tour_repository.dart';
 
 /// Maneja a qué circuitos pertenece cada parada, como las playlists de una
@@ -72,20 +73,47 @@ class CircuitCollectionsRepository extends ChangeNotifier {
     return added;
   }
 
-  /// Crea un circuito nuevo y, opcionalmente, le añade una parada.
-  CircuitCollection createCollection(String title, {String? withStopId}) {
+  /// Crea un circuito nuevo, vacío o con las paradas que lleguen: una sola
+  /// ([withStopId]) desde el detalle de una parada, o varias ([stopIds])
+  /// desde el asistente.
+  CircuitCollection createCollection(
+    String title, {
+    String? withStopId,
+    List<String> stopIds = const [],
+  }) {
     _createdCount++;
     final collection = CircuitCollection(
       id: 'user-circuit-$_createdCount-${DateTime.now().millisecondsSinceEpoch}',
       title: title.trim(),
       image: '',
       isUserCreated: true,
-      stopIds: withStopId == null ? const [] : [withStopId],
+      stopIds: [?withStopId, ...stopIds],
     );
 
     _collections.insert(0, collection);
     notifyListeners();
     return collection;
+  }
+
+  /// Guarda cómo quiere el usuario su día en un circuito: el orden de las
+  /// paradas, la hora de salida, cómo se mueve y a qué ritmo.
+  void updatePlan(
+    String circuitId, {
+    List<String>? stopIds,
+    String? startTime,
+    TravelMode? travelMode,
+    ItineraryPace? pace,
+  }) {
+    final collection = findById(circuitId);
+    if (collection == null) return;
+
+    collection.applyPlan(
+      stopIds: stopIds,
+      startTime: startTime,
+      travelMode: travelMode,
+      pace: pace,
+    );
+    notifyListeners();
   }
 
   void deleteCollection(String id) {

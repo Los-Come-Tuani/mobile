@@ -43,8 +43,43 @@ abstract final class Formatters {
   /// `TimeOfDay(8, 30)` -> `8:30 a.m.`
   static String time(int hour, int minute) {
     final suffix = hour < 12 ? 'a.m.' : 'p.m.';
+    return '${_hourAndMinute(hour, minute)} $suffix';
+  }
+
+  /// `DateTime(…, 14, 5)` -> `2:05 p.m.`
+  static String clock(DateTime value) => time(value.hour, value.minute);
+
+  /// Minutos desde la medianoche: `900` -> `3:00 p.m.`
+  static String minutesOfDay(int minutes) =>
+      time(minutes ~/ 60 % 24, minutes % 60);
+
+  /// Franja horaria. Si las dos horas caen del mismo lado del mediodía, el
+  /// sufijo va una sola vez: `8:30 – 9:00 a.m.`, pero
+  /// `11:40 a.m. – 12:10 p.m.`.
+  static String timeRange(DateTime from, DateTime to) {
+    final sameDay =
+        from.year == to.year && from.month == to.month && from.day == to.day;
+    final sameHalf = sameDay && (from.hour < 12) == (to.hour < 12);
+    if (!sameHalf) return '${clock(from)} – ${clock(to)}';
+    return '${_hourAndMinute(from.hour, from.minute)} – ${clock(to)}';
+  }
+
+  /// `Duration(minutes: 260)` -> `4 h 20 min`; también `45 min` o `3 h`.
+  static String duration(Duration value) {
+    final hours = value.inHours;
+    final minutes = value.inMinutes.remainder(60);
+    if (hours == 0) return '$minutes min';
+    if (minutes == 0) return '$hours h';
+    return '$hours h $minutes min';
+  }
+
+  /// `0.8` -> `800 m`, `2.24` -> `2.2 km`.
+  static String distance(double km) =>
+      km < 1 ? '${(km * 100).round() * 10} m' : '${km.toStringAsFixed(1)} km';
+
+  static String _hourAndMinute(int hour, int minute) {
     final hour12 = hour % 12 == 0 ? 12 : hour % 12;
-    return '$hour12:${minute.toString().padLeft(2, '0')} $suffix';
+    return '$hour12:${minute.toString().padLeft(2, '0')}';
   }
 
   /// Tiempo restante: `23 h 05 min`, `45 min` o `menos de 1 min`.

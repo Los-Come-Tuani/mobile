@@ -1,3 +1,5 @@
+import 'itinerary.dart';
+
 /// Un circuito turístico completo, con todo lo que necesita la pantalla de
 /// detalle y la de reserva.
 class Circuit {
@@ -24,11 +26,12 @@ class Circuit {
     required this.includes,
     required this.badgesNote,
     required this.notes,
-    required this.languages,
     required this.startTimes,
     required this.latitude,
     required this.longitude,
     required this.comments,
+    this.travelMode = TravelMode.walking,
+    this.legMinutes = const {},
     this.isCreativeCircuit = false,
     this.organizer = '',
   });
@@ -48,6 +51,16 @@ class Circuit {
 
   /// Ids de las paradas del recorrido, en orden.
   final List<String> stopIds;
+
+  /// Cómo se recorre: a pie o en vehículo. Define los traslados del
+  /// itinerario mientras el turista no elija otra cosa.
+  final TravelMode travelMode;
+
+  /// Minutos fijos para llegar a ciertas paradas (por id), cuando la
+  /// distancia no explica el traslado: p. ej. 0 al bajar del ferry.
+  final Map<String, int> legMinutes;
+
+  /// Duración con el ritmo equilibrado, calculada con [travelMode].
   final String duration;
   final String durationShort;
   final int badges;
@@ -61,7 +74,6 @@ class Circuit {
   final String includes;
   final String badgesNote;
   final String notes;
-  final List<String> languages;
   final List<String> startTimes;
   final double latitude;
   final double longitude;
@@ -100,6 +112,10 @@ class Circuit {
       rating: (json['rating'] as num? ?? 0).toDouble(),
       reviewsCount: json['reviewsCount'] as int? ?? 0,
       stopIds: _stringList(json['stopIds']),
+      travelMode: TravelMode.fromJson(json['travelMode']),
+      legMinutes: (json['legMinutes'] as Map<String, dynamic>? ?? const {}).map(
+        (stopId, minutes) => MapEntry(stopId, (minutes as num).toInt()),
+      ),
       duration: json['duration'] as String? ?? '',
       durationShort: json['durationShort'] as String? ?? '',
       badges: json['badges'] as int? ?? 0,
@@ -113,7 +129,6 @@ class Circuit {
       includes: json['includes'] as String? ?? '',
       badgesNote: json['badgesNote'] as String? ?? '',
       notes: json['notes'] as String? ?? '',
-      languages: _stringList(json['languages']),
       startTimes: _stringList(json['startTimes']),
       latitude: (location['latitude'] as num? ?? 0).toDouble(),
       longitude: (location['longitude'] as num? ?? 0).toDouble(),

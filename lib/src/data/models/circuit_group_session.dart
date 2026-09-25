@@ -1,3 +1,4 @@
+import '../../core/utils/time_parser.dart';
 import 'tour_guide.dart';
 
 /// Un horario que publica un guía certificado para hacer un circuito
@@ -43,11 +44,7 @@ class CircuitGroupSession {
   bool fits(int people) => people > 0 && people <= spotsLeft;
 
   /// Fecha y hora de salida, para ordenar y descartar horarios pasados.
-  DateTime get startsAt => DateTime(
-    date.year,
-    date.month,
-    date.day,
-  ).add(Duration(minutes: _minutesOf(startTime)));
+  DateTime get startsAt => TimeParser.at(date, startTime);
 
   CircuitGroupSession copyWith({int? joinedCount}) {
     return CircuitGroupSession(
@@ -85,14 +82,4 @@ class CircuitGroupSession {
       guide: guide,
     );
   }
-}
-
-/// Minutos desde la medianoche de una hora como "3:00 p.m.".
-int _minutesOf(String time) {
-  final match = RegExp(
-    r'^(\d{1,2}):(\d{2})\s*([ap])\.?\s*m\.?$',
-  ).firstMatch(time.trim().toLowerCase());
-  if (match == null) return 0;
-  final hour = int.parse(match[1]!) % 12 + (match[3] == 'p' ? 12 : 0);
-  return hour * 60 + int.parse(match[2]!);
 }
