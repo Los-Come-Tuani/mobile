@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
 
 import 'itinerary.dart';
+import 'stop.dart';
 import 'trip_progress.dart';
 
 /// Qué muestra el mapa.
@@ -25,7 +26,7 @@ class RouteMapPoint {
     this.number,
     this.status = TripStopStatus.pending,
     this.arrival,
-    this.isStop = true,
+    this.stop,
   });
 
   final String id;
@@ -43,8 +44,11 @@ class RouteMapPoint {
   /// A qué hora se llega según el plan del viaje.
   final DateTime? arrival;
 
+  /// La parada con todo su detalle; `null` si el punto es un evento.
+  final Stop? stop;
+
   /// `true` si es una parada (tiene detalle y QR); `false` si es un evento.
-  final bool isStop;
+  bool get isStop => stop != null;
 }
 
 /// Cómo se pinta un tramo del recorrido.

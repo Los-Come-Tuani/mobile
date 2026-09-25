@@ -13,6 +13,7 @@ import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repo
 import 'package:k_plan_mobile/src/data/datasources/repository/location_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/visit_log_repository.dart';
 import 'package:k_plan_mobile/src/data/models/circuit.dart';
 import 'package:k_plan_mobile/src/data/models/stop.dart';
 import 'package:k_plan_mobile/src/ui/home/view/home_view.dart';
@@ -22,6 +23,7 @@ import 'package:k_plan_mobile/src/ui/route_map/viewmodels/route_map_viewmodel.da
 import 'package:provider/provider.dart';
 
 const _granada = 'granada-historias-sabores';
+const _hint = 'Toca una parada para ver su información';
 
 void main() {
   late TourRepository tourRepository;
@@ -37,6 +39,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   }
 
+  /// Un teléfono de verdad (411 x 914): la hoja de la parada ocupa casi la
+  /// mitad de la pantalla.
+  void usePhoneScreen(WidgetTester tester) {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
   /// Los JSON se leen del disco (I/O real) y `pump()` no avanza I/O real:
   /// se precargan para que las pantallas los encuentren ya en caché.
   Future<void> preload(WidgetTester tester) async {
@@ -50,8 +61,11 @@ void main() {
     });
   }
 
-  /// El viaje por Granada, con la primera parada ya confirmada.
-  Future<ActiveTripRepository> startGranadaTrip(WidgetTester tester) async {
+  /// El viaje por Granada, con las primeras [checkedIn] paradas confirmadas.
+  Future<ActiveTripRepository> startGranadaTrip(
+    WidgetTester tester, {
+    int checkedIn = 1,
+  }) async {
     final trip = ActiveTripRepository();
     await tester.runAsync(() async {
       final circuit =
@@ -60,13 +74,14 @@ void main() {
           (await tourRepository.getStopsByIds(circuit.stopIds)
                   as Ok<List<Stop>>)
               .value;
-      trip
-        ..start(
-          _granada,
-          title: 'Granada Histórica',
-          plan: ItineraryPlanner.plan(stops: stops, start: DateTime.now()),
-        )
-        ..checkIn(stops.first.id);
+      trip.start(
+        _granada,
+        title: 'Granada Histórica',
+        plan: ItineraryPlanner.plan(stops: stops, start: DateTime.now()),
+      );
+      for (final stop in stops.take(checkedIn)) {
+        trip.checkIn(stop.id);
+      }
     });
     return trip;
   }
@@ -76,6 +91,7 @@ void main() {
     MapSubject subject, {
     ActiveTripRepository? trip,
   }) async {
+    usePhoneScreen(tester);
     await tester.pumpWidget(
       ChangeNotifierProvider<RouteMapViewModel>(
         create: (_) => RouteMapViewModel(
@@ -83,6 +99,8 @@ void main() {
           collections,
           trip ?? ActiveTripRepository(),
           LocationRepository(),
+          BadgesRepository(),
+          VisitLogRepository(),
           subject,
         ),
         child: MaterialApp(theme: AppTheme.light, home: const RouteMapView()),
@@ -91,9 +109,7 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('el mapa de un circuito muestra su sendero y sus paradas', (
-    tester,
-  ) async {
+  testWidgets('el mapa queda libre hasta tocar una parada', (tester) async {
     await preload(tester);
     await pumpMap(tester, const CircuitMapSubject(_granada));
 
@@ -101,30 +117,67 @@ void main() {
     expect(find.text('6 paradas'), findsOneWidget);
     // Sale del punto de encuentro, que queda aparte de la primera parada.
     expect(find.text('Inicio'), findsOneWidget);
-    expect(find.text('Parada 1 de 6'), findsOneWidget);
-    // En la tarjeta y en la píldora del pin elegido.
-    expect(find.text('Catedral de Granada'), findsNWidgets(2));
-    expect(find.text('Cómo llegar'), findsWidgets);
+    expect(find.text(_hint), findsOneWidget);
     expect(find.text('© OpenMapTiles © OpenStreetMap'), findsOneWidget);
+    expect(find.text('Cómo llegar'), findsNothing);
+
+    // Tocar el pin abre su hoja, con el QR porque la Catedral da insignia.
+    await tester.tap(find.text('1'));
+    await settle(tester);
+
+    expect(find.text('Parada 1 de 6'), findsOneWidget);
+    expect(find.text('Catedral de Granada'), findsWidgets);
+    expect(find.text('Escanear código QR'), findsOneWidget);
+    expect(find.text('Cómo llegar'), findsOneWidget);
+    expect(find.text(_hint), findsNothing);
+
+    await tester.tap(find.byTooltip('Cerrar'));
+    await settle(tester);
+
+    expect(find.text('Cómo llegar'), findsNothing);
+    expect(find.text(_hint), findsOneWidget);
   });
 
-  testWidgets('siguiendo el viaje, la tarjeta muestra la siguiente parada', (
+  testWidgets('en el viaje, la hoja de la siguiente parada escanea o salta', (
     tester,
   ) async {
     await preload(tester);
     final trip = await startGranadaTrip(tester);
     await pumpMap(tester, const CircuitMapSubject(_granada), trip: trip);
 
-    expect(find.text('Viaje en curso · 1/6 paradas'), findsOneWidget);
+    expect(find.textContaining('Siguiente: Parque Central'), findsOneWidget);
+    expect(find.text('Cómo llegar'), findsNothing);
+
+    await tester.tap(find.text('2'));
+    await settle(tester);
+
     expect(find.text('Siguiente parada'), findsOneWidget);
-    expect(find.text('Parque Central'), findsWidgets);
     expect(find.textContaining('Llegada'), findsOneWidget);
-    expect(find.text('Ver parada'), findsOneWidget);
+    // En un viaje se escanea en cualquier parada para confirmar la visita.
+    expect(find.text('Escanear código QR'), findsOneWidget);
+    expect(find.text('Saltar'), findsOneWidget);
+  });
+
+  testWidgets('una parada visitada lleva a la siguiente', (tester) async {
+    await preload(tester);
+    final trip = await startGranadaTrip(tester, checkedIn: 2);
+    await pumpMap(tester, const CircuitMapSubject(_granada), trip: trip);
+
+    await tester.tap(find.byIcon(Icons.check).last);
+    await settle(tester);
+
+    expect(find.textContaining('· Visitada'), findsOneWidget);
+    expect(find.textContaining('Llegaste a las'), findsOneWidget);
+    expect(find.text('Escanear código QR'), findsNothing);
+    expect(find.text('Ir a la siguiente: Calle La Calzada'), findsOneWidget);
   });
 
   testWidgets('"Cómo llegar" ofrece abrir Google Maps o Waze', (tester) async {
     await preload(tester);
     await pumpMap(tester, const EventMapSubject('hipica-granada'));
+
+    await tester.tap(find.byIcon(Icons.event));
+    await settle(tester);
 
     expect(find.text('Evento'), findsOneWidget);
     expect(find.text('Hípica de Granada'), findsWidgets);

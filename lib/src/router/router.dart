@@ -388,6 +388,8 @@ Widget _routeMap(MapSubject subject) {
       context.read<CircuitCollectionsRepository>(),
       context.read<ActiveTripRepository>(),
       context.read<LocationRepository>(),
+      context.read<BadgesRepository>(),
+      context.read<VisitLogRepository>(),
       subject,
     ),
     child: const RouteMapView(),

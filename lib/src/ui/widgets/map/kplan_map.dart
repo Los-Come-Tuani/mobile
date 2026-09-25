@@ -225,7 +225,9 @@ class _PinsLayer extends StatelessWidget {
     final regular = <Marker>[];
     final emphasized = <Marker>[];
 
-    for (final point in map.points) {
+    // Al revés: con paradas muy juntas, las primeras del recorrido quedan
+    // encima y se pueden tocar.
+    for (final point in map.points.reversed) {
       final isEmphasized =
           point.id == selectedId ||
           (selectedId == null &&

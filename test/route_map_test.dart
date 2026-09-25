@@ -194,7 +194,6 @@ void main() {
         id: 'evento',
         name: 'Festival',
         point: point,
-        isStop: false,
       );
 
       expect(map.points.single.number, isNull);

@@ -73,13 +73,13 @@ abstract final class RouteMapBuilder {
     );
   }
 
-  /// Un lugar suelto: una parada o un evento.
+  /// Un lugar suelto: una parada ([stop]) o un evento.
   static RouteMap place({
     required String id,
     required String name,
     required LatLng point,
     String subtitle = '',
-    bool isStop = true,
+    Stop? stop,
   }) {
     return RouteMap(
       kind: RouteMapKind.place,
@@ -90,7 +90,7 @@ abstract final class RouteMapBuilder {
           name: name,
           point: point,
           subtitle: subtitle,
-          isStop: isStop,
+          stop: stop,
         ),
       ],
     );
@@ -239,6 +239,7 @@ abstract final class RouteMapBuilder {
       number: number,
       status: status,
       arrival: arrival,
+      stop: stop,
     );
   }
 

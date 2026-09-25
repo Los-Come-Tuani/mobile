@@ -9,20 +9,27 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../data/datasources/repository/location_repository.dart';
 import '../../../data/models/route_map.dart';
+import '../../../data/models/stop.dart';
 import '../../../data/models/trip_progress.dart';
 import '../../../router/routes.dart';
+import '../../stop_detail/view/qr_generator_view.dart';
+import '../../stop_detail/view/qr_scanner_view.dart';
+import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/circle_icon_button.dart';
+import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/map/kplan_map.dart';
 import '../../widgets/map/paper_texture.dart';
 import '../../widgets/open_with_sheet.dart';
 import '../viewmodels/route_map_viewmodel.dart';
-import '../widgets/map_cards.dart';
+import '../widgets/stop_sheet.dart';
 
 /// El mapa a pantalla completa: el recorrido de un circuito (o el viaje en
-/// curso por él) o un lugar suelto. Google Maps y Waze quedan en "Cómo
-/// llegar", para la navegación paso a paso.
+/// curso por él) o un lugar suelto. Al tocar una parada se acerca y abre su
+/// hoja, desde donde se escanea el QR, se salta o se abre Google Maps o Waze
+/// para llegar, sin salir del mapa.
 class RouteMapView extends StatefulWidget {
   const RouteMapView({super.key});
 
@@ -33,12 +40,20 @@ class RouteMapView extends StatefulWidget {
 class _RouteMapViewState extends State<RouteMapView>
     with SingleTickerProviderStateMixin {
   final _mapController = MapController();
-  final _pageController = PageController(viewportFraction: 0.88);
   late final AnimationController _flight;
   VoidCallback? _flightStep;
 
   /// Se pidió "mi ubicación" y el GPS todavía no respondía.
   bool _centerOnUserWhenLocated = false;
+
+  /// Qué fracción de la pantalla ocupa la hoja abierta.
+  double _sheetExtent = StopSheet.initialSize;
+
+  /// Al tocar una parada, el mapa se acerca por lo menos hasta aquí.
+  static const double _focusZoom = 16.5;
+
+  /// Alto de la barra de arriba, sin el área segura.
+  static const double _topBarHeight = 64;
 
   @override
   void initState() {
@@ -53,7 +68,6 @@ class _RouteMapViewState extends State<RouteMapView>
   @override
   void dispose() {
     _flight.dispose();
-    _pageController.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -101,20 +115,53 @@ class _RouteMapViewState extends State<RouteMapView>
       ..forward(from: 0);
   }
 
-  /// Deja libres los controles de arriba, la tarjeta de abajo y, a los
+  /// Deja libres los controles de arriba, la hoja si está abierta y, a los
   /// lados, media píldora con el nombre de la parada.
-  EdgeInsets _mapPadding(BuildContext context) {
+  EdgeInsets _mapPadding({required bool withSheet}) {
     final insets = MediaQuery.paddingOf(context);
-    return EdgeInsets.fromLTRB(72, insets.top + 90, 72, insets.bottom + 250);
+    final bottom = withSheet
+        ? MediaQuery.sizeOf(context).height * _sheetExtent + 24
+        : insets.bottom + 90;
+    return EdgeInsets.fromLTRB(72, insets.top + 90, 72, bottom);
   }
 
-  void _showWholeRoute(RouteMap map) {
+  void _showWholeRoute(RouteMap map, {required bool withSheet}) {
     final target = KPlanMap.fitFor(
       map,
       user: context.read<RouteMapViewModel>().user?.point,
-      padding: _mapPadding(context),
+      padding: _mapPadding(withSheet: withSheet),
     ).fit(_mapController.camera);
     _flyTo(target.center, target.zoom);
+  }
+
+  /// Abre la hoja de [point] y acerca el mapa: el pin queda en el medio de
+  /// lo que la hoja deja libre arriba.
+  void _selectPoint(RouteMapPoint point) {
+    context.read<RouteMapViewModel>().select(point.id);
+    setState(() => _sheetExtent = StopSheet.initialSize);
+
+    final camera = _mapController.camera;
+    final zoom = math.max(camera.zoom, _focusZoom);
+    final height = MediaQuery.sizeOf(context).height;
+    final topBar = MediaQuery.paddingOf(context).top + _topBarHeight;
+    final shift = Offset(0, (height * StopSheet.initialSize - topBar) / 2);
+    _flyTo(
+      camera.unprojectAtZoom(
+        camera.projectAtZoom(point.point, zoom) + shift,
+        zoom,
+      ),
+      zoom,
+    );
+  }
+
+  void _closeSheet() => context.read<RouteMapViewModel>().select(null);
+
+  /// Mientras se arrastra la hoja, la atribución sube con ella.
+  void _onSheetExtentChanged(double extent) {
+    if (extent == _sheetExtent) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _sheetExtent = extent);
+    });
   }
 
   Future<void> _centerOnUser() async {
@@ -147,25 +194,36 @@ class _RouteMapViewState extends State<RouteMapView>
     }
   }
 
-  void _onPointTap(RouteMap map, RouteMapPoint point) {
-    context.read<RouteMapViewModel>().select(point.id);
-    if (map.kind != RouteMapKind.preview || !_pageController.hasClients) {
-      return;
-    }
-    final index = map.points.indexWhere((p) => p.id == point.id);
-    if (index >= 0) {
-      _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOut,
-      );
+  /// Escanea el QR de la parada; si coincide, confirma la visita y muestra
+  /// la insignia ganada.
+  Future<void> _scanQr(Stop stop) async {
+    final matched = await showQrScanner(context, stopId: stop.id);
+    if (matched != true || !mounted) return;
+
+    final earnedBadge = context.read<RouteMapViewModel>().confirmVisit(stop);
+    if (earnedBadge) {
+      await showBadgeEarnedAnimation(context, category: stop.category);
+    } else {
+      _notify('¡Visita a ${stop.name} confirmada!');
     }
   }
 
-  void _onPageChanged(RouteMap map, int index) {
-    final point = map.points[index];
-    context.read<RouteMapViewModel>().select(point.id);
-    _flyTo(point.point, math.max(_mapController.camera.zoom, 15));
+  /// Pantalla de demo con el QR de la parada, para escanearlo desde otro
+  /// teléfono (no hay carteles reales en el catálogo).
+  void _showDemoQr(Stop stop) => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) =>
+          QrGeneratorView(stopId: stop.id, stopName: stop.name),
+    ),
+  );
+
+  Future<void> _skip(RouteMapPoint point) async {
+    final reason = await showDropReasonSheet(
+      context,
+      title: '¿Por qué saltas ${point.name}?',
+    );
+    if (reason == null || !mounted) return;
+    context.read<RouteMapViewModel>().skipStop(point.id, reason);
   }
 
   Future<void> _directions(RouteMapPoint point) => openInNavigationApp(
@@ -173,9 +231,6 @@ class _RouteMapViewState extends State<RouteMapView>
     latitude: point.point.latitude,
     longitude: point.point.longitude,
   );
-
-  void _openStop(RouteMapPoint point) =>
-      context.push(Routes.stopDetailPath(point.id));
 
   void _endTrip() {
     context.read<RouteMapViewModel>().endTrip();
@@ -187,6 +242,9 @@ class _RouteMapViewState extends State<RouteMapView>
     final viewModel = context.watch<RouteMapViewModel>();
     final map = viewModel.map;
     final user = viewModel.user;
+    final selected = map?.pointById(viewModel.selectedId ?? '');
+    final insets = MediaQuery.paddingOf(context);
+    final height = MediaQuery.sizeOf(context).height;
 
     if (_centerOnUserWhenLocated && user != null) {
       _centerOnUserWhenLocated = false;
@@ -223,12 +281,10 @@ class _RouteMapViewState extends State<RouteMapView>
                       map: map,
                       user: user,
                       controller: _mapController,
-                      padding: _mapPadding(context),
+                      padding: _mapPadding(withSheet: false),
                       selectedId: viewModel.selectedId,
-                      onPointTap: (point) => _onPointTap(map, point),
-                      onMapTap: map.isTrip
-                          ? () => viewModel.select(null)
-                          : null,
+                      onPointTap: _selectPoint,
+                      onMapTap: _closeSheet,
                       showAttribution: false,
                     ),
             ),
@@ -242,87 +298,112 @@ class _RouteMapViewState extends State<RouteMapView>
                   title: viewModel.title,
                   subtitle: map == null ? null : _subtitleOf(map),
                   isPlace: map?.kind == RouteMapKind.place,
-                  onFit: map == null ? null : () => _showWholeRoute(map),
+                  onFit: map == null
+                      ? null
+                      : () => _showWholeRoute(map, withSheet: selected != null),
                   onMyLocation: map == null ? null : _centerOnUser,
                   showLocationHint: showLocationHint,
                 ),
               ),
             ),
-            if (map != null)
+            if (map != null && selected == null)
               Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.fromLTRB(16, 0, 16, 6),
-                          child: MapAttribution(),
-                        ),
-                        if (map.kind == RouteMapKind.preview)
-                          _card(viewModel, map)
-                        else
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: _card(viewModel, map),
-                          ),
-                      ],
-                    ),
-                  ),
+                left: 16,
+                right: 16,
+                bottom: insets.bottom + 44,
+                child: Center(
+                  child: map.isTrip && map.next == null
+                      ? _TripCompletePill(onEndTrip: _endTrip)
+                      : const _HintChip(),
                 ),
               ),
+            if (map != null)
+              Positioned(
+                left: 16,
+                bottom: selected == null
+                    ? insets.bottom + 12
+                    : height * _sheetExtent + 8,
+                child: const MapAttribution(),
+              ),
+            Positioned.fill(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => SlideTransition(
+                  position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+                      .animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOut,
+                        ),
+                      ),
+                  child: child,
+                ),
+                child: map == null || selected == null
+                    ? const SizedBox.shrink()
+                    : _sheetFor(viewModel, map, selected),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _card(RouteMapViewModel viewModel, RouteMap map) {
-    switch (map.kind) {
-      case RouteMapKind.trip:
-        final focused = map.pointById(viewModel.selectedId ?? '') ?? map.next;
-        if (focused == null) return TripCompleteCard(onEndTrip: _endTrip);
-        return TripStopCard(
-          point: focused,
-          delay: viewModel.delay,
-          leg: viewModel.legFromUser(focused),
-          onDirections: () => _directions(focused),
-          onOpenStop: () => _openStop(focused),
-        );
-      case RouteMapKind.preview:
-        return StopsCarousel(
-          points: map.points,
-          controller: _pageController,
-          onPageChanged: (index) => _onPageChanged(map, index),
-          onDirections: _directions,
-          onOpenStop: _openStop,
-        );
-      case RouteMapKind.place:
-        final point = map.points.single;
-        return PlaceCard(
-          point: point,
-          leg: viewModel.legFromUser(point),
-          onDirections: () => _directions(point),
-        );
-    }
+  Widget _sheetFor(
+    RouteMapViewModel viewModel,
+    RouteMap map,
+    RouteMapPoint point,
+  ) {
+    final stop = point.stop;
+    final next = map.next;
+    final isTrip = map.isTrip;
+    final isAhead =
+        point.status == TripStopStatus.next ||
+        point.status == TripStopStatus.pending;
+    // En un viaje se escanea para confirmar la visita; fuera de él, sólo
+    // para ganar la insignia si todavía no se tiene.
+    final canScan =
+        stop != null &&
+        (isTrip
+            ? point.status != TripStopStatus.done
+            : stop.hasBadge && !viewModel.hasClaimedBadge(stop.id));
+
+    return StopSheet(
+      key: ValueKey(point.id),
+      point: point,
+      total: map.points.length,
+      isTrip: isTrip,
+      progress: viewModel.progressOf(point.id),
+      delay: viewModel.delay,
+      leg: viewModel.legFromUser(point),
+      event: point.isStop ? null : viewModel.event,
+      hasClaimedBadge: stop != null && viewModel.hasClaimedBadge(stop.id),
+      next: next != null && next.id != point.id ? next : null,
+      onClose: _closeSheet,
+      onDirections: () => _directions(point),
+      onScanQr: canScan ? () => _scanQr(stop) : null,
+      onShowDemoQr: canScan ? () => _showDemoQr(stop) : null,
+      onSkip: isTrip && isAhead ? () => _skip(point) : null,
+      onGoToNext: next == null ? null : () => _selectPoint(next),
+      onExtentChanged: _onSheetExtentChanged,
+    );
   }
 
   static String? _subtitleOf(RouteMap map) {
     final total = map.points.length;
-    return switch (map.kind) {
-      RouteMapKind.trip =>
-        'Viaje en curso · '
-            '${map.points.where((p) => p.status == TripStopStatus.done).length}'
-            '/$total paradas',
-      RouteMapKind.preview => '$total ${total == 1 ? 'parada' : 'paradas'}',
-      RouteMapKind.place => null,
-    };
+    switch (map.kind) {
+      case RouteMapKind.trip:
+        final next = map.next;
+        if (next == null) return '¡Recorrido completo!';
+        final arrival = next.arrival;
+        return arrival == null
+            ? 'Siguiente: ${next.name}'
+            : 'Siguiente: ${next.name} · ${Formatters.clock(arrival)}';
+      case RouteMapKind.preview:
+        return '$total ${total == 1 ? 'parada' : 'paradas'}';
+      case RouteMapKind.place:
+        return null;
+    }
   }
 }
 
@@ -447,6 +528,89 @@ class _TopBar extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Mientras no se toca ninguna parada, el mapa queda libre y sólo se sugiere
+/// qué hacer.
+class _HintChip extends StatelessWidget {
+  const _HintChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary60.withValues(alpha: 0.82),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.touch_app_outlined,
+              size: 16,
+              color: AppColors.primary10,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'Toca una parada para ver su información',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.primary10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Cuando ya no quedan paradas por visitar: invita a cerrar el viaje.
+class _TripCompletePill extends StatelessWidget {
+  const _TripCompletePill({required this.onEndTrip});
+
+  final VoidCallback onEndTrip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary60,
+      borderRadius: BorderRadius.circular(28),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 6, 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.emoji_events_outlined, color: AppColors.star),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                '¡Recorrido completo!',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.primary10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(0, 38),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                shape: const StadiumBorder(),
+              ),
+              onPressed: onEndTrip,
+              child: const Text('Finalizar viaje'),
+            ),
+          ],
+        ),
       ),
     );
   }
