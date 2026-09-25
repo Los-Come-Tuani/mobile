@@ -5,6 +5,7 @@ import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/saved_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/visit_log_repository.dart';
 import 'package:k_plan_mobile/src/ui/stop_detail/view/stop_detail_view.dart';
 import 'package:k_plan_mobile/src/ui/stop_detail/viewmodels/stop_detail_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -65,6 +66,7 @@ void main() {
               collections,
               BadgesRepository(),
               ActiveTripRepository(),
+              VisitLogRepository(),
               stopId,
             ),
           ),

@@ -16,6 +16,7 @@ import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
+import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
 
 void main() {
@@ -85,6 +86,9 @@ class _KPlanAppState extends State<KPlanApp> {
           create: (context) =>
               GroupSessionRepository(context.read<GuideRepository>()),
         ),
+        // Visitas planeadas, QR escaneados y paradas dejadas con su razón:
+        // los datos que usará el portal web. La app sólo los guarda.
+        Provider<VisitLogRepository>(create: (_) => VisitLogRepository()),
       ],
       child: MaterialApp.router(
         title: "K'Plan",

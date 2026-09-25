@@ -3,6 +3,7 @@ import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
+import '../../../data/datasources/repository/visit_log_repository.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/stop.dart';
 import '../../core/base_viewmodel.dart';
@@ -13,6 +14,7 @@ class StopDetailViewModel extends BaseViewModel {
     this._collectionsRepository,
     this._badgesRepository,
     this._activeTripRepository,
+    this._visitLogRepository,
     this.stopId,
   ) {
     _collectionsRepository.addListener(safeNotify);
@@ -23,6 +25,7 @@ class StopDetailViewModel extends BaseViewModel {
   final CircuitCollectionsRepository _collectionsRepository;
   final BadgesRepository _badgesRepository;
   final ActiveTripRepository _activeTripRepository;
+  final VisitLogRepository _visitLogRepository;
   final String stopId;
 
   Stop? _stop;
@@ -52,8 +55,8 @@ class StopDetailViewModel extends BaseViewModel {
   }
 
   /// Confirma la visita a la parada (tras escanear su código QR): marca el
-  /// check-in del viaje en curso, si hay uno, y reclama la insignia de la
-  /// categoría de esta parada.
+  /// check-in del viaje en curso, si hay uno, lo registra para el portal
+  /// (llegó de verdad) y reclama la insignia de la categoría de esta parada.
   ///
   /// Devuelve `true` si se ganó una insignia nueva ahora (para disparar la
   /// animación); `false` si ya se había reclamado antes.
@@ -62,6 +65,11 @@ class StopDetailViewModel extends BaseViewModel {
     if (current == null) return false;
 
     _activeTripRepository.checkIn(current.id);
+    _visitLogRepository.recordCheckIn(
+      stopId: current.id,
+      circuitId: _activeTripRepository.activeCircuitId,
+      groupSize: _activeTripRepository.groupSize,
+    );
     return _badgesRepository.claim(
       stopId: current.id,
       category: current.category,
