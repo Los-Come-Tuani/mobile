@@ -11,11 +11,17 @@ class ContentCard extends StatelessWidget {
     required this.width,
     required this.child,
     this.onTap,
+    this.borderColor = AppColors.divider,
+    this.borderWidth = 1,
   });
 
   final double width;
   final Widget child;
   final VoidCallback? onTap;
+
+  /// Para destacar una tarjeta (por ejemplo, un circuito creativo).
+  final Color borderColor;
+  final double borderWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +32,7 @@ class ContentCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radius),
-          side: const BorderSide(color: AppColors.divider),
+          side: BorderSide(color: borderColor, width: borderWidth),
         ),
         child: InkWell(onTap: onTap, child: child),
       ),

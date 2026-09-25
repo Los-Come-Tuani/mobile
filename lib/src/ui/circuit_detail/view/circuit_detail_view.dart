@@ -14,6 +14,7 @@ import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/circle_icon_button.dart';
+import '../../widgets/creative_circuit_badge.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/open_with_sheet.dart';
@@ -269,12 +270,15 @@ class _DetailContent extends StatelessWidget {
                     rating: circuit.rating,
                     reviewsCount: circuit.reviewsCount,
                   ),
-                  if (circuit.isCreativeCircuit)
-                    _CreativeCircuitChip(organizer: circuit.organizer),
+                  if (circuit.isCreativeCircuit) const CreativeCircuitBadge(),
                 ],
               ),
               const SizedBox(height: 14),
               _MetaRow(circuit: circuit),
+              if (circuit.isCreativeCircuit) ...[
+                const SizedBox(height: 16),
+                CreativeCircuitBanner(circuit: circuit),
+              ],
               const SizedBox(height: 16),
               Text(circuit.description, style: AppTextStyles.bodySmall),
               const SizedBox(height: 16),
@@ -348,42 +352,6 @@ class _DetailContent extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Distintivo de circuito creativo (preestablecido por una alcaldía): sólo
-/// estos circuitos se pueden hacer en grupo y dan insignias extra (y una
-/// medalla de ciudad) al completarlos.
-class _CreativeCircuitChip extends StatelessWidget {
-  const _CreativeCircuitChip({required this.organizer});
-
-  final String organizer;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.accentSecondaryBlue,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.account_balance, size: 13, color: AppColors.white),
-          const SizedBox(width: 4),
-          Text(
-            organizer.isEmpty
-                ? 'Circuito creativo'
-                : 'Circuito creativo · $organizer',
-            style: AppTextStyles.caption.copyWith(
-              color: AppColors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

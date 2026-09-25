@@ -5,11 +5,13 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/circuit.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/category_chip.dart';
+import '../../widgets/creative_circuit_badge.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/remote_image.dart';
 import 'content_card.dart';
 
-/// Tarjeta de la sección "Circuitos completos".
+/// Tarjeta de la sección "Circuitos completos". Los circuitos creativos
+/// llevan borde dorado, distintivo e insignias extra para que se noten.
 class CircuitCard extends StatelessWidget {
   const CircuitCard({
     super.key,
@@ -28,9 +30,13 @@ class CircuitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCreative = circuit.isCreativeCircuit;
+
     return ContentCard(
       width: width,
       onTap: onTap,
+      borderColor: isCreative ? AppColors.creativeCircuit : AppColors.divider,
+      borderWidth: isCreative ? 1.5 : 1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -58,6 +64,12 @@ class CircuitCard extends StatelessWidget {
                   child: BookmarkButton(itemId: circuit.id, size: 18),
                 ),
               ),
+              if (isCreative)
+                const Positioned(
+                  bottom: 8,
+                  left: 8,
+                  child: CreativeCircuitBadge(),
+                ),
             ],
           ),
           Padding(
@@ -94,6 +106,18 @@ class CircuitCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (isCreative) ...[
+                  const SizedBox(height: 6),
+                  IconLabel(
+                    icon: Icons.military_tech,
+                    iconColor: AppColors.creativeCircuit,
+                    iconSize: 16,
+                    color: AppColors.primaryText,
+                    label:
+                        '+${Circuit.creativeBonusBadges} insignias extra '
+                        'y medalla',
+                  ),
+                ],
               ],
             ),
           ),

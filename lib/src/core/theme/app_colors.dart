@@ -50,4 +50,9 @@ abstract final class AppColors {
   static const Color medalBronze = Color(0xFFB08D57);
   static const Color medalSilver = Color(0xFFAEB4BD);
   static const Color medalGold = Color(0xFFE0B84C);
+
+  // ── Circuitos creativos (oficiales de las alcaldías) ──────────────────────
+  /// Dorado como las medallas: completarlos da insignias extra.
+  static const Color creativeCircuit = medalGold;
+  static const Color onCreativeCircuit = primary60;
 }

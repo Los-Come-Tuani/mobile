@@ -84,10 +84,6 @@ class CircuitDetailViewModel extends BaseViewModel {
 
   void endTrip() => _activeTripRepository.end();
 
-  /// Insignias extra que otorga completar un circuito creativo (más que un
-  /// circuito normal), además de la medalla de esa ciudad.
-  static const int creativeCircuitBonusBadges = 3;
-
   /// Si el circuito es creativo y se acaba de completar (todas las paradas
   /// con check-in), otorga las insignias extra de "Circuitos creativos" y
   /// la medalla de esa ciudad. `claim()` y `claimCityMedal()` son
@@ -100,7 +96,7 @@ class CircuitDetailViewModel extends BaseViewModel {
         isTripActive &&
         _stops.isNotEmpty &&
         checkedInCount == _stops.length) {
-      for (var i = 1; i <= creativeCircuitBonusBadges; i++) {
+      for (var i = 1; i <= Circuit.creativeBonusBadges; i++) {
         _badgesRepository.claim(
           stopId: 'circuit-bonus-$i-${circuit.id}',
           category: 'Circuitos creativos',

@@ -67,6 +67,10 @@ class Circuit {
   final double longitude;
   final List<CircuitComment> comments;
 
+  /// Insignias extra que da completar un circuito creativo, además de la
+  /// medalla de esa ciudad.
+  static const int creativeBonusBadges = 3;
+
   /// `true` si es un circuito creativo: preestablecido por una alcaldía.
   /// Son los únicos que se pueden hacer en grupo (a menos que haya otros
   /// especiales) y dan insignias extra, más una medalla de esa ciudad, al
