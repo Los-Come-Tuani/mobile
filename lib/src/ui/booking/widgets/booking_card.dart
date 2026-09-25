@@ -59,8 +59,8 @@ class BookingFieldRow extends StatelessWidget {
                 Icon(icon, size: 20, color: AppColors.primary30),
                 const SizedBox(width: 12),
                 Text(label, style: AppTextStyles.body),
-                const Spacer(),
-                Flexible(
+                const SizedBox(width: 12),
+                Expanded(
                   child: Text(
                     value,
                     maxLines: 1,
