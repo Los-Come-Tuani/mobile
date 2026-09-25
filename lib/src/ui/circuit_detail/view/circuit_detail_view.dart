@@ -26,7 +26,6 @@ import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
 import '../widgets/comment_tile.dart';
-import '../widgets/start_trip_sheet.dart';
 
 /// Detalle de un circuito, con la acción de agendar.
 class CircuitDetailView extends StatefulWidget {
@@ -55,16 +54,15 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
   void _openMap(Circuit circuit) =>
       context.push(Routes.circuitMapPath(circuit.id));
 
-  /// Elige la parada de arranque, marca el circuito como "en curso" (con el
-  /// itinerario recalculado desde ahora) y abre el mapa del viaje.
-  Future<void> _startTrip(Circuit circuit, List<Stop> stops) async {
-    if (stops.isEmpty) return;
+  /// Empieza a seguir el itinerario en el orden en que está (recalculado
+  /// desde ahora) y abre el mapa del viaje.
+  Future<void> _startTrip(Circuit circuit) async {
+    final viewModel = context.read<CircuitDetailViewModel>();
+    if (!await startTripChecked(context, viewModel) || !mounted) return;
 
-    final startStop = await showStartTripSheet(context, stops: stops);
-    if (startStop == null || !mounted) return;
-
-    context.read<CircuitDetailViewModel>().startTrip(startStop);
-    _notifySoon('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    if (viewModel.nextTripStop case final first?) {
+      _notifySoon('¡Viaje iniciado! Dirígete a ${first.stop.name}');
+    }
     _openMap(circuit);
   }
 
@@ -127,7 +125,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                   _notifySoon('Descargar sin conexión: próximamente'),
               onSeeAllComments: () =>
                   _notifySoon('Todas las reseñas: próximamente'),
-              onStartTrip: () => _startTrip(circuit, viewModel.stops),
+              onStartTrip: () => _startTrip(circuit),
               onEndTrip: _endTrip,
               onSkipStop: _skipStop,
             ),

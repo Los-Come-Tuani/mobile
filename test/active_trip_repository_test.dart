@@ -109,6 +109,15 @@ void main() {
       expect(trip.plan, isNull);
       expect(trip.checkedInStopIds, isEmpty);
     });
+
+    test('sólo puede haber un viaje en curso', () {
+      expect(() => trip.start('otro-circuito', plan: plan), throwsStateError);
+      expect(trip.activeCircuitId, 'mi-circuito');
+
+      trip.end();
+      trip.start('otro-circuito', plan: plan);
+      expect(trip.activeCircuitId, 'otro-circuito');
+    });
   });
 
   group('viaje desde el detalle de un circuito', () {
@@ -134,26 +143,44 @@ void main() {
 
     tearDown(() => viewModel.dispose());
 
-    test('empezar desde una parada deja las anteriores al final', () {
-      final calzada = viewModel.stops[2];
-      viewModel.startTrip(calzada);
+    test('empezar sigue el orden del itinerario', () {
+      expect(viewModel.startTrip(), isTrue);
 
       expect(viewModel.isTripActive, isTrue);
       expect(trip.title, 'Granada Histórica');
       expect(viewModel.tripPlan?.stopIds, [
+        'granada-catedral',
+        'granada-parque-central',
         'granada-calle-calzada',
         'granada-convento-san-francisco',
         'granada-mercado',
         'granada-muelle',
-        'granada-catedral',
-        'granada-parque-central',
       ]);
       expect(viewModel.tripPlan?.mode, TravelMode.walking);
-      expect(viewModel.nextTripStop?.stop.id, 'granada-calle-calzada');
+      expect(viewModel.nextTripStop?.stop.id, 'granada-catedral');
+    });
+
+    test('con otro viaje en curso no se empieza este', () {
+      trip.start('isla-ometepe', title: 'Isla de Ometepe', plan: plan);
+
+      expect(viewModel.otherActiveTrip?.title, 'Isla de Ometepe');
+      expect(viewModel.startTrip(), isFalse);
+      expect(viewModel.isTripActive, isFalse);
+      expect(trip.activeCircuitId, 'isla-ometepe');
+    });
+
+    test('finalizar el otro viaje guarda sus razones con ese circuito', () {
+      trip.start('isla-ometepe', title: 'Isla de Ometepe', plan: plan);
+      viewModel.endTrip({'a': DropReason.noTime});
+
+      final drop = visitLog.events.whereType<StopDropped>().single;
+      expect(drop.circuitId, 'isla-ometepe');
+      expect(viewModel.otherActiveTrip, isNull);
+      expect(viewModel.startTrip(), isTrue);
     });
 
     test('saltar y finalizar registran por qué no se fue', () {
-      viewModel.startTrip(viewModel.stops.first);
+      viewModel.startTrip();
       trip.checkIn('granada-catedral');
 
       viewModel.skipStop('granada-parque-central', DropReason.noTime);

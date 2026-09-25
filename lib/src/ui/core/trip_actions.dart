@@ -8,6 +8,13 @@ import '../../data/models/trip_progress.dart';
 import '../../data/models/visit_event.dart';
 import 'base_viewmodel.dart';
 
+/// El viaje que el turista ya sigue por otro circuito.
+typedef OtherActiveTrip = ({
+  String circuitId,
+  String title,
+  bool isUserCircuit,
+});
+
 /// Lo que comparten el detalle de un circuito del catálogo y el de uno
 /// propio sobre el viaje en curso: empezarlo, seguirlo, saltar paradas y
 /// finalizarlo registrando por qué no se fue a las pendientes.
@@ -49,15 +56,23 @@ mixin TripActions on BaseViewModel {
   TripStopProgress tripProgressOf(String stopId) =>
       activeTripRepository.progressOf(stopId);
 
-  /// Empieza el viaje en [from]. El itinerario se recalcula desde ahora y
-  /// sigue el orden del circuito a partir de esa parada; las anteriores
-  /// quedan al final.
-  void startTrip(Stop from) {
-    final stops = tripStops;
-    final index = stops.indexWhere((s) => s.id == from.id);
-    final ordered = index <= 0
-        ? stops
-        : [...stops.sublist(index), ...stops.sublist(0, index)];
+  /// El viaje en curso por otro circuito; `null` si no hay ninguno o si es
+  /// este. Sólo se sigue un circuito a la vez: antes de empezar este hay que
+  /// finalizar ese.
+  OtherActiveTrip? get otherActiveTrip {
+    final circuitId = activeTripRepository.activeCircuitId;
+    if (circuitId == null || circuitId == tripCircuitId) return null;
+    return (
+      circuitId: circuitId,
+      title: activeTripRepository.title,
+      isUserCircuit: activeTripRepository.isUserCircuit,
+    );
+  }
+
+  /// Empieza el viaje siguiendo el orden del itinerario, recalculado desde
+  /// ahora. Devuelve `false` sin empezarlo si hay otro viaje en curso.
+  bool startTrip() {
+    if (otherActiveTrip != null || tripStops.isEmpty) return false;
     final now = DateTime.now();
     final booking = bookingsRepository.bookingFor(tripCircuitId, day: now);
 
@@ -67,13 +82,14 @@ mixin TripActions on BaseViewModel {
       isUserCircuit: tripIsUserCircuit,
       groupSize: booking == null ? null : booking.adults + booking.children,
       plan: ItineraryPlanner.plan(
-        stops: ordered,
+        stops: tripStops,
         start: _nextFiveMinutes(now),
         mode: tripTravelMode,
         pace: tripPace,
         legMinutes: tripLegMinutes,
       ),
     );
+    return true;
   }
 
   void skipStop(String stopId, DropReason reason) {
@@ -86,13 +102,15 @@ mixin TripActions on BaseViewModel {
     );
   }
 
-  /// Finaliza el viaje; [reasons] dice por qué no se fue a las pendientes
+  /// Finaliza el viaje en curso, sea el de este circuito o el de otro (para
+  /// poder empezar este); [reasons] dice por qué no se fue a las pendientes
   /// que el turista quiso responder.
   void endTrip([Map<String, DropReason> reasons = const {}]) {
+    final circuitId = activeTripRepository.activeCircuitId ?? tripCircuitId;
     for (final entry in reasons.entries) {
       visitLogRepository.recordDrop(
         stopId: entry.key,
-        circuitId: tripCircuitId,
+        circuitId: circuitId,
         reason: entry.value,
         stage: DropStage.tripEnded,
       );

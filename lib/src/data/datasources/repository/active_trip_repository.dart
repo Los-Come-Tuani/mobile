@@ -94,6 +94,8 @@ class ActiveTripRepository extends ChangeNotifier {
     return late.isNegative ? Duration.zero : late;
   }
 
+  /// Empieza a seguir un circuito. Sólo puede haber un viaje en curso: con
+  /// otro ya empezado lanza [StateError], primero hay que finalizarlo.
   void start(
     String circuitId, {
     String title = '',
@@ -101,6 +103,10 @@ class ActiveTripRepository extends ChangeNotifier {
     bool isUserCircuit = false,
     int? groupSize,
   }) {
+    final current = _circuitId;
+    if (current != null && current != circuitId) {
+      throw StateError('Ya hay un viaje en curso por "$_title" ($current)');
+    }
     _circuitId = circuitId;
     _title = title;
     _plan = plan;

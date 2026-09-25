@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -8,6 +9,8 @@ import '../../data/models/itinerary.dart';
 import '../../data/models/stop.dart';
 import '../../data/models/trip_progress.dart';
 import '../../data/models/visit_event.dart';
+import '../../router/routes.dart';
+import '../core/trip_actions.dart';
 import 'drop_reason_sheet.dart';
 import 'itinerary_timeline.dart';
 
@@ -205,6 +208,106 @@ Future<Map<String, DropReason>?> askTripEndReasons(
 }) async {
   if (pending.isEmpty) return const {};
   return showTripEndSheet(context, pending: pending);
+}
+
+/// Empieza el viaje de [trip] siguiendo su itinerario. Si ya hay otro en
+/// curso pregunta qué hacer: ir a ese, o finalizarlo (con las razones de lo
+/// que quedó pendiente) y empezar este. Devuelve `true` si empezó.
+Future<bool> startTripChecked(BuildContext context, TripActions trip) async {
+  final other = trip.otherActiveTrip;
+  if (other != null) {
+    final choice = await _showTripConflictSheet(context, other.title);
+    if (choice == null || !context.mounted) return false;
+    if (choice == _TripConflictChoice.goToActive) {
+      context.push(
+        other.isUserCircuit
+            ? Routes.myCircuitPath(other.circuitId)
+            : Routes.circuitDetailPath(other.circuitId),
+      );
+      return false;
+    }
+    final reasons = await askTripEndReasons(
+      context,
+      pending: trip.pendingTripStops,
+    );
+    if (reasons == null || !context.mounted) return false;
+    trip.endTrip(reasons);
+  }
+  return trip.startTrip();
+}
+
+enum _TripConflictChoice { goToActive, endAndStart }
+
+Future<_TripConflictChoice?> _showTripConflictSheet(
+  BuildContext context,
+  String activeTitle,
+) {
+  return showModalBottomSheet<_TripConflictChoice>(
+    context: context,
+    backgroundColor: AppColors.white,
+    isScrollControlled: true,
+    useSafeArea: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (context) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.explore, color: AppColors.accentSecondaryBlue),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Ya tienes un viaje en curso',
+                    style: AppTextStyles.title,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Estás recorriendo $activeTitle. Sólo se puede seguir un '
+              'circuito a la vez: finalízalo para comenzar este.',
+              style: AppTextStyles.bodySmall,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () =>
+                    Navigator.of(context).pop(_TripConflictChoice.endAndStart),
+                child: const Text('Finalizar ese y comenzar este'),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: AppColors.primary30),
+                  foregroundColor: AppColors.primary30,
+                ),
+                onPressed: () =>
+                    Navigator.of(context).pop(_TripConflictChoice.goToActive),
+                child: const Text('Ir al viaje en curso'),
+              ),
+            ),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancelar'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _Marker extends StatelessWidget {

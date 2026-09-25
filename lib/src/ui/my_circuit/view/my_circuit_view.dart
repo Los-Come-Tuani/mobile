@@ -8,7 +8,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
-import '../../circuit_detail/widgets/start_trip_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
@@ -98,15 +97,15 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     Routes.myCircuitMapPath(context.read<MyCircuitViewModel>().collectionId),
   );
 
-  /// Elige la parada de arranque, empieza el viaje con el itinerario
-  /// recalculado desde ahora y abre el mapa del viaje.
+  /// Empieza a seguir el itinerario en el orden en que está (recalculado
+  /// desde ahora) y abre el mapa del viaje.
   Future<void> _startTrip() async {
     final viewModel = context.read<MyCircuitViewModel>();
-    final startStop = await showStartTripSheet(context, stops: viewModel.stops);
-    if (startStop == null || !mounted) return;
+    if (!await startTripChecked(context, viewModel) || !mounted) return;
 
-    viewModel.startTrip(startStop);
-    _notify('¡Viaje iniciado! Dirígete a ${startStop.name}');
+    if (viewModel.nextTripStop case final first?) {
+      _notify('¡Viaje iniciado! Dirígete a ${first.stop.name}');
+    }
     _openMap();
   }
 
