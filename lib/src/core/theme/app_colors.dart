@@ -55,4 +55,50 @@ abstract final class AppColors {
   /// Dorado como las medallas: completarlos da insignias extra.
   static const Color creativeCircuit = medalGold;
   static const Color onCreativeCircuit = primary60;
+
+  // ── Mapa (estilo de las calles y textura de papel) ────────────────────────
+  /// La tierra: el papel del mapa, un poco más tostado que el fondo.
+  static const Color mapLand = Color(0xFFF1E8D2);
+
+  /// Manzanas y zonas urbanas.
+  static const Color mapBlock = Color(0xFFEBDFC4);
+  static const Color mapBuilding = Color(0xFFE2D2B0);
+  static const Color mapBuildingOutline = Color(0xFFD3C09A);
+
+  /// Calles: blanco hueso con borde arena.
+  static const Color mapRoad = Color(0xFFFFFCF3);
+  static const Color mapRoadCasing = Color(0xFFD9C8A4);
+
+  /// Agua en azul acuarela, de la familia de [accentSecondaryBlue].
+  static const Color mapWater = Color(0xFFA7C4D2);
+  static const Color mapWaterEdge = Color(0xFF86ABC0);
+
+  /// Parques y bosques en verde suave, de la familia de
+  /// [accentSecondaryGreen].
+  static const Color mapPark = Color(0xFFCEDBB8);
+  static const Color mapWood = Color(0xFFBFD0A8);
+
+  /// Nombres de calles, barrios y ciudades, con halo del color del papel.
+  static const Color mapLabel = secondaryText;
+  static const Color mapLabelHalo = primary10;
+  static const Color mapWaterLabel = accentSecondaryBlue;
+
+  /// Grano, fibras y viñeta de la textura de papel.
+  static const Color paperGrain = Color(0xFF7A6A4E);
+
+  // ── Recorrido sobre el mapa ───────────────────────────────────────────────
+  /// Tramos ya recorridos.
+  static const Color routeDone = primary30;
+
+  /// El tramo hacia la siguiente parada.
+  static const Color routeCurrent = star;
+
+  /// Lo que falta del recorrido.
+  static const Color routeUpcoming = accentSecondaryBlue;
+
+  /// Tramos hacia paradas que el turista saltó.
+  static const Color routeSkipped = outline;
+
+  /// La flecha de "estás aquí".
+  static const Color userLocation = star;
 }

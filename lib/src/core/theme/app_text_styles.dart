@@ -89,4 +89,33 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.primary30,
   );
+
+  /// Nombres de calles y barrios dentro del mapa.
+  static TextStyle get mapLabel => GoogleFonts.poppins(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.mapLabel,
+  );
+
+  /// Pueblos y ciudades dentro del mapa.
+  static TextStyle get mapPlace => GoogleFonts.poppins(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.primaryText,
+  );
+
+  /// Ríos, lagos y mares dentro del mapa.
+  static TextStyle get mapWater => GoogleFonts.poppins(
+    fontSize: 12,
+    fontStyle: FontStyle.italic,
+    color: AppColors.mapWaterLabel,
+  );
+
+  /// Nombre de una parada en la píldora bajo su pin.
+  static TextStyle get mapPin => GoogleFonts.poppins(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    color: AppColors.primaryText,
+  );
 }
