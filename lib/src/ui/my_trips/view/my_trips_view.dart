@@ -81,6 +81,14 @@ class _MyTripsViewState extends State<MyTripsView> {
               padding: AppTheme.screenPadding.copyWith(top: 8, bottom: 24),
               children: [
                 _NewTripRow(onTap: _createTrip),
+                const SizedBox(height: 10),
+                _NewTripRow(
+                  icon: Icons.auto_awesome,
+                  label: 'Crear viaje con IA',
+                  subtitle:
+                      'El asistente te arma el día con horarios y traslados',
+                  onTap: () => context.push(Routes.assistant),
+                ),
                 const SizedBox(height: 16),
                 if (trips.isEmpty)
                   const _EmptyState()
@@ -99,9 +107,17 @@ class _MyTripsViewState extends State<MyTripsView> {
 
 /// Fila para crear un viaje nuevo, siempre visible al tope de la lista.
 class _NewTripRow extends StatelessWidget {
-  const _NewTripRow({required this.onTap});
+  const _NewTripRow({
+    required this.onTap,
+    this.icon = Icons.add,
+    this.label = 'Crear viaje nuevo',
+    this.subtitle,
+  });
 
   final VoidCallback onTap;
+  final IconData icon;
+  final String label;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -127,12 +143,23 @@ class _NewTripRow extends StatelessWidget {
                   color: AppColors.primary30.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppTheme.radius),
                 ),
-                child: const Icon(Icons.add, color: AppColors.primary30),
+                child: Icon(icon, color: AppColors.primary30),
               ),
               const SizedBox(width: 12),
-              Text(
-                'Crear viaje nuevo',
-                style: AppTextStyles.body.copyWith(color: AppColors.primary30),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.primary30,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(subtitle!, style: AppTextStyles.caption),
+                  ],
+                ),
               ),
             ],
           ),

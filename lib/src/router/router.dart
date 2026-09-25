@@ -13,6 +13,7 @@ import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
+import '../data/datasources/repository/visit_log_repository.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
@@ -32,6 +33,8 @@ import '../ui/guide_request/view/guide_proposal_view.dart';
 import '../ui/guide_request/viewmodels/guide_request_viewmodel.dart';
 import '../ui/home/view/home_view.dart';
 import '../ui/home/viewmodels/home_viewmodel.dart';
+import '../ui/itinerary_assistant/view/itinerary_assistant_view.dart';
+import '../ui/itinerary_assistant/viewmodels/itinerary_assistant_viewmodel.dart';
 import '../ui/login/view/login_view.dart';
 import '../ui/login/viewmodels/login_viewmodel.dart';
 import '../ui/medals/view/medals_view.dart';
@@ -102,6 +105,7 @@ GoRouter createRouter(AuthRepository authRepository) {
             context.read<BadgesRepository>(),
             context.read<BookingsRepository>(),
             context.read<GuideRequestRepository>(),
+            context.read<ActiveTripRepository>(),
           ),
           child: const HomeView(),
         ),
@@ -116,6 +120,8 @@ GoRouter createRouter(AuthRepository authRepository) {
               context.read<CircuitCollectionsRepository>(),
               context.read<ActiveTripRepository>(),
               context.read<BadgesRepository>(),
+              context.read<BookingsRepository>(),
+              context.read<VisitLogRepository>(),
               id,
             ),
             child: const CircuitDetailView(),
@@ -133,6 +139,7 @@ GoRouter createRouter(AuthRepository authRepository) {
                   context.read<BookingsRepository>(),
                   context.read<GuideRequestRepository>(),
                   context.read<GuideChatRepository>(),
+                  context.read<VisitLogRepository>(),
                   id,
                 ),
                 child: const BookingView(),
@@ -148,6 +155,7 @@ GoRouter createRouter(AuthRepository authRepository) {
                   context.read<TourRepository>(),
                   context.read<GroupSessionRepository>(),
                   context.read<BookingsRepository>(),
+                  context.read<VisitLogRepository>(),
                   id,
                 ),
                 child: const GroupSlotsView(),
@@ -175,6 +183,7 @@ GoRouter createRouter(AuthRepository authRepository) {
               context.read<CircuitCollectionsRepository>(),
               context.read<BadgesRepository>(),
               context.read<ActiveTripRepository>(),
+              context.read<VisitLogRepository>(),
               id,
             ),
             child: const StopDetailView(),
@@ -224,6 +233,9 @@ GoRouter createRouter(AuthRepository authRepository) {
             create: (context) => MyCircuitViewModel(
               context.read<TourRepository>(),
               context.read<CircuitCollectionsRepository>(),
+              context.read<ActiveTripRepository>(),
+              context.read<BookingsRepository>(),
+              context.read<VisitLogRepository>(),
               id,
             ),
             child: const MyCircuitView(),
@@ -241,6 +253,7 @@ GoRouter createRouter(AuthRepository authRepository) {
                   context.read<BookingsRepository>(),
                   context.read<GuideRequestRepository>(),
                   context.read<GuideChatRepository>(),
+                  context.read<VisitLogRepository>(),
                   id,
                   isUserCircuit: true,
                 ),
@@ -248,7 +261,34 @@ GoRouter createRouter(AuthRepository authRepository) {
               );
             },
           ),
+          GoRoute(
+            path: Routes.assistantSegment,
+            builder: (context, state) {
+              final id = state.pathParameters[Routes.collectionId] ?? '';
+              return ChangeNotifierProvider<ItineraryAssistantViewModel>(
+                create: (context) => ItineraryAssistantViewModel(
+                  context.read<TourRepository>(),
+                  context.read<CircuitCollectionsRepository>(),
+                  context.read<VisitLogRepository>(),
+                  collectionId: id,
+                ),
+                child: const ItineraryAssistantView(),
+              );
+            },
+          ),
         ],
+      ),
+      GoRoute(
+        path: Routes.assistant,
+        builder: (context, state) =>
+            ChangeNotifierProvider<ItineraryAssistantViewModel>(
+              create: (context) => ItineraryAssistantViewModel(
+                context.read<TourRepository>(),
+                context.read<CircuitCollectionsRepository>(),
+                context.read<VisitLogRepository>(),
+              ),
+              child: const ItineraryAssistantView(),
+            ),
       ),
       GoRoute(
         path: Routes.myTrips,

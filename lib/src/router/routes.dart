@@ -31,6 +31,13 @@ abstract final class Routes {
   /// Circuito creado por el usuario: `/my-circuit/:id`
   static const myCircuit = '/my-circuit/:$collectionId';
 
+  /// Sub-ruta del asistente que reorganiza un circuito propio:
+  /// `/my-circuit/:id/assistant`.
+  static const assistantSegment = 'assistant';
+
+  /// Asistente que arma un circuito desde cero: `/assistant`.
+  static const assistant = '/assistant';
+
   /// Perfil de un guía: `/guide/:id`
   static const guideProfile = '/guide/:$guideId';
 
@@ -58,6 +65,8 @@ abstract final class Routes {
   static String eventDetailPath(String id) => '/event/$id';
   static String myCircuitPath(String id) => '/my-circuit/$id';
   static String myCircuitBookingPath(String id) => '/my-circuit/$id/booking';
+  static String myCircuitAssistantPath(String id) =>
+      '/my-circuit/$id/assistant';
   static String guideProfilePath(String id) => '/guide/$id';
 
   /// Rutas accesibles sin sesión iniciada.
