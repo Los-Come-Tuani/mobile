@@ -117,14 +117,20 @@ abstract final class ItineraryPlanner {
     TravelMode mode, {
     int? fixedMinutes,
   }) {
-    final km = distanceKm(from, to) * detourFactor;
     if (fixedMinutes != null) {
       return ItineraryLeg(
         kind: LegKind.fixed,
         minutes: fixedMinutes,
-        distanceKm: km,
+        distanceKm: distanceKm(from, to) * detourFactor,
       );
     }
+    return legForDistance(distanceKm(from, to), mode);
+  }
+
+  /// El traslado para [straightKm] en línea recta, con los mismos criterios
+  /// que entre dos paradas (sirve, p. ej., desde donde está el turista).
+  static ItineraryLeg legForDistance(double straightKm, TravelMode mode) {
+    final km = straightKm * detourFactor;
     if (km < samePlaceKm) {
       return ItineraryLeg(kind: LegKind.samePlace, minutes: 0, distanceKm: km);
     }
