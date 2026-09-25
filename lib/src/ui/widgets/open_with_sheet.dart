@@ -130,9 +130,11 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                   onChanged: (value) =>
                       setState(() => _remember = value ?? false),
                 ),
-                Text(
-                  'Usar siempre esta opción',
-                  style: AppTextStyles.bodySmall,
+                Flexible(
+                  child: Text(
+                    'Usar siempre esta opción',
+                    style: AppTextStyles.bodySmall,
+                  ),
                 ),
               ],
             ),
