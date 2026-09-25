@@ -101,6 +101,18 @@ class CircuitDetailViewModel extends BaseViewModel with TripActions {
     safeNotify();
   }
 
+  /// El orden se ajusta antes de salir. Los creativos no: siguen el
+  /// recorrido oficial que hacen los guías con el grupo.
+  bool get canReorderStops =>
+      !isTripActive &&
+      _stops.length > 1 &&
+      !(_circuit?.isCreativeCircuit ?? false);
+
+  /// Guarda el orden nuevo del recorrido; el itinerario se recalcula al
+  /// recargar las paradas.
+  void reorderStops(List<String> stopIds) =>
+      _collectionsRepository.updatePlan(circuitId, stopIds: stopIds);
+
   void _replan() {
     final circuit = _circuit;
     _itinerary = circuit == null || _stops.isEmpty

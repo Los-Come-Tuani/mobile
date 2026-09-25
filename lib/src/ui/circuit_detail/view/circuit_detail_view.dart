@@ -22,6 +22,7 @@ import '../../widgets/image_gallery.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
+import '../../widgets/reorder_stops_sheet.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/circuit_detail_viewmodel.dart';
@@ -88,6 +89,16 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     context.read<CircuitDetailViewModel>().skipStop(stop.stop.id, reason);
   }
 
+  /// Cambia el orden de las paradas arrastrándolas; los horarios del
+  /// itinerario se recalculan con el orden nuevo.
+  Future<void> _reorderStops() async {
+    final viewModel = context.read<CircuitDetailViewModel>();
+    final order = await showReorderStopsSheet(context, stops: viewModel.stops);
+    if (order == null || !mounted) return;
+    viewModel.reorderStops(order);
+    _notifySoon('Orden guardado: el itinerario se recalculó');
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<CircuitDetailViewModel>();
@@ -128,6 +139,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
               onStartTrip: () => _startTrip(circuit),
               onEndTrip: _endTrip,
               onSkipStop: _skipStop,
+              onReorderStops: viewModel.canReorderStops ? _reorderStops : null,
             ),
     );
   }
@@ -165,6 +177,7 @@ class _DetailContent extends StatelessWidget {
     required this.onStartTrip,
     required this.onEndTrip,
     required this.onSkipStop,
+    required this.onReorderStops,
   });
 
   final Circuit circuit;
@@ -182,6 +195,9 @@ class _DetailContent extends StatelessWidget {
   final VoidCallback onStartTrip;
   final VoidCallback onEndTrip;
   final ValueChanged<ItineraryStop> onSkipStop;
+
+  /// `null` si el orden no se puede cambiar (viaje en curso o creativo).
+  final VoidCallback? onReorderStops;
 
   static const double _galleryHeight = 260;
 
@@ -335,7 +351,12 @@ class _DetailContent extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
               ] else if (stops.isNotEmpty) ...[
-                SectionHeader(title: 'Paradas del recorrido (${stops.length})'),
+                SectionHeader(
+                  title: 'Paradas del recorrido (${stops.length})',
+                  actionLabel: onReorderStops == null ? null : 'Ordenar',
+                  actionIcon: Icons.swap_vert,
+                  onActionPressed: onReorderStops,
+                ),
                 const SizedBox(height: 10),
                 if (startTimes.length > 1) ...[
                   _StartTimePicker(

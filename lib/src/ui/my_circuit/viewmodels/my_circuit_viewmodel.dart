@@ -100,6 +100,14 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
   void setTravelMode(TravelMode value) =>
       _collectionsRepository.updatePlan(collectionId, travelMode: value);
 
+  /// El orden se ajusta antes de salir: el viaje en curso sigue el plan con
+  /// que empezó.
+  bool get canReorderStops => !isTripActive && _stops.length > 1;
+
+  /// Guarda el orden nuevo del recorrido; el itinerario se recalcula.
+  void reorderStops(List<String> stopIds) =>
+      _collectionsRepository.updatePlan(collectionId, stopIds: stopIds);
+
   /// Quita la parada del circuito y registra por qué, para el portal.
   StopRemoval removeStop(String stopId, DropReason reason) {
     final index = _collectionsRepository

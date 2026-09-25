@@ -9,11 +9,15 @@ class SectionHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.actionLabel,
+    this.actionIcon = Icons.chevron_right,
     this.onActionPressed,
   });
 
   final String title;
   final String? actionLabel;
+
+  /// Va después de [actionLabel]; por defecto, la flecha de "ver más".
+  final IconData actionIcon;
   final VoidCallback? onActionPressed;
 
   @override
@@ -26,10 +30,7 @@ class SectionHeader extends StatelessWidget {
             onPressed: onActionPressed,
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(actionLabel!),
-                const Icon(Icons.chevron_right, size: 18),
-              ],
+              children: [Text(actionLabel!), Icon(actionIcon, size: 18)],
             ),
           ),
       ],

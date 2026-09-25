@@ -13,6 +13,7 @@ import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/reorder_stops_sheet.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
@@ -107,6 +108,16 @@ class _MyCircuitViewState extends State<MyCircuitView> {
       _notify('¡Viaje iniciado! Dirígete a ${first.stop.name}');
     }
     _openMap();
+  }
+
+  /// Cambia el orden de las paradas arrastrándolas; los horarios del
+  /// itinerario se recalculan con el orden nuevo.
+  Future<void> _reorderStops() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final order = await showReorderStopsSheet(context, stops: viewModel.stops);
+    if (order == null || !mounted) return;
+    viewModel.reorderStops(order);
+    _notify('Orden guardado: el itinerario se recalculó');
   }
 
   Future<void> _skipStop(ItineraryStop stop) async {
@@ -248,6 +259,13 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                   if (itinerary == null)
                     const _EmptyState()
                   else ...[
+                    SectionHeader(
+                      title: 'Paradas del recorrido',
+                      actionLabel: viewModel.canReorderStops ? 'Ordenar' : null,
+                      actionIcon: Icons.swap_vert,
+                      onActionPressed: _reorderStops,
+                    ),
+                    const SizedBox(height: 10),
                     ItinerarySummary(itinerary: itinerary),
                     const SizedBox(height: 12),
                     ItineraryTimeline(

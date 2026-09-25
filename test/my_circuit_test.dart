@@ -86,4 +86,70 @@ void main() {
       expect(visitLog.events, isEmpty);
     },
   );
+
+  testWidgets('Las paradas se ordenan arrastrándolas', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final tourRepository = TourRepository();
+    final collections = CircuitCollectionsRepository(tourRepository);
+    await tester.runAsync(() async {
+      await collections.ensureLoaded();
+      await tourRepository.getStops();
+    });
+    final circuit = collections.createCollection(
+      'Mi ruta por Granada',
+      stopIds: const [
+        'granada-catedral',
+        'granada-convento-san-francisco',
+        'granada-mercado',
+      ],
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<MyCircuitViewModel>(
+        create: (_) => MyCircuitViewModel(
+          tourRepository,
+          collections,
+          ActiveTripRepository(),
+          BookingsRepository(),
+          VisitLogRepository(),
+          circuit.id,
+        ),
+        child: MaterialApp(theme: AppTheme.light, home: const MyCircuitView()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.ensureVisible(find.text('Ordenar'));
+    await tester.tap(find.text('Ordenar'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Ordenar paradas'), findsOneWidget);
+
+    // La Catedral, arrastrada por su manija, pasa al final.
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byIcon(Icons.drag_indicator).first),
+    );
+    for (var i = 0; i < 12; i++) {
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump();
+    }
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('Guardar orden'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(circuit.stopIds, [
+      'granada-convento-san-francisco',
+      'granada-mercado',
+      'granada-catedral',
+    ]);
+    expect(find.text('Orden guardado: el itinerario se recalculó'), findsOne);
+  });
 }
