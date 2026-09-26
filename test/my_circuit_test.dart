@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:k_plan_mobile/src/core/theme/app_theme.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/active_trip_repository.dart';
@@ -149,6 +150,114 @@ void main() {
     // El Mercado, que ahora está en la segunda posición, llega a las 11:00.
     expect(find.textContaining('11:00'), findsWidgets);
   });
+
+  testWidgets('el reloj para elegir la hora es de 12 horas con a.m. y p.m.', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 3;
+    tester.view.physicalSize = const Size(411 * 3, 900 * 3);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final tourRepository = TourRepository();
+    final collections = CircuitCollectionsRepository(tourRepository);
+    await tester.runAsync(() async {
+      await collections.ensureLoaded();
+      await tourRepository.getStops();
+    });
+    final circuit = collections.createCollection(
+      'Mi ruta por Granada',
+      stopIds: const ['granada-catedral', 'granada-convento-san-francisco'],
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<MyCircuitViewModel>(
+        create: (_) => MyCircuitViewModel(
+          tourRepository,
+          collections,
+          ActiveTripRepository(),
+          BookingsRepository(),
+          VisitLogRepository(),
+          circuit.id,
+        ),
+        child: MaterialApp(
+          theme: AppTheme.light,
+          locale: const Locale('es'),
+          supportedLocales: const [Locale('es'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: const MyCircuitView(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final firstTime = find.text('9:00 – 9:30 a.m.');
+    await tester.scrollUntilVisible(
+      firstTime,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(firstTime);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hora de salida'), findsWidgets);
+    expect(find.text('a.m.'), findsOneWidget);
+    expect(find.text('p.m.'), findsOneWidget);
+  });
+
+  for (final width in [411.0, 360.0]) {
+    testWidgets('las paradas con hora caben en un teléfono de ${width.toInt()} '
+        'de ancho', (tester) async {
+      tester.view.devicePixelRatio = 3;
+      tester.view.physicalSize = Size(width * 3, 800 * 3);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final tourRepository = TourRepository();
+      final collections = CircuitCollectionsRepository(tourRepository);
+      await tester.runAsync(() async {
+        await collections.ensureLoaded();
+        await tourRepository.getStops();
+      });
+      final circuit = collections.createCollection(
+        'Mi ruta por Granada',
+        stopIds: const [
+          'granada-catedral',
+          'granada-convento-san-francisco',
+          'granada-mercado',
+        ],
+      );
+      // Una hora que no alcanza, para ver el aviso y la nota bajo la parada.
+      collections.setFixedArrival(circuit.id, 2, 9 * 60);
+
+      await tester.pumpWidget(
+        ChangeNotifierProvider<MyCircuitViewModel>(
+          create: (_) => MyCircuitViewModel(
+            tourRepository,
+            collections,
+            ActiveTripRepository(),
+            BookingsRepository(),
+            VisitLogRepository(),
+            circuit.id,
+          ),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const MyCircuitView(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.scrollUntilVisible(
+        find.text('Querías llegar a las 9:00 a.m.'),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   test(
     'las horas fijas van con la posición y se limpian al quitar paradas',

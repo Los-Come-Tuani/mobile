@@ -153,20 +153,22 @@ class StopListTile extends StatelessWidget {
                                   style: AppTextStyles.caption,
                                 ),
                                 const SizedBox(height: 4),
-                                Row(
+                                // En tarjetas angostas (con manija para
+                                // arrastrar) la insignia baja de línea.
+                                Wrap(
+                                  spacing: 10,
+                                  runSpacing: 2,
                                   children: [
                                     IconLabel(
                                       icon: Icons.schedule,
                                       label: stop.duration,
                                     ),
-                                    if (stop.hasBadge) ...[
-                                      const SizedBox(width: 10),
+                                    if (stop.hasBadge)
                                       const IconLabel(
                                         icon: Icons.military_tech_outlined,
                                         label: 'Insignia',
                                         color: AppColors.primary30,
                                       ),
-                                    ],
                                   ],
                                 ),
                                 if (footer != null) ...[
