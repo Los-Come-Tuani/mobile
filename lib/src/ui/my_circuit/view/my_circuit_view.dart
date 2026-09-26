@@ -7,16 +7,15 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
-import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
-import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/reorder_stops_sheet.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
+import '../widgets/day_plan_editor.dart';
 
 /// Detalle de un circuito creado por el usuario: cómo quiere hacer el día,
 /// el itinerario con la hora de cada parada y, si lo está recorriendo, el
@@ -66,31 +65,6 @@ class _MyCircuitViewState extends State<MyCircuitView> {
           ),
         ),
       );
-  }
-
-  Future<void> _pickStartTime() async {
-    final viewModel = context.read<MyCircuitViewModel>();
-    final picked = await showOptionsSheet(
-      context,
-      title: 'Hora de salida',
-      options: viewModel.startTimes,
-      selected: viewModel.startTime,
-    );
-    if (picked != null) viewModel.setStartTime(picked);
-  }
-
-  Future<void> _pickTravelMode() async {
-    final viewModel = context.read<MyCircuitViewModel>();
-    final picked = await showOptionsSheet(
-      context,
-      title: '¿Cómo te vas a mover?',
-      options: [for (final mode in TravelMode.values) mode.label],
-      selected: viewModel.travelMode.label,
-    );
-    if (picked == null) return;
-    viewModel.setTravelMode(
-      TravelMode.values.firstWhere((mode) => mode.label == picked),
-    );
   }
 
   /// El mapa del circuito: su recorrido o, si se está siguiendo, el viaje.
@@ -234,27 +208,17 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                     ),
                     const SizedBox(height: 20),
                     Text('Tu día', style: AppTextStyles.title),
-                    const SizedBox(height: 10),
-                    BookingCard(
-                      children: [
-                        BookingFieldRow(
-                          icon: Icons.schedule,
-                          label: 'Hora de salida',
-                          value: viewModel.startTime,
-                          onTap: _pickStartTime,
-                        ),
-                        BookingFieldRow(
-                          icon: viewModel.travelMode == TravelMode.walking
-                              ? Icons.directions_walk
-                              : Icons.directions_car_outlined,
-                          label: 'Transporte',
-                          value: viewModel.travelMode.label,
-                          showDivider: false,
-                          onTap: _pickTravelMode,
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    DayPlanEditor(
+                      startTime: viewModel.startTime,
+                      startTimes: viewModel.startTimes,
+                      travelMode: viewModel.travelMode,
+                      pace: viewModel.pace,
+                      onStartTimeChanged: viewModel.setStartTime,
+                      onTravelModeChanged: viewModel.setTravelMode,
+                      onPaceChanged: viewModel.setPace,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 28),
                   ],
                   if (itinerary == null)
                     const _EmptyState()

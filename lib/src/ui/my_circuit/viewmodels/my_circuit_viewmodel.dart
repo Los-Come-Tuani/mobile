@@ -1,5 +1,6 @@
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/start_times.dart';
 import '../../../core/utils/time_parser.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
@@ -10,7 +11,6 @@ import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/visit_event.dart';
-import '../../booking/viewmodels/booking_viewmodel.dart';
 import '../../core/base_viewmodel.dart';
 import '../../core/trip_actions.dart';
 
@@ -64,12 +64,14 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
   CircuitCollection? get collection =>
       _collectionsRepository.findById(collectionId);
 
-  /// Las mismas horas que se ofrecen al agendar un circuito propio.
-  List<String> get startTimes => BookingViewModel.userCircuitStartTimes;
+  /// Las mismas horas que se ofrecen al agendar un circuito propio, más la
+  /// que eligió si es a la medida.
+  List<String> get startTimes => StartTimes.including(startTime);
 
   String get startTime =>
       collection?.startTime ?? CircuitCollection.defaultStartTime;
   TravelMode get travelMode => collection?.travelMode ?? TravelMode.walking;
+  ItineraryPace get pace => collection?.pace ?? ItineraryPace.balanced;
 
   /// `null` mientras el circuito no tenga paradas.
   Itinerary? get itinerary {
@@ -99,6 +101,9 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
 
   void setTravelMode(TravelMode value) =>
       _collectionsRepository.updatePlan(collectionId, travelMode: value);
+
+  void setPace(ItineraryPace value) =>
+      _collectionsRepository.updatePlan(collectionId, pace: value);
 
   /// El orden se ajusta antes de salir: el viaje en curso sigue el plan con
   /// que empezó.

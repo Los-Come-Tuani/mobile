@@ -1,5 +1,6 @@
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/start_times.dart';
 import '../../../core/utils/time_parser.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
@@ -49,20 +50,6 @@ class BookingViewModel extends BaseViewModel {
 
   /// Mínimo de días de anticipación para agendar.
   static const int minDaysAhead = 1;
-
-  /// Horas de salida para los circuitos del usuario, que no traen las suyas.
-  /// Son horas en punto: es lo que propone el asistente al mover la salida.
-  static const List<String> userCircuitStartTimes = [
-    '7:00 a.m.',
-    '8:00 a.m.',
-    '9:00 a.m.',
-    '10:00 a.m.',
-    '11:00 a.m.',
-    '12:00 p.m.',
-    '1:00 p.m.',
-    '2:00 p.m.',
-    '3:00 p.m.',
-  ];
 
   Circuit? _circuit;
   CircuitCollection? _collection;
@@ -130,7 +117,7 @@ class BookingViewModel extends BaseViewModel {
   bool get isSaving => _isSaving;
 
   List<String> get availableTimes => isUserCircuit
-      ? userCircuitStartTimes
+      ? StartTimes.including(_startTime)
       : (_circuit?.startTimes ?? const []);
 
   /// Un circuito propio no tiene precio por persona: sólo se paga el guía o
@@ -205,10 +192,11 @@ class BookingViewModel extends BaseViewModel {
     }
 
     _collection = collection;
-    // Sale a la hora que dejó en su circuito (o el asistente), si se ofrece.
-    _startTime = userCircuitStartTimes.contains(collection.startTime)
-        ? collection.startTime
-        : userCircuitStartTimes[2];
+    // Sale a la hora que dejó en su circuito (o el asistente), aunque sea
+    // una hora a la medida.
+    _startTime = TimeParser.minutesOfDay(collection.startTime) == null
+        ? CircuitCollection.defaultStartTime
+        : collection.startTime;
     await _loadStops(collection.stopIds);
   }
 
