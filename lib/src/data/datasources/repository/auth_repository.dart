@@ -40,10 +40,32 @@ class AuthRepository extends ChangeNotifier {
     }
   }
 
+  /// Envía el código de 6 dígitos que confirma que el correo es del usuario.
+  ///
+  /// El backend todavía no tiene este paso: por ahora sólo se simula.
+  Future<Result<void>> sendVerificationCode(String email) async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    return const Result.ok(null);
+  }
+
+  /// Mientras no exista el endpoint, cualquier código de 6 dígitos es válido.
+  Future<Result<void>> verifyCode({
+    required String email,
+    required String code,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (!RegExp(r'^\d{6}$').hasMatch(code)) {
+      return const Result.failure('El código no es válido');
+    }
+    return const Result.ok(null);
+  }
+
   Future<Result<User>> register({
     required String name,
     required String email,
     required String password,
+    String? username,
+    DateTime? birthDate,
   }) async {
     try {
       if (!ApiClient.isConfigured) {
@@ -54,7 +76,14 @@ class AuthRepository extends ChangeNotifier {
 
       final response = await ApiClient.instance.post(
         ApiRoutes.register,
-        data: {'name': name, 'email': email, 'password': password},
+        data: {
+          'name': name,
+          'email': email,
+          'password': password,
+          'username': ?username,
+          if (birthDate != null)
+            'birthDate': birthDate.toIso8601String().split('T').first,
+        },
       );
       final user = User.fromJson(_payloadOf(response));
       _setUser(user);

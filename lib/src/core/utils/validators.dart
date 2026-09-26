@@ -17,4 +17,31 @@ abstract final class Validators {
     if (text.length < minLength) return 'Mínimo 6 caracteres';
     return null;
   }
+
+  /// Reglas de una contraseña nueva, para la lista que se marca al escribir.
+  static ({bool length, bool letter, bool number}) newPasswordRules(
+    String value,
+  ) => (
+    length: value.length >= 8,
+    letter: RegExp('[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]').hasMatch(value),
+    number: RegExp(r'\d').hasMatch(value),
+  );
+
+  static String? newPassword(String? value) {
+    final rules = newPasswordRules(value ?? '');
+    if (rules.length && rules.letter && rules.number) return null;
+    return 'Usa al menos 8 caracteres con letras y números';
+  }
+
+  static final RegExp _usernameRegExp = RegExp(r'^[A-Za-z0-9._]{3,20}$');
+
+  /// Sin la "@" inicial, que el campo agrega sólo como ayuda visual.
+  static String? username(String? value) {
+    final text = (value ?? '').trim().replaceFirst(RegExp('^@'), '');
+    if (text.isEmpty) return 'Ingresa un nombre de usuario';
+    if (!_usernameRegExp.hasMatch(text)) {
+      return 'De 3 a 20 letras, números, puntos o guiones bajos';
+    }
+    return null;
+  }
 }

@@ -13,32 +13,51 @@ class IllustrationHeader extends StatelessWidget {
     super.key,
     required this.asset,
     required this.height,
+    this.alignment = Alignment.bottomCenter,
+    this.zoom = 1,
   });
 
   final String asset;
   final double height;
 
+  /// Qué parte del arte queda visible cuando la banda lo recorta.
+  final Alignment alignment;
+
+  /// Acerca el arte dentro de la banda sin hacerla más alta; lo que sobra
+  /// por los bordes se recorta.
+  final double zoom;
+
   @override
   Widget build(BuildContext context) {
     final isSvg = asset.toLowerCase().endsWith('.svg');
 
-    return SizedBox(
-      width: double.infinity,
-      height: height,
-      child: isSvg
+    final artwork = isSvg
           ? SvgPicture.asset(
               asset,
               fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
+              alignment: alignment,
               errorBuilder: (context, error, stackTrace) =>
                   const _MissingArtwork(),
             )
           : Image.asset(
               asset,
               fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
+              alignment: alignment,
               errorBuilder: (context, error, stackTrace) =>
                   const _MissingArtwork(),
+            );
+
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: zoom == 1
+          ? artwork
+          : ClipRect(
+              child: Transform.scale(
+                scale: zoom,
+                alignment: alignment,
+                child: artwork,
+              ),
             ),
     );
   }

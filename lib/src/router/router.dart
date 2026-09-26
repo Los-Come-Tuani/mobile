@@ -78,26 +78,33 @@ GoRouter createRouter(AuthRepository authRepository) {
     routes: [
       GoRoute(
         path: Routes.welcome,
-        builder: (context, state) => const WelcomeView(),
+        pageBuilder: (context, state) => _fadePage(state, const WelcomeView()),
       ),
       GoRoute(
         path: Routes.login,
-        builder: (context, state) => ChangeNotifierProvider<LoginViewModel>(
-          create: (context) => LoginViewModel(context.read<AuthRepository>()),
-          child: const LoginView(),
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ChangeNotifierProvider<LoginViewModel>(
+            create: (context) => LoginViewModel(context.read<AuthRepository>()),
+            child: const LoginView(),
+          ),
         ),
       ),
       GoRoute(
         path: Routes.register,
-        builder: (context, state) => ChangeNotifierProvider<RegisterViewModel>(
-          create: (context) =>
-              RegisterViewModel(context.read<AuthRepository>()),
-          child: const RegisterView(),
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ChangeNotifierProvider<RegisterViewModel>(
+            create: (context) =>
+                RegisterViewModel(context.read<AuthRepository>()),
+            child: const RegisterView(),
+          ),
         ),
       ),
       GoRoute(
         path: Routes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordView(),
+        pageBuilder: (context, state) =>
+            _fadePage(state, const ForgotPasswordView()),
       ),
       GoRoute(
         path: Routes.home,
@@ -376,6 +383,22 @@ GoRouter createRouter(AuthRepository authRepository) {
         ),
       ),
     ],
+  );
+}
+
+/// Fundido corto entre las pantallas de acceso: comparten la ilustración y el
+/// zoom por defecto de Android la hacía parpadear.
+CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 250),
+    reverseTransitionDuration: const Duration(milliseconds: 200),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+        FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: child,
+        ),
+    child: child,
   );
 }
 

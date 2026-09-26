@@ -21,12 +21,14 @@ class WelcomeView extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
-        top: false,
         child: Column(
           children: [
+            // Como en Figma: el arte de 604 × 340 sobre una pantalla de 375
+            // de ancho, pegado a la izquierda y recortado por la derecha.
             IllustrationHeader(
               asset: AppAssets.welcomeIllustration,
-              height: size.height * 0.48,
+              height: size.width * 340 / 375,
+              alignment: Alignment.centerLeft,
             ),
             Expanded(
               child: Padding(

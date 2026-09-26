@@ -85,6 +85,8 @@ class _LoginViewState extends State<LoginView> {
                       IllustrationHeader(
                         asset: AppAssets.authIllustration,
                         height: size.height * 0.26,
+                        alignment: const Alignment(0.8, 0),
+                        zoom: 1.45,
                       ),
                       Expanded(
                         child: Padding(
