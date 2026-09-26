@@ -335,8 +335,12 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.myTrips,
         builder: (context, state) => ChangeNotifierProvider<MyTripsViewModel>(
-          create: (context) =>
-              MyTripsViewModel(context.read<CircuitCollectionsRepository>()),
+          create: (context) => MyTripsViewModel(
+            context.read<CircuitCollectionsRepository>(),
+            context.read<BookingsRepository>(),
+            context.read<ActiveTripRepository>(),
+            context.read<GuideRequestRepository>(),
+          ),
           child: const MyTripsView(),
         ),
       ),
