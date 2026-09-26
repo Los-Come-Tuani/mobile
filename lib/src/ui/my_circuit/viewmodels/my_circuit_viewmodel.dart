@@ -1,3 +1,4 @@
+import '../../../core/utils/formatters.dart';
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/start_times.dart';
@@ -59,6 +60,8 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
   TravelMode get tripTravelMode => travelMode;
   @override
   ItineraryPace get tripPace => collection?.pace ?? ItineraryPace.balanced;
+  @override
+  Map<int, DateTime> tripFixedArrivals(DateTime day) => _fixedArrivalsOn(day);
 
   List<Stop> get stops => _stops;
   CircuitCollection? get collection =>
@@ -71,18 +74,28 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
   String get startTime =>
       collection?.startTime ?? CircuitCollection.defaultStartTime;
   TravelMode get travelMode => collection?.travelMode ?? TravelMode.walking;
-  ItineraryPace get pace => collection?.pace ?? ItineraryPace.balanced;
 
   /// `null` mientras el circuito no tenga paradas.
   Itinerary? get itinerary {
     final current = collection;
     if (current == null || _stops.isEmpty) return null;
+    final today = DateTime.now();
     return ItineraryPlanner.plan(
       stops: _stops,
-      start: TimeParser.at(DateTime.now(), current.startTime),
+      start: TimeParser.at(today, current.startTime),
       mode: current.travelMode,
       pace: current.pace,
+      fixedArrivals: _fixedArrivalsOn(today),
     );
+  }
+
+  Map<int, DateTime> _fixedArrivalsOn(DateTime day) {
+    final midnight = DateTime(day.year, day.month, day.day);
+    return {
+      for (final entry
+          in (collection?.fixedArrivals ?? const <int, int>{}).entries)
+        entry.key: midnight.add(Duration(minutes: entry.value)),
+    };
   }
 
   Future<void> load() async {
@@ -102,16 +115,40 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
   void setTravelMode(TravelMode value) =>
       _collectionsRepository.updatePlan(collectionId, travelMode: value);
 
-  void setPace(ItineraryPace value) =>
-      _collectionsRepository.updatePlan(collectionId, pace: value);
-
   /// El orden se ajusta antes de salir: el viaje en curso sigue el plan con
   /// que empezó.
   bool get canReorderStops => !isTripActive && _stops.length > 1;
 
-  /// Guarda el orden nuevo del recorrido; el itinerario se recalcula.
-  void reorderStops(List<String> stopIds) =>
-      _collectionsRepository.updatePlan(collectionId, stopIds: stopIds);
+  /// Mueve la parada de [oldIndex] a [newIndex] (con la convención de
+  /// `ReorderableListView`). Toma la hora de la posición a la que llega y los
+  /// horarios se recalculan con los traslados nuevos.
+  void moveStop(int oldIndex, int newIndex) {
+    final target = oldIndex < newIndex ? newIndex - 1 : newIndex;
+    if (target == oldIndex) return;
+    final reordered = [..._stops];
+    reordered.insert(target, reordered.removeAt(oldIndex));
+    // Se ve el orden nuevo al soltar, sin esperar a recargar las paradas.
+    _stops = reordered;
+    safeNotify();
+    _collectionsRepository.updatePlan(
+      collectionId,
+      stopIds: [for (final stop in reordered) stop.id],
+    );
+  }
+
+  /// La hora de llegada a la parada en [index]; en la primera es la hora de
+  /// salida del día.
+  void setArrival(int index, int minutesOfDay) {
+    if (index == 0) {
+      setStartTime(Formatters.minutesOfDay(minutesOfDay));
+    } else {
+      _collectionsRepository.setFixedArrival(collectionId, index, minutesOfDay);
+    }
+  }
+
+  /// Vuelve a calcular sola la hora de llegada a la parada en [index].
+  void clearArrival(int index) =>
+      _collectionsRepository.setFixedArrival(collectionId, index, null);
 
   /// Quita la parada del circuito y registra por qué, para el portal.
   StopRemoval removeStop(String stopId, DropReason reason) {

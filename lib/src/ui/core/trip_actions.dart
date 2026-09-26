@@ -33,6 +33,9 @@ mixin TripActions on BaseViewModel {
   ItineraryPace get tripPace => ItineraryPace.balanced;
   Map<String, int> get tripLegMinutes => const {};
 
+  /// Horas de llegada que el turista fijó en el recorrido, para [day].
+  Map<int, DateTime> tripFixedArrivals(DateTime day) => const {};
+
   /// `true` si este es el circuito que el usuario está recorriendo ahora.
   bool get isTripActive => activeTripRepository.isActiveTrip(tripCircuitId);
 
@@ -87,6 +90,7 @@ mixin TripActions on BaseViewModel {
         mode: tripTravelMode,
         pace: tripPace,
         legMinutes: tripLegMinutes,
+        fixedArrivals: tripFixedArrivals(now),
       ),
     );
     return true;

@@ -34,12 +34,18 @@ abstract final class ItineraryPlanner {
 
   /// [legMinutes] fija a mano el traslado hacia una parada (por id), para
   /// tramos que la distancia no explica, como el desembarco de un ferry.
+  ///
+  /// [fixedArrivals] son las horas que el turista eligió para llegar a una
+  /// posición del recorrido (la primera la da [start]). Si llega antes, le
+  /// queda tiempo libre; si el traslado no alcanza, llega cuando pueda y se
+  /// avisa.
   static Itinerary plan({
     required List<Stop> stops,
     required DateTime start,
     TravelMode mode = TravelMode.walking,
     ItineraryPace pace = ItineraryPace.balanced,
     Map<String, int> legMinutes = const {},
+    Map<int, DateTime> fixedArrivals = const {},
   }) {
     final planned = <ItineraryStop>[];
     final warnings = <ItineraryWarning>[];
@@ -73,6 +79,26 @@ abstract final class ItineraryPlanner {
         }
       }
 
+      final fixed = i == 0 ? null : fixedArrivals[i];
+      var wait = Duration.zero;
+      if (fixed != null) {
+        if (fixed.isAfter(clock)) {
+          wait = fixed.difference(clock);
+          clock = fixed;
+        } else if (clock.isAfter(fixed)) {
+          warnings.add(
+            ItineraryWarning(
+              kind: ItineraryWarningKind.missedTime,
+              stopId: stop.id,
+              message:
+                  'No alcanzas a llegar a ${stop.name} a las '
+                  '${Formatters.clock(fixed)}: llegarías a las '
+                  '${Formatters.clock(clock)}.',
+            ),
+          );
+        }
+      }
+
       final arrival = clock;
       final departure = arrival.add(
         Duration(minutes: visitMinutes(stop, pace)),
@@ -83,6 +109,8 @@ abstract final class ItineraryPlanner {
           arrival: arrival,
           departure: departure,
           leg: leg,
+          fixedArrival: fixed,
+          waitBefore: wait,
         ),
       );
       final closed = _openingWarning(stop, arrival, departure, dayStart);

@@ -5,17 +5,18 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
+import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
-import '../../widgets/reorder_stops_sheet.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
-import '../widgets/day_plan_editor.dart';
 
 /// Detalle de un circuito creado por el usuario: cómo quiere hacer el día,
 /// el itinerario con la hora de cada parada y, si lo está recorriendo, el
@@ -84,14 +85,85 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     _openMap();
   }
 
-  /// Cambia el orden de las paradas arrastrándolas; los horarios del
-  /// itinerario se recalculan con el orden nuevo.
-  Future<void> _reorderStops() async {
+  Future<void> _pickStartTime() async {
     final viewModel = context.read<MyCircuitViewModel>();
-    final order = await showReorderStopsSheet(context, stops: viewModel.stops);
-    if (order == null || !mounted) return;
-    viewModel.reorderStops(order);
-    _notify('Orden guardado: el itinerario se recalculó');
+    final picked = await showOptionsSheet(
+      context,
+      title: 'Hora de salida',
+      options: viewModel.startTimes,
+      selected: viewModel.startTime,
+    );
+    if (picked != null) viewModel.setStartTime(picked);
+  }
+
+  Future<void> _pickTravelMode() async {
+    final viewModel = context.read<MyCircuitViewModel>();
+    final picked = await showOptionsSheet(
+      context,
+      title: '¿Cómo te vas a mover?',
+      options: [for (final mode in TravelMode.values) mode.label],
+      selected: viewModel.travelMode.label,
+    );
+    if (picked == null) return;
+    viewModel.setTravelMode(
+      TravelMode.values.firstWhere((mode) => mode.label == picked),
+    );
+  }
+
+  /// Elige a qué hora llegar a una parada; en la primera, a qué hora sale.
+  Future<void> _pickArrival(int index, ItineraryStop stop) async {
+    final current = stop.fixedArrival ?? stop.arrival;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(current),
+      helpText: index == 0
+          ? 'Hora de salida'
+          : 'Hora de llegada a ${stop.stop.name}',
+      cancelText: 'Cancelar',
+      confirmText: 'Listo',
+    );
+    if (picked == null || !mounted) return;
+    context.read<MyCircuitViewModel>().setArrival(
+      index,
+      picked.hour * 60 + picked.minute,
+    );
+  }
+
+  /// Bajo una parada con hora fija: que se note y cómo volver a automática.
+  Widget? _fixedTimeNote(int index, ItineraryStop stop) {
+    final fixed = stop.fixedArrival;
+    if (fixed == null) return null;
+    final text = stop.missesFixedArrival
+        ? 'Querías llegar a las ${Formatters.clock(fixed)}'
+        : 'Hora fija';
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            text,
+            style: AppTextStyles.caption.copyWith(
+              color: stop.missesFixedArrival
+                  ? AppColors.primary30
+                  : AppColors.secondaryText,
+              fontWeight: stop.missesFixedArrival ? FontWeight.w600 : null,
+            ),
+          ),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            minimumSize: const Size(48, 32),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            textStyle: AppTextStyles.caption.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          onPressed: () =>
+              context.read<MyCircuitViewModel>().clearArrival(index),
+          child: const Text('Quitar'),
+        ),
+      ],
+    );
   }
 
   Future<void> _skipStop(ItineraryStop stop) async {
@@ -208,32 +280,50 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                     ),
                     const SizedBox(height: 20),
                     Text('Tu día', style: AppTextStyles.title),
-                    const SizedBox(height: 12),
-                    DayPlanEditor(
-                      startTime: viewModel.startTime,
-                      startTimes: viewModel.startTimes,
-                      travelMode: viewModel.travelMode,
-                      pace: viewModel.pace,
-                      onStartTimeChanged: viewModel.setStartTime,
-                      onTravelModeChanged: viewModel.setTravelMode,
-                      onPaceChanged: viewModel.setPace,
+                    const SizedBox(height: 10),
+                    BookingCard(
+                      children: [
+                        BookingFieldRow(
+                          icon: Icons.schedule,
+                          label: 'Hora de salida',
+                          value: viewModel.startTime,
+                          onTap: _pickStartTime,
+                        ),
+                        BookingFieldRow(
+                          icon: viewModel.travelMode == TravelMode.walking
+                              ? Icons.directions_walk
+                              : Icons.directions_car_outlined,
+                          label: 'Transporte',
+                          value: viewModel.travelMode.label,
+                          showDivider: false,
+                          onTap: _pickTravelMode,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
                   ],
                   if (itinerary == null)
                     const _EmptyState()
                   else ...[
-                    SectionHeader(
-                      title: 'Paradas del recorrido',
-                      actionLabel: viewModel.canReorderStops ? 'Ordenar' : null,
-                      actionIcon: Icons.swap_vert,
-                      onActionPressed: _reorderStops,
+                    const SectionHeader(title: 'Paradas del recorrido'),
+                    const SizedBox(height: 4),
+                    Text(
+                      viewModel.canReorderStops
+                          ? 'Toca la hora de una parada para cambiarla y '
+                                'arrástrala para cambiar el orden.'
+                          : 'Toca la hora de una parada para cambiarla.',
+                      style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 10),
                     ItinerarySummary(itinerary: itinerary),
                     const SizedBox(height: 12),
                     ItineraryTimeline(
                       itinerary: itinerary,
+                      onReorder: viewModel.canReorderStops
+                          ? viewModel.moveStop
+                          : null,
+                      onTimeTap: _pickArrival,
+                      footerBuilder: _fixedTimeNote,
                       onStopTap: (stop) =>
                           context.push(Routes.stopDetailPath(stop.id)),
                       trailingBuilder: (stop) => IconButton(

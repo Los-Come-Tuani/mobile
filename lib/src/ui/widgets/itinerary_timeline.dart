@@ -23,6 +23,9 @@ class ItineraryTimeline extends StatelessWidget {
     this.decorate,
     this.dense = false,
     this.showWarnings = true,
+    this.onReorder,
+    this.onTimeTap,
+    this.footerBuilder,
   });
 
   final Itinerary itinerary;
@@ -36,9 +39,20 @@ class ItineraryTimeline extends StatelessWidget {
   final bool dense;
   final bool showWarnings;
 
+  /// Con esto las paradas se arrastran para cambiar el orden (convención de
+  /// `ReorderableListView`).
+  final ReorderCallback? onReorder;
+
+  /// Con esto la hora de cada parada se toca para elegir cuándo llegar.
+  final void Function(int index, ItineraryStop stop)? onTimeTap;
+
+  /// Línea al pie de la tarjeta fuera de un viaje (p. ej. "Hora fija").
+  final Widget? Function(int index, ItineraryStop stop)? footerBuilder;
+
   @override
   Widget build(BuildContext context) {
     final stops = itinerary.stops;
+    final onReorder = this.onReorder;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,27 +61,88 @@ class ItineraryTimeline extends StatelessWidget {
           ItineraryWarningsCard(warnings: itinerary.warnings),
           const SizedBox(height: 12),
         ],
-        for (var i = 0; i < stops.length; i++) ...[
-          if (stops[i].leg case final leg? when i > 0)
-            _LegRow(leg: leg, dense: dense),
-          if (dense) _DenseStopRow(stop: stops[i]) else _buildTile(stops[i], i),
-        ],
+        if (onReorder != null && !dense)
+          ReorderableListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: stops.length,
+            onReorder: onReorder,
+            proxyDecorator: (child, index, animation) => Material(
+              color: Colors.transparent,
+              elevation: 6,
+              shadowColor: AppColors.primary60.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(AppTheme.radius),
+              child: child,
+            ),
+            itemBuilder: (context, i) => ReorderableDelayedDragStartListener(
+              key: ValueKey(stops[i].stop.id),
+              index: i,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (stops[i].leg case final leg? when i > 0)
+                    _LegRow(leg: leg, wait: stops[i].waitBefore, dense: false),
+                  _buildTile(stops[i], i, dragHandle: _DragHandle(index: i)),
+                ],
+              ),
+            ),
+          )
+        else
+          for (var i = 0; i < stops.length; i++) ...[
+            if (stops[i].leg case final leg? when i > 0)
+              _LegRow(leg: leg, wait: stops[i].waitBefore, dense: dense),
+            if (dense)
+              _DenseStopRow(stop: stops[i])
+            else
+              _buildTile(stops[i], i),
+          ],
       ],
     );
   }
 
-  Widget _buildTile(ItineraryStop stop, int index) {
+  Widget _buildTile(ItineraryStop stop, int index, {Widget? dragHandle}) {
     final decoration = decorate?.call(stop);
+    final trailing = trailingBuilder?.call(stop);
     return StopListTile(
       stop: stop.stop,
       position: index + 1,
       timeRange: decoration?.timeLabel ?? stop.timeRange,
+      onTimeTap: onTimeTap == null ? null : () => onTimeTap!(index, stop),
+      isTimeFixed: stop.fixedArrival != null,
       marker: decoration?.marker,
-      footer: decoration?.footer,
+      footer: decoration?.footer ?? footerBuilder?.call(index, stop),
       dimmed: decoration?.dimmed ?? false,
       showConnector: index < itinerary.stops.length - 1,
       onTap: onStopTap == null ? null : () => onStopTap!(stop.stop),
-      trailing: trailingBuilder?.call(stop),
+      trailing: dragHandle == null
+          ? trailing
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [?trailing, dragHandle],
+            ),
+    );
+  }
+}
+
+/// Manija para arrastrar la parada a otro lugar del recorrido.
+class _DragHandle extends StatelessWidget {
+  const _DragHandle({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableDragStartListener(
+      index: index,
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+        child: Icon(
+          Icons.drag_indicator,
+          semanticLabel: 'Arrastrar para cambiar el orden',
+          color: AppColors.secondaryText,
+        ),
+      ),
     );
   }
 }
@@ -173,23 +248,30 @@ class ItineraryWarningsCard extends StatelessWidget {
     ItineraryWarningKind.longWalk => Icons.directions_walk,
     ItineraryWarningKind.closed => Icons.lock_clock,
     ItineraryWarningKind.endsLate => Icons.dark_mode_outlined,
+    ItineraryWarningKind.missedTime => Icons.schedule,
   };
 }
 
 /// El traslado entre dos paradas, sobre la línea que las une.
 class _LegRow extends StatelessWidget {
-  const _LegRow({required this.leg, required this.dense});
+  const _LegRow({required this.leg, required this.wait, required this.dense});
 
   final ItineraryLeg leg;
+
+  /// Tiempo libre antes de la siguiente parada, por una hora fijada.
+  final Duration wait;
   final bool dense;
 
   @override
   Widget build(BuildContext context) {
-    final label = switch (leg.kind) {
+    final travel = switch (leg.kind) {
       LegKind.walking || LegKind.vehicle =>
         '${leg.label} · ${Formatters.distance(leg.distanceKm)}',
       _ => leg.label,
     };
+    final label = wait > Duration.zero
+        ? '$travel · ${Formatters.duration(wait)} libres'
+        : travel;
     final icon = switch (leg.kind) {
       LegKind.samePlace => Icons.place_outlined,
       LegKind.walking => Icons.directions_walk,

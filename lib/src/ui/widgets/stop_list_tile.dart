@@ -19,6 +19,8 @@ class StopListTile extends StatelessWidget {
     this.trailing,
     this.showConnector = true,
     this.timeRange,
+    this.onTimeTap,
+    this.isTimeFixed = false,
     this.marker,
     this.footer,
     this.dimmed = false,
@@ -36,6 +38,12 @@ class StopListTile extends StatelessWidget {
 
   /// Franja horaria del itinerario ("8:30 – 9:00 a.m."), sobre el nombre.
   final String? timeRange;
+
+  /// Con esto la franja se vuelve un botón para elegir la hora de llegada.
+  final VoidCallback? onTimeTap;
+
+  /// La hora de llegada la fijó el turista (se marca con un pin).
+  final bool isTimeFixed;
 
   /// Reemplaza el círculo con el número (p. ej. un check si ya se visitó).
   final Widget? marker;
@@ -115,13 +123,20 @@ class StopListTile extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (timeRange != null) ...[
-                                  Text(
-                                    timeRange,
-                                    style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.primary30,
-                                      fontWeight: FontWeight.w700,
+                                  if (onTimeTap == null)
+                                    Text(
+                                      timeRange,
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.primary30,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    )
+                                  else
+                                    _TimeButton(
+                                      label: timeRange,
+                                      isFixed: isTimeFixed,
+                                      onTap: onTimeTap!,
                                     ),
-                                  ),
                                   const SizedBox(height: 2),
                                 ],
                                 Text(
@@ -176,6 +191,67 @@ class StopListTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// La franja horaria como botón: al tocarla se elige a qué hora llegar.
+class _TimeButton extends StatelessWidget {
+  const _TimeButton({
+    required this.label,
+    required this.isFixed,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isFixed;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Cambiar hora de llegada, $label',
+      excludeSemantics: true,
+      child: Material(
+        color: AppColors.primary30.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isFixed ? Icons.push_pin : Icons.schedule,
+                  size: 13,
+                  color: AppColors.primary30,
+                ),
+                const SizedBox(width: 5),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.primary30,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5),
+                const Icon(
+                  Icons.edit_outlined,
+                  size: 12,
+                  color: AppColors.primary30,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

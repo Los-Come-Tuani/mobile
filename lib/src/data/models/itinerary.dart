@@ -106,6 +106,8 @@ class ItineraryStop {
     required this.arrival,
     required this.departure,
     this.leg,
+    this.fixedArrival,
+    this.waitBefore = Duration.zero,
   });
 
   final Stop stop;
@@ -114,6 +116,17 @@ class ItineraryStop {
 
   /// Traslado desde la parada anterior; `null` en la primera.
   final ItineraryLeg? leg;
+
+  /// La hora a la que el turista quiere llegar, si la fijó. Puede ser antes
+  /// de [arrival] cuando el traslado no alcanza.
+  final DateTime? fixedArrival;
+
+  /// Tiempo libre antes de llegar, esperando la [fixedArrival].
+  final Duration waitBefore;
+
+  /// Fijó una hora y no le alcanza para llegar a tiempo.
+  bool get missesFixedArrival =>
+      fixedArrival != null && arrival.isAfter(fixedArrival!);
 
   /// `8:30 – 9:00 a.m.`
   String get timeRange => Formatters.timeRange(arrival, departure);
@@ -128,6 +141,9 @@ enum ItineraryWarningKind {
 
   /// El día termina de noche.
   endsLate,
+
+  /// No alcanza a llegar a la hora que fijó en una parada.
+  missedTime,
 }
 
 /// Algo del itinerario que conviene revisar.

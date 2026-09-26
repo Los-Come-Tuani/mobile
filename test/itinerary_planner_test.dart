@@ -194,6 +194,67 @@ void main() {
       );
     });
 
+    group('horas fijas', () {
+      final start = DateTime(2026, 9, 26, 9);
+      Future<List<Stop>> granada() async =>
+          (await tourRepository.getStopsByIds(const [
+            'granada-catedral',
+            'granada-convento-san-francisco',
+            'granada-mercado',
+          ])).let();
+
+      test('si llega antes, espera; lo que sigue se corre desde ahí', () async {
+        final stops = await granada();
+        final free = ItineraryPlanner.plan(stops: stops, start: start);
+        final fixed = free.stops[1].arrival.add(const Duration(minutes: 45));
+
+        final itinerary = ItineraryPlanner.plan(
+          stops: stops,
+          start: start,
+          fixedArrivals: {1: fixed},
+        );
+
+        expect(itinerary.stops[1].arrival, fixed);
+        expect(itinerary.stops[1].waitBefore, const Duration(minutes: 45));
+        expect(itinerary.stops[1].missesFixedArrival, isFalse);
+        expect(
+          itinerary.stops[2].arrival,
+          free.stops[2].arrival.add(const Duration(minutes: 45)),
+        );
+        expect(itinerary.warnings, isEmpty);
+      });
+
+      test('si el traslado no alcanza, llega cuando puede y avisa', () async {
+        final stops = await granada();
+        final free = ItineraryPlanner.plan(stops: stops, start: start);
+        final tooEarly = free.stops[2].arrival.subtract(
+          const Duration(minutes: 20),
+        );
+
+        final itinerary = ItineraryPlanner.plan(
+          stops: stops,
+          start: start,
+          fixedArrivals: {2: tooEarly},
+        );
+
+        expect(itinerary.stops[2].arrival, free.stops[2].arrival);
+        expect(itinerary.stops[2].missesFixedArrival, isTrue);
+        expect(itinerary.warnings.single.kind, ItineraryWarningKind.missedTime);
+      });
+
+      test('la primera parada siempre sale a la hora de salida', () async {
+        final stops = await granada();
+        final itinerary = ItineraryPlanner.plan(
+          stops: stops,
+          start: start,
+          fixedArrivals: {0: start.add(const Duration(hours: 2))},
+        );
+
+        expect(itinerary.stops.first.arrival, start);
+        expect(itinerary.stops.first.fixedArrival, isNull);
+      });
+    });
+
     test('sin paradas, el itinerario termina donde empieza', () {
       final start = DateTime(2026, 9, 26, 9);
       final itinerary = ItineraryPlanner.plan(stops: const [], start: start);

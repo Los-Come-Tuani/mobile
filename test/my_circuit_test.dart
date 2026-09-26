@@ -6,6 +6,7 @@ import 'package:k_plan_mobile/src/data/datasources/repository/bookings_repositor
 import 'package:k_plan_mobile/src/data/datasources/repository/circuit_collections_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/tour_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/visit_log_repository.dart';
+import 'package:k_plan_mobile/src/data/models/circuit_collection.dart';
 import 'package:k_plan_mobile/src/data/models/visit_event.dart';
 import 'package:k_plan_mobile/src/ui/my_circuit/view/my_circuit_view.dart';
 import 'package:k_plan_mobile/src/ui/my_circuit/viewmodels/my_circuit_viewmodel.dart';
@@ -124,25 +125,19 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.ensureVisible(find.text('Ordenar'));
-    await tester.tap(find.text('Ordenar'));
+    // La hora fija de la segunda posición se queda en su lugar al mover.
+    collections.setFixedArrival(circuit.id, 1, 11 * 60);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Ordenar paradas'), findsOneWidget);
 
-    // La Catedral, arrastrada por su manija, pasa al final.
-    final gesture = await tester.startGesture(
-      tester.getCenter(find.byIcon(Icons.drag_indicator).first),
-    );
-    for (var i = 0; i < 12; i++) {
+    // La Catedral, arrastrada por su manija en la misma lista, pasa al final.
+    final handle = find.byIcon(Icons.drag_indicator).first;
+    await tester.ensureVisible(handle);
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    for (var i = 0; i < 30; i++) {
       await gesture.moveBy(const Offset(0, 20));
       await tester.pump();
     }
     await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    await tester.tap(find.text('Guardar orden'));
-    await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(circuit.stopIds, [
@@ -150,6 +145,31 @@ void main() {
       'granada-mercado',
       'granada-catedral',
     ]);
-    expect(find.text('Orden guardado: el itinerario se recalculó'), findsOne);
+    expect(circuit.fixedArrivals, {1: 11 * 60});
+    // El Mercado, que ahora está en la segunda posición, llega a las 11:00.
+    expect(find.textContaining('11:00'), findsWidgets);
   });
+
+  test(
+    'las horas fijas van con la posición y se limpian al quitar paradas',
+    () {
+      final collection = CircuitCollection(
+        id: 'c',
+        title: 'Prueba',
+        image: '',
+        isUserCreated: true,
+        stopIds: const ['a', 'b', 'c'],
+      );
+
+      collection.setFixedArrival(2, 14 * 60);
+      collection.setFixedArrival(0, 8 * 60);
+      expect(collection.fixedArrivals, {2: 14 * 60});
+
+      collection.applyPlan(stopIds: const ['c', 'a', 'b']);
+      expect(collection.fixedArrivals, {2: 14 * 60});
+
+      collection.removeStop('b');
+      expect(collection.fixedArrivals, isEmpty);
+    },
+  );
 }

@@ -33,9 +33,15 @@ class CircuitCollection {
   String _startTime;
   TravelMode _travelMode;
   ItineraryPace _pace;
+  final Map<int, int> _fixedArrivals = {};
 
   List<String> get stopIds => List.unmodifiable(_stopIds);
   int get stopCount => _stopIds.length;
+
+  /// Horas de llegada que el usuario fijó, por posición del recorrido (en
+  /// minutos desde la medianoche). Van con la posición, no con la parada:
+  /// la que se mueve a ese lugar toma su hora.
+  Map<int, int> get fixedArrivals => Map.unmodifiable(_fixedArrivals);
 
   /// Cómo quiere el usuario su día: con esto se arma el itinerario.
   String get startTime => _startTime;
@@ -51,7 +57,20 @@ class CircuitCollection {
     return true;
   }
 
-  bool removeStop(String stopId) => _stopIds.remove(stopId);
+  bool removeStop(String stopId) {
+    final removed = _stopIds.remove(stopId);
+    if (removed) _fixedArrivals.removeWhere((index, _) => index >= stopCount);
+    return removed;
+  }
+
+  /// Uso interno del repositorio: `null` vuelve la hora a automática.
+  void setFixedArrival(int index, int? minutes) {
+    if (minutes == null) {
+      _fixedArrivals.remove(index);
+    } else if (index > 0 && index < stopCount) {
+      _fixedArrivals[index] = minutes;
+    }
+  }
 
   /// Uso interno del repositorio: sólo cambia lo que llega.
   void applyPlan({
@@ -64,6 +83,7 @@ class CircuitCollection {
       _stopIds
         ..clear()
         ..addAll(stopIds);
+      _fixedArrivals.removeWhere((index, _) => index >= stopCount);
     }
     if (startTime != null) _startTime = startTime;
     if (travelMode != null) _travelMode = travelMode;

@@ -90,12 +90,19 @@ class BookingViewModel extends BaseViewModel {
   /// paradas.
   Itinerary? get itinerary {
     if (_stops.isEmpty) return null;
+    final day = DateTime(_date.year, _date.month, _date.day);
     return ItineraryPlanner.plan(
       stops: _stops,
       start: TimeParser.at(_date, _startTime),
       mode: travelMode,
       pace: _collection?.pace ?? ItineraryPace.balanced,
       legMinutes: _circuit?.legMinutes ?? const {},
+      // Las horas que fijó en su circuito también valen el día que agenda.
+      fixedArrivals: {
+        for (final entry
+            in (_collection?.fixedArrivals ?? const <int, int>{}).entries)
+          entry.key: day.add(Duration(minutes: entry.value)),
+      },
     );
   }
 

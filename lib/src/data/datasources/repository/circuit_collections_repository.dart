@@ -116,6 +116,15 @@ class CircuitCollectionsRepository extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Fija la hora de llegada a la posición [index] del recorrido; con
+  /// [minutes] en `null` vuelve a calcularse sola.
+  void setFixedArrival(String circuitId, int index, int? minutes) {
+    final collection = findById(circuitId);
+    if (collection == null) return;
+    collection.setFixedArrival(index, minutes);
+    notifyListeners();
+  }
+
   void deleteCollection(String id) {
     final removed = _collections.length;
     _collections.removeWhere((c) => c.id == id && c.isUserCreated);
