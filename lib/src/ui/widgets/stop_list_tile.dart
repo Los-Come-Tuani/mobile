@@ -54,6 +54,9 @@ class StopListTile extends StatelessWidget {
   /// Atenúa la tarjeta, para una parada que se saltó.
   final bool dimmed;
 
+  /// Ancho de la foto, que va de borde a borde en el alto de la tarjeta.
+  static const double _photoWidth = 80;
+
   @override
   Widget build(BuildContext context) {
     final timeRange = this.timeRange;
@@ -107,84 +110,108 @@ class StopListTile extends StatelessWidget {
                   ),
                   child: InkWell(
                     onTap: onTap,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Row(
-                        children: [
-                          RemoteImage(
-                            url: stop.coverImage,
-                            width: 56,
-                            height: 56,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (timeRange != null) ...[
-                                  if (onTimeTap == null)
-                                    Text(
-                                      timeRange,
-                                      style: AppTextStyles.caption.copyWith(
-                                        color: AppColors.primary30,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    )
-                                  else
-                                    _TimeButton(
-                                      label: timeRange,
-                                      isFixed: isTimeFixed,
-                                      onTap: onTimeTap!,
-                                    ),
-                                  const SizedBox(height: 2),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: _photoWidth),
+                      child: IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // La foto llena todo el alto de la tarjeta; ese
+                            // alto lo decide el texto, no la proporción de la
+                            // imagen (va posicionada, sin tamaño propio).
+                            SizedBox(
+                              width: _photoWidth,
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: RemoteImage(url: stop.coverImage),
+                                  ),
                                 ],
-                                Text(
-                                  stop.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.cardTitle,
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  10,
+                                  4,
+                                  10,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  stop.address,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.caption,
-                                ),
-                                const SizedBox(height: 4),
-                                // En tarjetas angostas (con manija para
-                                // arrastrar) la insignia baja de línea.
-                                Wrap(
-                                  spacing: 10,
-                                  runSpacing: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    IconLabel(
-                                      icon: Icons.schedule,
-                                      label: stop.duration,
+                                    if (timeRange != null) ...[
+                                      if (onTimeTap == null)
+                                        Text(
+                                          timeRange,
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.primary30,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        )
+                                      else
+                                        _TimeButton(
+                                          label: timeRange,
+                                          isFixed: isTimeFixed,
+                                          onTap: onTimeTap!,
+                                        ),
+                                      const SizedBox(height: 2),
+                                    ],
+                                    Text(
+                                      stop.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.cardTitle,
                                     ),
-                                    if (stop.hasBadge)
-                                      const IconLabel(
-                                        icon: Icons.military_tech_outlined,
-                                        label: 'Insignia',
-                                        color: AppColors.primary30,
-                                      ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      stop.address,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.caption,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // En tarjetas angostas (con manija para
+                                    // arrastrar) la insignia baja de línea.
+                                    Wrap(
+                                      spacing: 10,
+                                      runSpacing: 2,
+                                      children: [
+                                        IconLabel(
+                                          icon: Icons.schedule,
+                                          label: stop.duration,
+                                        ),
+                                        if (stop.hasBadge)
+                                          const IconLabel(
+                                            icon: Icons.military_tech_outlined,
+                                            label: 'Insignia',
+                                            color: AppColors.primary30,
+                                          ),
+                                      ],
+                                    ),
+                                    if (footer != null) ...[
+                                      const SizedBox(height: 6),
+                                      footer,
+                                    ],
                                   ],
                                 ),
-                                if (footer != null) ...[
-                                  const SizedBox(height: 6),
-                                  footer,
-                                ],
-                              ],
-                            ),
-                          ),
-                          trailing ??
-                              const Icon(
-                                Icons.chevron_right,
-                                size: 20,
-                                color: AppColors.secondaryText,
                               ),
-                        ],
+                            ),
+                            Align(
+                              widthFactor: 1,
+                              child:
+                                  trailing ??
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 8),
+                                    child: Icon(
+                                      Icons.chevron_right,
+                                      size: 20,
+                                      color: AppColors.secondaryText,
+                                    ),
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
