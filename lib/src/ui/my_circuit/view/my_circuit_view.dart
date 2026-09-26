@@ -10,6 +10,7 @@ import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_time_picker.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/options_sheet.dart';
@@ -113,14 +114,12 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   /// Elige a qué hora llegar a una parada; en la primera, a qué hora sale.
   Future<void> _pickArrival(int index, ItineraryStop stop) async {
     final current = stop.fixedArrival ?? stop.arrival;
-    final picked = await showTimePicker(
-      context: context,
+    final picked = await showAppTimePicker(
+      context,
       initialTime: TimeOfDay.fromDateTime(current),
       helpText: index == 0
           ? 'Hora de salida'
           : 'Hora de llegada a ${stop.stop.name}',
-      cancelText: 'Cancelar',
-      confirmText: 'Listo',
     );
     if (picked == null || !mounted) return;
     context.read<MyCircuitViewModel>().setArrival(

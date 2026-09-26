@@ -92,6 +92,53 @@ abstract final class AppTheme {
         errorBorder: _fieldBorder(AppColors.error),
         focusedErrorBorder: _fieldBorder(AppColors.error, width: 1.5),
       ),
+      // Sin esto el círculo del reloj queda del mismo crema que el diálogo.
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: AppColors.background,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        helpTextStyle: AppTextStyles.fieldLabel,
+        dialBackgroundColor: AppColors.placeholder,
+        dialHandColor: AppColors.primary30,
+        dialTextColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.white
+              : AppColors.primaryText,
+        ),
+        hourMinuteShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        hourMinuteColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primary30.withValues(alpha: 0.14)
+              : AppColors.placeholder,
+        ),
+        hourMinuteTextColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primary30
+              : AppColors.primaryText,
+        ),
+        dayPeriodShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        dayPeriodBorderSide: const BorderSide(color: AppColors.outline),
+        dayPeriodColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.primary30
+              : AppColors.background,
+        ),
+        dayPeriodTextColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? AppColors.white
+              : AppColors.primaryText,
+        ),
+        entryModeIconColor: AppColors.secondaryText,
+        cancelButtonStyle: TextButton.styleFrom(
+          foregroundColor: AppColors.secondaryText,
+        ),
+        confirmButtonStyle: TextButton.styleFrom(
+          foregroundColor: AppColors.primary30,
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         backgroundColor: AppColors.primary60,
