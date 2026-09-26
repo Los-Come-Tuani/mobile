@@ -11,6 +11,18 @@ abstract final class Routes {
   static const medals = '/medals';
   static const profile = '/profile';
 
+  /// Configuraciones y sus pantallas.
+  static const settings = '/settings';
+  static const settingsAccount = '/settings/account';
+  static const settingsPassword = '/settings/account/password';
+  static const settingsNotifications = '/settings/notifications';
+  static const settingsLanguage = '/settings/language';
+  static const settingsPrivacy = '/settings/privacy';
+  static const settingsDataUsage = '/settings/privacy/data';
+  static const settingsHelp = '/settings/help';
+  static const settingsBookingHelp = '/settings/help/booking';
+  static const settingsSupport = '/settings/help/support';
+
   /// Detalle de un circuito: `/circuit/:id`
   static const circuitDetail = '/circuit/:$circuitId';
 

@@ -39,11 +39,30 @@ class LocationRepository extends ChangeNotifier {
   int _trackers = 0;
   bool _hasAsked = false;
 
+  bool _useLocation = true;
+
   LocationAccess get access => _access;
   bool get isGranted => _access == LocationAccess.granted;
 
-  /// La última posición conocida; `null` sin permiso o mientras llega.
-  UserLocation? get location => isGranted ? _location : null;
+  /// Si el turista quiere que los mapas usen su ubicación (Configuraciones >
+  /// Privacidad). Apagado, el GPS no se escucha aunque haya permiso.
+  bool get useLocation => _useLocation;
+
+  set useLocation(bool value) {
+    if (_useLocation == value) return;
+    _useLocation = value;
+    if (value) {
+      if (_trackers > 0) unawaited(_resume());
+    } else {
+      _subscription?.cancel();
+      _subscription = null;
+    }
+    notifyListeners();
+  }
+
+  /// La última posición conocida; `null` sin permiso, con la ubicación
+  /// apagada en Configuraciones o mientras llega.
+  UserLocation? get location => isGranted && _useLocation ? _location : null;
 
   /// Un mapa que quiere mostrar al turista. Si ya dio permiso, empieza a
   /// seguirlo; si no, espera a [requestAccess].
@@ -117,7 +136,12 @@ class LocationRepository extends ChangeNotifier {
   }
 
   void _listen() {
-    if (!isGranted || _trackers == 0 || _subscription != null) return;
+    if (!isGranted ||
+        !_useLocation ||
+        _trackers == 0 ||
+        _subscription != null) {
+      return;
+    }
     unawaited(_seedWithLastKnown());
     _subscription =
         Geolocator.getPositionStream(

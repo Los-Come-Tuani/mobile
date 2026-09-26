@@ -213,6 +213,11 @@ class RouteMapViewModel extends BaseViewModel {
   Future<LocationAccess> requestLocation() =>
       _locationRepository.requestAccess();
 
+  /// `false` si el turista apagó la ubicación en Configuraciones.
+  bool get useLocation => _locationRepository.useLocation;
+
+  void enableLocation() => _locationRepository.useLocation = true;
+
   Future<void> openLocationSettings() => _locationRepository.openSettings();
 
   /// Cierra el viaje cuando ya no quedan paradas por visitar.

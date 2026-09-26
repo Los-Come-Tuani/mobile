@@ -53,6 +53,16 @@ import '../ui/route_map/view/route_map_view.dart';
 import '../ui/route_map/viewmodels/route_map_viewmodel.dart';
 import '../ui/saved/view/saved_view.dart';
 import '../ui/saved/viewmodels/saved_viewmodel.dart';
+import '../ui/settings/view/account_view.dart';
+import '../ui/settings/view/booking_help_view.dart';
+import '../ui/settings/view/data_usage_view.dart';
+import '../ui/settings/view/help_view.dart';
+import '../ui/settings/view/language_view.dart';
+import '../ui/settings/view/notifications_settings_view.dart';
+import '../ui/settings/view/password_reset_view.dart';
+import '../ui/settings/view/privacy_view.dart';
+import '../ui/settings/view/settings_view.dart';
+import '../ui/settings/view/support_view.dart';
 import '../ui/stop_detail/view/stop_detail_view.dart';
 import '../ui/stop_detail/viewmodels/stop_detail_viewmodel.dart';
 import '../ui/welcome/view/welcome_view.dart';
@@ -385,6 +395,46 @@ GoRouter createRouter(AuthRepository authRepository) {
           ),
           child: const ProfileView(),
         ),
+      ),
+      GoRoute(
+        path: Routes.settings,
+        builder: (context, state) => const SettingsView(),
+      ),
+      GoRoute(
+        path: Routes.settingsAccount,
+        builder: (context, state) => const AccountView(),
+      ),
+      GoRoute(
+        path: Routes.settingsPassword,
+        builder: (context, state) => const PasswordResetView(),
+      ),
+      GoRoute(
+        path: Routes.settingsNotifications,
+        builder: (context, state) => const NotificationsSettingsView(),
+      ),
+      GoRoute(
+        path: Routes.settingsLanguage,
+        builder: (context, state) => const LanguageView(),
+      ),
+      GoRoute(
+        path: Routes.settingsPrivacy,
+        builder: (context, state) => const PrivacyView(),
+      ),
+      GoRoute(
+        path: Routes.settingsDataUsage,
+        builder: (context, state) => const DataUsageView(),
+      ),
+      GoRoute(
+        path: Routes.settingsHelp,
+        builder: (context, state) => const HelpView(),
+      ),
+      GoRoute(
+        path: Routes.settingsBookingHelp,
+        builder: (context, state) => const BookingHelpView(),
+      ),
+      GoRoute(
+        path: Routes.settingsSupport,
+        builder: (context, state) => const SupportView(),
       ),
     ],
   );

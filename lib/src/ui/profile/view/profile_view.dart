@@ -9,22 +9,13 @@ import '../../../router/routes.dart';
 import '../../widgets/action_row.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/soft_button.dart';
+import '../../settings/widgets/logout_sheet.dart';
 import '../viewmodels/profile_viewmodel.dart';
 
 /// Pantalla de perfil: datos del usuario, sus contadores y accesos rápidos.
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
-
-  void _comingSoon(BuildContext context, String label) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$label: próximamente')));
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await context.read<ProfileViewModel>().logout();
-    // El redirect del router vuelve al welcome al perder la sesión.
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +24,9 @@ class ProfileView extends StatelessWidget {
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Mi perfil'),
-      bottomNavigationBar: const AppBottomNav(currentIndex: AppBottomNav.profile),
+      bottomNavigationBar: const AppBottomNav(
+        currentIndex: AppBottomNav.profile,
+      ),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -73,7 +66,7 @@ class ProfileView extends StatelessWidget {
               icon: Icons.edit_outlined,
               label: 'Datos personales',
               subtitle: 'Nombre y datos de contacto',
-              onTap: () => _comingSoon(context, 'Datos personales'),
+              onTap: () => context.push(Routes.settingsAccount),
             ),
             _MenuTile(
               icon: Icons.bookmark_border,
@@ -97,23 +90,18 @@ class ProfileView extends StatelessWidget {
               icon: Icons.notifications_none,
               label: 'Notificaciones',
               subtitle: 'Avisos de tus viajes y reservas',
-              onTap: () => _comingSoon(context, 'Notificaciones'),
+              onTap: () => context.push(Routes.settingsNotifications),
             ),
             _MenuTile(
               icon: Icons.settings_outlined,
-              label: 'Ajustes',
+              label: 'Configuraciones',
               subtitle: 'Cuenta, idioma y privacidad',
-              onTap: () => _comingSoon(context, 'Ajustes'),
+              onTap: () => context.push(Routes.settings),
             ),
-            const SizedBox(height: 20),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary30),
-                foregroundColor: AppColors.primary30,
-              ),
-              onPressed: () => _logout(context),
-              icon: const Icon(Icons.logout),
-              label: const Text('Cerrar sesión'),
+            const SizedBox(height: 4),
+            SoftButton(
+              label: 'Cerrar sesión',
+              onPressed: () => showLogoutSheet(context),
             ),
           ],
         ),

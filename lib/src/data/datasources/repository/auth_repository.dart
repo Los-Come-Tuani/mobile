@@ -97,6 +97,27 @@ class AuthRepository extends ChangeNotifier {
     }
   }
 
+  /// Cambia el nombre visible del usuario. No hay endpoint de perfil todavía:
+  /// por ahora el cambio vive sólo en esta sesión.
+  void updateName(String name) {
+    final user = _currentUser;
+    final trimmed = name.trim();
+    if (user == null || trimmed.isEmpty || trimmed == user.name) return;
+    _currentUser = user.copyWith(name: trimmed);
+    notifyListeners();
+  }
+
+  /// `true` mientras [requestPasswordReset] no mande correos de verdad, para
+  /// decírselo al turista en la confirmación.
+  bool get isPasswordResetSimulated => true;
+
+  /// Pide el enlace para crear una contraseña nueva. El backend todavía no
+  /// tiene este paso: por ahora sólo se simula.
+  Future<Result<void>> requestPasswordReset(String email) async {
+    await Future<void>.delayed(const Duration(milliseconds: 700));
+    return const Result.ok(null);
+  }
+
   Future<void> logout() async {
     ApiClient.clearToken();
     _currentUser = null;

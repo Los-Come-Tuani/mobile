@@ -172,6 +172,21 @@ class _RouteMapViewState extends State<RouteMapView>
       return;
     }
 
+    if (!viewModel.useLocation) {
+      _notify(
+        'Apagaste la ubicación en Configuraciones',
+        action: SnackBarAction(
+          label: 'Activar',
+          textColor: AppColors.primary10,
+          onPressed: () {
+            viewModel.enableLocation();
+            _centerOnUser();
+          },
+        ),
+      );
+      return;
+    }
+
     final access = await viewModel.requestLocation();
     if (!mounted) return;
     switch (access) {

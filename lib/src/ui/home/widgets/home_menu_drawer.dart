@@ -94,7 +94,14 @@ class HomeMenuDrawer extends StatelessWidget {
                 context.push(Routes.coupons);
               },
             ),
-            const _MenuItem(icon: Icons.settings_outlined, label: 'Ajustes'),
+            _MenuItem(
+              icon: Icons.settings_outlined,
+              label: 'Configuraciones',
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.settings);
+              },
+            ),
             const Spacer(),
             const Divider(color: AppColors.divider, height: 1),
             ListTile(

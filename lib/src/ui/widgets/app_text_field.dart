@@ -15,6 +15,8 @@ class AppTextField extends StatefulWidget {
     this.isPassword = false,
     this.enabled = true,
     this.onSubmitted,
+    this.minLines,
+    this.maxLines = 1,
   });
 
   final String hint;
@@ -25,6 +27,11 @@ class AppTextField extends StatefulWidget {
   final bool isPassword;
   final bool enabled;
   final ValueChanged<String>? onSubmitted;
+
+  /// Para textos largos (un mensaje): el campo crece de [minLines] a
+  /// [maxLines]. No aplica a contraseñas.
+  final int? minLines;
+  final int maxLines;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -43,6 +50,8 @@ class _AppTextFieldState extends State<AppTextField> {
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
       onFieldSubmitted: widget.onSubmitted,
+      minLines: widget.isPassword ? null : widget.minLines,
+      maxLines: widget.isPassword ? 1 : widget.maxLines,
       autocorrect: !widget.isPassword,
       enableSuggestions: !widget.isPassword,
       decoration: InputDecoration(

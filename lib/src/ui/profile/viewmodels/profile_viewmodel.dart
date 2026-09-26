@@ -13,6 +13,8 @@ class ProfileViewModel extends BaseViewModel {
     this._savedRepository,
     this._badgesRepository,
   ) {
+    // El nombre se puede editar desde Configuraciones > Cuenta.
+    _authRepository.addListener(safeNotify);
     _collectionsRepository.addListener(safeNotify);
     _savedRepository.addListener(safeNotify);
     _badgesRepository.addListener(safeNotify);
@@ -34,10 +36,9 @@ class ProfileViewModel extends BaseViewModel {
   /// Insignias ganadas en total (histórico, lo que definen las medallas).
   int get badgesCount => _badgesRepository.earnedTotal;
 
-  Future<void> logout() => _authRepository.logout();
-
   @override
   void dispose() {
+    _authRepository.removeListener(safeNotify);
     _collectionsRepository.removeListener(safeNotify);
     _savedRepository.removeListener(safeNotify);
     _badgesRepository.removeListener(safeNotify);
