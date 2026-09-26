@@ -16,6 +16,7 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/brand_app_bar.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/remote_image.dart';
+import '../../widgets/soft_button.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_trips_viewmodel.dart';
 
@@ -109,7 +110,9 @@ class _MyTripsViewState extends State<MyTripsView>
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Mis viajes'),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 1),
+      bottomNavigationBar: const AppBottomNav(
+        currentIndex: AppBottomNav.myTrips,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -250,7 +253,7 @@ class _UpcomingTab extends StatelessWidget {
             _GuideRow(guide: guide),
           const SizedBox(height: 20),
         ],
-        _SoftButton(label: 'Planificar otro viaje', onPressed: onPlanAnother),
+        SoftButton(label: 'Planificar otro viaje', onPressed: onPlanAnother),
       ],
     );
   }
@@ -523,7 +526,7 @@ class _OngoingTab extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 12),
-        _SoftButton(
+        SoftButton(
           label: 'Ver detalle del recorrido',
           onPressed: () =>
               onOpenCircuit(trip.circuitId, isUserCircuit: trip.isUserCircuit),
@@ -794,33 +797,6 @@ class _EmptyTab extends StatelessWidget {
           Center(child: secondaryAction),
         ],
       ],
-    );
-  }
-}
-
-/// Botón tranquilo del diseño: fondo blanco, borde suave y texto verde,
-/// para lo que no es la acción principal de la pantalla.
-class _SoftButton extends StatelessWidget {
-  const _SoftButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor: AppColors.card,
-        foregroundColor: AppColors.accentSecondaryGreen,
-        minimumSize: const Size.fromHeight(48),
-        side: const BorderSide(color: AppColors.divider),
-        textStyle: AppTextStyles.body.copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      onPressed: onPressed,
-      child: Text(label),
     );
   }
 }

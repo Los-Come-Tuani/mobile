@@ -40,7 +40,9 @@ class _SavedViewState extends State<SavedView> {
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Guardados'),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 2),
+      bottomNavigationBar: const AppBottomNav(
+        currentIndex: AppBottomNav.profile,
+      ),
       body: viewModel.isBusy
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary30),

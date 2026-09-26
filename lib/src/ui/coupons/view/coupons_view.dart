@@ -71,7 +71,9 @@ class _CouponsViewState extends State<CouponsView> {
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Cupones'),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
+      bottomNavigationBar: const AppBottomNav(
+        currentIndex: AppBottomNav.coupons,
+      ),
       body: viewModel.isBusy
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary30),

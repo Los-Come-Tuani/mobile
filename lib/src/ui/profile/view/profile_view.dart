@@ -33,7 +33,7 @@ class ProfileView extends StatelessWidget {
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Mi perfil'),
-      bottomNavigationBar: const AppBottomNav(currentIndex: 4),
+      bottomNavigationBar: const AppBottomNav(currentIndex: AppBottomNav.profile),
       body: SafeArea(
         top: false,
         child: ListView(
@@ -74,6 +74,12 @@ class ProfileView extends StatelessWidget {
               label: 'Datos personales',
               subtitle: 'Nombre y datos de contacto',
               onTap: () => _comingSoon(context, 'Datos personales'),
+            ),
+            _MenuTile(
+              icon: Icons.bookmark_border,
+              label: 'Guardados',
+              subtitle: 'Circuitos, lugares y eventos que marcaste',
+              onTap: () => context.push(Routes.saved),
             ),
             _MenuTile(
               icon: Icons.military_tech_outlined,

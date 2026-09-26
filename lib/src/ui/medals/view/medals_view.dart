@@ -36,7 +36,9 @@ class _MedalsViewState extends State<MedalsView> {
 
     return Scaffold(
       appBar: const BrandAppBar(title: 'Mis medallas'),
-      bottomNavigationBar: const AppBottomNav(),
+      bottomNavigationBar: const AppBottomNav(
+        currentIndex: AppBottomNav.profile,
+      ),
       body: ListView(
         padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
         children: [

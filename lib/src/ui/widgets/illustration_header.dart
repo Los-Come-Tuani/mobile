@@ -32,20 +32,20 @@ class IllustrationHeader extends StatelessWidget {
     final isSvg = asset.toLowerCase().endsWith('.svg');
 
     final artwork = isSvg
-          ? SvgPicture.asset(
-              asset,
-              fit: BoxFit.cover,
-              alignment: alignment,
-              errorBuilder: (context, error, stackTrace) =>
-                  const _MissingArtwork(),
-            )
-          : Image.asset(
-              asset,
-              fit: BoxFit.cover,
-              alignment: alignment,
-              errorBuilder: (context, error, stackTrace) =>
-                  const _MissingArtwork(),
-            );
+        ? SvgPicture.asset(
+            asset,
+            fit: BoxFit.cover,
+            alignment: alignment,
+            errorBuilder: (context, error, stackTrace) =>
+                const _MissingArtwork(),
+          )
+        : Image.asset(
+            asset,
+            fit: BoxFit.cover,
+            alignment: alignment,
+            errorBuilder: (context, error, stackTrace) =>
+                const _MissingArtwork(),
+          );
 
     return SizedBox(
       width: double.infinity,

@@ -7,32 +7,35 @@ import '../../router/routes.dart';
 
 /// Barra inferior de la app.
 class AppBottomNav extends StatelessWidget {
-  const AppBottomNav({super.key, this.currentIndex = 0});
+  const AppBottomNav({super.key, this.currentIndex = home});
+
+  static const int home = 0;
+  static const int myTrips = 1;
+  static const int coupons = 2;
+
+  /// También lo marcan las pantallas que cuelgan de Perfil (Guardados,
+  /// Medallas, Configuraciones).
+  static const int profile = 3;
 
   final int currentIndex;
 
-  static const List<({IconData icon, String label})> _items = [
-    (icon: Icons.home_outlined, label: 'Inicio'),
-    (icon: Icons.explore_outlined, label: 'Mis viajes'),
-    (icon: Icons.bookmark_border, label: 'Guardados'),
-    (icon: Icons.confirmation_number_outlined, label: 'Cupones'),
-    (icon: Icons.person_outline, label: 'Perfil'),
+  static const List<({IconData icon, String label, String route})> _items = [
+    (icon: Icons.home_outlined, label: 'Inicio', route: Routes.home),
+    (icon: Icons.explore_outlined, label: 'Mis viajes', route: Routes.myTrips),
+    (
+      icon: Icons.confirmation_number_outlined,
+      label: 'Cupones',
+      route: Routes.coupons,
+    ),
+    (icon: Icons.person_outline, label: 'Perfil', route: Routes.profile),
   ];
 
   void _onTap(BuildContext context, int index) {
-    if (index == currentIndex) return;
-    switch (index) {
-      case 0:
-        context.go(Routes.home);
-      case 1:
-        context.go(Routes.myTrips);
-      case 2:
-        context.go(Routes.saved);
-      case 3:
-        context.go(Routes.coupons);
-      case 4:
-        context.go(Routes.profile);
-    }
+    // Desde una pantalla que cuelga de Perfil, tocar Perfil también regresa.
+    final isOnRoot =
+        GoRouterState.of(context).matchedLocation == _items[index].route;
+    if (index == currentIndex && isOnRoot) return;
+    context.go(_items[index].route);
   }
 
   @override
