@@ -80,7 +80,14 @@ class _HomeViewState extends State<HomeView> {
             padding: const EdgeInsets.only(bottom: 24),
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Text(
+                  'Descubre tu próximo plan',
+                  style: AppTextStyles.pageTitle,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                 child: AppSearchField(
                   hint: '¿Qué quieres descubrir?',
                   controller: _searchController,

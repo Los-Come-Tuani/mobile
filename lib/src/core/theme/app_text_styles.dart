@@ -5,12 +5,15 @@ import 'app_colors.dart';
 
 /// Tipografías de K'Plan.
 ///
-/// Display serif para títulos de marca, sans para el resto de la interfaz.
+/// Inknut Antiqua solo para el titular de marca ("Bienvenido"), Poppins para
+/// el resto de la interfaz, como en los wireframes.
 abstract final class AppTextStyles {
-  static TextStyle get display => GoogleFonts.poppins(
+  /// Titular de marca del manual: -0.2 % de tracking e interlineado de 1.4.
+  static TextStyle get display => GoogleFonts.inknutAntiqua(
     fontSize: 40,
-    fontWeight: FontWeight.w900,
-    height: 1.1,
+    fontWeight: FontWeight.w700,
+    height: 1.4,
+    letterSpacing: 40 * -0.002,
     color: AppColors.primaryText,
   );
 
@@ -18,6 +21,29 @@ abstract final class AppTextStyles {
     fontSize: 28,
     fontWeight: FontWeight.w700,
     height: 1.2,
+    color: AppColors.primaryText,
+  );
+
+  /// Encabezado de las pantallas principales ("Descubre tu próximo plan").
+  static TextStyle get pageTitle => GoogleFonts.poppins(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    height: 26 / 18,
+    color: AppColors.primaryText,
+  );
+
+  /// Pregunta de cada paso del registro ("¿Cómo te llamas?").
+  static TextStyle get stepTitle => GoogleFonts.poppins(
+    fontSize: 26,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
+    color: AppColors.primaryText,
+  );
+
+  /// Etiqueta en mayúsculas sobre un campo ("CORREO ELECTRÓNICO").
+  static TextStyle get fieldLabel => GoogleFonts.poppins(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
     color: AppColors.primaryText,
   );
 

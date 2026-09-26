@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/coupon.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/brand_app_bar.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/coupons_viewmodel.dart';
 
@@ -69,7 +70,7 @@ class _CouponsViewState extends State<CouponsView> {
     final viewModel = context.watch<CouponsViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cupones')),
+      appBar: const BrandAppBar(title: 'Cupones'),
       bottomNavigationBar: const AppBottomNav(currentIndex: 3),
       body: viewModel.isBusy
           ? const Center(

@@ -17,7 +17,8 @@ abstract final class AppColors {
 
   /// Acentos secundarios (gráficas, chips, estados).
   static const Color accentSecondaryGreen = Color(0xFF2D6A4F);
-  static const Color accentSecondaryBlue = Color(0xFF2F6690);
+  static const Color accentSecondaryBlue = Color(0xFF0077B6);
+  static const Color accentSecondaryYellow = Color(0xFFE9B824);
 
   // ── Neutros ───────────────────────────────────────────────────────────────
   static const Color white = Color(0xFFFFFFFF);
@@ -42,7 +43,7 @@ abstract final class AppColors {
   static const Color chipCity = Color(0xFF2B8FD1);
   static const Color chipNature = Color(0xFF0E9AA7);
   static const Color chipCulture = Color(0xFF7B5EA7);
-  static const Color star = Color(0xFFF5A623);
+  static const Color star = accentSecondaryYellow;
   static const Color placeholder = Color(0xFFEDE7D6);
 
   // ── Medallas (insignias y niveles) ────────────────────────────────────────

@@ -11,6 +11,7 @@ import '../../home/widgets/event_card.dart';
 import '../../home/widgets/place_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/bookmark_button.dart';
+import '../../widgets/brand_app_bar.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../viewmodels/saved_viewmodel.dart';
@@ -38,7 +39,7 @@ class _SavedViewState extends State<SavedView> {
     final viewModel = context.watch<SavedViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Guardados')),
+      appBar: const BrandAppBar(title: 'Guardados'),
       bottomNavigationBar: const AppBottomNav(currentIndex: 2),
       body: viewModel.isBusy
           ? const Center(
@@ -49,6 +50,11 @@ class _SavedViewState extends State<SavedView> {
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
               children: [
+                Text(
+                  'Tus próximos descubrimientos',
+                  style: AppTextStyles.pageTitle,
+                ),
+                const SizedBox(height: 16),
                 if (viewModel.savedCircuits.isNotEmpty) ...[
                   const SectionHeader(title: 'Circuitos'),
                   const SizedBox(height: 10),

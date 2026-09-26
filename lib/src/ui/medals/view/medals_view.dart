@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/medal_tiers.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/brand_app_bar.dart';
 import '../viewmodels/medals_viewmodel.dart';
 
 /// Medallas ganadas: una general, una por cada categoría de parada, y una
@@ -34,7 +35,7 @@ class _MedalsViewState extends State<MedalsView> {
     final viewModel = context.watch<MedalsViewModel>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis medallas')),
+      appBar: const BrandAppBar(title: 'Mis medallas'),
       bottomNavigationBar: const AppBottomNav(),
       body: ListView(
         padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),

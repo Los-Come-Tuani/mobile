@@ -13,7 +13,7 @@ class AppBottomNav extends StatelessWidget {
 
   static const List<({IconData icon, String label})> _items = [
     (icon: Icons.home_outlined, label: 'Inicio'),
-    (icon: Icons.explore_outlined, label: 'Viajes'),
+    (icon: Icons.explore_outlined, label: 'Mis viajes'),
     (icon: Icons.bookmark_border, label: 'Guardados'),
     (icon: Icons.confirmation_number_outlined, label: 'Cupones'),
     (icon: Icons.person_outline, label: 'Perfil'),

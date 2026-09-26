@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/app_assets.dart';
@@ -23,6 +24,9 @@ class HomeTopBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: AppColors.primary30,
       foregroundColor: AppColors.white,
+      systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
       elevation: 0,
       titleSpacing: 20,
       title: SvgPicture.asset(
