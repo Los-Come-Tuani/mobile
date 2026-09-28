@@ -365,6 +365,8 @@ class _TermsCard extends StatelessWidget {
       children: [
         Text(request.circuitTitle, style: AppTextStyles.cardTitle),
         const SizedBox(height: 6),
+        if (request.city.isNotEmpty)
+          _TermLine(icon: Icons.location_on_outlined, text: request.city),
         _TermLine(
           icon: Icons.calendar_month_outlined,
           text:

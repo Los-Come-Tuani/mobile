@@ -1,3 +1,5 @@
+import 'guide_coverage.dart';
+
 /// Qué servicio ofrece un guía: acompañar y explicar (guía), traducir sin
 /// conocimiento turístico (traductor), o ambos.
 enum GuideRole {
@@ -33,6 +35,8 @@ class TourGuide {
     required this.reviews,
     this.role = GuideRole.guide,
     this.hasTransport = false,
+    this.coverage = GuideCoverage.national,
+    this.certifiedCity,
   });
 
   final String id;
@@ -50,6 +54,17 @@ class TourGuide {
   /// `true` si el guía tiene transporte propio para ofrecerlo en el
   /// recorrido (ver [TransportOption.guideProvides]).
   final bool hasTransport;
+
+  /// Hasta dónde puede guiar. Sólo limita el puesto de guía: un traductor
+  /// acompaña recorridos en cualquier ciudad.
+  final GuideCoverage coverage;
+
+  /// La única ciudad donde puede guiar si es local.
+  final String? certifiedCity;
+
+  /// Si puede guiar un recorrido en [city].
+  bool coversCity(String city) =>
+      coverage == GuideCoverage.national || certifiedCity == city;
 
   /// Inicial para el avatar cuando no hay foto.
   String get initial => name.isEmpty ? '?' : name.substring(0, 1).toUpperCase();
@@ -70,6 +85,8 @@ class TourGuide {
           .toList(growable: false),
       role: GuideRole.fromJson(json['role'] as String?),
       hasTransport: json['hasTransport'] as bool? ?? false,
+      coverage: GuideCoverage.fromJson(json['coverage'] as String?),
+      certifiedCity: json['certifiedCity'] as String?,
     );
   }
 

@@ -159,6 +159,11 @@ class BookingViewModel extends BaseViewModel {
   num get serviceFee => subtotal * serviceRate;
   num get total => subtotal + serviceFee;
 
+  /// Dónde es el recorrido. Un circuito propio no tiene ciudad, pero todas
+  /// sus paradas son de la misma.
+  String get _city =>
+      _circuit?.city ?? (_stops.isEmpty ? '' : _stops.first.city);
+
   /// No se puede agendar sin personas ni sin horario.
   bool get canConfirm =>
       isLoaded && (_adults + _children) > 0 && _startTime.isNotEmpty;
@@ -280,6 +285,7 @@ class BookingViewModel extends BaseViewModel {
       _guideRequestRepository.publish(
         circuitId: circuitId,
         circuitTitle: title,
+        city: _city,
         date: _date,
         startTime: _startTime,
         groupSize: _adults + _children,

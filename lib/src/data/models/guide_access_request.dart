@@ -1,12 +1,11 @@
+import 'guide_coverage.dart';
+
+export 'guide_coverage.dart';
+
 /// En qué va el acceso de guía de una cuenta. La misma cuenta sirve para
 /// entrar como turista o como guía; el rol de guía se habilita cuando el
 /// equipo de K'Plan aprueba su solicitud.
 enum GuideAccessStatus { none, pending, approved }
-
-/// Hasta dónde puede guiar alguien, según su certificación: un guía nacional
-/// cubre todo el territorio nicaragüense; uno local, sólo la ciudad donde se
-/// certificó.
-enum GuideCoverage { national, local }
 
 /// Un archivo adjunto a la solicitud: el documento de identidad, la
 /// credencial INTUR o una certificación.

@@ -93,6 +93,7 @@ void main() {
     repository.publish(
       circuitId: 'granada-historias-sabores',
       circuitTitle: 'Granada Histórica',
+      city: 'Granada',
       date: DateTime(2026, 10, 3),
       startTime: '8:30 a.m.',
       groupSize: 3,

@@ -57,12 +57,13 @@ class GuideRequestRepository extends ChangeNotifier {
     return left.isNegative ? Duration.zero : left;
   }
 
-  /// Publica una propuesta nueva para [circuitId] con la fecha, hora y
-  /// tamaño del grupo de la reserva. Reemplaza cualquier propuesta previa,
-  /// ya esté resuelta o no.
+  /// Publica una propuesta nueva para [circuitId] en [city] con la fecha,
+  /// hora y tamaño del grupo de la reserva. Reemplaza cualquier propuesta
+  /// previa, ya esté resuelta o no.
   void publish({
     required String circuitId,
     required String circuitTitle,
+    required String city,
     required DateTime date,
     required String startTime,
     required int groupSize,
@@ -74,6 +75,7 @@ class GuideRequestRepository extends ChangeNotifier {
       id: 'guide-request-${_nextRequestId++}',
       circuitId: circuitId,
       circuitTitle: circuitTitle,
+      city: city,
       date: date,
       startTime: startTime,
       groupSize: groupSize,
@@ -98,7 +100,7 @@ class GuideRequestRepository extends ChangeNotifier {
     final request = _request;
     if (request == null || request.id != requestId || !request.isOpen) return;
     if (result case Ok(:final value)) {
-      _upcoming.addAll(_applicantsFor(value, request.terms));
+      _upcoming.addAll(_applicantsFor(value, request));
       _scheduleNextApplication(firstApplicationDelay);
     }
   }
@@ -109,8 +111,9 @@ class GuideRequestRepository extends ChangeNotifier {
   /// reciban postulaciones desde el principio.
   List<({TourGuide guide, ApplicationRole role})> _applicantsFor(
     List<TourGuide> catalog,
-    GuideRequestTerms terms,
+    GuideRequest request,
   ) {
+    final terms = request.terms;
     final language = terms.touristLanguage;
 
     final translators = terms.need.needsTranslator
@@ -125,6 +128,9 @@ class GuideRequestRepository extends ChangeNotifier {
     final guides = terms.need.needsGuide
         ? catalog.where((g) {
             if (!g.role.canGuide) return false;
+            // Un guía local no puede guiar fuera de la ciudad donde se
+            // certificó; uno nacional, sí.
+            if (!g.coversCity(request.city)) return false;
             // Quien también traduce el idioma pedido se postula como
             // traductor, para que nadie compita por los dos puestos a la vez.
             if (translatorIds.contains(g.id)) return false;

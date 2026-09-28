@@ -96,6 +96,11 @@ class ApplicationCard extends StatelessWidget {
             spacing: 6,
             runSpacing: 6,
             children: [
+              if (application.role == ApplicationRole.guide)
+                OfferChip(
+                  icon: Icons.verified_outlined,
+                  label: guide.coverage.labelFor(guide.certifiedCity),
+                ),
               OfferChip(
                 icon: Icons.translate,
                 label: guide.languages.join(' · '),

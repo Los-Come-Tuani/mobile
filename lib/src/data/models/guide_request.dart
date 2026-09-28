@@ -152,6 +152,7 @@ class GuideRequest {
     required this.id,
     required this.circuitId,
     required this.circuitTitle,
+    required this.city,
     required this.date,
     required this.startTime,
     required this.groupSize,
@@ -167,6 +168,9 @@ class GuideRequest {
   final String id;
   final String circuitId;
   final String circuitTitle;
+
+  /// Dónde es el recorrido: un guía local sólo se postula en su ciudad.
+  final String city;
 
   /// Fecha, hora y tamaño del grupo de la reserva: lo que un guía necesita
   /// saber para decidir si se postula.
@@ -242,6 +246,7 @@ class GuideRequest {
       id: id,
       circuitId: circuitId,
       circuitTitle: circuitTitle,
+      city: city,
       date: date,
       startTime: startTime,
       groupSize: groupSize,

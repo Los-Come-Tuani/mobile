@@ -5,6 +5,7 @@ import 'package:k_plan_mobile/src/core/utils/result.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_request_repository.dart';
 import 'package:k_plan_mobile/src/data/models/guide_application.dart';
+import 'package:k_plan_mobile/src/data/models/guide_coverage.dart';
 import 'package:k_plan_mobile/src/data/models/guide_request.dart';
 import 'package:k_plan_mobile/src/data/models/tour_guide.dart';
 
@@ -14,6 +15,8 @@ TourGuide _guide(
   GuideRole role = GuideRole.guide,
   bool hasTransport = false,
   double rating = 4.6,
+  GuideCoverage coverage = GuideCoverage.national,
+  String? certifiedCity,
 }) {
   return TourGuide(
     id: id,
@@ -28,6 +31,8 @@ TourGuide _guide(
     reviews: const [],
     role: role,
     hasTransport: hasTransport,
+    coverage: coverage,
+    certifiedCity: certifiedCity,
   );
 }
 
@@ -86,10 +91,15 @@ GuideRequestRepository _repository(
   );
 }
 
-void _publish(GuideRequestRepository repository, GuideRequestTerms terms) {
+void _publish(
+  GuideRequestRepository repository,
+  GuideRequestTerms terms, {
+  String city = 'Granada',
+}) {
   repository.publish(
     circuitId: 'circuit-1',
     circuitTitle: 'Circuito de prueba',
+    city: city,
     date: DateTime(2026, 10, 3),
     startTime: '9:00 a.m.',
     groupSize: 4,
@@ -197,6 +207,63 @@ void main() {
       'guide-bilingual',
     });
     expect(_applicantIds(repository, ApplicationRole.translator), isEmpty);
+    repository.dispose();
+  });
+
+  test('un guía local sólo se postula en su ciudad; uno nacional, en '
+      'cualquiera', () async {
+    final granada = _guide(
+      'guide-granada',
+      coverage: GuideCoverage.local,
+      certifiedCity: 'Granada',
+    );
+    final leon = _guide(
+      'guide-leon',
+      coverage: GuideCoverage.local,
+      certifiedCity: 'León',
+    );
+    final national = _guide('guide-national');
+    final repository = _repository([granada, leon, national]);
+
+    _publish(
+      repository,
+      const GuideRequestTerms(need: GuideNeed.localGuide, serviceHours: 5),
+      city: 'Granada',
+    );
+    await _waitForApplications();
+
+    expect(repository.activeRequest?.city, 'Granada');
+    expect(_applicantIds(repository, ApplicationRole.guide), {
+      'guide-granada',
+      'guide-national',
+    });
+    repository.dispose();
+  });
+
+  test('la cobertura no limita a los traductores', () async {
+    final localTranslator = _guide(
+      'translator-leon',
+      languages: ['Español', 'Inglés'],
+      role: GuideRole.translator,
+      coverage: GuideCoverage.local,
+      certifiedCity: 'León',
+    );
+    final repository = _repository([_localGuide, localTranslator]);
+
+    _publish(
+      repository,
+      const GuideRequestTerms(
+        need: GuideNeed.localGuideAndTranslator,
+        serviceHours: 5,
+        touristLanguage: 'Inglés',
+      ),
+      city: 'Granada',
+    );
+    await _waitForApplications();
+
+    expect(_applicantIds(repository, ApplicationRole.translator), {
+      'translator-leon',
+    });
     repository.dispose();
   });
 

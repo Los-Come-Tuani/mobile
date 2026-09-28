@@ -163,6 +163,12 @@ class _Header extends StatelessWidget {
               label: roleLabel(guide.role),
               color: AppColors.secondaryText,
             ),
+            if (guide.role.canGuide)
+              IconLabel(
+                icon: Icons.verified_outlined,
+                label: guide.coverage.labelFor(guide.certifiedCity),
+                color: AppColors.secondaryText,
+              ),
             IconLabel(
               icon: Icons.translate,
               label: guide.languages.join(', '),

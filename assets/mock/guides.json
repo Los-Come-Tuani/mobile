@@ -11,6 +11,8 @@
     "specialties": ["Historia colonial", "Gastronomía"],
     "role": "guide",
     "hasTransport": true,
+    "coverage": "local",
+    "certifiedCity": "Granada",
     "reviews": [
       {
         "author": "Carlos M.",
@@ -38,6 +40,7 @@
     "specialties": ["Arquitectura", "Leyendas locales"],
     "role": "both",
     "hasTransport": false,
+    "coverage": "national",
     "reviews": [
       {
         "author": "Sophie L.",
@@ -65,6 +68,8 @@
     "specialties": ["Cultura viva", "Arte urbano"],
     "role": "guide",
     "hasTransport": true,
+    "coverage": "local",
+    "certifiedCity": "León",
     "reviews": [
       {
         "author": "Daniel K.",
@@ -98,6 +103,8 @@
     "specialties": ["Volcanes", "Senderismo"],
     "role": "guide",
     "hasTransport": false,
+    "coverage": "local",
+    "certifiedCity": "Masaya",
     "reviews": [
       {
         "author": "Patricia N.",
@@ -125,6 +132,7 @@
     "specialties": ["Gastronomía", "Mercados locales"],
     "role": "guide",
     "hasTransport": true,
+    "coverage": "national",
     "reviews": [
       {
         "author": "Tom H.",
@@ -152,6 +160,8 @@
     "specialties": ["Ciudad", "Fotografía"],
     "role": "guide",
     "hasTransport": false,
+    "coverage": "local",
+    "certifiedCity": "Granada",
     "reviews": [
       {
         "author": "Diego R.",
