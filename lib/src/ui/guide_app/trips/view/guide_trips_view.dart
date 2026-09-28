@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../data/models/guide_trip.dart';
+import '../../../../router/routes.dart';
+import '../../../widgets/secondary_button.dart';
+import '../../widgets/guide_bar.dart';
+import '../../widgets/guide_bottom_nav.dart';
+import '../../widgets/guide_empty_state.dart';
+import '../../widgets/trip_row.dart';
+import '../viewmodels/guide_trips_viewmodel.dart';
+
+/// Viajes del guía: los próximos y los realizados, donde falta calificar a
+/// los turistas.
+class GuideTripsView extends StatefulWidget {
+  const GuideTripsView({super.key});
+
+  @override
+  State<GuideTripsView> createState() => _GuideTripsViewState();
+}
+
+class _GuideTripsViewState extends State<GuideTripsView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<GuideTripsViewModel>().load(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<GuideTripsViewModel>();
+    final pendingRatings = viewModel.pendingRatings;
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: const GuideBar(),
+        bottomNavigationBar: const GuideBottomNav(
+          currentIndex: GuideBottomNav.trips,
+        ),
+        body: Column(
+          children: [
+            TabBar(
+              labelColor: AppColors.primary30,
+              unselectedLabelColor: AppColors.secondaryText,
+              labelStyle: AppTextStyles.caption.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelStyle: AppTextStyles.caption,
+              indicatorColor: AppColors.primary30,
+              indicatorWeight: 2,
+              indicatorSize: TabBarIndicatorSize.tab,
+              dividerColor: AppColors.divider,
+              dividerHeight: 2,
+              overlayColor: WidgetStatePropertyAll(
+                AppColors.primary30.withValues(alpha: 0.06),
+              ),
+              tabs: [
+                const Tab(text: 'Próximos', height: 44),
+                Tab(
+                  text: pendingRatings > 0
+                      ? 'Realizados · $pendingRatings por calificar'
+                      : 'Realizados',
+                  height: 44,
+                ),
+              ],
+            ),
+            Expanded(
+              child: !viewModel.isLoaded
+                  ? const Center(child: CircularProgressIndicator())
+                  : TabBarView(
+                      children: [
+                        _TripList(
+                          trips: viewModel.upcoming,
+                          viewModel: viewModel,
+                          empty: GuideEmptyState(
+                            icon: Icons.explore_outlined,
+                            title: 'Todavía no tienes viajes próximos',
+                            message:
+                                'Postúlate a una propuesta desde Inicio; cuando '
+                                'un turista te contrate, el viaje aparece aquí.',
+                            action: SecondaryButton(
+                              label: 'Ver propuestas',
+                              onPressed: () => context.go(Routes.guideHome),
+                            ),
+                          ),
+                        ),
+                        _TripList(
+                          trips: viewModel.completed,
+                          viewModel: viewModel,
+                          empty: const GuideEmptyState(
+                            icon: Icons.history,
+                            title: 'Aquí verás los viajes que termines',
+                            message:
+                                'Después de cada viaje podrás calificar al '
+                                'turista para ayudar a otros guías.',
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TripList extends StatelessWidget {
+  const _TripList({
+    required this.trips,
+    required this.viewModel,
+    required this.empty,
+  });
+
+  final List<GuideTrip> trips;
+  final GuideTripsViewModel viewModel;
+  final Widget empty;
+
+  @override
+  Widget build(BuildContext context) {
+    if (trips.isEmpty) {
+      return ListView(padding: AppTheme.screenPadding, children: [empty]);
+    }
+    return ListView.separated(
+      padding: AppTheme.screenPadding.copyWith(top: 8, bottom: 24),
+      itemCount: trips.length,
+      separatorBuilder: (context, index) =>
+          const Divider(color: AppColors.divider, height: 1),
+      itemBuilder: (context, index) {
+        final trip = trips[index];
+        return TripRow(
+          trip: trip,
+          tourist: viewModel.touristOf(trip.touristId),
+          onTap: () => context.push(Routes.guideTripPath(trip.id)),
+        );
+      },
+    );
+  }
+}

@@ -25,8 +25,54 @@ abstract final class Formatters {
     'Domingo',
   ];
 
+  static const List<String> _shortWeekdays = [
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom',
+  ];
+
   /// `250` -> `C$ 250`
   static String currency(num value) => 'C\$ ${value.toStringAsFixed(0)}';
+
+  /// Cambia los espacios por espacios que no parten el renglón, para que
+  /// `C$ 560` o `3 personas` nunca queden cortados.
+  static String keepTogether(String text) => text.replaceAll(' ', '\u00A0');
+
+  /// Datos cortos separados por ` · `; si no caben, el renglón se parte
+  /// sólo entre dato y dato: `Vie 2 oct · 4:00 p.m. · 3 personas`.
+  static String facts(Iterable<String> parts) =>
+      parts.map(keepTogether).join(' · ');
+
+  /// `DateTime(2026, 10, 3)` -> `Sáb 3 oct`
+  static String compactDate(DateTime date) =>
+      '${_shortWeekdays[date.weekday - 1]} ${dayAndMonth(date)}';
+
+  /// "Hoy", "Mañana", "Ayer" o, si no, `Sáb 3 oct`.
+  static String relativeDay(DateTime date, {DateTime? now}) {
+    final reference = now ?? DateTime.now();
+    final days = DateTime(date.year, date.month, date.day)
+        .difference(DateTime(reference.year, reference.month, reference.day))
+        .inDays;
+    return switch (days) {
+      0 => 'Hoy',
+      1 => 'Mañana',
+      -1 => 'Ayer',
+      _ => compactDate(date),
+    };
+  }
+
+  /// `hace 5 min`, `hace 2 h`, `hace 3 días`.
+  static String timeAgo(DateTime value, {DateTime? now}) {
+    final elapsed = (now ?? DateTime.now()).difference(value);
+    if (elapsed.inMinutes < 1) return 'ahora';
+    if (elapsed.inHours < 1) return 'hace ${elapsed.inMinutes} min';
+    if (elapsed.inDays < 1) return 'hace ${elapsed.inHours} h';
+    return elapsed.inDays == 1 ? 'hace 1 día' : 'hace ${elapsed.inDays} días';
+  }
 
   /// `DateTime(2026, 9, 26)` -> `Sábado 26 sep`
   static String weekdayDate(DateTime date) =>

@@ -22,6 +22,30 @@ abstract final class Routes {
 
   /// Solicitud en revisión o acceso de guía habilitado.
   static const guideStatus = '/guide-access/status';
+
+  /// App del guía (cuenta aprobada). Sus pestañas son rutas hermanas, como
+  /// las del turista.
+  static const guideHome = '/guide-app';
+  static const guideTrips = '/guide-app/trips';
+  static const guideChats = '/guide-app/chats';
+  static const guideSelfProfile = '/guide-app/profile';
+  static const guideBalance = '/guide-app/balance';
+
+  /// Una propuesta vista por el guía: `/guide-app/proposal/:jobId`
+  static const guideJob = '/guide-app/proposal/:$jobId';
+
+  /// Un turista visto por el guía: `/guide-app/tourist/:touristId`
+  static const guideTourist = '/guide-app/tourist/:$touristId';
+
+  /// Un viaje del guía: `/guide-app/trip/:tripId`
+  static const guideTrip = '/guide-app/trip/:$tripId';
+
+  /// La conversación de un viaje: `/guide-app/chat/:tripId`
+  static const guideThread = '/guide-app/chat/:$tripId';
+
+  /// Todo lo de la app del guía exige una cuenta de guía aprobada.
+  static bool isGuideApp(String location) =>
+      location == guideHome || location.startsWith('$guideHome/');
   static const home = '/home';
   static const myTrips = '/my-trips';
   static const saved = '/saved';
@@ -92,6 +116,9 @@ abstract final class Routes {
   static const eventId = 'eventId';
   static const collectionId = 'collectionId';
   static const guideId = 'guideId';
+  static const jobId = 'jobId';
+  static const touristId = 'touristId';
+  static const tripId = 'tripId';
 
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
@@ -107,6 +134,10 @@ abstract final class Routes {
   static String myCircuitAssistantPath(String id) =>
       '/my-circuit/$id/assistant';
   static String guideProfilePath(String id) => '/guide/$id';
+  static String guideJobPath(String id) => '/guide-app/proposal/$id';
+  static String guideTouristPath(String id) => '/guide-app/tourist/$id';
+  static String guideTripPath(String id) => '/guide-app/trip/$id';
+  static String guideThreadPath(String tripId) => '/guide-app/chat/$tripId';
 
   /// Rutas accesibles sin sesión iniciada.
   static const Set<String> public = {

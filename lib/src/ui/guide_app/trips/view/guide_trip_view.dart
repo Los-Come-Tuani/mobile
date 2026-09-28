@@ -1,0 +1,249 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/formatters.dart';
+import '../../../../data/models/guide_trip.dart';
+import '../../../../data/models/tourist_profile.dart';
+import '../../../../router/routes.dart';
+import '../../../widgets/primary_button.dart';
+import '../../../widgets/secondary_button.dart';
+import '../../widgets/detail_line.dart';
+import '../../widgets/guide_bar.dart';
+import '../../widgets/guide_empty_state.dart';
+import '../../widgets/money_breakdown.dart';
+import '../../widgets/rate_tourist_sheet.dart';
+import '../../widgets/tourist_identity.dart';
+import '../viewmodels/guide_trip_viewmodel.dart';
+
+/// Un viaje del guía: cuándo y dónde, el pago con la comisión, el turista y
+/// qué hacer (escribirle o, si ya terminó, calificarlo).
+class GuideTripView extends StatefulWidget {
+  const GuideTripView({super.key});
+
+  @override
+  State<GuideTripView> createState() => _GuideTripViewState();
+}
+
+class _GuideTripViewState extends State<GuideTripView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<GuideTripViewModel>().load(),
+    );
+  }
+
+  Future<void> _rate(GuideTrip trip, TouristProfile? tourist) async {
+    final viewModel = context.read<GuideTripViewModel>();
+    final answer = await showRateTouristSheet(
+      context,
+      touristName: tourist?.firstName ?? 'el turista',
+      tripLabel: '${trip.circuitTitle} · ${Formatters.compactDate(trip.date)}',
+    );
+    if (answer == null || !mounted) return;
+
+    final ok = await viewModel.rateTourist(
+      stars: answer.stars,
+      comment: answer.comment,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? 'Calificación enviada. Gracias por ayudar a otros guías.'
+                : viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+          ),
+        ),
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = context.watch<GuideTripViewModel>();
+    final trip = viewModel.trip;
+
+    if (!viewModel.isLoaded || trip == null) {
+      return Scaffold(
+        appBar: const GuideBar(title: 'Viaje'),
+        body: !viewModel.isLoaded
+            ? const Center(child: CircularProgressIndicator())
+            : const GuideEmptyState(
+                icon: Icons.search_off,
+                title: 'No encontramos este viaje',
+                message: 'Revisa tus viajes desde la pestaña Viajes.',
+              ),
+      );
+    }
+
+    final tourist = viewModel.tourist;
+    final name = tourist?.firstName ?? 'el turista';
+    final chat = viewModel.hasChat
+        ? () => context.push(Routes.guideThreadPath(trip.id))
+        : null;
+    final actions = [
+      if (trip.canRateTourist) ...[
+        PrimaryButton(
+          label: 'Calificar a $name',
+          icon: Icons.star_outline,
+          isLoading: viewModel.isBusy,
+          onPressed: () => _rate(trip, tourist),
+        ),
+        if (chat != null) ...[
+          const SizedBox(height: 8),
+          SecondaryButton(label: 'Ver la conversación', onPressed: chat),
+        ],
+      ] else if (chat != null)
+        PrimaryButton(
+          label: 'Escribir a $name',
+          icon: Icons.chat_bubble_outline,
+          onPressed: chat,
+        ),
+    ];
+
+    return Scaffold(
+      appBar: const GuideBar(title: 'Viaje'),
+      bottomNavigationBar: actions.isEmpty
+          ? null
+          : _ActionBar(children: actions),
+      body: ListView(
+        padding: AppTheme.screenPadding.copyWith(top: 20, bottom: 32),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _StatusPill(completed: trip.isCompleted),
+          ),
+          const SizedBox(height: 10),
+          Semantics(
+            header: true,
+            child: Text(trip.circuitTitle, style: AppTextStyles.formTitle),
+          ),
+          const SizedBox(height: 14),
+          DetailLine(
+            icon: Icons.calendar_month_outlined,
+            text: '${Formatters.weekdayDate(trip.date)} · ${trip.startTime}',
+          ),
+          DetailLine(
+            icon: Icons.location_on_outlined,
+            text: trip.meetingPoint == null
+                ? '${trip.city} · Punto de encuentro por acordar en el chat'
+                : '${trip.city} · ${trip.meetingPoint}',
+          ),
+          DetailLine(
+            icon: Icons.schedule,
+            text: '${trip.terms.serviceHours} h de servicio',
+          ),
+          DetailLine(
+            icon: Icons.group_outlined,
+            text: Formatters.people(trip.groupSize),
+          ),
+          DetailLine(
+            icon: Icons.person_pin_circle_outlined,
+            text: trip.terms.needLabel,
+          ),
+          DetailLine(
+            icon: Icons.directions_car_outlined,
+            text: transportForGuide(trip.terms.transportOption),
+          ),
+          const SizedBox(height: 24),
+          Semantics(
+            header: true,
+            child: Text('Pago', style: AppTextStyles.title),
+          ),
+          const SizedBox(height: 8),
+          MoneyBreakdown(
+            price: trip.agreedPrice,
+            earningsLabel: trip.isCompleted ? 'Recibiste' : 'Recibes',
+          ),
+          if (!trip.isCompleted) ...[
+            const SizedBox(height: 6),
+            Text(
+              'Pasa a tu balance cuando termine el viaje.',
+              style: AppTextStyles.caption,
+            ),
+          ],
+          const SizedBox(height: 24),
+          Text('Turista', style: AppTextStyles.title),
+          const SizedBox(height: 10),
+          TouristTile(
+            tourist: tourist,
+            onTap: () => context.push(Routes.guideTouristPath(trip.touristId)),
+          ),
+          if (trip.isCompleted && trip.touristRated) ...[
+            const SizedBox(height: 12),
+            Text(
+              'Ya calificaste a $name por este viaje.',
+              style: AppTextStyles.caption,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Lo que toca hacer con el viaje, fijo abajo para tenerlo a mano sin
+/// desplazarse.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Próximo" o "Terminado".
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.completed});
+
+  final bool completed;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = completed
+        ? AppColors.secondaryText
+        : AppColors.accentSecondaryGreen;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          completed ? 'Terminado' : 'Próximo',
+          style: AppTextStyles.caption.copyWith(
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}

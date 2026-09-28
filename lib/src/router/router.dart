@@ -11,11 +11,14 @@ import '../data/datasources/repository/circuit_collections_repository.dart';
 import '../data/datasources/repository/group_session_repository.dart';
 import '../data/datasources/repository/guide_access_repository.dart';
 import '../data/datasources/repository/guide_chat_repository.dart';
+import '../data/datasources/repository/guide_inbox_repository.dart';
 import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
+import '../data/datasources/repository/guide_work_repository.dart';
 import '../data/datasources/repository/location_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
+import '../data/datasources/repository/tourist_repository.dart';
 import '../data/datasources/repository/visit_log_repository.dart';
 import '../data/models/guide_access_request.dart';
 import '../data/models/user_role.dart';
@@ -34,6 +37,23 @@ import '../ui/guide_access/view/guide_application_view.dart';
 import '../ui/guide_access/view/guide_start_view.dart';
 import '../ui/guide_access/view/guide_status_view.dart';
 import '../ui/guide_access/viewmodels/guide_application_viewmodel.dart';
+import '../ui/guide_app/balance/view/guide_balance_view.dart';
+import '../ui/guide_app/balance/viewmodels/guide_balance_viewmodel.dart';
+import '../ui/guide_app/chats/view/guide_chats_view.dart';
+import '../ui/guide_app/chats/view/guide_thread_view.dart';
+import '../ui/guide_app/chats/viewmodels/guide_chats_viewmodel.dart';
+import '../ui/guide_app/chats/viewmodels/guide_thread_viewmodel.dart';
+import '../ui/guide_app/home/view/guide_home_view.dart';
+import '../ui/guide_app/home/viewmodels/guide_home_viewmodel.dart';
+import '../ui/guide_app/job/view/guide_job_view.dart';
+import '../ui/guide_app/job/viewmodels/guide_job_viewmodel.dart';
+import '../ui/guide_app/profile/view/guide_self_profile_view.dart';
+import '../ui/guide_app/tourist/view/tourist_profile_view.dart';
+import '../ui/guide_app/tourist/viewmodels/tourist_profile_viewmodel.dart';
+import '../ui/guide_app/trips/view/guide_trip_view.dart';
+import '../ui/guide_app/trips/view/guide_trips_view.dart';
+import '../ui/guide_app/trips/viewmodels/guide_trip_viewmodel.dart';
+import '../ui/guide_app/trips/viewmodels/guide_trips_viewmodel.dart';
 import '../ui/guide_chat/view/guide_chat_view.dart';
 import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
 import '../ui/guide_profile/view/guide_profile_view.dart';
@@ -94,6 +114,10 @@ GoRouter createRouter(AuthRepository authRepository) {
       if (authRepository.isLoggedIn && isPublic) {
         return location == Routes.guideLogin ? Routes.guideAccess : Routes.home;
       }
+      if (Routes.isGuideApp(location) &&
+          !context.read<GuideAccessRepository>().isApproved) {
+        return Routes.guideAccess;
+      }
       return null;
     },
     routes: [
@@ -140,10 +164,11 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.guideAccess,
         redirect: (context, state) =>
-            context.read<GuideAccessRepository>().status ==
-                GuideAccessStatus.none
-            ? Routes.guideStart
-            : Routes.guideStatus,
+            switch (context.read<GuideAccessRepository>().status) {
+              GuideAccessStatus.none => Routes.guideStart,
+              GuideAccessStatus.pending => Routes.guideStatus,
+              GuideAccessStatus.approved => Routes.guideHome,
+            },
       ),
       GoRoute(
         path: Routes.guideStart,
@@ -168,6 +193,104 @@ GoRouter createRouter(AuthRepository authRepository) {
             ? Routes.guideStart
             : null,
         builder: (context, state) => const GuideStatusView(),
+      ),
+      // ── App del guía ──────────────────────────────────────────────────────
+      GoRoute(
+        path: Routes.guideHome,
+        builder: (context, state) => ChangeNotifierProvider<GuideHomeViewModel>(
+          create: (context) => GuideHomeViewModel(
+            context.read<GuideAccessRepository>(),
+            context.read<GuideWorkRepository>(),
+            context.read<TouristRepository>(),
+          ),
+          child: const GuideHomeView(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.guideTrips,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideTripsViewModel>(
+              create: (context) => GuideTripsViewModel(
+                context.read<GuideWorkRepository>(),
+                context.read<TouristRepository>(),
+              ),
+              child: const GuideTripsView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideChats,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideChatsViewModel>(
+              create: (context) => GuideChatsViewModel(
+                context.read<GuideWorkRepository>(),
+                context.read<TouristRepository>(),
+                context.read<GuideInboxRepository>(),
+              ),
+              child: const GuideChatsView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideSelfProfile,
+        builder: (context, state) => const GuideSelfProfileView(),
+      ),
+      GoRoute(
+        path: Routes.guideBalance,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideBalanceViewModel>(
+              create: (context) => GuideBalanceViewModel(
+                context.read<GuideWorkRepository>(),
+                context.read<TouristRepository>(),
+              ),
+              child: const GuideBalanceView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideJob,
+        builder: (context, state) => ChangeNotifierProvider<GuideJobViewModel>(
+          create: (context) => GuideJobViewModel(
+            context.read<GuideWorkRepository>(),
+            context.read<TouristRepository>(),
+            state.pathParameters[Routes.jobId] ?? '',
+          ),
+          child: const GuideJobView(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.guideTourist,
+        builder: (context, state) =>
+            ChangeNotifierProvider<TouristProfileViewModel>(
+              create: (context) => TouristProfileViewModel(
+                context.read<GuideWorkRepository>(),
+                context.read<TouristRepository>(),
+                state.pathParameters[Routes.touristId] ?? '',
+              ),
+              child: const TouristProfileView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideTrip,
+        builder: (context, state) => ChangeNotifierProvider<GuideTripViewModel>(
+          create: (context) => GuideTripViewModel(
+            context.read<GuideWorkRepository>(),
+            context.read<TouristRepository>(),
+            context.read<GuideInboxRepository>(),
+            state.pathParameters[Routes.tripId] ?? '',
+          ),
+          child: const GuideTripView(),
+        ),
+      ),
+      GoRoute(
+        path: Routes.guideThread,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideThreadViewModel>(
+              create: (context) => GuideThreadViewModel(
+                context.read<GuideWorkRepository>(),
+                context.read<TouristRepository>(),
+                context.read<GuideInboxRepository>(),
+                state.pathParameters[Routes.tripId] ?? '',
+              ),
+              child: const GuideThreadView(),
+            ),
       ),
       GoRoute(
         path: Routes.home,

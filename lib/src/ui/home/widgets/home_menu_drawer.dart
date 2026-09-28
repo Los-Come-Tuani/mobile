@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../router/routes.dart';
 import '../viewmodels/home_viewmodel.dart';
 
@@ -102,6 +103,7 @@ class HomeMenuDrawer extends StatelessWidget {
                 context.push(Routes.settings);
               },
             ),
+            const _GuideModeItem(),
             const Spacer(),
             const Divider(color: AppColors.divider, height: 1),
             ListTile(
@@ -117,6 +119,28 @@ class HomeMenuDrawer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Modo guía" si la cuenta ya es de guía; si no, la invitación a
+/// postularse (o a ver cómo va su solicitud).
+class _GuideModeItem extends StatelessWidget {
+  const _GuideModeItem();
+
+  @override
+  Widget build(BuildContext context) {
+    final isGuide = context.select<GuideAccessRepository, bool>(
+      (access) => access.isApproved,
+    );
+
+    return _MenuItem(
+      icon: Icons.tour_outlined,
+      label: isGuide ? 'Modo guía' : 'Ser guía en K’Plan',
+      onTap: () {
+        Navigator.of(context).pop();
+        context.go(isGuide ? Routes.guideHome : Routes.guideAccess);
+      },
     );
   }
 }

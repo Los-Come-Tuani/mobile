@@ -16,8 +16,7 @@ import '../widgets/guide_heading.dart';
 /// En qué va la solicitud de guía: en revisión o aprobada.
 ///
 /// Escucha a [GuideAccessRepository], así que cambia sola cuando termina la
-/// revisión. Todavía no hay panel de guía: al continuar se entra a la app
-/// con la misma cuenta.
+/// revisión; aprobada, lleva a la app del guía.
 class GuideStatusView extends StatelessWidget {
   const GuideStatusView({super.key});
 
@@ -134,8 +133,8 @@ class _Approved extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         PrimaryButton(
-          label: 'Continuar',
-          onPressed: () => context.go(Routes.home),
+          label: 'Entrar como guía',
+          onPressed: () => context.go(Routes.guideHome),
         ),
       ],
     );
