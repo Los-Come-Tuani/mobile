@@ -11,6 +11,7 @@ import 'src/data/datasources/repository/badges_repository.dart';
 import 'src/data/datasources/repository/bookings_repository.dart';
 import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/group_session_repository.dart';
+import 'src/data/datasources/repository/guide_access_repository.dart';
 import 'src/data/datasources/repository/guide_chat_repository.dart';
 import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
@@ -48,6 +49,11 @@ class _KPlanAppState extends State<KPlanApp> {
       providers: [
         ChangeNotifierProvider<AuthRepository>.value(
           value: widget.authRepository,
+        ),
+        // Quién puede entrar como guía: solicitudes en revisión o aprobadas.
+        ChangeNotifierProvider<GuideAccessRepository>(
+          create: (context) =>
+              GuideAccessRepository(context.read<AuthRepository>()),
         ),
         Provider<ApiRepository>(create: (_) => ApiRepository()),
         Provider<TourRepository>(create: (_) => TourRepository()),

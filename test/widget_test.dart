@@ -26,12 +26,14 @@ Widget _wrap(Widget child, {List<SingleChildWidget> providers = const []}) {
 }
 
 void main() {
-  testWidgets('Welcome muestra el título y las dos acciones', (tester) async {
+  testWidgets('Welcome muestra el título y las dos formas de entrar', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrap(const WelcomeView()));
 
     expect(find.text('Bienvenido'), findsOneWidget);
-    expect(find.text('INICIAR SESIÓN'), findsOneWidget);
-    expect(find.text('CREAR CUENTA'), findsOneWidget);
+    expect(find.text('Turista'), findsOneWidget);
+    expect(find.text('Guía'), findsOneWidget);
   });
 
   testWidgets('Login valida los campos vacíos', (tester) async {

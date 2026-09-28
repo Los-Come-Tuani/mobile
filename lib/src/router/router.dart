@@ -9,6 +9,7 @@ import '../data/datasources/repository/badges_repository.dart';
 import '../data/datasources/repository/bookings_repository.dart';
 import '../data/datasources/repository/circuit_collections_repository.dart';
 import '../data/datasources/repository/group_session_repository.dart';
+import '../data/datasources/repository/guide_access_repository.dart';
 import '../data/datasources/repository/guide_chat_repository.dart';
 import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
@@ -16,6 +17,8 @@ import '../data/datasources/repository/location_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
 import '../data/datasources/repository/visit_log_repository.dart';
+import '../data/models/guide_access_request.dart';
+import '../data/models/user_role.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
@@ -27,6 +30,10 @@ import '../ui/event_detail/viewmodels/event_detail_viewmodel.dart';
 import '../ui/forgot_password/view/forgot_password_view.dart';
 import '../ui/group_slots/view/group_slots_view.dart';
 import '../ui/group_slots/viewmodels/group_slots_viewmodel.dart';
+import '../ui/guide_access/view/guide_application_view.dart';
+import '../ui/guide_access/view/guide_start_view.dart';
+import '../ui/guide_access/view/guide_status_view.dart';
+import '../ui/guide_access/viewmodels/guide_application_viewmodel.dart';
 import '../ui/guide_chat/view/guide_chat_view.dart';
 import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
 import '../ui/guide_profile/view/guide_profile_view.dart';
@@ -79,10 +86,14 @@ GoRouter createRouter(AuthRepository authRepository) {
     // Reevalúa [redirect] cada vez que cambia la sesión (login / logout).
     refreshListenable: authRepository,
     redirect: (context, state) {
-      final isPublic = Routes.public.contains(state.matchedLocation);
+      final location = state.matchedLocation;
+      if (Routes.guideOnboarding.contains(location)) return null;
 
+      final isPublic = Routes.public.contains(location);
       if (!authRepository.isLoggedIn && !isPublic) return Routes.welcome;
-      if (authRepository.isLoggedIn && isPublic) return Routes.home;
+      if (authRepository.isLoggedIn && isPublic) {
+        return location == Routes.guideLogin ? Routes.guideAccess : Routes.home;
+      }
       return null;
     },
     routes: [
@@ -115,6 +126,48 @@ GoRouter createRouter(AuthRepository authRepository) {
         path: Routes.forgotPassword,
         pageBuilder: (context, state) =>
             _fadePage(state, const ForgotPasswordView()),
+      ),
+      GoRoute(
+        path: Routes.guideLogin,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ChangeNotifierProvider<LoginViewModel>(
+            create: (context) => LoginViewModel(context.read<AuthRepository>()),
+            child: const LoginView(role: UserRole.guide),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: Routes.guideAccess,
+        redirect: (context, state) =>
+            context.read<GuideAccessRepository>().status ==
+                GuideAccessStatus.none
+            ? Routes.guideStart
+            : Routes.guideStatus,
+      ),
+      GoRoute(
+        path: Routes.guideStart,
+        builder: (context, state) => const GuideStartView(),
+      ),
+      GoRoute(
+        path: Routes.guideApplication,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideApplicationViewModel>(
+              create: (context) => GuideApplicationViewModel(
+                context.read<AuthRepository>(),
+                context.read<GuideAccessRepository>(),
+              ),
+              child: const GuideApplicationView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideStatus,
+        redirect: (context, state) =>
+            context.read<GuideAccessRepository>().status ==
+                GuideAccessStatus.none
+            ? Routes.guideStart
+            : null,
+        builder: (context, state) => const GuideStatusView(),
       ),
       GoRoute(
         path: Routes.home,

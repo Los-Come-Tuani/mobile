@@ -4,6 +4,24 @@ abstract final class Routes {
   static const login = '/login';
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
+
+  /// El mismo login, pero al entrar lleva a [guideAccess] y abajo ofrece
+  /// postularse en vez de crear cuenta.
+  static const guideLogin = '/guide-login';
+
+  /// Entrada de guías con sesión iniciada. No tiene pantalla: redirige a
+  /// [guideStart] o a [guideStatus] según en qué va la solicitud.
+  static const guideAccess = '/guide-access';
+
+  /// "Comparte tu territorio": qué pide la postulación antes de empezar.
+  static const guideStart = '/guide-access/start';
+
+  /// La postulación por pasos. Sin sesión, al final se verifica el correo y
+  /// se crea la cuenta.
+  static const guideApplication = '/guide-access/application';
+
+  /// Solicitud en revisión o acceso de guía habilitado.
+  static const guideStatus = '/guide-access/status';
   static const home = '/home';
   static const myTrips = '/my-trips';
   static const saved = '/saved';
@@ -91,5 +109,15 @@ abstract final class Routes {
   static String guideProfilePath(String id) => '/guide/$id';
 
   /// Rutas accesibles sin sesión iniciada.
-  static const Set<String> public = {welcome, login, register, forgotPassword};
+  static const Set<String> public = {
+    welcome,
+    login,
+    register,
+    forgotPassword,
+    guideLogin,
+  };
+
+  /// Rutas que se recorren con o sin sesión: quien se postula sin cuenta la
+  /// crea al final, sin salir de la postulación.
+  static const Set<String> guideOnboarding = {guideStart, guideApplication};
 }
