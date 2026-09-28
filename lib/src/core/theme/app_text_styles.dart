@@ -40,6 +40,23 @@ abstract final class AppTextStyles {
     color: AppColors.primaryText,
   );
 
+  /// Titular de las pantallas de guías ("Comparte tu territorio").
+  static TextStyle get formTitle => GoogleFonts.poppins(
+    fontSize: 26,
+    fontWeight: FontWeight.w600,
+    height: 34 / 26,
+    color: AppColors.primaryText,
+  );
+
+  /// Etiqueta verde de las pantallas de guías: la miga "K’Plan / Guías", el
+  /// progreso de la postulación y los títulos de cada bloque ("Ten a mano").
+  static TextStyle get sectionLabel => GoogleFonts.poppins(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 18 / 12,
+    color: AppColors.accentSecondaryGreen,
+  );
+
   /// Etiqueta en mayúsculas sobre un campo ("CORREO ELECTRÓNICO").
   static TextStyle get fieldLabel => GoogleFonts.poppins(
     fontSize: 14,

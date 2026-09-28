@@ -33,6 +33,20 @@ abstract final class Validators {
     return 'Usa al menos 8 caracteres con letras y números';
   }
 
+  /// Para campos obligatorios sin un formato especial.
+  static String? Function(String?) notEmpty(String message) =>
+      (value) => (value == null || value.trim().isEmpty) ? message : null;
+
+  /// Sin el código de país, que se elige aparte.
+  static String? phone(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return 'Ingresa un teléfono de contacto';
+    if (digits.length < 7 || digits.length > 15) {
+      return 'El teléfono no es válido';
+    }
+    return null;
+  }
+
   static final RegExp _usernameRegExp = RegExp(r'^[A-Za-z0-9._]{3,20}$');
 
   /// Sin la "@" inicial, que el campo agrega sólo como ayuda visual.

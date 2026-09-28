@@ -11,9 +11,9 @@ import '../../../core/utils/validators.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/verification_code_field.dart';
 import '../viewmodels/register_viewmodel.dart';
 import '../widgets/birth_date_sheet.dart';
-import '../widgets/verification_code_field.dart';
 
 /// "Crear cuenta" por pasos: correo, código, contraseña, fecha de
 /// nacimiento, nombre y nombre de usuario.

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_text_styles.dart';
+
 /// Campo de texto de la app. Toma la decoración de
 /// `AppTheme.inputDecorationTheme`, así que todas las pantallas se ven igual.
 ///
@@ -8,10 +10,13 @@ class AppTextField extends StatefulWidget {
   const AppTextField({
     super.key,
     required this.hint,
+    this.helper,
     this.controller,
     this.validator,
     this.keyboardType,
     this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.autofillHints,
     this.isPassword = false,
     this.enabled = true,
     this.onSubmitted,
@@ -20,10 +25,15 @@ class AppTextField extends StatefulWidget {
   });
 
   final String hint;
+
+  /// Ayuda bajo el campo; el mensaje de error la reemplaza mientras exista.
+  final String? helper;
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final Iterable<String>? autofillHints;
   final bool isPassword;
   final bool enabled;
   final ValueChanged<String>? onSubmitted;
@@ -49,6 +59,8 @@ class _AppTextFieldState extends State<AppTextField> {
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
+      textCapitalization: widget.textCapitalization,
+      autofillHints: widget.autofillHints,
       onFieldSubmitted: widget.onSubmitted,
       minLines: widget.isPassword ? null : widget.minLines,
       maxLines: widget.isPassword ? 1 : widget.maxLines,
@@ -56,6 +68,9 @@ class _AppTextFieldState extends State<AppTextField> {
       enableSuggestions: !widget.isPassword,
       decoration: InputDecoration(
         hintText: widget.hint,
+        helperText: widget.helper,
+        helperMaxLines: 2,
+        helperStyle: AppTextStyles.caption,
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
