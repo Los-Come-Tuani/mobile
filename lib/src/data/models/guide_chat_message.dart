@@ -1,5 +1,5 @@
-/// Un mensaje del chat simulado entre el turista y los participantes
-/// (guía y/o traductor) de la solicitud activa.
+/// Un mensaje de un chat entre un turista y quienes lo guían: el del lado
+/// turista (con guía y/o traductor) y el de la app del guía.
 class GuideChatMessage {
   const GuideChatMessage({
     required this.id,

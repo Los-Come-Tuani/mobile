@@ -13,14 +13,17 @@ import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/group_session_repository.dart';
 import 'src/data/datasources/repository/guide_access_repository.dart';
 import 'src/data/datasources/repository/guide_chat_repository.dart';
+import 'src/data/datasources/repository/guide_inbox_repository.dart';
 import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
+import 'src/data/datasources/repository/guide_work_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
 import 'src/data/datasources/repository/map_tiles_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
 import 'src/data/datasources/repository/support_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
+import 'src/data/datasources/repository/tourist_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
 
@@ -55,6 +58,23 @@ class _KPlanAppState extends State<KPlanApp> {
           create: (context) =>
               GuideAccessRepository(context.read<AuthRepository>()),
         ),
+        // App del guía: sus chats con turistas, su trabajo (propuestas,
+        // viajes y dinero) y los turistas con sus calificaciones de guías.
+        ChangeNotifierProvider<GuideInboxRepository>(
+          create: (context) =>
+              GuideInboxRepository(context.read<AuthRepository>()),
+        ),
+        ChangeNotifierProvider<GuideWorkRepository>(
+          create: (context) => GuideWorkRepository(
+            context.read<AuthRepository>(),
+            context.read<GuideAccessRepository>(),
+            context.read<GuideInboxRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider<TouristRepository>(
+          create: (context) =>
+              TouristRepository(context.read<GuideWorkRepository>()),
+        ),
         Provider<ApiRepository>(create: (_) => ApiRepository()),
         Provider<TourRepository>(create: (_) => TourRepository()),
         // Las "playlists" de paradas: se siembran del catálogo y el usuario
@@ -87,7 +107,8 @@ class _KPlanAppState extends State<KPlanApp> {
         // Catálogo de guías turísticos disponibles para solicitar en vivo.
         Provider<GuideRepository>(create: (_) => GuideRepository()),
         // La propuesta de trabajo para guía/traductor en curso, si hay una.
-        // Las postulaciones se simulan: no hay app del lado del guía todavía.
+        // Las postulaciones se simulan con el catálogo de guías: en la demo
+        // no llegan a la app del guía, que tiene sus propuestas de ejemplo.
         ChangeNotifierProvider<GuideRequestRepository>(
           create: (context) =>
               GuideRequestRepository(context.read<GuideRepository>()),

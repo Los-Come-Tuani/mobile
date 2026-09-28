@@ -16,7 +16,53 @@ class GuideAccessRepository extends ChangeNotifier {
   GuideAccessRepository(
     this._authRepository, {
     this.reviewTime = const Duration(minutes: 1),
-  });
+  }) {
+    for (final demo in demoGuides) {
+      _byAccount[demo.contactEmail] = (
+        request: demo,
+        status: GuideAccessStatus.approved,
+      );
+    }
+  }
+
+  /// Cuentas de guía ya aprobadas, para probar la app del guía sin pasar
+  /// por la postulación. Entran con cualquier contraseña, como toda cuenta
+  /// de la demo.
+  static final demoGuides = [
+    GuideAccessRequest(
+      fullName: 'Esteban Vado',
+      phone: '+505 8854 2210',
+      contactEmail: 'guia@kplan.com',
+      coverage: GuideCoverage.national,
+      languages: const ['Español', 'Inglés', 'Francés'],
+      experience: '9 años con recorridos de arquitectura colonial y leyendas.',
+      identityDocument: GuideDocument(
+        name: 'cedula.pdf',
+        uri: Uri.parse('demo:cedula.pdf'),
+      ),
+      inturCredential: GuideDocument(
+        name: 'credencial-intur.pdf',
+        uri: Uri.parse('demo:credencial-intur.pdf'),
+      ),
+    ),
+    GuideAccessRequest(
+      fullName: 'Marlene Ríos',
+      phone: '+505 8831 4476',
+      contactEmail: 'guia.granada@kplan.com',
+      coverage: GuideCoverage.local,
+      certifiedCity: 'Granada',
+      languages: const ['Español', 'Inglés'],
+      experience: '6 años en Granada: historia colonial y gastronomía.',
+      identityDocument: GuideDocument(
+        name: 'cedula.pdf',
+        uri: Uri.parse('demo:cedula.pdf'),
+      ),
+      inturCredential: GuideDocument(
+        name: 'credencial-intur.pdf',
+        uri: Uri.parse('demo:credencial-intur.pdf'),
+      ),
+    ),
+  ];
 
   final AuthRepository _authRepository;
 
@@ -28,8 +74,14 @@ class GuideAccessRepository extends ChangeNotifier {
   _byAccount = {};
   final Map<String, Timer> _reviews = {};
 
-  String? get _account =>
-      _authRepository.currentUser?.email.trim().toLowerCase();
+  String? get _account => accountKeyOf(_authRepository);
+
+  /// Con qué clave se guarda lo de cada cuenta: el correo, sin mayúsculas.
+  /// La usan también los repositorios de la app del guía.
+  static String? accountKeyOf(AuthRepository auth) =>
+      auth.currentUser?.email.trim().toLowerCase();
+
+  bool get isApproved => status == GuideAccessStatus.approved;
 
   /// En qué va la cuenta con sesión iniciada.
   GuideAccessStatus get status =>

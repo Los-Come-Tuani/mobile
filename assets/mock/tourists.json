@@ -1,0 +1,162 @@
+[
+  {
+    "id": "tourist-carlos",
+    "name": "Carlos Méndez",
+    "country": "Nicaragua",
+    "languages": ["Español"],
+    "tripsCount": 6,
+    "memberSince": 2024,
+    "ratings": [
+      {
+        "guideName": "Fátima D.",
+        "rating": 5,
+        "timeAgo": "hace 2 meses",
+        "text": "Puntual y muy respetuoso con el grupo. Da gusto guiarlo."
+      },
+      {
+        "guideName": "Óscar M.",
+        "rating": 4,
+        "timeAgo": "hace 5 meses",
+        "text": "Pidió cambiar la ruta a última hora, pero avisó con tiempo."
+      }
+    ]
+  },
+  {
+    "id": "tourist-sophie",
+    "name": "Sophie Laurent",
+    "country": "Francia",
+    "languages": ["Francés", "Inglés"],
+    "tripsCount": 3,
+    "memberSince": 2025,
+    "ratings": [
+      {
+        "guideName": "Fátima D.",
+        "rating": 5,
+        "timeAgo": "hace 3 semanas",
+        "text": "Muy interesada en la historia y hace buenas preguntas."
+      },
+      {
+        "guideName": "Valeria O.",
+        "rating": 5,
+        "timeAgo": "hace 2 meses",
+        "text": "Súper amable y puntual."
+      },
+      {
+        "guideName": "Ramón C.",
+        "rating": 4,
+        "timeAgo": "hace 4 meses",
+        "text": "Llegó 20 minutos tarde, pero lo compensó con buena actitud."
+      }
+    ]
+  },
+  {
+    "id": "tourist-daniel",
+    "name": "Daniel Kim",
+    "country": "Corea del Sur",
+    "languages": ["Inglés"],
+    "tripsCount": 2,
+    "memberSince": 2025,
+    "ratings": [
+      {
+        "guideName": "Fátima D.",
+        "rating": 5,
+        "timeAgo": "hace 1 mes",
+        "text": "Excelente grupo, siguieron todas las indicaciones de seguridad."
+      }
+    ]
+  },
+  {
+    "id": "tourist-emily",
+    "name": "Emily Walker",
+    "country": "Estados Unidos",
+    "languages": ["Inglés"],
+    "tripsCount": 4,
+    "memberSince": 2024,
+    "ratings": [
+      {
+        "guideName": "Marlene R.",
+        "rating": 3,
+        "timeAgo": "hace 3 semanas",
+        "text": "Cambió el punto de encuentro sin avisar. Después, todo bien."
+      },
+      {
+        "guideName": "Esteban V.",
+        "rating": 4,
+        "timeAgo": "hace 2 semanas",
+        "text": "Grupo alegre, aunque un poco impuntual."
+      }
+    ]
+  },
+  {
+    "id": "tourist-werner",
+    "name": "Werner Klein",
+    "country": "Alemania",
+    "languages": ["Alemán", "Inglés"],
+    "tripsCount": 5,
+    "memberSince": 2023,
+    "ratings": [
+      {
+        "guideName": "Valeria O.",
+        "rating": 5,
+        "timeAgo": "hace 1 semana",
+        "text": "Muy organizado: mandó la lista del grupo un día antes."
+      }
+    ]
+  },
+  {
+    "id": "tourist-ana",
+    "name": "Ana Pérez",
+    "country": "Costa Rica",
+    "languages": ["Español"],
+    "tripsCount": 1,
+    "memberSince": 2026,
+    "ratings": []
+  },
+  {
+    "id": "tourist-marco",
+    "name": "Marco Bianchi",
+    "country": "Italia",
+    "languages": ["Italiano", "Español"],
+    "tripsCount": 2,
+    "memberSince": 2025,
+    "ratings": [
+      {
+        "guideName": "Ramón C.",
+        "rating": 5,
+        "timeAgo": "hace 3 semanas",
+        "text": "Muy respetuoso con las comunidades que visitamos."
+      }
+    ]
+  },
+  {
+    "id": "tourist-julia",
+    "name": "Julia Souza",
+    "country": "Brasil",
+    "languages": ["Portugués", "Español"],
+    "tripsCount": 3,
+    "memberSince": 2024,
+    "ratings": [
+      {
+        "guideName": "Esteban V.",
+        "rating": 5,
+        "timeAgo": "hace 3 semanas",
+        "text": "Llegó puntual y con muchas ganas de aprender."
+      },
+      {
+        "guideName": "Óscar M.",
+        "rating": 4,
+        "timeAgo": "hace 2 meses",
+        "text": "Buena condición física para la caminata al volcán."
+      }
+    ]
+  },
+  {
+    "id": "tourist-lucia",
+    "name": "Lucía Herrera",
+    "country": "México",
+    "languages": ["Español"],
+    "tripsCount": 0,
+    "memberSince": 2026,
+    "ratings": []
+  }
+]
