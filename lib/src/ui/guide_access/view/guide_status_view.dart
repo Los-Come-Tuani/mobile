@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
@@ -14,6 +12,7 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/soft_button.dart';
 import '../widgets/guide_app_bar.dart';
 import '../widgets/guide_heading.dart';
+import '../widgets/review_timeline.dart';
 
 /// En qué va la solicitud de guía: en revisión o aprobada.
 ///
@@ -58,6 +57,7 @@ class GuideStatusView extends StatelessWidget {
                   ? const _Approved(key: ValueKey(GuideAccessStatus.approved))
                   : _Pending(
                       key: const ValueKey(GuideAccessStatus.pending),
+                      review: guideAccess.review,
                       contactEmail: guideAccess.request?.contactEmail,
                       canGoHome: canGoHome,
                     ),
@@ -72,43 +72,30 @@ class GuideStatusView extends StatelessWidget {
 class _Pending extends StatelessWidget {
   const _Pending({
     super.key,
+    required this.review,
     required this.contactEmail,
     required this.canGoHome,
   });
 
+  final GuideReview? review;
   final String? contactEmail;
   final bool canGoHome;
 
   @override
   Widget build(BuildContext context) {
+    final review = this.review;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const GuideHeading(
           title: 'Solicitud en revisión',
-          subtitle:
-              'Tu solicitud está en revisión. Te comunicaremos el resultado al '
-              'correo indicado.',
+          subtitle: 'El equipo de K’Plan está revisando tu información.',
         ),
-        if (contactEmail != null) ...[
-          const SizedBox(height: 20),
-          MergeSemantics(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Correo de contacto', style: AppTextStyles.sectionLabel),
-                const SizedBox(height: 4),
-                Text(
-                  contactEmail!,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.primaryText,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        if (review != null) ...[
+          const SizedBox(height: 28),
+          ReviewTimeline(review: review, contactEmail: contactEmail),
         ],
-        const SizedBox(height: 20),
+        const SizedBox(height: 28),
         const InlineNotice(
           message:
               'El acceso de guía estará disponible únicamente si tu solicitud '

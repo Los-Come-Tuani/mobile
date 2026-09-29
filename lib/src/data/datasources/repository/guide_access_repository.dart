@@ -10,8 +10,8 @@ import 'auth_repository.dart';
 /// solicitud está en revisión o si ya puede entrar como guía.
 ///
 /// El portal donde el equipo de K'Plan revisa las solicitudes todavía no
-/// existe, así que la revisión se simula: cada solicitud queda en revisión
-/// durante [reviewTime] y después se aprueba sola.
+/// existe, así que la revisión se simula: cada solicitud pasa por los pasos
+/// de [GuideReviewStep] durante [reviewTime] y después se aprueba sola.
 class GuideAccessRepository extends ChangeNotifier {
   GuideAccessRepository(
     this._authRepository, {
@@ -21,6 +21,7 @@ class GuideAccessRepository extends ChangeNotifier {
       _byAccount[demo.contactEmail] = (
         request: demo,
         status: GuideAccessStatus.approved,
+        review: null,
       );
     }
   }
@@ -66,13 +67,21 @@ class GuideAccessRepository extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  /// Cuánto tarda la revisión simulada.
+  /// Cuánto tarda la revisión simulada. Los documentos y la experiencia se
+  /// dan por revisados al 40 % y al 80 % de este tiempo.
   final Duration reviewTime;
 
   /// Por correo y no por id: en la demo todas las sesiones comparten id.
-  final Map<String, ({GuideAccessRequest request, GuideAccessStatus status})>
+  final Map<
+    String,
+    ({
+      GuideAccessRequest request,
+      GuideAccessStatus status,
+      GuideReview? review,
+    })
+  >
   _byAccount = {};
-  final Map<String, Timer> _reviews = {};
+  final Map<String, List<Timer>> _reviews = {};
 
   /// Cuentas que se crearon al enviar la postulación, no como turista.
   final Set<String> _signedUpAsGuide = {};
@@ -92,6 +101,9 @@ class GuideAccessRepository extends ChangeNotifier {
 
   /// Lo que envió la cuenta con sesión iniciada, si ya se postuló.
   GuideAccessRequest? get request => _byAccount[_account]?.request;
+
+  /// En qué va la revisión de lo que envió la cuenta con sesión iniciada.
+  GuideReview? get review => _byAccount[_account]?.review;
 
   /// La cuenta con sesión iniciada se creó al postularse, no como turista.
   bool get signedUpAsGuide => _signedUpAsGuide.contains(_account);
@@ -113,12 +125,32 @@ class GuideAccessRepository extends ChangeNotifier {
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 800));
-    _byAccount[account] = (request: request, status: GuideAccessStatus.pending);
+    _byAccount[account] = (
+      request: request,
+      status: GuideAccessStatus.pending,
+      review: GuideReview(finished: [DateTime.now()]),
+    );
     if (signedUpAsGuide) _signedUpAsGuide.add(account);
-    _reviews[account]?.cancel();
-    _reviews[account] = Timer(reviewTime, () => _approve(account));
+    _cancelReview(account);
+    _reviews[account] = [
+      Timer(reviewTime * 0.4, () => _finishStep(account)),
+      Timer(reviewTime * 0.8, () => _finishStep(account)),
+      Timer(reviewTime, () => _approve(account)),
+    ];
     notifyListeners();
     return const Result.ok(null);
+  }
+
+  void _finishStep(String account) {
+    final entry = _byAccount[account];
+    final review = entry?.review;
+    if (entry == null || review == null) return;
+    _byAccount[account] = (
+      request: entry.request,
+      status: entry.status,
+      review: review.finishCurrent(DateTime.now()),
+    );
+    notifyListeners();
   }
 
   void _approve(String account) {
@@ -128,14 +160,23 @@ class GuideAccessRepository extends ChangeNotifier {
     _byAccount[account] = (
       request: entry.request,
       status: GuideAccessStatus.approved,
+      review: entry.review?.finishCurrent(DateTime.now()),
     );
     notifyListeners();
   }
 
+  void _cancelReview(String account) {
+    for (final timer in _reviews.remove(account) ?? const <Timer>[]) {
+      timer.cancel();
+    }
+  }
+
   @override
   void dispose() {
-    for (final review in _reviews.values) {
-      review.cancel();
+    for (final timers in _reviews.values) {
+      for (final timer in timers) {
+        timer.cancel();
+      }
     }
     _reviews.clear();
     super.dispose();

@@ -102,6 +102,34 @@ void main() {
       repository.dispose();
     });
 
+    testWidgets('la revisión avanza paso a paso hasta aprobarse', (
+      tester,
+    ) async {
+      final auth = AuthRepository();
+      final repository = GuideAccessRepository(
+        auth,
+        reviewTime: const Duration(minutes: 1),
+      );
+      await _login(tester, auth, 'mariana@example.com');
+      await _settle(tester, repository.submit(_request()));
+
+      final review = repository.review!;
+      expect(review.finishedAt(GuideReviewStep.submitted), isNotNull);
+      expect(review.current, GuideReviewStep.documents);
+
+      await tester.pump(const Duration(seconds: 24));
+      expect(repository.review?.current, GuideReviewStep.experience);
+
+      await tester.pump(const Duration(seconds: 24));
+      expect(repository.review?.current, GuideReviewStep.decision);
+      expect(repository.status, GuideAccessStatus.pending);
+
+      await tester.pump(const Duration(seconds: 12));
+      expect(repository.status, GuideAccessStatus.approved);
+      expect(repository.review?.current, isNull);
+      repository.dispose();
+    });
+
     testWidgets('cada cuenta tiene su propio acceso de guía', (tester) async {
       final auth = AuthRepository();
       final repository = GuideAccessRepository(auth);
@@ -596,10 +624,18 @@ void main() {
         ),
       );
       expect(find.text('Solicitud en revisión'), findsOneWidget);
-      expect(find.text('mariana@example.com'), findsOneWidget);
+      expect(find.text('Revisión de documentos'), findsOneWidget);
+      expect(find.textContaining('mariana@example.com'), findsOneWidget);
       expect(find.text('VOLVER AL INICIO'), findsOneWidget);
+      expect(find.textContaining('Listo'), findsOneWidget);
+      expect(find.text('Revisando ahora'), findsOneWidget);
 
-      await tester.pump(const Duration(seconds: 30));
+      // Al 40 % de la revisión quedan revisados los documentos.
+      await tester.pump(const Duration(seconds: 12));
+      expect(find.textContaining('Listo'), findsNWidgets(2));
+      expect(find.text('Revisando ahora'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 18));
       await tester.pumpAndSettle();
       expect(find.text('Acceso de guía habilitado'), findsOneWidget);
     });

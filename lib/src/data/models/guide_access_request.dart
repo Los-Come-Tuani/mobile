@@ -7,6 +7,32 @@ export 'guide_coverage.dart';
 /// equipo de K'Plan aprueba su solicitud.
 enum GuideAccessStatus { none, pending, approved }
 
+/// Los pasos de la revisión de una solicitud, en el orden en que pasan.
+enum GuideReviewStep { submitted, documents, experience, decision }
+
+/// En qué va la revisión de una solicitud: cuándo terminó cada paso.
+class GuideReview {
+  const GuideReview({required this.finished});
+
+  /// Cuándo terminó cada paso, en el orden de [GuideReviewStep]. Los que no
+  /// están todavía no terminan.
+  final List<DateTime> finished;
+
+  /// El paso que se está revisando; `null` si ya terminaron todos.
+  GuideReviewStep? get current =>
+      finished.length < GuideReviewStep.values.length
+      ? GuideReviewStep.values[finished.length]
+      : null;
+
+  /// Cuándo terminó [step]; `null` si todavía no.
+  DateTime? finishedAt(GuideReviewStep step) =>
+      step.index < finished.length ? finished[step.index] : null;
+
+  /// La misma revisión con el paso actual terminado en [at].
+  GuideReview finishCurrent(DateTime at) =>
+      GuideReview(finished: [...finished, at]);
+}
+
 /// Un archivo adjunto a la solicitud: el documento de identidad, la
 /// credencial INTUR o una certificación.
 class GuideDocument {
