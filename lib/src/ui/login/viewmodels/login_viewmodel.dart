@@ -2,15 +2,29 @@ import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../core/base_viewmodel.dart';
 
+/// Qué pasó al intentar entrar.
+enum LoginResult {
+  /// La sesión quedó iniciada.
+  success,
+
+  /// No hay cuenta con ese correo: la vista ofrece crear una.
+  missingAccount,
+
+  /// Contraseña incorrecta u otro error. El texto queda en [BaseViewModel.errorMessage].
+  failed,
+}
+
 class LoginViewModel extends BaseViewModel {
   LoginViewModel(this._authRepository);
 
   final AuthRepository _authRepository;
 
-  /// Devuelve `true` si la sesión se inició correctamente.
-  /// El error queda en [errorMessage] para que la vista lo muestre.
-  Future<bool> login({required String email, required String password}) async {
-    if (isBusy) return false;
+  /// El error de [LoginResult.failed] queda en [errorMessage].
+  Future<LoginResult> login({
+    required String email,
+    required String password,
+  }) async {
+    if (isBusy) return LoginResult.failed;
 
     clearError();
     setBusy(true);
@@ -22,10 +36,12 @@ class LoginViewModel extends BaseViewModel {
 
     switch (result) {
       case Ok():
-        return true;
+        return LoginResult.success;
+      case Failure(:final error) when error is MissingAccount:
+        return LoginResult.missingAccount;
       case Failure(:final message):
         setError(message);
-        return false;
+        return LoginResult.failed;
     }
   }
 }

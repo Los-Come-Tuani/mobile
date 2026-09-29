@@ -13,6 +13,7 @@ import 'package:k_plan_mobile/src/ui/guide_access/view/guide_status_view.dart';
 import 'package:k_plan_mobile/src/ui/guide_access/viewmodels/guide_application_viewmodel.dart';
 import 'package:k_plan_mobile/src/ui/login/view/login_view.dart';
 import 'package:k_plan_mobile/src/ui/login/viewmodels/login_viewmodel.dart';
+import 'package:k_plan_mobile/src/ui/widgets/app_dialog.dart';
 import 'package:provider/provider.dart';
 
 typedef _TestApp = ({
@@ -45,6 +46,15 @@ Future<T> _settle<T>(WidgetTester tester, Future<T> future) async {
 
 Future<void> _login(WidgetTester tester, AuthRepository auth, String email) =>
     _settle(tester, auth.login(email: email, password: 'secreta1'));
+
+Future<void> _submitLogin(WidgetTester tester, String email) async {
+  await tester.enterText(find.byType(TextFormField).at(0), email);
+  await tester.enterText(find.byType(TextFormField).at(1), 'secreta1');
+  await tester.tap(find.text('INICIAR SESIÓN'));
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+  await tester.pumpAndSettle();
+}
 
 /// Llena la postulación de una guía local de Granada hasta la revisión.
 void _fillUntilReview(GuideApplicationViewModel viewModel) {
@@ -396,6 +406,93 @@ void main() {
       expect(find.textContaining('mismo correo y contraseña'), findsOneWidget);
       expect(find.text('POSTULARME COMO GUÍA'), findsOneWidget);
       expect(find.text('CREAR CUENTA'), findsNothing);
+    });
+
+    testWidgets('un correo desconocido ofrece registrarse como turista', (
+      tester,
+    ) async {
+      final router = GoRouter(
+        initialLocation: Routes.login,
+        routes: [
+          GoRoute(
+            path: Routes.login,
+            builder: (context, state) => ChangeNotifierProvider<LoginViewModel>(
+              create: (_) => LoginViewModel(AuthRepository()),
+              child: const LoginView(),
+            ),
+          ),
+          GoRoute(
+            path: Routes.register,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Registro de turista')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      );
+      await tester.pumpAndSettle();
+      await _submitLogin(tester, 'nadie@kplan.com');
+
+      expect(find.text('No hemos encontrado esta cuenta'), findsOneWidget);
+      expect(find.text('¿Quieres registrarte como turista?'), findsOneWidget);
+
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AppDialog), findsNothing);
+      expect(find.text('Registro de turista'), findsNothing);
+
+      await _submitLogin(tester, 'nadie@kplan.com');
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppDialog),
+          matching: find.text('Crear cuenta'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Registro de turista'), findsOneWidget);
+    });
+
+    testWidgets('un correo desconocido ofrece postularse como guía', (
+      tester,
+    ) async {
+      final router = GoRouter(
+        initialLocation: Routes.guideLogin,
+        routes: [
+          GoRoute(
+            path: Routes.guideLogin,
+            builder: (context, state) => ChangeNotifierProvider<LoginViewModel>(
+              create: (_) => LoginViewModel(AuthRepository()),
+              child: const LoginView(role: UserRole.guide),
+            ),
+          ),
+          GoRoute(
+            path: Routes.guideStart,
+            builder: (context, state) =>
+                const Scaffold(body: Text('Postulación de guía')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      );
+      await tester.pumpAndSettle();
+      await _submitLogin(tester, 'nadie@kplan.com');
+
+      expect(find.text('¿Quieres registrarte como guía?'), findsOneWidget);
+      expect(find.text('Cancelar'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AppDialog),
+          matching: find.text('Postularme'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Postulación de guía'), findsOneWidget);
     });
 
     testWidgets('el estado cambia solo cuando se aprueba la solicitud', (

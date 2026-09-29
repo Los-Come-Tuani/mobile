@@ -7,12 +7,27 @@ import '../../models/user.dart';
 import '../remote/api_client.dart';
 import '../remote/api_routes.dart';
 
+/// El correo con el que se intentó entrar no tiene cuenta.
+class MissingAccount implements Exception {
+  const MissingAccount();
+}
+
 /// Fuente de verdad de la sesión.
 ///
 /// Es un [ChangeNotifier] para que `GoRouter` pueda escucharlo
 /// (`refreshListenable`) y reevaluar los guards al entrar o salir de sesión.
 class AuthRepository extends ChangeNotifier {
   User? _currentUser;
+
+  /// Correos que ya tienen cuenta mientras no hay backend. Cualquier otro
+  /// ofrece registrarse. Quien crea una cuenta en esta sesión se agrega.
+  final Set<String> _demoAccounts = {
+    'guia@kplan.com',
+    'guia.granada@kplan.com',
+    'mariana@example.com',
+    'rosa@example.com',
+    'otra@example.com',
+  };
 
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
@@ -28,8 +43,19 @@ class AuthRepository extends ChangeNotifier {
 
       _setUser(user);
       return Result.ok(user);
+    } on MissingAccount {
+      return const Result.failure(
+        'No hemos encontrado esta cuenta',
+        MissingAccount(),
+      );
     } on DioException catch (e, st) {
       log.e('login: ${e.message}', error: e, stackTrace: st);
+      if (_isMissingAccount(e)) {
+        return const Result.failure(
+          'No hemos encontrado esta cuenta',
+          MissingAccount(),
+        );
+      }
       if (e.response?.statusCode == 401) {
         return const Result.failure('Correo o contraseña incorrectos');
       }
@@ -69,7 +95,7 @@ class AuthRepository extends ChangeNotifier {
   }) async {
     try {
       if (!ApiClient.isConfigured) {
-        final user = await _loginDemo(email, name: name);
+        final user = await _loginDemo(email, name: name, create: true);
         _setUser(user);
         return Result.ok(user);
       }
@@ -134,12 +160,69 @@ class AuthRepository extends ChangeNotifier {
       ApiRoutes.login,
       data: {'email': email, 'password': password},
     );
-    return User.fromJson(_payloadOf(response));
+    if (_saysAccountMissing(response.data)) throw const MissingAccount();
+    final payload = _payloadOf(response);
+    if (_saysAccountMissing(payload)) throw const MissingAccount();
+    final user = User.fromJson(payload);
+    if (user.id.isEmpty && user.email.isEmpty) {
+      throw const FormatException('Respuesta inesperada del servidor');
+    }
+    return user;
+  }
+
+  /// 404, o un mensaje del servidor que dice que ese correo no tiene cuenta.
+  /// Una contraseña incorrecta sigue siendo 401 y no entra aquí.
+  bool _isMissingAccount(DioException e) =>
+      e.response?.statusCode == 404 || _saysAccountMissing(e.response?.data);
+
+  bool _saysAccountMissing(Object? data) {
+    final text = _collectText(data).toLowerCase();
+    const hints = [
+      'no encontrado',
+      'no encontrada',
+      'not found',
+      'no existe',
+      'does not exist',
+      "doesn't exist",
+      'no registrado',
+      'no registrada',
+      'not registered',
+      'usuario inexistente',
+      'user_not_found',
+      'usernotfound',
+      'account_not_found',
+      'accountnotfound',
+      'sin cuenta',
+      'no account',
+      'cuenta inexistente',
+    ];
+    return hints.any(text.contains);
+  }
+
+  String _collectText(Object? data) {
+    return switch (data) {
+      String value => value,
+      Map value => value.values.map(_collectText).join(' '),
+      List value => value.map(_collectText).join(' '),
+      _ => '',
+    };
   }
 
   /// Sesión simulada mientras no exista backend (`ApiClient.baseUrl` vacío).
-  Future<User> _loginDemo(String email, {String name = ''}) async {
+  ///
+  /// Con [create], el correo pasa a ser una cuenta de la demo. Si no, un
+  /// correo que no esté en [_demoAccounts] no inicia sesión.
+  Future<User> _loginDemo(
+    String email, {
+    String name = '',
+    bool create = false,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 900));
+    final key = email.trim().toLowerCase();
+    if (!create && !_demoAccounts.contains(key)) {
+      throw const MissingAccount();
+    }
+    _demoAccounts.add(key);
     return User(
       id: 'demo-user',
       email: email,

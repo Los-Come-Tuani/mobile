@@ -9,6 +9,7 @@ import '../../../core/utils/validators.dart';
 import '../../../data/models/user_role.dart';
 import '../../../router/routes.dart';
 import '../../guide_access/widgets/guide_app_bar.dart';
+import '../../widgets/app_dialog.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/illustration_header.dart';
 import '../../widgets/primary_button.dart';
@@ -45,24 +46,37 @@ class _LoginViewState extends State<LoginView> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     final viewModel = context.read<LoginViewModel>();
-    final ok = await viewModel.login(
+    final result = await viewModel.login(
       email: _emailController.text,
       password: _passwordController.text,
     );
     if (!mounted) return;
 
-    if (ok) {
-      // El redirect del router también protege estas rutas; navegamos
-      // explícito para reemplazar la pila de autenticación.
-      context.go(_isGuide ? Routes.guideAccess : Routes.home);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+    switch (result) {
+      case LoginResult.success:
+        // El redirect del router también protege estas rutas; navegamos
+        // explícito para reemplazar la pila de autenticación.
+        context.go(_isGuide ? Routes.guideAccess : Routes.home);
+      case LoginResult.missingAccount:
+        // Ofrece el registro del rol con el que intentó entrar.
+        final wantsAccount = await showConfirmDialog(
+          context,
+          icon: Icons.person_search_outlined,
+          title: 'No hemos encontrado esta cuenta',
+          message: _isGuide
+              ? '¿Quieres registrarte como guía?'
+              : '¿Quieres registrarte como turista?',
+          confirmLabel: _isGuide ? 'Postularme' : 'Crear cuenta',
+        );
+        if (wantsAccount && mounted) _startSignUp();
+      case LoginResult.failed:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+            ),
           ),
-        ),
-      );
+        );
     }
   }
 

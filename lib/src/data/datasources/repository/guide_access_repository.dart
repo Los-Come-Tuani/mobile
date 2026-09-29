@@ -26,8 +26,8 @@ class GuideAccessRepository extends ChangeNotifier {
   }
 
   /// Cuentas de guía ya aprobadas, para probar la app del guía sin pasar
-  /// por la postulación. Entran con cualquier contraseña, como toda cuenta
-  /// de la demo.
+  /// por la postulación. Entran con cualquier contraseña. Un correo que no
+  /// esté entre las cuentas de la demo no inicia sesión.
   static final demoGuides = [
     GuideAccessRequest(
       fullName: 'Esteban Vado',
