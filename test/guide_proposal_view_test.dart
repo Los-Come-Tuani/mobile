@@ -12,6 +12,7 @@ import 'package:k_plan_mobile/src/data/models/tour_guide.dart';
 import 'package:k_plan_mobile/src/router/routes.dart';
 import 'package:k_plan_mobile/src/ui/guide_request/view/guide_proposal_view.dart';
 import 'package:k_plan_mobile/src/ui/guide_request/viewmodels/guide_request_viewmodel.dart';
+import 'package:k_plan_mobile/src/ui/widgets/app_dialog.dart';
 import 'package:provider/provider.dart';
 
 TourGuide _guide(String id, String name, {bool hasTransport = false}) {
@@ -125,7 +126,7 @@ void main() {
     await tester.pump();
     await tester.tap(
       find.descendant(
-        of: find.byType(AlertDialog),
+        of: find.byType(AppDialog),
         matching: find.text('Contratar'),
       ),
     );

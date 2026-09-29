@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/coupon.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/coupons_viewmodel.dart';
@@ -30,25 +31,14 @@ class _CouponsViewState extends State<CouponsView> {
 
   Future<void> _redeem(Coupon coupon) async {
     final viewModel = context.read<CouponsViewModel>();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: Text('¿Canjear "${coupon.title}"?', style: AppTextStyles.title),
-        content: Text('Se descontarán ${coupon.cost} insignias de tu saldo.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Canjear'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      icon: Icons.military_tech_outlined,
+      title: '¿Canjear "${coupon.title}"?',
+      message: 'Se descontarán ${coupon.cost} insignias de tu saldo.',
+      confirmLabel: 'Canjear',
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final ok = viewModel.redeem(coupon);
     if (!mounted) return;

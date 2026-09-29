@@ -13,6 +13,7 @@ import '../../../data/models/guide_request.dart';
 import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_dialog.dart';
 import '../../widgets/primary_button.dart';
 import '../viewmodels/guide_request_viewmodel.dart';
 import '../widgets/application_card.dart';
@@ -70,28 +71,17 @@ class _GuideProposalViewState extends State<GuideProposalView> {
 
   Future<void> _cancel() async {
     final viewModel = context.read<GuideRequestViewModel>();
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: const Text('¿Retirar tu propuesta?'),
-        content: const Text(
+    final confirmed = await showConfirmDialog(
+      context,
+      icon: Icons.campaign_outlined,
+      title: '¿Retirar tu propuesta?',
+      message:
           'Los guías ya no podrán postularse. Tu reserva del circuito sigue '
           'agendada.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Retirar'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Retirar',
+      destructive: true,
     );
-    if (confirmed == true) viewModel.cancel();
+    if (confirmed) viewModel.cancel();
   }
 
   @override

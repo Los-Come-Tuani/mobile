@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
-import '../../widgets/primary_button.dart';
-import '../../widgets/soft_button.dart';
+import '../../widgets/app_dialog.dart';
 
 /// Pide confirmación antes de cerrar la sesión. Al perderla, el redirect del
 /// router vuelve solo a la bienvenida.
@@ -69,14 +68,11 @@ class _LogoutSheet extends StatelessWidget {
                     style: AppTextStyles.bodySmall,
                   ),
                   const SizedBox(height: 32),
-                  PrimaryButton(
-                    label: 'Cerrar sesión',
-                    onPressed: () => Navigator.of(context).pop(true),
-                  ),
-                  const SizedBox(height: 12),
-                  SoftButton(
-                    label: 'Seguir explorando',
-                    onPressed: () => Navigator.of(context).pop(false),
+                  DialogActions(
+                    primaryLabel: 'Cerrar sesión',
+                    onPrimary: () => Navigator.of(context).pop(true),
+                    secondaryLabel: 'Cancelar',
+                    onSecondary: () => Navigator.of(context).pop(false),
                   ),
                 ],
               ),

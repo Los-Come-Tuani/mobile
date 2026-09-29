@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import 'app_dialog.dart';
 
 /// Animación de "+1 insignia" al confirmar la visita a una parada. Se
 /// cierra sola o al tocarla.
@@ -10,24 +11,9 @@ Future<void> showBadgeEarnedAnimation(
   BuildContext context, {
   required String category,
 }) {
-  return showGeneralDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: 'Insignia obtenida',
-    barrierColor: Colors.black54,
-    transitionDuration: const Duration(milliseconds: 300),
-    pageBuilder: (context, animation, secondaryAnimation) =>
-        _BadgeEarnedCard(category: category),
-    transitionBuilder: (context, animation, secondaryAnimation, child) {
-      final scale = CurvedAnimation(
-        parent: animation,
-        curve: Curves.elasticOut,
-      );
-      return Opacity(
-        opacity: animation.value.clamp(0.0, 1.0),
-        child: ScaleTransition(scale: scale, child: child),
-      );
-    },
+  return showAppDialog<void>(
+    context,
+    builder: (context) => _BadgeEarnedCard(category: category),
   );
 }
 
@@ -59,8 +45,8 @@ class _BadgeEarnedCardState extends State<_BadgeEarnedCard> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
             decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(AppTheme.radius * 2),
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(AppTheme.dialogRadius),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,

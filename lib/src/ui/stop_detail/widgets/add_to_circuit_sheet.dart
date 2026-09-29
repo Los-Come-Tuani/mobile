@@ -6,6 +6,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/models/circuit_collection.dart';
+import '../../widgets/new_circuit_dialog.dart';
 import '../../widgets/remote_image.dart';
 
 /// Hoja "Añadir a un circuito", al estilo de agregar una canción a una
@@ -40,11 +41,8 @@ class _AddToCircuitSheet extends StatelessWidget {
 
   Future<void> _createCircuit(BuildContext context) async {
     final repository = context.read<CircuitCollectionsRepository>();
-    final title = await showDialog<String>(
-      context: context,
-      builder: (context) => const _NewCircuitDialog(),
-    );
-    if (title == null || title.isEmpty) return;
+    final title = await showNewCircuitDialog(context);
+    if (title == null) return;
 
     repository.createCollection(title, withStopId: stopId);
     if (!context.mounted) return;
@@ -203,55 +201,6 @@ class _CollectionRow extends StatelessWidget {
         isSelected ? Icons.check_circle : Icons.add_circle_outline,
         color: isSelected ? AppColors.accentSecondaryGreen : AppColors.outline,
       ),
-    );
-  }
-}
-
-/// Diálogo con el nombre del circuito nuevo.
-class _NewCircuitDialog extends StatefulWidget {
-  const _NewCircuitDialog();
-
-  @override
-  State<_NewCircuitDialog> createState() => _NewCircuitDialogState();
-}
-
-class _NewCircuitDialogState extends State<_NewCircuitDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final title = _controller.text.trim();
-    if (title.isEmpty) return;
-    Navigator.of(context).pop(title);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.white,
-      title: Text('Nuevo circuito', style: AppTextStyles.title),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        textCapitalization: TextCapitalization.sentences,
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _submit(),
-        decoration: const InputDecoration(
-          hintText: 'Ej. Fin de semana en el sur',
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(onPressed: _submit, child: const Text('Crear')),
-      ],
     );
   }
 }

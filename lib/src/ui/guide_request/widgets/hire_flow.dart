@@ -1,46 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/guide_application.dart';
 import '../../../data/models/guide_request.dart';
 import '../../../router/routes.dart';
+import '../../widgets/app_dialog.dart';
 import '../../widgets/guide_hired_overlay.dart';
 
 /// Pregunta antes de contratar a quien mandó [application]. `true` si el
 /// turista confirmó.
-Future<bool> confirmHire(
-  BuildContext context,
-  GuideApplication application,
-) async {
+Future<bool> confirmHire(BuildContext context, GuideApplication application) {
   final roleName = application.role == ApplicationRole.guide
       ? 'guía'
       : 'traductor';
 
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: AppColors.white,
-      title: Text('¿Contratar a ${application.guide.name}?'),
-      content: Text(
+  return showConfirmDialog(
+    context,
+    icon: Icons.handshake_outlined,
+    title: '¿Contratar a ${application.guide.name}?',
+    message:
         'Será tu $roleName por '
         '${Formatters.currency(application.proposedPrice)}. Las demás '
         'postulaciones para este puesto quedan descartadas.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancelar'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Contratar'),
-        ),
-      ],
-    ),
+    confirmLabel: 'Contratar',
   );
-  return confirmed == true;
 }
 
 /// Lo que sigue después de contratar: si ya quedó completo el equipo,

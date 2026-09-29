@@ -19,6 +19,7 @@ class AppTextField extends StatefulWidget {
     this.autofillHints,
     this.isPassword = false,
     this.enabled = true,
+    this.autofocus = false,
     this.onSubmitted,
     this.minLines,
     this.maxLines = 1,
@@ -36,6 +37,7 @@ class AppTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final bool isPassword;
   final bool enabled;
+  final bool autofocus;
   final ValueChanged<String>? onSubmitted;
 
   /// Para textos largos (un mensaje): el campo crece de [minLines] a
@@ -56,6 +58,7 @@ class _AppTextFieldState extends State<AppTextField> {
       controller: widget.controller,
       validator: widget.validator,
       enabled: widget.enabled,
+      autofocus: widget.autofocus,
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,

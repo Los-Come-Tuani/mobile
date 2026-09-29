@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/tour_guide.dart';
+import 'app_dialog.dart';
 import 'primary_button.dart';
 import 'rating_stars.dart';
 import 'remote_image.dart';
@@ -17,24 +18,9 @@ Future<void> showGuideHiredOverlay(
   BuildContext context, {
   required List<TourGuide> people,
 }) {
-  return showGeneralDialog<void>(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: 'Contratado',
-    barrierColor: Colors.black54,
-    transitionDuration: const Duration(milliseconds: 300),
-    pageBuilder: (context, animation, secondaryAnimation) =>
-        _GuideHiredCard(people: people),
-    transitionBuilder: (context, animation, secondaryAnimation, child) {
-      final scale = CurvedAnimation(
-        parent: animation,
-        curve: Curves.elasticOut,
-      );
-      return Opacity(
-        opacity: animation.value.clamp(0.0, 1.0),
-        child: ScaleTransition(scale: scale, child: child),
-      );
-    },
+  return showAppDialog<void>(
+    context,
+    builder: (context) => _GuideHiredCard(people: people),
   );
 }
 
@@ -58,8 +44,8 @@ class _GuideHiredCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 32),
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 28),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppTheme.radius * 2),
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(AppTheme.dialogRadius),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

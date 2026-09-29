@@ -39,6 +39,9 @@ abstract final class AppColors {
   static const Color buttonBorder = primary60;
   static const Color fieldFill = Color(0xFFFDFBF3);
 
+  /// Velo detrás de los diálogos: la tinta de la marca, no negro puro.
+  static const Color scrim = Color(0x8C1E2022);
+
   // ── Contenido (chips de categoría, calificaciones) ────────────────────────
   static const Color chipCity = Color(0xFF2B8FD1);
   static const Color chipNature = Color(0xFF0E9AA7);

@@ -10,6 +10,9 @@ abstract final class AppTheme {
   /// Radio de esquinas de botones y campos.
   static const double radius = 10;
 
+  /// Radio de los diálogos y avisos flotantes.
+  static const double dialogRadius = 20;
+
   /// Alto estándar de los controles táctiles.
   static const double controlHeight = 52;
 
@@ -91,6 +94,21 @@ abstract final class AppTheme {
         focusedBorder: _fieldBorder(AppColors.primary60, width: 1.5),
         errorBorder: _fieldBorder(AppColors.error),
         focusedErrorBorder: _fieldBorder(AppColors.error, width: 1.5),
+      ),
+      // AppDialog toma de aquí el papel, la forma y el velo; también cualquier
+      // diálogo de Material que se abra sin él.
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.background,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        barrierColor: AppColors.scrim,
+        insetPadding: const EdgeInsets.all(24),
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(dialogRadius),
+        ),
+        titleTextStyle: AppTextStyles.pageTitle,
+        contentTextStyle: AppTextStyles.bodySmall,
       ),
       // Sin esto el círculo del reloj queda del mismo crema que el diálogo.
       timePickerTheme: TimePickerThemeData(

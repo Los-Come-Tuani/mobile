@@ -13,7 +13,9 @@ import '../../../router/routes.dart';
 import '../../home/widgets/active_trip_map_card.dart';
 import '../../widgets/action_row.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/new_circuit_dialog.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/remote_image.dart';
 import '../../widgets/soft_button.dart';
@@ -70,11 +72,8 @@ class _MyTripsViewState extends State<MyTripsView>
 
   Future<void> _createTrip() async {
     final viewModel = context.read<MyTripsViewModel>();
-    final title = await showDialog<String>(
-      context: context,
-      builder: (context) => const _NewTripDialog(),
-    );
-    if (title == null || title.isEmpty || !mounted) return;
+    final title = await showNewCircuitDialog(context);
+    if (title == null || !mounted) return;
 
     final trip = viewModel.createTrip(title);
     if (!mounted) return;
@@ -82,25 +81,15 @@ class _MyTripsViewState extends State<MyTripsView>
   }
 
   Future<void> _deleteTrip(CircuitCollection trip) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.white,
-        title: Text('¿Eliminar "${trip.title}"?', style: AppTextStyles.title),
-        content: const Text('Se borrarán sus paradas guardadas.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Eliminar'),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      icon: Icons.delete_outline,
+      title: '¿Eliminar "${trip.title}"?',
+      message: 'Se borrarán sus paradas guardadas. No se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      destructive: true,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     context.read<MyTripsViewModel>().deleteTrip(trip.id);
   }
 
@@ -796,55 +785,6 @@ class _EmptyTab extends StatelessWidget {
           const SizedBox(height: 8),
           Center(child: secondaryAction),
         ],
-      ],
-    );
-  }
-}
-
-/// Diálogo con el nombre del circuito nuevo.
-class _NewTripDialog extends StatefulWidget {
-  const _NewTripDialog();
-
-  @override
-  State<_NewTripDialog> createState() => _NewTripDialogState();
-}
-
-class _NewTripDialogState extends State<_NewTripDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final title = _controller.text.trim();
-    if (title.isEmpty) return;
-    Navigator.of(context).pop(title);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: AppColors.white,
-      title: Text('Nuevo circuito', style: AppTextStyles.title),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        textCapitalization: TextCapitalization.sentences,
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _submit(),
-        decoration: const InputDecoration(
-          hintText: 'Ej. Fin de semana en el sur',
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(onPressed: _submit, child: const Text('Crear')),
       ],
     );
   }
