@@ -7,6 +7,7 @@ import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../data/models/guide_access_request.dart';
 import '../../../router/routes.dart';
+import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/soft_button.dart';
@@ -43,25 +44,23 @@ class GuideStatusView extends StatelessWidget {
         appBar: GuideAppBar(
           onBack: canGoHome ? () => context.go(Routes.home) : null,
         ),
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
-            child: AnimatedSwitcher(
-              duration: motion,
-              layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topCenter,
-                children: [...previous, ?current],
-              ),
-              child: isApproved
-                  ? const _Approved(key: ValueKey(GuideAccessStatus.approved))
-                  : _Pending(
-                      key: const ValueKey(GuideAccessStatus.pending),
-                      review: guideAccess.review,
-                      contactEmail: guideAccess.request?.contactEmail,
-                      canGoHome: canGoHome,
-                    ),
+        body: FootArtScrollView(
+          art: FootArt.codeLines,
+          padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
+          child: AnimatedSwitcher(
+            duration: motion,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.topCenter,
+              children: [...previous, ?current],
             ),
+            child: isApproved
+                ? const _Approved(key: ValueKey(GuideAccessStatus.approved))
+                : _Pending(
+                    key: const ValueKey(GuideAccessStatus.pending),
+                    review: guideAccess.review,
+                    contactEmail: guideAccess.request?.contactEmail,
+                    canGoHome: canGoHome,
+                  ),
           ),
         ),
       ),

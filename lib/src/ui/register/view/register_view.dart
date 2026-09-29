@@ -10,6 +10,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/foot_art.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/verification_code_field.dart';
 import '../viewmodels/register_viewmodel.dart';
@@ -470,62 +471,24 @@ class _LoginLink extends StatelessWidget {
   }
 }
 
-/// El arte decorativo al pie de cada paso, en la posición y escala de Figma
-/// (diseñado sobre una pantalla de 375 de ancho).
+/// El arte decorativo al pie de cada paso.
 class _StepDecoration extends StatelessWidget {
   const _StepDecoration({super.key, required this.step});
 
   final RegisterStep step;
 
-  static const _designWidth = 375.0;
-
-  static const _art = <RegisterStep, ({String asset, Size size, double left})>{
-    RegisterStep.email: (
-      asset: AppAssets.registerEmail,
-      size: Size(637, 358),
-      left: 0,
-    ),
-    RegisterStep.code: (
-      asset: AppAssets.registerCodeLines,
-      size: Size(723, 420),
-      left: -136.5,
-    ),
-    RegisterStep.birthDate: (
-      asset: AppAssets.registerBirthDate,
-      size: Size(375, 374),
-      left: -1,
-    ),
-    RegisterStep.name: (
-      asset: AppAssets.registerName,
-      size: Size(594, 372),
-      left: -219,
-    ),
-    RegisterStep.username: (
-      asset: AppAssets.registerUsername,
-      size: Size(411, 283),
-      left: 0,
-    ),
+  static const _art = <RegisterStep, FootArt>{
+    RegisterStep.email: FootArt.email,
+    RegisterStep.code: FootArt.codeLines,
+    RegisterStep.birthDate: FootArt.birthDate,
+    RegisterStep.name: FootArt.name,
+    RegisterStep.username: FootArt.username,
   };
 
   @override
   Widget build(BuildContext context) {
     final art = _art[step];
     if (art == null) return const SizedBox.shrink();
-    final scale = MediaQuery.sizeOf(context).width / _designWidth;
-
-    return IgnorePointer(
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          Positioned(
-            left: art.left * scale,
-            bottom: 0,
-            width: art.size.width * scale,
-            height: art.size.height * scale,
-            child: SvgPicture.asset(art.asset, fit: BoxFit.fill),
-          ),
-        ],
-      ),
-    );
+    return FootArtLayer(art: art);
   }
 }

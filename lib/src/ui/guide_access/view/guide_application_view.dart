@@ -13,6 +13,7 @@ import '../../../data/models/guide_access_request.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_choice_chip.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/secondary_button.dart';
@@ -211,52 +212,61 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
       },
       child: Scaffold(
         appBar: GuideAppBar(onBack: _back),
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (formStep != null) ...[
-                  ApplicationProgress(
-                    step: formStep,
-                    total: GuideApplicationViewModel.formStepCount,
-                  ),
-                  const SizedBox(height: 20),
-                ],
-                AnimatedSwitcher(
-                  duration: motion,
-                  layoutBuilder: (current, previous) => Stack(
-                    alignment: Alignment.topCenter,
-                    children: [...previous, ?current],
-                  ),
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: SlideTransition(
-                      position: Tween(
-                        begin: const Offset(0.04, 0),
-                        end: Offset.zero,
-                      ).animate(animation),
-                      child: child,
-                    ),
-                  ),
-                  child: KeyedSubtree(
-                    key: ValueKey(step),
-                    child: Form(
-                      key: _formKeys[step],
-                      child: _buildStep(step, viewModel),
-                    ),
+        body: FootArtScrollView(
+          art: _artFor(step),
+          controller: _scrollController,
+          padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (formStep != null) ...[
+                ApplicationProgress(
+                  step: formStep,
+                  total: GuideApplicationViewModel.formStepCount,
+                ),
+                const SizedBox(height: 20),
+              ],
+              AnimatedSwitcher(
+                duration: motion,
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  children: [...previous, ?current],
+                ),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween(
+                      begin: const Offset(0.04, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
                   ),
                 ),
-              ],
-            ),
+                child: KeyedSubtree(
+                  key: ValueKey(step),
+                  child: Form(
+                    key: _formKeys[step],
+                    child: _buildStep(step, viewModel),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+
+  /// Un dibujo al pie de cada paso, como en el registro de turistas.
+  static FootArt _artFor(GuideApplicationStep step) => switch (step) {
+    GuideApplicationStep.identity => FootArt.username,
+    GuideApplicationStep.experience => FootArt.name,
+    GuideApplicationStep.documents => FootArt.birthDate,
+    GuideApplicationStep.training => FootArt.email,
+    GuideApplicationStep.review => FootArt.username,
+    GuideApplicationStep.code => FootArt.codeLines,
+    GuideApplicationStep.password => FootArt.birthDate,
+  };
 
   Widget _buildStep(
     GuideApplicationStep step,

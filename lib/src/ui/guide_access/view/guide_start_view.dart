@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../router/routes.dart';
+import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/secondary_button.dart';
@@ -45,48 +46,46 @@ class GuideStartView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: GuideAppBar(onBack: back),
-        body: SafeArea(
-          top: false,
-          child: SingleChildScrollView(
-            padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const GuideHeading(
-                  title: 'Comparte tu territorio',
-                  subtitle:
-                      'Puedes postularte para ofrecer tus servicios como guía.',
-                ),
-                const SizedBox(height: 20),
-                const InlineNotice(
-                  message:
-                      'El equipo de K’Plan revisará tu información antes de '
-                      'habilitar tu acceso.',
-                ),
-                const SizedBox(height: 24),
-                Text('Ten a mano', style: AppTextStyles.sectionLabel),
-                const SizedBox(height: 4),
-                for (final item in _checklist)
-                  Text(
-                    item,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.primaryText,
-                      height: 22 / 14,
-                    ),
+        body: FootArtScrollView(
+          art: FootArt.email,
+          padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const GuideHeading(
+                title: 'Comparte tu territorio',
+                subtitle:
+                    'Puedes postularte para ofrecer tus servicios como guía.',
+              ),
+              const SizedBox(height: 20),
+              const InlineNotice(
+                message:
+                    'El equipo de K’Plan revisará tu información antes de '
+                    'habilitar tu acceso.',
+              ),
+              const SizedBox(height: 24),
+              Text('Ten a mano', style: AppTextStyles.sectionLabel),
+              const SizedBox(height: 4),
+              for (final item in _checklist)
+                Text(
+                  item,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.primaryText,
+                    height: 22 / 14,
                   ),
-                const SizedBox(height: 40),
-                PrimaryButton(
-                  label: 'Postularme',
-                  onPressed: () => context.push(Routes.guideApplication),
                 ),
-                const SizedBox(height: 16),
-                SecondaryButton(
-                  label: 'Continuar como turista',
-                  onPressed: () =>
-                      context.go(isLoggedIn ? Routes.home : Routes.login),
-                ),
-              ],
-            ),
+              const SizedBox(height: 40),
+              PrimaryButton(
+                label: 'Postularme',
+                onPressed: () => context.push(Routes.guideApplication),
+              ),
+              const SizedBox(height: 16),
+              SecondaryButton(
+                label: 'Continuar como turista',
+                onPressed: () =>
+                    context.go(isLoggedIn ? Routes.home : Routes.login),
+              ),
+            ],
           ),
         ),
       ),
