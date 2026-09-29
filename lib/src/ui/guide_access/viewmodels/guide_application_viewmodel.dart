@@ -149,6 +149,10 @@ class GuideApplicationViewModel extends BaseViewModel {
   bool _codeRejected = false;
   bool get codeRejected => _codeRejected;
 
+  /// La cuenta se creó en esta postulación. Se recuerda para reintentar el
+  /// envío si falló después de crearla.
+  bool _createdAccount = false;
+
   /// Por qué no se puede adjuntar un archivo, o `null` si se puede.
   static String? fileProblem({required String name, int? sizeBytes}) {
     final dot = name.lastIndexOf('.');
@@ -347,6 +351,7 @@ class GuideApplicationViewModel extends BaseViewModel {
         setError(message);
         return false;
       }
+      _createdAccount = true;
     }
     return _submit();
   }
@@ -382,6 +387,7 @@ class GuideApplicationViewModel extends BaseViewModel {
         inturCredential: _inturCredential!,
         certificates: List.of(_certificates),
       ),
+      signedUpAsGuide: _createdAccount,
     );
     setBusy(false);
 

@@ -5,18 +5,22 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../data/models/guide_access_request.dart';
 import '../../../router/routes.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/soft_button.dart';
 import '../widgets/guide_app_bar.dart';
 import '../widgets/guide_heading.dart';
 
 /// En qué va la solicitud de guía: en revisión o aprobada.
 ///
 /// Escucha a [GuideAccessRepository], así que cambia sola cuando termina la
-/// revisión; aprobada, lleva a la app del guía.
+/// revisión; aprobada, lleva a la app del guía. Quien se registró al
+/// postularse no llegó como turista: desde aquí no se le manda al inicio de
+/// turista, sólo puede cerrar sesión.
 class GuideStatusView extends StatelessWidget {
   const GuideStatusView({super.key});
 
@@ -24,18 +28,22 @@ class GuideStatusView extends StatelessWidget {
   Widget build(BuildContext context) {
     final guideAccess = context.watch<GuideAccessRepository>();
     final isApproved = guideAccess.status == GuideAccessStatus.approved;
+    final canGoHome = !guideAccess.signedUpAsGuide;
     final motion = MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : const Duration(milliseconds: 250);
 
-    // Se llega con `go`: el botón atrás del sistema también lleva al inicio.
+    // Se llega con `go`: el botón atrás del sistema también lleva al inicio
+    // o, sin inicio de turista, sale de la app.
     return PopScope(
-      canPop: false,
+      canPop: !canGoHome,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) context.go(Routes.home);
+        if (!didPop && canGoHome) context.go(Routes.home);
       },
       child: Scaffold(
-        appBar: GuideAppBar(onBack: () => context.go(Routes.home)),
+        appBar: GuideAppBar(
+          onBack: canGoHome ? () => context.go(Routes.home) : null,
+        ),
         body: SafeArea(
           top: false,
           child: SingleChildScrollView(
@@ -51,6 +59,7 @@ class GuideStatusView extends StatelessWidget {
                   : _Pending(
                       key: const ValueKey(GuideAccessStatus.pending),
                       contactEmail: guideAccess.request?.contactEmail,
+                      canGoHome: canGoHome,
                     ),
             ),
           ),
@@ -61,9 +70,14 @@ class GuideStatusView extends StatelessWidget {
 }
 
 class _Pending extends StatelessWidget {
-  const _Pending({super.key, required this.contactEmail});
+  const _Pending({
+    super.key,
+    required this.contactEmail,
+    required this.canGoHome,
+  });
 
   final String? contactEmail;
+  final bool canGoHome;
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +115,17 @@ class _Pending extends StatelessWidget {
               'es aprobada.',
         ),
         const SizedBox(height: 28),
-        PrimaryButton(
-          label: 'Volver al inicio',
-          onPressed: () => context.go(Routes.home),
-        ),
+        if (canGoHome)
+          PrimaryButton(
+            label: 'Volver al inicio',
+            onPressed: () => context.go(Routes.home),
+          )
+        else
+          // Al perder la sesión, el redirect del router vuelve al welcome.
+          SoftButton(
+            label: 'Cerrar sesión',
+            onPressed: () => context.read<AuthRepository>().logout(),
+          ),
       ],
     );
   }

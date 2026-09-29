@@ -74,6 +74,9 @@ class GuideAccessRepository extends ChangeNotifier {
   _byAccount = {};
   final Map<String, Timer> _reviews = {};
 
+  /// Cuentas que se crearon al enviar la postulación, no como turista.
+  final Set<String> _signedUpAsGuide = {};
+
   String? get _account => accountKeyOf(_authRepository);
 
   /// Con qué clave se guarda lo de cada cuenta: el correo, sin mayúsculas.
@@ -90,8 +93,20 @@ class GuideAccessRepository extends ChangeNotifier {
   /// Lo que envió la cuenta con sesión iniciada, si ya se postuló.
   GuideAccessRequest? get request => _byAccount[_account]?.request;
 
+  /// La cuenta con sesión iniciada se creó al postularse, no como turista.
+  bool get signedUpAsGuide => _signedUpAsGuide.contains(_account);
+
+  /// Mientras su solicitud está en revisión, una cuenta creada al postularse
+  /// no es guía ni turista: lo único que puede ver es el estado.
+  bool get isLimitedToStatus =>
+      signedUpAsGuide && status == GuideAccessStatus.pending;
+
   /// Envía [request] a revisión a nombre de la cuenta con sesión iniciada.
-  Future<Result<void>> submit(GuideAccessRequest request) async {
+  /// [signedUpAsGuide] si esa cuenta se acaba de crear para postularse.
+  Future<Result<void>> submit(
+    GuideAccessRequest request, {
+    bool signedUpAsGuide = false,
+  }) async {
     final account = _account;
     if (account == null) {
       return const Result.failure('Inicia sesión para enviar tu solicitud');
@@ -99,6 +114,7 @@ class GuideAccessRepository extends ChangeNotifier {
 
     await Future<void>.delayed(const Duration(milliseconds: 800));
     _byAccount[account] = (request: request, status: GuideAccessStatus.pending);
+    if (signedUpAsGuide) _signedUpAsGuide.add(account);
     _reviews[account]?.cancel();
     _reviews[account] = Timer(reviewTime, () => _approve(account));
     notifyListeners();

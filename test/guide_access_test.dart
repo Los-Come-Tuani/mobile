@@ -117,6 +117,37 @@ void main() {
       expect(repository.status, GuideAccessStatus.pending);
       repository.dispose();
     });
+
+    testWidgets('quien se registró al postularse sólo ve su estado hasta que '
+        'la aprueban', (tester) async {
+      final auth = AuthRepository();
+      final repository = GuideAccessRepository(auth);
+      await _settle(
+        tester,
+        auth.register(
+          name: 'Nueva Guía',
+          email: 'nueva@example.com',
+          password: 'secreta123',
+        ),
+      );
+      await _settle(
+        tester,
+        repository.submit(_request(), signedUpAsGuide: true),
+      );
+      expect(repository.isLimitedToStatus, isTrue);
+
+      await auth.logout();
+      await _login(tester, auth, 'mariana@example.com');
+      await _settle(tester, repository.submit(_request()));
+      expect(repository.isLimitedToStatus, isFalse);
+
+      await auth.logout();
+      await _login(tester, auth, 'nueva@example.com');
+      await tester.pump(const Duration(minutes: 1));
+      expect(repository.status, GuideAccessStatus.approved);
+      expect(repository.isLimitedToStatus, isFalse);
+      repository.dispose();
+    });
   });
 
   group('GuideApplicationViewModel', () {
@@ -275,6 +306,7 @@ void main() {
       expect(auth.currentUser?.email, 'mariana@example.com');
       expect(auth.currentUser?.name, 'Mariana López');
       expect(guideAccess.status, GuideAccessStatus.pending);
+      expect(guideAccess.isLimitedToStatus, isTrue);
       guideAccess.dispose();
     });
 
@@ -291,6 +323,7 @@ void main() {
       expect(await _settle(tester, viewModel.sendApplication()), isTrue);
       expect(viewModel.step, GuideApplicationStep.review);
       expect(guideAccess.status, GuideAccessStatus.pending);
+      expect(guideAccess.isLimitedToStatus, isFalse);
       expect(guideAccess.request?.coverage, GuideCoverage.local);
       expect(guideAccess.request?.certifiedCity, 'Granada');
       guideAccess.dispose();
@@ -379,6 +412,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Comparte tu territorio'), findsOneWidget);
+      app.guideAccess.dispose();
+    });
+
+    testWidgets('quien se registró al postularse sólo ve su solicitud', (
+      tester,
+    ) async {
+      final app = await pumpApp(tester);
+      app.router.go(Routes.guideStart);
+      await tester.pumpAndSettle();
+      await _settle(
+        tester,
+        app.auth.register(
+          name: 'Nueva Guía',
+          email: 'nueva@example.com',
+          password: 'secreta123',
+        ),
+      );
+      await _settle(
+        tester,
+        app.guideAccess.submit(_request(), signedUpAsGuide: true),
+      );
+      app.router.go(Routes.guideStatus);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Solicitud en revisión'), findsOneWidget);
+      expect(find.byTooltip('Regresar'), findsNothing);
+      expect(find.text('VOLVER AL INICIO'), findsNothing);
+
+      for (final location in [Routes.home, Routes.guideHome]) {
+        app.router.go(location);
+        await tester.pumpAndSettle();
+        expect(find.text('Solicitud en revisión'), findsOneWidget);
+      }
+
+      await tester.tap(find.text('Cerrar sesión'));
+      await tester.pumpAndSettle();
+      expect(find.text('Bienvenido'), findsOneWidget);
+
+      for (final login in [Routes.login, Routes.guideLogin]) {
+        app.router.go(login);
+        await tester.pumpAndSettle();
+        await _submitLogin(tester, 'nueva@example.com');
+        expect(find.text('Solicitud en revisión'), findsOneWidget);
+
+        await tester.tap(find.text('Cerrar sesión'));
+        await tester.pumpAndSettle();
+      }
       app.guideAccess.dispose();
     });
   });
@@ -517,6 +597,7 @@ void main() {
       );
       expect(find.text('Solicitud en revisión'), findsOneWidget);
       expect(find.text('mariana@example.com'), findsOneWidget);
+      expect(find.text('VOLVER AL INICIO'), findsOneWidget);
 
       await tester.pump(const Duration(seconds: 30));
       await tester.pumpAndSettle();

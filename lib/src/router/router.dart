@@ -111,11 +111,17 @@ GoRouter createRouter(AuthRepository authRepository) {
 
       final isPublic = Routes.public.contains(location);
       if (!authRepository.isLoggedIn && !isPublic) return Routes.welcome;
+
+      final guideAccess = context.read<GuideAccessRepository>();
+      // Entre por el login que entre, quien se registró al postularse sólo
+      // ve su solicitud hasta que la aprueben.
+      if (guideAccess.isLimitedToStatus) {
+        return location == Routes.guideStatus ? null : Routes.guideStatus;
+      }
       if (authRepository.isLoggedIn && isPublic) {
         return location == Routes.guideLogin ? Routes.guideAccess : Routes.home;
       }
-      if (Routes.isGuideApp(location) &&
-          !context.read<GuideAccessRepository>().isApproved) {
+      if (Routes.isGuideApp(location) && !guideAccess.isApproved) {
         return Routes.guideAccess;
       }
       return null;
