@@ -50,11 +50,9 @@ dependencies:
   mobile_scanner: ^7.4.0
   qr_flutter: ^4.1.0
   flutter_svg: ^2.3.0
-  # Mapa propio: tiles vectoriales de OpenFreeMap (gratis, sin API key).
-  flutter_map: ^8.3.2
-  # Beta fijada exacta: es la línea que soporta flutter_map 8.
-  vector_map_tiles: 9.0.0-beta.13
-  vector_tile_renderer: ^6.1.0
+  # Mapa: MapLibre Native dibuja con la GPU las calles de OpenFreeMap, que son
+  # datos de OpenStreetMap (gratis, sin API key). La 0.3.6 pide Dart 3.12.
+  maplibre: ^0.3.5
   latlong2: ^0.10.1
   # Ubicación del turista en el mapa (GPS del teléfono).
   geolocator: ^14.0.3
@@ -78,6 +76,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  # maplibre exige Swift Package Manager para compilar en iOS.
+  config:
+    enable-swift-package-manager: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

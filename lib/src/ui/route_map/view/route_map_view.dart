@@ -2,15 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/datasources/repository/location_repository.dart';
+import '../../../core/utils/map_camera.dart';
 import '../../../data/models/route_map.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/trip_progress.dart';
@@ -22,6 +21,7 @@ import '../../widgets/circle_icon_button.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/map/kplan_map.dart';
 import '../../widgets/map/paper_texture.dart';
+import '../../widgets/map/map_engine.dart';
 import '../../widgets/open_with_sheet.dart';
 import '../viewmodels/route_map_viewmodel.dart';
 import '../widgets/stop_sheet.dart';
@@ -37,11 +37,8 @@ class RouteMapView extends StatefulWidget {
   State<RouteMapView> createState() => _RouteMapViewState();
 }
 
-class _RouteMapViewState extends State<RouteMapView>
-    with SingleTickerProviderStateMixin {
-  final _mapController = MapController();
-  late final AnimationController _flight;
-  VoidCallback? _flightStep;
+class _RouteMapViewState extends State<RouteMapView> {
+  final _mapController = KPlanMapController();
 
   /// Se pidió "mi ubicación" y el GPS todavía no respondía.
   bool _centerOnUserWhenLocated = false;
@@ -49,8 +46,12 @@ class _RouteMapViewState extends State<RouteMapView>
   /// Qué fracción de la pantalla ocupa la hoja abierta.
   double _sheetExtent = StopSheet.initialSize;
 
-  /// Al tocar una parada, el mapa se acerca por lo menos hasta aquí.
-  static const double _focusZoom = 16.5;
+  /// Al tocar una parada, el mapa se acerca por lo menos hasta aquí (zoom de
+  /// MapLibre, 1 menos que el de flutter_map a la misma distancia).
+  static const double _focusZoom = 15.5;
+
+  /// Al centrarse en el turista, el mapa se acerca por lo menos hasta aquí.
+  static const double _userZoom = 15;
 
   /// Alto de la barra de arriba, sin el área segura.
   static const double _topBarHeight = 64;
@@ -58,16 +59,11 @@ class _RouteMapViewState extends State<RouteMapView>
   @override
   void initState() {
     super.initState();
-    _flight = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   @override
   void dispose() {
-    _flight.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -90,31 +86,6 @@ class _RouteMapViewState extends State<RouteMapView>
       ..showSnackBar(SnackBar(content: Text(message), action: action));
   }
 
-  /// Mueve la cámara con una animación corta.
-  void _flyTo(LatLng center, double zoom) {
-    final camera = _mapController.camera;
-    final from = camera.center;
-    final fromZoom = camera.zoom;
-    double lerp(double a, double b, double t) => a + (b - a) * t;
-
-    if (_flightStep case final previous?) _flight.removeListener(previous);
-    void step() {
-      final t = Curves.easeInOutCubic.transform(_flight.value);
-      _mapController.move(
-        LatLng(
-          lerp(from.latitude, center.latitude, t),
-          lerp(from.longitude, center.longitude, t),
-        ),
-        lerp(fromZoom, zoom, t),
-      );
-    }
-
-    _flightStep = step;
-    _flight
-      ..addListener(step)
-      ..forward(from: 0);
-  }
-
   /// Deja libres los controles de arriba, la hoja si está abierta y, a los
   /// lados, media píldora con el nombre de la parada.
   EdgeInsets _mapPadding({required bool withSheet}) {
@@ -126,12 +97,15 @@ class _RouteMapViewState extends State<RouteMapView>
   }
 
   void _showWholeRoute(RouteMap map, {required bool withSheet}) {
-    final target = KPlanMap.fitFor(
+    final size = _mapController.size;
+    if (size.isEmpty) return;
+    final target = KPlanMap.cameraFor(
       map,
       user: context.read<RouteMapViewModel>().user?.point,
+      size: size,
       padding: _mapPadding(withSheet: withSheet),
-    ).fit(_mapController.camera);
-    _flyTo(target.center, target.zoom);
+    );
+    _mapController.flyTo(target.center, target.zoom);
   }
 
   /// Abre la hoja de [point] y acerca el mapa: el pin queda en el medio de
@@ -140,14 +114,13 @@ class _RouteMapViewState extends State<RouteMapView>
     context.read<RouteMapViewModel>().select(point.id);
     setState(() => _sheetExtent = StopSheet.initialSize);
 
-    final camera = _mapController.camera;
-    final zoom = math.max(camera.zoom, _focusZoom);
+    final zoom = math.max(_mapController.camera?.zoom ?? 0, _focusZoom);
     final height = MediaQuery.sizeOf(context).height;
     final topBar = MediaQuery.paddingOf(context).top + _topBarHeight;
     final shift = Offset(0, (height * StopSheet.initialSize - topBar) / 2);
-    _flyTo(
-      camera.unprojectAtZoom(
-        camera.projectAtZoom(point.point, zoom) + shift,
+    _mapController.flyTo(
+      MapProjection.unproject(
+        MapProjection.project(point.point, zoom) + shift,
         zoom,
       ),
       zoom,
@@ -168,7 +141,10 @@ class _RouteMapViewState extends State<RouteMapView>
     final viewModel = context.read<RouteMapViewModel>();
     final user = viewModel.user;
     if (user != null) {
-      _flyTo(user.point, math.max(_mapController.camera.zoom, 16));
+      _mapController.flyTo(
+        user.point,
+        math.max(_mapController.camera?.zoom ?? 0, _userZoom),
+      );
       return;
     }
 
@@ -265,7 +241,10 @@ class _RouteMapViewState extends State<RouteMapView>
       _centerOnUserWhenLocated = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _flyTo(user.point, math.max(_mapController.camera.zoom, 16));
+          _mapController.flyTo(
+            user.point,
+            math.max(_mapController.camera?.zoom ?? 0, _userZoom),
+          );
         }
       });
     }

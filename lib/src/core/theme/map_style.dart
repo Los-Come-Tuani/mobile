@@ -1,40 +1,57 @@
+import 'dart:convert';
 import 'dart:ui';
 
-import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
-
+import '../../data/models/route_map.dart';
 import 'app_colors.dart';
-import 'app_text_styles.dart';
 
-/// Estilo de las calles del mapa de K'Plan.
+/// Estilo del mapa de K'Plan, en el formato que lee MapLibre Native.
 ///
-/// Sigue las capas del estilo Positron de OpenFreeMap (esquema OpenMapTiles),
-/// pintadas con la paleta de la app. No trae íconos de lugares ni escudos de
-/// carreteras: en el mapa sólo resaltan nuestras paradas.
+/// Las calles siguen las capas del estilo Positron de OpenFreeMap (esquema
+/// OpenMapTiles, datos de OpenStreetMap), pintadas con la paleta de la app. No
+/// trae íconos de lugares ni escudos de carreteras: en el mapa sólo resaltan
+/// nuestras paradas.
+///
+/// Encima de las calles van el círculo de precisión del GPS y las líneas del
+/// recorrido. Son capas de dos fuentes GeoJSON que nacen vacías y la app
+/// actualiza con el recorrido y la ubicación de cada momento.
 abstract final class KPlanMapStyle {
-  /// Fuente de los tiles en el estilo: la llave de `TileProviders`.
+  /// Fuente de las calles en el estilo.
   static const String source = 'openmaptiles';
 
-  /// Súbelo al cambiar el estilo: invalida los tiles ya pintados en caché.
-  static const String version = '1';
+  /// Fuente GeoJSON con los tramos del recorrido (líneas). Cada tramo lleva en
+  /// [segmentProperty] el nombre de su [RouteSegmentStyle].
+  static const String routeSource = 'kplan-route';
 
-  static vtr.Theme? _theme;
+  /// Fuente GeoJSON con el círculo de precisión del GPS (un polígono).
+  static const String accuracySource = 'kplan-accuracy';
 
-  /// El estilo ya leído, con las etiquetas en Poppins como el resto de la app.
-  static vtr.Theme get theme => _theme ??= vtr.ThemeReader().read(
-    build(
-      regularFont: AppTextStyles.mapLabel.fontFamily,
-      boldFont: AppTextStyles.mapPlace.fontFamily,
-      italicFont: AppTextStyles.mapWater.fontFamily,
-    ),
-  );
+  /// Propiedad de cada tramo con el nombre de su [RouteSegmentStyle].
+  static const String segmentProperty = 'style';
 
-  /// El estilo en formato MapLibre. Sin fuentes, las etiquetas usan la del
-  /// sistema.
-  static Map<String, dynamic> build({
-    String? regularFont,
-    String? boldFont,
-    String? italicFont,
-  }) {
+  /// TileJSON de OpenFreeMap. MapLibre lo lee solo: la URL de los tiles cambia
+  /// con cada actualización semanal del planeta.
+  static const String tilesUrl = 'https://tiles.openfreemap.org/planet';
+
+  /// Glifos de las etiquetas. OpenFreeMap sólo sirve las familias de abajo.
+  static const String glyphsUrl =
+      'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
+
+  static const String regularFont = 'Noto Sans Regular';
+  static const String boldFont = 'Noto Sans Bold';
+  static const String italicFont = 'Noto Sans Italic';
+
+  /// MapLibre cuenta el zoom sobre tiles de 512 px; flutter_map, sobre tiles de
+  /// 256 px. A la misma escala el zoom de MapLibre es 1 menos. Los niveles de
+  /// abajo se escribieron con el zoom que mostraba la app, así que se restan
+  /// aquí para que calles, edificios y etiquetas aparezcan a la misma escala.
+  static const double zoomShift = 1;
+
+  /// El estilo ya serializado, listo para dárselo a MapLibre.
+  static final String json = jsonEncode(build());
+
+  /// El estilo como mapa. Las capas de calles van primero, luego el círculo de
+  /// precisión y al final el recorrido.
+  static Map<String, dynamic> build() {
     const minorRoads = ['minor', 'service', 'track'];
     const majorRoads = ['primary', 'secondary', 'tertiary', 'trunk'];
 
@@ -42,12 +59,11 @@ abstract final class KPlanMapStyle {
       'version': 8,
       'id': 'kplan',
       'name': "K'Plan",
-      'metadata': {'version': version},
+      'glyphs': glyphsUrl,
       'sources': {
-        source: {
-          'type': 'vector',
-          'url': 'https://tiles.openfreemap.org/planet',
-        },
+        source: {'type': 'vector', 'url': tilesUrl},
+        routeSource: _emptyGeoJson,
+        accuracySource: _emptyGeoJson,
       },
       'layers': [
         {
@@ -299,9 +315,134 @@ abstract final class KPlanMapStyle {
           uppercase: true,
           maxzoom: 8,
         ),
+        ..._accuracyLayers(),
+        for (final segment in _routeOrder) ..._routeLayersOf(segment),
       ],
     };
   }
+
+  // ── Recorrido y precisión ─────────────────────────────────────────────────
+
+  static const Map<String, Object> _emptyGeoJson = {
+    'type': 'geojson',
+    'data': {'type': 'FeatureCollection', 'features': <Object>[]},
+  };
+
+  /// De abajo hacia arriba, como se dibujaban las líneas: el tramo hacia la
+  /// siguiente parada sobre lo recorrido, y eso sobre lo que falta.
+  static const List<RouteSegmentStyle> _routeOrder = [
+    RouteSegmentStyle.skipped,
+    RouteSegmentStyle.preview,
+    RouteSegmentStyle.upcoming,
+    RouteSegmentStyle.done,
+    RouteSegmentStyle.current,
+  ];
+
+  /// Lo que el borde suma al ancho de la línea (el borde se pinta como una
+  /// línea más gruesa debajo, del color de las calles).
+  static const double _routeBorder = 1.5;
+
+  /// El círculo de precisión, debajo de las líneas: relleno tenue y aro fino.
+  static List<Map<String, dynamic>> _accuracyLayers() => [
+    {
+      'id': 'accuracy-fill',
+      'type': 'fill',
+      'source': accuracySource,
+      'paint': {
+        'fill-color': _hex(AppColors.userLocation),
+        'fill-opacity': 0.14,
+      },
+    },
+    {
+      'id': 'accuracy-outline',
+      'type': 'line',
+      'source': accuracySource,
+      'paint': {
+        'line-color': _hex(AppColors.userLocation),
+        'line-opacity': 0.4,
+        'line-width': 1,
+      },
+    },
+  ];
+
+  static List<Map<String, dynamic>> _routeLayersOf(RouteSegmentStyle segment) =>
+      switch (segment) {
+        RouteSegmentStyle.skipped => [
+          _routeLine(
+            segment,
+            color: AppColors.routeSkipped,
+            width: 3,
+            dash: _dashed(const [8, 7], width: 3),
+          ),
+        ],
+        RouteSegmentStyle.preview => [
+          _routeLine(
+            segment,
+            color: AppColors.routeDone,
+            width: 4,
+            dash: _dashed(const [12, 8], width: 4),
+          ),
+        ],
+        RouteSegmentStyle.upcoming => [
+          _routeLine(
+            segment,
+            color: AppColors.mapRoad,
+            width: 4.5 + _routeBorder,
+            isCasing: true,
+          ),
+          _routeLine(segment, color: AppColors.routeUpcoming, width: 4.5),
+        ],
+        RouteSegmentStyle.done => [
+          _routeLine(
+            segment,
+            color: AppColors.mapRoad,
+            width: 5 + _routeBorder,
+            isCasing: true,
+          ),
+          _routeLine(segment, color: AppColors.routeDone, width: 5),
+        ],
+        // Puntos redondos: rayas de largo cero con extremos redondos, separados
+        // 1.9 veces el ancho.
+        RouteSegmentStyle.current => [
+          _routeLine(
+            segment,
+            color: AppColors.routeCurrent,
+            width: 6,
+            dash: const [0, 1.9],
+          ),
+        ],
+      };
+
+  /// MapLibre mide las rayas en múltiplos del ancho de la línea, no en
+  /// píxeles.
+  static List<double> _dashed(List<double> pixels, {required double width}) => [
+    for (final length in pixels) length / width,
+  ];
+
+  static Map<String, dynamic> _routeLine(
+    RouteSegmentStyle segment, {
+    required Color color,
+    required double width,
+    List<num>? dash,
+    bool isCasing = false,
+  }) => {
+    'id': 'route-${segment.name}${isCasing ? '-casing' : ''}',
+    'type': 'line',
+    'source': routeSource,
+    'filter': [
+      '==',
+      ['get', segmentProperty],
+      segment.name,
+    ],
+    'layout': {'line-cap': 'round', 'line-join': 'round'},
+    'paint': {
+      'line-color': _hex(color),
+      'line-width': width,
+      'line-dasharray': ?dash,
+    },
+  };
+
+  // ── Piezas del estilo ─────────────────────────────────────────────────────
 
   static const List<Object> _polygons = [
     'match',
@@ -349,7 +490,7 @@ abstract final class KPlanMapStyle {
   ];
 
   /// Un valor que crece con el zoom, de [from] en [fromZoom] a [to] en
-  /// [toZoom].
+  /// [toZoom] (con el zoom de la app: [zoomShift] los acomoda a MapLibre).
   static List<Object> _ramp(
     double fromZoom,
     num from,
@@ -360,11 +501,13 @@ abstract final class KPlanMapStyle {
     'interpolate',
     if (base == 1) ['linear'] else ['exponential', base],
     ['zoom'],
-    fromZoom,
+    fromZoom - zoomShift,
     from,
-    toZoom,
+    toZoom - zoomShift,
     to,
   ];
+
+  static double? _shift(double? zoom) => zoom == null ? null : zoom - zoomShift;
 
   static Map<String, dynamic> _fill(
     String id,
@@ -379,7 +522,7 @@ abstract final class KPlanMapStyle {
     'type': 'fill',
     'source': source,
     'source-layer': sourceLayer,
-    'minzoom': ?minzoom,
+    'minzoom': ?_shift(minzoom),
     'filter': ?filter,
     'paint': {
       'fill-color': _hex(color),
@@ -402,7 +545,7 @@ abstract final class KPlanMapStyle {
     'type': 'line',
     'source': source,
     'source-layer': sourceLayer,
-    'minzoom': ?minzoom,
+    'minzoom': ?_shift(minzoom),
     'filter': ?filter,
     'layout': {'line-cap': 'round', 'line-join': 'round'},
     'paint': {
@@ -419,7 +562,7 @@ abstract final class KPlanMapStyle {
     Object? filter,
     required Color color,
     required Object size,
-    String? font,
+    required String font,
     bool alongLine = false,
     bool uppercase = false,
     double? maxWidth,
@@ -430,13 +573,13 @@ abstract final class KPlanMapStyle {
     'type': 'symbol',
     'source': source,
     'source-layer': sourceLayer,
-    'minzoom': ?minzoom,
-    'maxzoom': ?maxzoom,
+    'minzoom': ?_shift(minzoom),
+    'maxzoom': ?_shift(maxzoom),
     'filter': ?filter,
     'layout': {
       'text-field': _name,
       'text-size': size,
-      if (font != null) 'text-font': [font],
+      'text-font': [font],
       if (alongLine) ...{
         'symbol-placement': 'line',
         'text-rotation-alignment': 'map',

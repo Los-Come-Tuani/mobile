@@ -18,7 +18,6 @@ import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
 import 'src/data/datasources/repository/guide_work_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
-import 'src/data/datasources/repository/map_tiles_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
 import 'src/data/datasources/repository/support_repository.dart';
@@ -26,6 +25,8 @@ import 'src/data/datasources/repository/tour_repository.dart';
 import 'src/data/datasources/repository/tourist_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
+import 'src/ui/widgets/map/map_engine.dart';
+import 'src/ui/widgets/map/maplibre_engine.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -102,8 +103,9 @@ class _KPlanAppState extends State<KPlanApp> {
         ChangeNotifierProvider<LocationRepository>(
           create: (_) => LocationRepository(),
         ),
-        // Las calles del mapa (OpenFreeMap, gratis y sin API key).
-        Provider<MapTilesRepository>(create: (_) => MapTilesRepository()),
+        // El motor del mapa: MapLibre Native dibuja con la GPU las calles de
+        // OpenFreeMap (datos de OpenStreetMap, gratis y sin API key).
+        Provider<MapEngine>(create: (_) => const MapLibreEngine()),
         // Catálogo de guías turísticos disponibles para solicitar en vivo.
         Provider<GuideRepository>(create: (_) => GuideRepository()),
         // La propuesta de trabajo para guía/traductor en curso, si hay una.
