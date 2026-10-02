@@ -1,0 +1,90 @@
+[
+  {
+    "id": "group-leon-1",
+    "circuitId": "leon-colonial",
+    "daysFromNow": 2,
+    "startTime": "9:00 a.m.",
+    "capacity": 12,
+    "joinedCount": 6,
+    "guideId": "guide-fatima",
+    "transportIncluded": true,
+    "note": "I was born in León: I'll show you the city that doesn't show up on postcards. We leave by minibus from Parque Central."
+  },
+  {
+    "id": "group-leon-2",
+    "circuitId": "leon-colonial",
+    "daysFromNow": 2,
+    "startTime": "3:00 p.m.",
+    "capacity": 12,
+    "joinedCount": 9,
+    "guideId": "guide-esteban",
+    "transportIncluded": false,
+    "note": "Walking tour with explanations in Spanish, English or French, depending on the group."
+  },
+  {
+    "id": "group-leon-3",
+    "circuitId": "leon-colonial",
+    "daysFromNow": 5,
+    "startTime": "9:00 a.m.",
+    "capacity": 15,
+    "joinedCount": 3,
+    "guideId": "guide-marlene",
+    "transportIncluded": false,
+    "note": "Bring water and a hat: you climb to the Cathedral rooftops barefoot."
+  },
+  {
+    "id": "group-leon-4",
+    "circuitId": "leon-colonial",
+    "daysFromNow": 6,
+    "startTime": "3:00 p.m.",
+    "capacity": 10,
+    "joinedCount": 10,
+    "guideId": "guide-ramon",
+    "transportIncluded": false,
+    "note": "Afternoon group: we go up to the rooftops in the golden light and finish with a quesillo at La Terminal."
+  },
+  {
+    "id": "group-masaya-1",
+    "circuitId": "masaya-artesanias-volcan",
+    "daysFromNow": 3,
+    "startTime": "9:00 a.m.",
+    "capacity": 15,
+    "joinedCount": 5,
+    "guideId": "guide-valeria",
+    "transportIncluded": true,
+    "note": "We try vigorón at the market before heading up the volcano. Transportation to the viewpoint is included."
+  },
+  {
+    "id": "group-masaya-2",
+    "circuitId": "masaya-artesanias-volcan",
+    "daysFromNow": 7,
+    "startTime": "2:00 p.m.",
+    "capacity": 15,
+    "joinedCount": 12,
+    "guideId": "guide-oscar",
+    "transportIncluded": false,
+    "note": "Perfect if you like walking around Monimbó. We go up to the volcano viewpoint by bus, and the fare is paid separately."
+  },
+  {
+    "id": "group-esteli-1",
+    "circuitId": "esteli-murales-tabaco",
+    "daysFromNow": 4,
+    "startTime": "9:00 a.m.",
+    "capacity": 12,
+    "joinedCount": 4,
+    "guideId": "guide-fatima",
+    "transportIncluded": true,
+    "note": "Murals, cigar factory and Tisey viewpoint in a single day. Transportation is included."
+  },
+  {
+    "id": "group-esteli-2",
+    "circuitId": "esteli-murales-tabaco",
+    "daysFromNow": 8,
+    "startTime": "1:00 p.m.",
+    "capacity": 12,
+    "joinedCount": 9,
+    "guideId": "guide-marlene",
+    "transportIncluded": true,
+    "note": "Departure after lunch, with transportation included to the Tisey viewpoint."
+  }
+]

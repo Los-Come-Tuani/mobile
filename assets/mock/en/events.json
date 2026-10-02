@@ -1,0 +1,70 @@
+[
+  {
+    "id": "gritería-2026",
+    "title": "La Gritería",
+    "location": "León, León",
+    "date": "2026-12-07",
+    "dateLabel": "Dec 7",
+    "image": "https://picsum.photos/seed/griteria/800/600",
+    "category": "Tradición",
+    "address": "Catedral de León, León",
+    "description": "On the night of December 7, León's streets fill with altars to the Virgin Mary. Neighbors open their doors and hand out candy, fruit and toys to those who shout 'Who causes so much joy?'",
+    "images": [
+      "https://picsum.photos/seed/griteria/800/600",
+      "https://picsum.photos/seed/griteria-2/800/600"
+    ],
+    "price": 0,
+    "coordinates": { "latitude": 12.434, "longitude": -86.878 }
+  },
+  {
+    "id": "hipica-granada",
+    "title": "Hípica de Granada",
+    "location": "Granada, Granada",
+    "date": "2026-09-14",
+    "dateLabel": "Sep 14",
+    "image": "https://picsum.photos/seed/hipica/800/600",
+    "category": "Feria",
+    "address": "Hipódromo de Granada",
+    "description": "A parade of riders, band music and traditional food fill the streets of Granada in one of the most anticipated patron saint festivals of the year.",
+    "images": [
+      "https://picsum.photos/seed/hipica/800/600",
+      "https://picsum.photos/seed/hipica-2/800/600"
+    ],
+    "price": 150,
+    "coordinates": { "latitude": 11.9302, "longitude": -85.956 }
+  },
+  {
+    "id": "festival-poesia",
+    "title": "Poetry Festival",
+    "location": "Granada, Granada",
+    "date": "2026-11-20",
+    "dateLabel": "Nov 20",
+    "image": "https://picsum.photos/seed/poesia/800/600",
+    "category": "Cultura",
+    "address": "Parque Central, Granada",
+    "description": "Poets from all over Latin America come to Granada to recite in the streets, squares and colonial courtyards of the historic center for a week.",
+    "images": [
+      "https://picsum.photos/seed/poesia/800/600",
+      "https://picsum.photos/seed/poesia-2/800/600"
+    ],
+    "price": 0,
+    "coordinates": { "latitude": 11.9304, "longitude": -85.9564 }
+  },
+  {
+    "id": "torovenado",
+    "title": "El Torovenado",
+    "location": "Masaya, Masaya",
+    "date": "2026-10-25",
+    "dateLabel": "Oct 25",
+    "image": "https://picsum.photos/seed/torovenado/800/600",
+    "category": "Tradición",
+    "address": "Malecón de Masaya",
+    "description": "Troupes in masks and satirical costumes parade through Masaya, poking fun at the personalities of the year to the rhythm of the marimba.",
+    "images": [
+      "https://picsum.photos/seed/torovenado/800/600",
+      "https://picsum.photos/seed/torovenado-2/800/600"
+    ],
+    "price": 0,
+    "coordinates": { "latitude": 11.9744, "longitude": -86.094 }
+  }
+]

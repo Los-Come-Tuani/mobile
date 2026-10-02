@@ -1,0 +1,32 @@
+[
+  {
+    "id": "mirador-de-catarina",
+    "name": "Mirador de Catarina",
+    "location": "Catarina, Masaya",
+    "image": "https://picsum.photos/seed/catarina/800/600"
+  },
+  {
+    "id": "cerro-negro",
+    "name": "Cerro Negro",
+    "location": "Rota, León",
+    "image": "https://picsum.photos/seed/cerronegro/800/600"
+  },
+  {
+    "id": "laguna-de-apoyo",
+    "name": "Laguna de Apoyo",
+    "location": "Catarina, Masaya",
+    "image": "https://picsum.photos/seed/apoyo/800/600"
+  },
+  {
+    "id": "playa-el-coco",
+    "name": "Playa El Coco",
+    "location": "San Juan del Sur, Rivas",
+    "image": "https://picsum.photos/seed/elcoco/800/600"
+  },
+  {
+    "id": "catedral-de-leon",
+    "name": "Catedral de León",
+    "location": "León, León",
+    "image": "https://picsum.photos/seed/catedral/800/600"
+  }
+]
