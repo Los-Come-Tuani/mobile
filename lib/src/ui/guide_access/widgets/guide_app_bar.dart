@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -15,6 +16,7 @@ class GuideAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final onBack = this.onBack;
     return AppBar(
       automaticallyImplyLeading: false,
@@ -22,13 +24,13 @@ class GuideAppBar extends StatelessWidget implements PreferredSizeWidget {
           ? null
           : IconButton(
               icon: const Icon(Icons.arrow_back),
-              tooltip: 'Regresar',
+              tooltip: l10n.commonBack,
               onPressed: onBack,
             ),
       titleSpacing: onBack == null ? AppTheme.screenPadding.left : 0,
       title: Text(
-        'K’Plan  /  Guías',
-        semanticsLabel: 'K’Plan, guías',
+        l10n.guideAccessAppBarTitle,
+        semanticsLabel: l10n.guideAccessAppBarSemantics,
         style: AppTextStyles.sectionLabel,
       ),
     );

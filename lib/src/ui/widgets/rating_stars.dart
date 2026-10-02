@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -20,6 +21,8 @@ class RatingStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reviewsCount = this.reviewsCount;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -42,7 +45,10 @@ class RatingStars extends StatelessWidget {
         ],
         if (reviewsCount != null) ...[
           const SizedBox(width: 4),
-          Text('($reviewsCount reseñas)', style: AppTextStyles.caption),
+          Text(
+            context.l10n.sharedReviewsCount(reviewsCount),
+            style: AppTextStyles.caption,
+          ),
         ],
       ],
     );

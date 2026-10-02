@@ -6,6 +6,7 @@ import '../../data/models/itinerary.dart';
 import '../../data/models/route_map.dart';
 import '../../data/models/stop.dart';
 import '../../data/models/trip_progress.dart';
+import '../l10n/l10n.dart';
 import 'itinerary_planner.dart';
 
 /// Arma lo que pinta el mapa a partir de un circuito, del viaje en curso o de
@@ -233,7 +234,7 @@ abstract final class RouteMapBuilder {
       name: stop.name,
       point: LatLng(stop.latitude, stop.longitude),
       subtitle: [
-        stop.category,
+        AppStrings.current.categoryName(stop.category),
         stop.duration,
       ].where((part) => part.isNotEmpty).join(' · '),
       number: number,

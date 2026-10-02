@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../models/guide_application.dart';
 import '../../models/guide_request.dart';
@@ -202,25 +203,47 @@ class GuideRequestRepository extends ChangeNotifier {
     ApplicationRole role,
     GuideRequestTerms terms,
   ) {
+    final l10n = AppStrings.current;
     final language = terms.touristLanguage?.toLowerCase();
     if (role == ApplicationRole.translator) {
       return language == null
-          ? 'Traduzco en tiempo real durante todo el recorrido.'
-          : 'Traduzco en tiempo real del español al $language durante '
-                'todo el recorrido.';
+          ? l10n.repoApplicantTranslatorMessage
+          : l10n.repoApplicantTranslatorMessageToLanguage(
+              _languageInSentence(l10n, language),
+            );
     }
 
     final parts = <String>[
       if (guide.specialties.isNotEmpty)
-        'Mi fuerte: ${guide.specialties.map((s) => s.toLowerCase()).join(' y ')}.',
+        l10n.repoApplicantStrengths(_joinSpecialties(l10n, guide.specialties)),
       if (language != null &&
           guide.languages.any((l) => l.toLowerCase() == language))
-        'Puedo dar todo el recorrido en $language.',
-      if (guide.hasTransport) 'Tengo vehículo propio para tu grupo.',
+        l10n.repoApplicantTourInLanguage(_languageInSentence(l10n, language)),
+      if (guide.hasTransport) l10n.repoApplicantHasVehicle,
     ];
-    return parts.isEmpty
-        ? '¡Me encantaría acompañarte en este recorrido!'
-        : parts.join(' ');
+    return parts.isEmpty ? l10n.repoApplicantDefaultMessage : parts.join(' ');
+  }
+
+  /// Las especialidades en minúscula, unidas con "y" ("historia y
+  /// gastronomía"). Necesita al menos una.
+  String _joinSpecialties(AppLocalizations l10n, List<String> specialties) {
+    return specialties
+        .map((s) => s.toLowerCase())
+        .reduce((all, next) => l10n.repoSpecialtiesPair(all, next));
+  }
+
+  /// El idioma del catálogo ([language], ya en minúscula) como se escribe
+  /// dentro de una frase: "inglés" en español, "English" en inglés.
+  String _languageInSentence(AppLocalizations l10n, String language) {
+    return switch (language) {
+      'español' => l10n.repoInlineLanguageSpanish,
+      'inglés' => l10n.repoInlineLanguageEnglish,
+      'alemán' => l10n.repoInlineLanguageGerman,
+      'francés' => l10n.repoInlineLanguageFrench,
+      'portugués' => l10n.repoInlineLanguagePortuguese,
+      'italiano' => l10n.repoInlineLanguageItalian,
+      _ => language,
+    };
   }
 
   /// Contrata a quien mandó [applicationId] para el puesto al que se

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../models/guide_access_request.dart';
 import 'auth_repository.dart';
@@ -18,6 +19,7 @@ class GuideAccessRepository extends ChangeNotifier {
     this.reviewTime = const Duration(minutes: 1),
   }) {
     for (final demo in demoGuides) {
+      _seeded.add(demo.contactEmail);
       _byAccount[demo.contactEmail] = (
         request: demo,
         status: GuideAccessStatus.approved,
@@ -29,14 +31,17 @@ class GuideAccessRepository extends ChangeNotifier {
   /// Cuentas de guía ya aprobadas, para probar la app del guía sin pasar
   /// por la postulación. Entran con cualquier contraseña. Un correo que no
   /// esté entre las cuentas de la demo no inicia sesión.
-  static final demoGuides = [
+  ///
+  /// Se arma en cada lectura y no una sola vez: la experiencia va en el
+  /// idioma de ahora.
+  static List<GuideAccessRequest> get demoGuides => [
     GuideAccessRequest(
       fullName: 'Esteban Vado',
       phone: '+505 8854 2210',
       contactEmail: 'guia@kplan.com',
       coverage: GuideCoverage.national,
       languages: const ['Español', 'Inglés', 'Francés'],
-      experience: '9 años con recorridos de arquitectura colonial y leyendas.',
+      experience: AppStrings.current.repoAccessDemoExperienceNational,
       identityDocument: GuideDocument(
         name: 'cedula.pdf',
         uri: Uri.parse('demo:cedula.pdf'),
@@ -53,7 +58,7 @@ class GuideAccessRepository extends ChangeNotifier {
       coverage: GuideCoverage.local,
       certifiedCity: 'Granada',
       languages: const ['Español', 'Inglés'],
-      experience: '6 años en Granada: historia colonial y gastronomía.',
+      experience: AppStrings.current.repoAccessDemoExperienceLocal,
       identityDocument: GuideDocument(
         name: 'cedula.pdf',
         uri: Uri.parse('demo:cedula.pdf'),
@@ -86,6 +91,10 @@ class GuideAccessRepository extends ChangeNotifier {
   /// Cuentas que se crearon al enviar la postulación, no como turista.
   final Set<String> _signedUpAsGuide = {};
 
+  /// Cuentas de la demo que todavía no envían otra solicitud: la suya se
+  /// arma al leerla ([request]), para que siga el idioma de ahora.
+  final Set<String> _seeded = {};
+
   String? get _account => accountKeyOf(_authRepository);
 
   /// Con qué clave se guarda lo de cada cuenta: el correo, sin mayúsculas.
@@ -100,7 +109,13 @@ class GuideAccessRepository extends ChangeNotifier {
       _byAccount[_account]?.status ?? GuideAccessStatus.none;
 
   /// Lo que envió la cuenta con sesión iniciada, si ya se postuló.
-  GuideAccessRequest? get request => _byAccount[_account]?.request;
+  GuideAccessRequest? get request {
+    final account = _account;
+    if (_seeded.contains(account)) {
+      return demoGuides.firstWhere((demo) => demo.contactEmail == account);
+    }
+    return _byAccount[account]?.request;
+  }
 
   /// En qué va la revisión de lo que envió la cuenta con sesión iniciada.
   GuideReview? get review => _byAccount[_account]?.review;
@@ -121,10 +136,11 @@ class GuideAccessRepository extends ChangeNotifier {
   }) async {
     final account = _account;
     if (account == null) {
-      return const Result.failure('Inicia sesión para enviar tu solicitud');
+      return Result.failure(AppStrings.current.repoAccessLoginRequired);
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 800));
+    _seeded.remove(account);
     _byAccount[account] = (
       request: request,
       status: GuideAccessStatus.pending,

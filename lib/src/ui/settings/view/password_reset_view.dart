@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/validators.dart';
@@ -57,6 +58,7 @@ class _PasswordResetViewState extends State<PasswordResetView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final sentTo = _sentTo;
 
     if (sentTo != null) {
@@ -64,18 +66,14 @@ class _PasswordResetViewState extends State<PasswordResetView> {
           .read<AuthRepository>()
           .isPasswordResetSimulated;
       return SettingsPage(
-        title: 'Revisa tu correo',
+        title: l10n.settingsPasswordResetSentTitle,
         children: [
           DonePanel(
             icon: Icons.mail_outline,
-            title: 'Enlace solicitado',
-            message:
-                'Te llegará a $sentTo para que crees una contraseña nueva. '
-                'Revisa también la carpeta de spam.',
-            note: isSimulated
-                ? 'Demostración: todavía no se envían correos.'
-                : null,
-            actionLabel: 'Volver a Cuenta',
+            title: l10n.settingsPasswordResetSentPanelTitle,
+            message: l10n.settingsPasswordResetSentMessage(sentTo),
+            note: isSimulated ? l10n.settingsPasswordResetDemoNote : null,
+            actionLabel: l10n.settingsPasswordResetBackToAccount,
             onAction: context.pop,
           ),
         ],
@@ -83,24 +81,23 @@ class _PasswordResetViewState extends State<PasswordResetView> {
     }
 
     return SettingsPage(
-      title: 'Recuperar acceso',
-      heading: 'Cambiar contraseña',
+      title: l10n.settingsPasswordResetTitle,
+      heading: l10n.settingsChangePassword,
       children: [
-        Text(
-          'Te enviaremos un enlace al correo de tu cuenta para que crees una '
-          'contraseña nueva.',
-          style: AppTextStyles.bodySmall,
-        ),
+        Text(l10n.settingsPasswordResetIntro, style: AppTextStyles.bodySmall),
         const SizedBox(height: 20),
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Correo', style: AppTextStyles.caption),
+              Text(
+                l10n.settingsPasswordResetEmailLabel,
+                style: AppTextStyles.caption,
+              ),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Correo electrónico',
+                hint: l10n.commonEmail,
                 controller: _emailController,
                 validator: Validators.email,
                 keyboardType: TextInputType.emailAddress,
@@ -110,7 +107,7 @@ class _PasswordResetViewState extends State<PasswordResetView> {
               ),
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Solicitar enlace',
+                label: l10n.settingsPasswordResetRequest,
                 isLoading: _isSending,
                 onPressed: _submit,
               ),

@@ -1,11 +1,21 @@
 import 'package:flutter/foundation.dart';
 
+import '../../core/l10n/app_strings.dart';
+
 /// Base de todos los ViewModels: expone estado de carga y de error
 /// para que las vistas no repitan esa lógica.
 abstract class BaseViewModel extends ChangeNotifier {
+  BaseViewModel() {
+    AppStrings.changes.addListener(_onLanguageChanged);
+  }
+
   bool _isBusy = false;
   String? _errorMessage;
   bool _disposed = false;
+
+  /// Al cambiar de idioma, las vistas vuelven a leer los textos que este
+  /// ViewModel arma (subtítulos, resúmenes, etiquetas).
+  void _onLanguageChanged() => safeNotify();
 
   bool get isBusy => _isBusy;
   String? get errorMessage => _errorMessage;
@@ -37,6 +47,7 @@ abstract class BaseViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    AppStrings.changes.removeListener(_onLanguageChanged);
     super.dispose();
   }
 }

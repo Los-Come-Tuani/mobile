@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -42,12 +43,13 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final profile = context.watch<GuideAccessRepository>().request;
     final work = context.watch<GuideWorkRepository>();
     final email = context.select<AuthRepository, String?>(
       (auth) => auth.currentUser?.email,
     );
-    final name = profile?.fullName ?? 'Guía';
+    final name = profile?.fullName ?? l10n.commonGuide;
     final rating = work.rating;
 
     return Scaffold(
@@ -98,15 +100,14 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           if (rating != null)
             RatingStars(rating: rating, reviewsCount: work.reviewsCount)
           else
-            Text(
-              'Todavía sin reseñas de turistas',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.guideAppProfileNoReviews, style: AppTextStyles.caption),
           const SizedBox(height: 16),
           if (profile != null) ...[
             DetailLine(
               icon: Icons.translate,
-              text: 'Habla ${profile.languages.join(', ')}',
+              text: l10n.guideAppProfileSpeaks(
+                profile.languages.map(l10n.languageName).join(', '),
+              ),
             ),
             DetailLine(icon: Icons.work_outline, text: profile.experience),
             DetailLine(icon: Icons.phone_outlined, text: profile.phone),
@@ -117,21 +118,29 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           const SizedBox(height: 8),
           ActionRow(
             icon: Icons.account_balance_wallet_outlined,
-            title: 'Balance',
+            title: l10n.guideAppBalanceTitle,
             subtitle: work.isLoaded
-                ? 'Disponible ${Formatters.currency(work.available)}'
-                : 'Lo que recibes por tus viajes',
+                ? l10n.guideAppProfileAvailable(
+                    Formatters.currency(work.available),
+                  )
+                : l10n.guideAppProfileBalanceHint,
             onTap: () => context.push(Routes.guideBalance),
           ),
           ActionRow(
+            icon: Icons.translate,
+            title: l10n.languageSettingsTitle,
+            subtitle: AppStrings.language.nativeName,
+            onTap: () => context.push(Routes.guideLanguage),
+          ),
+          ActionRow(
             icon: Icons.explore_outlined,
-            title: 'Entrar como turista',
-            subtitle: 'Explora y reserva con la misma cuenta',
+            title: l10n.guideAppProfileEnterTourist,
+            subtitle: l10n.guideAppProfileEnterTouristHint,
             onTap: () => context.go(Routes.home),
           ),
           const SizedBox(height: 24),
           SoftButton(
-            label: 'Cerrar sesión',
+            label: l10n.commonLogout,
             onPressed: () => showLogoutSheet(context),
           ),
         ],

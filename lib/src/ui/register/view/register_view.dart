@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -54,7 +55,7 @@ class _RegisterViewState extends State<RegisterView> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+          viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
         ),
       ),
     );
@@ -120,6 +121,7 @@ class _RegisterViewState extends State<RegisterView> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<RegisterViewModel>();
     final step = viewModel.step;
+    final l10n = context.l10n;
 
     return PopScope(
       canPop: viewModel.isFirstStep,
@@ -132,7 +134,7 @@ class _RegisterViewState extends State<RegisterView> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            tooltip: 'Regresar',
+            tooltip: l10n.commonBack,
             onPressed: _back,
           ),
         ),
@@ -192,14 +194,13 @@ class _RegisterViewState extends State<RegisterView> {
 
   Widget _buildStep(RegisterStep step, RegisterViewModel viewModel) {
     final isBusy = viewModel.isBusy;
+    final l10n = context.l10n;
 
     return switch (step) {
       RegisterStep.email => _StepLayout(
-        title: 'Ingrese su correo electrónico',
-        subtitle:
-            'Lo usaremos para verificar tu cuenta. Tu información se '
-            'mantendrá privada.',
-        label: 'Correo electrónico',
+        title: l10n.registerEmailTitle,
+        subtitle: l10n.registerEmailSubtitle,
+        label: l10n.commonEmail,
         field: AppTextField(
           hint: 'example@kplan.com',
           controller: _emailController,
@@ -210,7 +211,7 @@ class _RegisterViewState extends State<RegisterView> {
           onSubmitted: (_) => _submitEmail(),
         ),
         button: PrimaryButton(
-          label: 'Siguiente',
+          label: l10n.commonNext,
           isLoading: isBusy,
           onPressed: _submitEmail,
         ),
@@ -219,10 +220,7 @@ class _RegisterViewState extends State<RegisterView> {
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-              'Ingrese el código de verificación',
-              style: AppTextStyles.stepTitle,
-            ),
+            child: Text(l10n.registerCodeTitle, style: AppTextStyles.stepTitle),
           ),
           const SizedBox(height: 20),
           SvgPicture.asset(AppAssets.registerCodeSent, width: 191),
@@ -230,15 +228,11 @@ class _RegisterViewState extends State<RegisterView> {
           Text.rich(
             TextSpan(
               style: AppTextStyles.fieldLabel,
-              children: [
-                const TextSpan(
-                  text: 'Enviamos un código de 6 dígitos al correo ',
-                ),
-                TextSpan(
-                  text: viewModel.email,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ],
+              children: _withHighlight(
+                l10n.registerCodeSent(viewModel.email),
+                viewModel.email,
+                const TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
             textAlign: TextAlign.center,
           ),
@@ -252,7 +246,7 @@ class _RegisterViewState extends State<RegisterView> {
           ListenableBuilder(
             listenable: _codeController,
             builder: (context, _) => PrimaryButton(
-              label: 'Siguiente',
+              label: l10n.commonNext,
               isLoading: isBusy,
               onPressed: _codeController.text.length == 6 ? _submitCode : null,
             ),
@@ -260,9 +254,9 @@ class _RegisterViewState extends State<RegisterView> {
         ],
       ),
       RegisterStep.password => _StepLayout(
-        title: 'Cree una contraseña',
-        subtitle: 'Usa al menos 8 caracteres con letras y números.',
-        label: 'Contraseña',
+        title: l10n.registerPasswordTitle,
+        subtitle: l10n.registerPasswordSubtitle,
+        label: l10n.commonPassword,
         field: AppTextField(
           hint: '',
           controller: _passwordController,
@@ -272,40 +266,41 @@ class _RegisterViewState extends State<RegisterView> {
           onSubmitted: (_) => _submitPassword(),
         ),
         below: _PasswordChecklist(controller: _passwordController),
-        button: PrimaryButton(label: 'Siguiente', onPressed: _submitPassword),
+        button: PrimaryButton(
+          label: l10n.commonNext,
+          onPressed: _submitPassword,
+        ),
       ),
       RegisterStep.birthDate => _StepLayout(
-        title: '¿Cuándo naciste?',
-        subtitle:
-            'Tu fecha de nacimiento será privada, y nos ayudará a ofrecerte '
-            'una mejor experiencia',
-        label: 'Fecha',
+        title: l10n.registerBirthDateTitle,
+        subtitle: l10n.registerBirthDateSubtitle,
+        label: l10n.commonDate,
         field: _DateField(date: viewModel.birthDate, onTap: _pickBirthDate),
         button: PrimaryButton(
-          label: 'Siguiente',
+          label: l10n.commonNext,
           onPressed: viewModel.birthDate == null
               ? null
               : viewModel.submitBirthDate,
         ),
       ),
       RegisterStep.name => _StepLayout(
-        title: '¿Cómo te llamas?',
-        label: 'Nombre',
+        title: l10n.registerNameTitle,
+        label: l10n.registerNameLabel,
         field: AppTextField(
-          hint: 'Nombre completo',
+          hint: l10n.commonFullName,
           controller: _nameController,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _submitName(),
           validator: (value) => (value == null || value.trim().isEmpty)
-              ? 'Ingresa tu nombre'
+              ? l10n.registerNameRequired
               : null,
         ),
-        button: PrimaryButton(label: 'Siguiente', onPressed: _submitName),
+        button: PrimaryButton(label: l10n.commonNext, onPressed: _submitName),
       ),
       RegisterStep.username => _StepLayout(
-        title: 'Cree un nombre de usuario',
-        subtitle: 'Este nombre será visible dentro de K’Plan',
-        label: 'Nombre de usuario',
+        title: l10n.registerUsernameTitle,
+        subtitle: l10n.registerUsernameSubtitle,
+        label: l10n.registerUsernameLabel,
         field: AppTextField(
           hint: '@username',
           controller: _usernameController,
@@ -315,13 +310,31 @@ class _RegisterViewState extends State<RegisterView> {
           onSubmitted: (_) => _register(),
         ),
         button: PrimaryButton(
-          label: 'Crear cuenta',
+          label: l10n.commonCreateAccount,
           isLoading: isBusy,
           onPressed: _register,
         ),
       ),
     };
   }
+}
+
+/// Parte [message] en lo de antes, [highlight] con su propio [style] y lo de
+/// después. [message] ya viene traducido con [highlight] donde cada idioma lo
+/// pide, así que el orden de las palabras nunca se arma a mano.
+List<InlineSpan> _withHighlight(
+  String message,
+  String highlight,
+  TextStyle style,
+) {
+  final start = highlight.isEmpty ? -1 : message.indexOf(highlight);
+  if (start < 0) return [TextSpan(text: message)];
+  final end = start + highlight.length;
+  return [
+    if (start > 0) TextSpan(text: message.substring(0, start)),
+    TextSpan(text: highlight, style: style),
+    if (end < message.length) TextSpan(text: message.substring(end)),
+  ];
 }
 
 /// Pregunta, explicación opcional, etiqueta, campo y botón: la estructura
@@ -376,15 +389,16 @@ class _PasswordChecklist extends StatelessWidget {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
+        final l10n = context.l10n;
         final rules = Validators.newPasswordRules(controller.text);
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Rule(label: '8 caracteres', met: rules.length),
+            _Rule(label: l10n.registerPasswordRuleLength, met: rules.length),
             const SizedBox(height: 12),
-            _Rule(label: 'Una letra', met: rules.letter),
+            _Rule(label: l10n.registerPasswordRuleLetter, met: rules.letter),
             const SizedBox(height: 12),
-            _Rule(label: 'Un número', met: rules.number),
+            _Rule(label: l10n.registerPasswordRuleNumber, met: rules.number),
           ],
         );
       },
@@ -400,8 +414,11 @@ class _Rule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Semantics(
-      label: '$label: ${met ? 'cumplido' : 'pendiente'}',
+      label: met
+          ? l10n.registerPasswordRuleMet(label)
+          : l10n.registerPasswordRulePending(label),
       excludeSemantics: true,
       child: Row(
         children: [
@@ -450,6 +467,8 @@ class _LoginLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final action = l10n.registerLoginAction;
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: TextButton(
@@ -457,13 +476,11 @@ class _LoginLink extends StatelessWidget {
         child: Text.rich(
           TextSpan(
             style: AppTextStyles.link.copyWith(fontSize: 12),
-            children: const [
-              TextSpan(text: '¿Ya tienes cuenta? '),
-              TextSpan(
-                text: 'Inicia sesión',
-                style: TextStyle(color: AppColors.primary30),
-              ),
-            ],
+            children: _withHighlight(
+              l10n.registerLoginLink(action),
+              action,
+              const TextStyle(color: AppColors.primary30),
+            ),
           ),
         ),
       ),

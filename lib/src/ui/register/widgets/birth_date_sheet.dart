@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -103,6 +104,7 @@ class _BirthDateSheetState extends State<_BirthDateSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final dayLabel = _day.toString().padLeft(2, '0');
     final monthLabel = _month.toString().padLeft(2, '0');
 
@@ -188,7 +190,7 @@ class _BirthDateSheetState extends State<_BirthDateSheet> {
                       ),
                     ),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancelar'),
+                    child: Text(l10n.commonCancel),
                   ),
                 ),
                 const SizedBox(width: 19),
@@ -196,7 +198,7 @@ class _BirthDateSheetState extends State<_BirthDateSheet> {
                   child: ElevatedButton(
                     style: _sheetButtonStyle(ElevatedButton.styleFrom()),
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
-                    child: const Text('Aceptar'),
+                    child: Text(l10n.commonAccept),
                   ),
                 ),
               ],
@@ -235,14 +237,15 @@ class _PartSelector extends StatelessWidget {
   final _DatePart active;
   final ValueChanged<_DatePart> onSelected;
 
-  static const _labels = {
-    _DatePart.day: 'Día',
-    _DatePart.month: 'Mes',
-    _DatePart.year: 'Año',
+  static String _label(AppLocalizations l10n, _DatePart part) => switch (part) {
+    _DatePart.day => l10n.registerBirthDatePartDay,
+    _DatePart.month => l10n.registerBirthDatePartMonth,
+    _DatePart.year => l10n.registerBirthDatePartYear,
   };
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -270,7 +273,7 @@ class _PartSelector extends StatelessWidget {
                 ),
               ),
               child: Text(
-                _labels[part]!,
+                _label(l10n, part),
                 style: AppTextStyles.body.copyWith(
                   fontSize: 14,
                   color: part == active

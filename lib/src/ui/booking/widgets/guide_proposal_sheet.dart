@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -9,6 +10,8 @@ import '../../../core/utils/formatters.dart';
 import '../../../data/models/guide_request.dart';
 
 /// Idiomas que puede pedir el turista para un guía bilingüe o un traductor.
+/// Son claves del catálogo (siempre en español): se muestran con
+/// `l10n.languageName`.
 const _touristLanguages = [
   'Inglés',
   'Francés',
@@ -109,6 +112,7 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final terms = _terms;
 
     return SafeArea(
@@ -124,18 +128,11 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Propuesta para guía o traductor',
-                style: AppTextStyles.title,
-              ),
+              Text(l10n.bookingProposalTitle, style: AppTextStyles.title),
               const SizedBox(height: 4),
-              Text(
-                'Los guías verán tu propuesta y se postularán. Tú revisas sus '
-                'perfiles y eliges a quién contratar.',
-                style: AppTextStyles.caption,
-              ),
+              Text(l10n.bookingProposalIntro, style: AppTextStyles.caption),
               const SizedBox(height: 20),
-              Text('¿Qué necesitas?', style: AppTextStyles.body),
+              Text(l10n.bookingProposalWhatYouNeed, style: AppTextStyles.body),
               const SizedBox(height: 8),
               for (final need in GuideNeed.values) ...[
                 _NeedOption(
@@ -147,13 +144,19 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
               ],
               if (_need.needsTouristLanguage) ...[
                 const SizedBox(height: 8),
-                Text('Tu idioma', style: AppTextStyles.body),
+                Text(
+                  l10n.bookingProposalYourLanguage,
+                  style: AppTextStyles.body,
+                ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: _language,
                   items: [
                     for (final language in _touristLanguages)
-                      DropdownMenuItem(value: language, child: Text(language)),
+                      DropdownMenuItem(
+                        value: language,
+                        child: Text(l10n.languageName(language)),
+                      ),
                   ],
                   onChanged: (value) {
                     if (value == null) return;
@@ -162,16 +165,19 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
                 ),
               ],
               const SizedBox(height: 20),
-              Text('Duración del servicio', style: AppTextStyles.body),
+              Text(l10n.bookingProposalDuration, style: AppTextStyles.body),
               const SizedBox(height: 2),
               Text(
                 [
                   _need.needsGuide
-                      ? 'Mínimo ${_need.minServiceHours} horas con guía.'
-                      : 'Mínimo ${_need.minServiceHours} horas sólo con '
-                            'traductor.',
+                      ? l10n.bookingProposalMinHoursGuide(_need.minServiceHours)
+                      : l10n.bookingProposalMinHoursTranslator(
+                          _need.minServiceHours,
+                        ),
                   if (widget.itineraryDuration case final duration?)
-                    'Tu itinerario dura ${Formatters.duration(duration)}.',
+                    l10n.bookingProposalItineraryLasts(
+                      Formatters.duration(duration),
+                    ),
                 ].join(' '),
                 style: AppTextStyles.caption,
               ),
@@ -183,19 +189,22 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
               ),
               if (_need.needsGuide) ...[
                 const SizedBox(height: 20),
-                Text('Transporte', style: AppTextStyles.body),
+                Text(l10n.bookingProposalTransport, style: AppTextStyles.body),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _transportChip('A pie', TransportOption.onFoot),
                     _transportChip(
-                      'Yo pongo el transporte',
+                      l10n.bookingTransportOnFoot,
+                      TransportOption.onFoot,
+                    ),
+                    _transportChip(
+                      l10n.bookingTransportTourist,
                       TransportOption.touristProvides,
                     ),
                     _transportChip(
-                      'Que lo ponga el guía',
+                      l10n.bookingTransportGuide,
                       TransportOption.guideProvides,
                     ),
                   ],
@@ -214,8 +223,7 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Este recorrido se hace en vehículo: a pie hay '
-                          'tramos muy largos y el día no alcanza.',
+                          l10n.bookingProposalVehicleWarning,
                           style: AppTextStyles.caption,
                         ),
                       ),
@@ -233,23 +241,22 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
                   controlAffinity: ListTileControlAffinity.leading,
                   activeColor: AppColors.primary30,
                   title: Text(
-                    '¿Le darás alojamiento al guía?',
+                    l10n.bookingProposalLodgingTitle,
                     style: AppTextStyles.body,
                   ),
                   subtitle: Text(
-                    'Más de un día de recorrido: si le das alojamiento, el '
-                    'precio baja.',
+                    l10n.bookingProposalLodgingHint,
                     style: AppTextStyles.caption,
                   ),
                 ),
               ],
               const SizedBox(height: 20),
-              Text('Presupuesto que ofreces', style: AppTextStyles.body),
+              Text(l10n.bookingProposalBudget, style: AppTextStyles.body),
               const SizedBox(height: 8),
               _BudgetBox(terms: terms),
               const SizedBox(height: 6),
               Text(
-                'Cada guía lo acepta o propone su precio al postularse.',
+                l10n.bookingProposalBudgetHint,
                 style: AppTextStyles.caption,
               ),
               const SizedBox(height: 24),
@@ -258,14 +265,14 @@ class _GuideProposalSheetState extends State<_GuideProposalSheet> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancelar'),
+                      child: Text(l10n.commonCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(terms),
-                      child: const Text('Guardar'),
+                      child: Text(l10n.commonSave),
                     ),
                   ),
                 ],
@@ -309,26 +316,27 @@ class _NeedOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (icon, title, subtitle) = switch (need) {
       GuideNeed.localGuide => (
         Icons.person_pin_circle_outlined,
-        'Guía local',
-        'Te da el recorrido en español.',
+        l10n.commonLocalGuide,
+        l10n.bookingNeedLocalGuideSubtitle,
       ),
       GuideNeed.bilingualGuide => (
         Icons.record_voice_over_outlined,
-        'Guía que habla tu idioma',
-        'Te explica todo el recorrido en tu idioma.',
+        l10n.bookingNeedBilingualTitle,
+        l10n.bookingNeedBilingualSubtitle,
       ),
       GuideNeed.localGuideAndTranslator => (
         Icons.groups_outlined,
-        'Guía local + traductor',
-        'Un guía local y alguien que te traduce en el momento.',
+        l10n.bookingNeedGuideTranslatorTitle,
+        l10n.bookingNeedGuideTranslatorSubtitle,
       ),
       GuideNeed.translatorOnly => (
         Icons.translate,
-        'Solo traductor',
-        'Recorres por tu cuenta con alguien que te traduce.',
+        l10n.bookingNeedTranslatorOnlyTitle,
+        l10n.bookingNeedTranslatorOnlySubtitle,
       ),
     };
 
@@ -382,6 +390,7 @@ class _BudgetBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final bothRoles = terms.need.needsGuide && terms.need.needsTranslator;
 
     return Container(
@@ -394,10 +403,17 @@ class _BudgetBox extends StatelessWidget {
       child: bothRoles
           ? Column(
               children: [
-                _BudgetLine(label: 'Guía', amount: terms.guideBudget),
-                _BudgetLine(label: 'Traductor', amount: terms.translatorBudget),
+                _BudgetLine(label: l10n.commonGuide, amount: terms.guideBudget),
+                _BudgetLine(
+                  label: l10n.commonTranslator,
+                  amount: terms.translatorBudget,
+                ),
                 const Divider(height: 16, color: AppColors.divider),
-                _BudgetLine(label: 'Total', amount: terms.budget, bold: true),
+                _BudgetLine(
+                  label: l10n.commonTotal,
+                  amount: terms.budget,
+                  bold: true,
+                ),
               ],
             )
           : Text(
@@ -448,12 +464,14 @@ class _HoursStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Row(
       children: [
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
           color: AppColors.primary30,
-          tooltip: 'Menos horas',
+          tooltip: l10n.bookingProposalFewerHours,
           onPressed: hours <= minHours ? null : () => onChanged(hours - 1),
         ),
         Expanded(
@@ -466,7 +484,7 @@ class _HoursStepper extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
           color: AppColors.primary30,
-          tooltip: 'Más horas',
+          tooltip: l10n.bookingProposalMoreHours,
           onPressed: () => onChanged(hours + 1),
         ),
       ],

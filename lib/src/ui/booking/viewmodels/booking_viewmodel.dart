@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/start_times.dart';
@@ -141,13 +142,15 @@ class BookingViewModel extends BaseViewModel {
   bool get hasGuideRequest => _guideTerms != null;
 
   /// Valor de la fila "Guía o traductor" del formulario.
-  String get guideRowValue => _guideTerms?.shortNeedLabel ?? 'Agregar';
+  String get guideRowValue =>
+      _guideTerms?.shortNeedLabel ?? AppStrings.current.bookingGuideRowAdd;
 
   /// Lo que se pide y por cuántas horas, para el aviso y el desglose.
   String get guideSummary {
     final terms = _guideTerms;
-    if (terms == null) return 'Sin guía ni traductor';
-    return '${terms.needLabel} · ${terms.serviceHours}h';
+    final l10n = AppStrings.current;
+    if (terms == null) return l10n.bookingNoGuideOrTranslator;
+    return l10n.bookingGuideSummary(terms.needLabel, terms.serviceHours);
   }
 
   num get adultsTotal => (_circuit?.priceAdult ?? 0) * _adults;
@@ -199,7 +202,7 @@ class BookingViewModel extends BaseViewModel {
     await _collectionsRepository.ensureLoaded();
     final collection = _collectionsRepository.findById(circuitId);
     if (collection == null) {
-      setError('No encontramos este circuito');
+      setError(AppStrings.current.bookingCircuitNotFound);
       return;
     }
 

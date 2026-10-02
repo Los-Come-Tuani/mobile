@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -29,14 +30,16 @@ class _GuideHiredCard extends StatelessWidget {
 
   final List<TourGuide> people;
 
-  String get _title {
-    if (people.length > 1) return '¡Tu equipo está listo!';
+  String _title(AppLocalizations l10n) {
+    if (people.length > 1) return l10n.sharedHiredTeamReady;
     final firstName = people.isEmpty ? '' : people.first.name.split(' ').first;
-    return '¡Contrataste a $firstName!';
+    return l10n.sharedHiredName(firstName);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -51,7 +54,7 @@ class _GuideHiredCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _title,
+                _title(l10n),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.headline,
               ),
@@ -62,13 +65,13 @@ class _GuideHiredCard extends StatelessWidget {
               ],
               const SizedBox(height: 12),
               Text(
-                'Coordina el punto de encuentro por el chat.',
+                l10n.sharedHiredCoordinate,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall,
               ),
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Ir al chat',
+                label: l10n.sharedHiredGoToChat,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],

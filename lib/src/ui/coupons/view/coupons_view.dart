@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -30,13 +31,14 @@ class _CouponsViewState extends State<CouponsView> {
   }
 
   Future<void> _redeem(Coupon coupon) async {
+    final l10n = context.l10n;
     final viewModel = context.read<CouponsViewModel>();
     final confirmed = await showConfirmDialog(
       context,
       icon: Icons.military_tech_outlined,
-      title: '¿Canjear "${coupon.title}"?',
-      message: 'Se descontarán ${coupon.cost} insignias de tu saldo.',
-      confirmLabel: 'Canjear',
+      title: l10n.couponsRedeemTitle(coupon.title),
+      message: l10n.couponsRedeemMessage(coupon.cost),
+      confirmLabel: l10n.couponsRedeemConfirm,
     );
     if (!confirmed || !mounted) return;
 
@@ -46,11 +48,7 @@ class _CouponsViewState extends State<CouponsView> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(
-            ok
-                ? '¡Cupón canjeado! Muéstralo al reservar.'
-                : 'No se pudo canjear el cupón',
-          ),
+          content: Text(ok ? l10n.couponsRedeemed : l10n.couponsRedeemFailed),
         ),
       );
   }
@@ -60,7 +58,7 @@ class _CouponsViewState extends State<CouponsView> {
     final viewModel = context.watch<CouponsViewModel>();
 
     return Scaffold(
-      appBar: const BrandAppBar(title: 'Cupones'),
+      appBar: BrandAppBar(title: context.l10n.commonCoupons),
       bottomNavigationBar: const AppBottomNav(
         currentIndex: AppBottomNav.coupons,
       ),
@@ -119,7 +117,7 @@ class _BalanceCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'insignias disponibles para canjear',
+                  context.l10n.couponsBalanceLabel(available),
                   style: AppTextStyles.caption.copyWith(color: AppColors.white),
                 ),
               ],
@@ -230,6 +228,8 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (isRedeemed) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -241,7 +241,7 @@ class _ActionButton extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'Canjeado',
+            l10n.couponsRedeemedLabel,
             style: AppTextStyles.caption.copyWith(
               color: AppColors.accentSecondaryGreen,
               fontWeight: FontWeight.w600,
@@ -262,7 +262,7 @@ class _ActionButton extends StatelessWidget {
           ),
         ),
         onPressed: canAfford ? onPressed : null,
-        child: const Text('CANJEAR'),
+        child: Text(l10n.couponsRedeemButton),
       ),
     );
   }

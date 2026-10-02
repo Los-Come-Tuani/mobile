@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/medal_tiers.dart';
@@ -20,13 +21,15 @@ class CategoryFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SizedBox(
       height: 36,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
           _FilterChip(
-            label: 'Todas',
+            label: l10n.sharedFilterAll,
             isSelected: selected == null,
             onTap: () => onSelected(null),
           ),
@@ -34,7 +37,7 @@ class CategoryFilterBar extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: _FilterChip(
-                label: category,
+                label: l10n.categoryName(category),
                 icon: iconForBadgeCategory(category),
                 isSelected: selected == category,
                 onTap: () => onSelected(category),

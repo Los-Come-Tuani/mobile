@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
 import 'src/data/datasources/repository/active_trip_repository.dart';
 import 'src/data/datasources/repository/api_repository.dart';
@@ -17,6 +17,7 @@ import 'src/data/datasources/repository/guide_inbox_repository.dart';
 import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
 import 'src/data/datasources/repository/guide_work_repository.dart';
+import 'src/data/datasources/repository/language_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
@@ -25,20 +26,31 @@ import 'src/data/datasources/repository/tour_repository.dart';
 import 'src/data/datasources/repository/tourist_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
+import 'src/ui/language/widgets/language_content_sync.dart';
 import 'src/ui/widgets/map/map_engine.dart';
 import 'src/ui/widgets/map/maplibre_engine.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(KPlanApp(authRepository: AuthRepository()));
+  // El idioma se lee antes del primer cuadro: así la app nunca arranca en uno
+  // y cambia a otro.
+  final language = await LanguageRepository.load();
+  runApp(KPlanApp(authRepository: AuthRepository(), language: language));
 }
 
 class KPlanApp extends StatefulWidget {
-  const KPlanApp({super.key, required this.authRepository});
+  const KPlanApp({
+    super.key,
+    required this.authRepository,
+    required this.language,
+  });
 
   /// Se crea fuera del árbol porque el router necesita escucharlo
   /// (`refreshListenable`) antes de que exista un `BuildContext`.
   final AuthRepository authRepository;
+
+  /// Se lee del teléfono antes de pintar; lo demás depende de él.
+  final LanguageRepository language;
 
   @override
   State<KPlanApp> createState() => _KPlanAppState();
@@ -53,6 +65,11 @@ class _KPlanAppState extends State<KPlanApp> {
       providers: [
         ChangeNotifierProvider<AuthRepository>.value(
           value: widget.authRepository,
+        ),
+        // Español por defecto; se pregunta en el login la primera vez y se
+        // puede cambiar en Configuraciones.
+        ChangeNotifierProvider<LanguageRepository>.value(
+          value: widget.language,
         ),
         // Quién puede entrar como guía: solicitudes en revisión o aprobadas.
         ChangeNotifierProvider<GuideAccessRepository>(
@@ -134,19 +151,23 @@ class _KPlanAppState extends State<KPlanApp> {
         // los datos que usará el portal web. La app sólo los guarda.
         Provider<VisitLogRepository>(create: (_) => VisitLogRepository()),
       ],
-      child: MaterialApp.router(
-        title: "K'Plan",
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        routerConfig: _router,
-        // La app es en español: afecta date pickers y textos de Material.
-        locale: const Locale('es'),
-        supportedLocales: const [Locale('es'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
+      // Al cambiar el idioma, el contenido del catálogo que ya se cargó se
+      // vuelve a leer en el nuevo.
+      child: LanguageContentSync(
+        child: Consumer<LanguageRepository>(
+          builder: (context, language, _) => MaterialApp.router(
+            title: "K'Plan",
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light,
+            routerConfig: _router,
+            // El idioma elegido: también traduce date pickers y los textos
+            // de Material (AppLocalizations.localizationsDelegates los
+            // incluye).
+            locale: language.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+          ),
+        ),
       ),
     );
   }

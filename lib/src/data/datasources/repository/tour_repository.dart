@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/circuit.dart';
@@ -108,7 +109,7 @@ class TourRepository {
       return Result.ok(await action());
     } catch (e, st) {
       log.e('$tag: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../../data/models/itinerary.dart';
 import '../../data/models/stop.dart';
+import '../l10n/l10n.dart';
 import 'formatters.dart';
 import 'time_parser.dart';
 
@@ -47,6 +48,7 @@ abstract final class ItineraryPlanner {
     Map<String, int> legMinutes = const {},
     Map<int, DateTime> fixedArrivals = const {},
   }) {
+    final l10n = AppStrings.current;
     final planned = <ItineraryStop>[];
     final warnings = <ItineraryWarning>[];
     final dayStart = DateTime(start.year, start.month, start.day);
@@ -69,11 +71,12 @@ abstract final class ItineraryPlanner {
             ItineraryWarning(
               kind: ItineraryWarningKind.longWalk,
               stopId: stop.id,
-              message:
-                  'De ${previous.name} a ${stop.name} son '
-                  '${Formatters.distance(leg.distanceKm)} a pie '
-                  '(${Formatters.duration(leg.duration)}). Si prefieres, haz '
-                  'ese tramo en taxi o en vehículo.',
+              message: l10n.utilPlannerLongWalk(
+                previous.name,
+                stop.name,
+                Formatters.distance(leg.distanceKm),
+                Formatters.duration(leg.duration),
+              ),
             ),
           );
         }
@@ -90,10 +93,11 @@ abstract final class ItineraryPlanner {
             ItineraryWarning(
               kind: ItineraryWarningKind.missedTime,
               stopId: stop.id,
-              message:
-                  'No alcanzas a llegar a ${stop.name} a las '
-                  '${Formatters.clock(fixed)}: llegarías a las '
-                  '${Formatters.clock(clock)}.',
+              message: l10n.utilPlannerMissedTime(
+                stop.name,
+                Formatters.clock(fixed),
+                Formatters.clock(clock),
+              ),
             ),
           );
         }
@@ -123,7 +127,7 @@ abstract final class ItineraryPlanner {
       warnings.add(
         ItineraryWarning(
           kind: ItineraryWarningKind.endsLate,
-          message: 'Terminarías a las ${Formatters.clock(clock)}, ya de noche.',
+          message: l10n.utilPlannerEndsLate(Formatters.clock(clock)),
         ),
       );
     }
@@ -206,25 +210,33 @@ abstract final class ItineraryPlanner {
     final hours = stop.hours;
     if (hours == null) return null;
 
+    final l10n = AppStrings.current;
     final arrives = arrival.difference(dayStart).inMinutes;
     final leaves = departure.difference(dayStart).inMinutes;
     final opens = Formatters.minutesOfDay(hours.opensAt);
     final closes = Formatters.minutesOfDay(hours.closesAt);
 
-    // Las horas terminan en "a.m." o "p.m.": ese punto cierra la oración.
+    // En español las horas terminan en "a.m." o "p.m.": ese punto cierra la
+    // oración, así que esos textos no llevan otro.
     final String message;
     if (arrives >= hours.closesAt) {
-      message =
-          'Llegarías a ${stop.name} a las ${Formatters.clock(arrival)}, '
-          'cuando ya cerró (cierra a las $closes).';
+      message = l10n.utilPlannerArrivesAfterClosing(
+        stop.name,
+        Formatters.clock(arrival),
+        closes,
+      );
     } else if (leaves > hours.closesAt) {
-      message =
-          '${stop.name} cierra a las $closes y saldrías a las '
-          '${Formatters.clock(departure)}';
+      message = l10n.utilPlannerLeavesAfterClosing(
+        stop.name,
+        closes,
+        Formatters.clock(departure),
+      );
     } else if (arrives < hours.opensAt) {
-      message =
-          'Llegarías a ${stop.name} a las ${Formatters.clock(arrival)} y '
-          'abre a las $opens';
+      message = l10n.utilPlannerArrivesBeforeOpening(
+        stop.name,
+        Formatters.clock(arrival),
+        opens,
+      );
     } else {
       return null;
     }

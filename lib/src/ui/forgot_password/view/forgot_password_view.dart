@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
@@ -32,21 +33,21 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Te enviamos un correo para restablecer tu contraseña'),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.forgotPasswordSent)));
     context.pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: context.pop,
         ),
       ),
@@ -59,18 +60,15 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                Text(
-                  '¿Olvidaste tu contraseña?',
-                  style: AppTextStyles.headline,
-                ),
+                Text(l10n.forgotPasswordTitle, style: AppTextStyles.headline),
                 const SizedBox(height: 8),
                 Text(
-                  'Ingresa tu correo y te enviaremos las instrucciones.',
+                  l10n.forgotPasswordSubtitle,
                   style: AppTextStyles.bodySmall,
                 ),
                 const SizedBox(height: 24),
                 AppTextField(
-                  hint: 'Correo electrónico',
+                  hint: l10n.commonEmail,
                   controller: _emailController,
                   validator: Validators.email,
                   keyboardType: TextInputType.emailAddress,
@@ -78,7 +76,10 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                   onSubmitted: (_) => _submit(),
                 ),
                 const SizedBox(height: 24),
-                PrimaryButton(label: 'Enviar', onPressed: _submit),
+                PrimaryButton(
+                  label: l10n.forgotPasswordSend,
+                  onPressed: _submit,
+                ),
               ],
             ),
           ),

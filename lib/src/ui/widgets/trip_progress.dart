@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -17,10 +18,14 @@ import 'itinerary_timeline.dart';
 /// Con menos atraso que esto, se considera que va a tiempo.
 const Duration _onTimeTolerance = Duration(minutes: 5);
 
-/// "Vas a tiempo" o "Vas 10 min atrasado".
-String delayLabel(Duration delay) => delay < _onTimeTolerance
-    ? 'Vas a tiempo'
-    : 'Vas ${Formatters.duration(delay)} atrasado';
+/// "Vas a tiempo" o "Vas 10 min atrasado" (en inglés, "You're on time" o
+/// "You're running 10 min late"). Se arma al llamarla, con el idioma de ahora.
+String delayLabel(Duration delay) {
+  final l10n = AppStrings.current;
+  return delay < _onTimeTolerance
+      ? l10n.sharedTripOnTime
+      : l10n.sharedTripDelayed(Formatters.duration(delay));
+}
 
 /// Progreso del viaje en curso: cuántas paradas se confirmaron por QR,
 /// hacia dónde va ahora y si va a tiempo.
@@ -44,6 +49,7 @@ class TripProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final progress = totalCount == 0 ? 0.0 : checkedInCount / totalCount;
     final next = nextStop;
     final isLate = delay >= _onTimeTolerance;
@@ -64,12 +70,11 @@ class TripProgressCard extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Viaje en curso · $checkedInCount/$totalCount paradas '
-                  'confirmadas',
+                  l10n.sharedTripInProgress(checkedInCount, totalCount),
                   style: AppTextStyles.bodySmall,
                 ),
               ),
-              TextButton(onPressed: onEndTrip, child: const Text('Finalizar')),
+              TextButton(onPressed: onEndTrip, child: Text(l10n.sharedEndTrip)),
             ],
           ),
           const SizedBox(height: 8),
@@ -84,14 +89,13 @@ class TripProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (next == null)
-            Text(
-              'Ya pasaste por todas las paradas. Toca Finalizar para cerrar '
-              'el viaje.',
-              style: AppTextStyles.caption,
-            )
+            Text(l10n.sharedTripAllStopsDone, style: AppTextStyles.caption)
           else ...[
             Text(
-              'Siguiente: ${next.stop.name} · ${Formatters.clock(next.arrival)}',
+              l10n.sharedTripNextStop(
+                next.stop.name,
+                Formatters.clock(next.arrival),
+              ),
               style: AppTextStyles.cardTitle,
             ),
             const SizedBox(height: 2),
@@ -143,6 +147,8 @@ class TripTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ItineraryTimeline(
       itinerary: plan,
       showWarnings: false,
@@ -156,7 +162,7 @@ class TripTimeline extends StatelessWidget {
         }
         return TextButton(
           onPressed: () => onSkip(stop),
-          child: const Text('Saltar'),
+          child: Text(l10n.sharedSkip),
         );
       },
     );
@@ -168,6 +174,7 @@ TimelineStopDecoration tripStopDecoration(
   TripStopProgress progress, {
   required Duration delay,
 }) {
+  final l10n = AppStrings.current;
   return switch (progress.status) {
     TripStopStatus.done => TimelineStopDecoration(
       marker: const _Marker(
@@ -176,7 +183,7 @@ TimelineStopDecoration tripStopDecoration(
       ),
       footer: _StatusLine(
         icon: Icons.qr_code_2,
-        text: 'Llegaste a las ${Formatters.clock(progress.checkedInAt!)}',
+        text: l10n.sharedTripArrivedAt(Formatters.clock(progress.checkedInAt!)),
         color: AppColors.accentSecondaryGreen,
       ),
     ),
@@ -185,14 +192,14 @@ TimelineStopDecoration tripStopDecoration(
       dimmed: true,
       footer: _StatusLine(
         icon: Icons.not_interested,
-        text: 'Saltada · ${progress.skipReason?.label ?? ''}',
+        text: l10n.sharedTripSkippedReason(progress.skipReason?.label ?? ''),
         color: AppColors.secondaryText,
       ),
     ),
     TripStopStatus.next => TimelineStopDecoration(
       footer: _StatusLine(
         icon: Icons.near_me_outlined,
-        text: 'Siguiente · ${delayLabel(delay).toLowerCase()}',
+        text: l10n.sharedTripNextDelay(delayLabel(delay).toLowerCase()),
         color: AppColors.primary30,
       ),
     ),
@@ -263,7 +270,7 @@ Future<_TripConflictChoice?> _showTripConflictSheet(
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Ya tienes un viaje en curso',
+                    context.l10n.sharedTripConflictTitle,
                     style: AppTextStyles.title,
                   ),
                 ),
@@ -271,8 +278,7 @@ Future<_TripConflictChoice?> _showTripConflictSheet(
             ),
             const SizedBox(height: 8),
             Text(
-              'Estás recorriendo $activeTitle. Sólo se puede seguir un '
-              'circuito a la vez: finalízalo para comenzar este.',
+              context.l10n.sharedTripConflictBody(activeTitle),
               style: AppTextStyles.bodySmall,
             ),
             const SizedBox(height: 20),
@@ -281,7 +287,7 @@ Future<_TripConflictChoice?> _showTripConflictSheet(
               child: ElevatedButton(
                 onPressed: () =>
                     Navigator.of(context).pop(_TripConflictChoice.endAndStart),
-                child: const Text('Finalizar ese y comenzar este'),
+                child: Text(context.l10n.sharedTripConflictEndAndStart),
               ),
             ),
             const SizedBox(height: 10),
@@ -294,13 +300,13 @@ Future<_TripConflictChoice?> _showTripConflictSheet(
                 ),
                 onPressed: () =>
                     Navigator.of(context).pop(_TripConflictChoice.goToActive),
-                child: const Text('Ir al viaje en curso'),
+                child: Text(context.l10n.sharedTripConflictGoToActive),
               ),
             ),
             Center(
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
+                child: Text(context.l10n.commonCancel),
               ),
             ),
           ],

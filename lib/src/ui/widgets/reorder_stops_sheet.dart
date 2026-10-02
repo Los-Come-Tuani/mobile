@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -57,6 +58,7 @@ class _ReorderStopsSheetState extends State<_ReorderStopsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.8;
 
     return SafeArea(
@@ -79,13 +81,9 @@ class _ReorderStopsSheetState extends State<_ReorderStopsSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Ordenar paradas', style: AppTextStyles.title),
+                  Text(l10n.sharedReorderTitle, style: AppTextStyles.title),
                   const SizedBox(height: 4),
-                  Text(
-                    'Arrastra cada parada a su lugar. Los horarios del '
-                    'itinerario se recalculan solos.',
-                    style: AppTextStyles.caption,
-                  ),
+                  Text(l10n.sharedReorderHint, style: AppTextStyles.caption),
                 ],
               ),
             ),
@@ -124,14 +122,14 @@ class _ReorderStopsSheetState extends State<_ReorderStopsSheet> {
                         foregroundColor: AppColors.primary30,
                       ),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancelar'),
+                      child: Text(l10n.commonCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _save,
-                      child: const Text('Guardar orden'),
+                      child: Text(l10n.sharedReorderSave),
                     ),
                   ),
                 ],
@@ -154,6 +152,8 @@ class _StopRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListTile(
       contentPadding: const EdgeInsets.only(left: 20, right: 8),
       leading: Row(
@@ -208,7 +208,7 @@ class _StopRow extends StatelessWidget {
       ),
       subtitle: Text(
         [
-          stop.category,
+          l10n.categoryName(stop.category),
           stop.duration,
         ].where((part) => part.isNotEmpty).join(' · '),
         maxLines: 1,
@@ -217,11 +217,11 @@ class _StopRow extends StatelessWidget {
       ),
       trailing: ReorderableDragStartListener(
         index: index,
-        child: const Padding(
-          padding: EdgeInsets.all(8),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
           child: Icon(
             Icons.drag_indicator,
-            semanticLabel: 'Arrastrar para cambiar el orden',
+            semanticLabel: l10n.sharedDragToReorder,
             color: AppColors.secondaryText,
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -21,8 +22,10 @@ class QrGeneratorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Código QR (demo)')),
+      appBar: AppBar(title: Text(l10n.stopDetailQrDemoTitle)),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -50,8 +53,7 @@ class QrGeneratorView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Escanéalo desde el detalle de esta parada para reclamar '
-                'su insignia.',
+                l10n.stopDetailQrDemoHint,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.bodySmall,
               ),

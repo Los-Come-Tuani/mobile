@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -97,7 +98,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   void _showError(GuideApplicationViewModel viewModel) => _showMessage(
-    viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+    viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
   );
 
   void _back() {
@@ -132,7 +133,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
       );
     } on Exception {
       if (mounted) {
-        _showMessage('No pudimos abrir tus archivos. Intenta de nuevo.');
+        _showMessage(context.l10n.guideAccessFilePickerFailed);
       }
       return;
     }
@@ -284,21 +285,22 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   Widget _identityStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Cuéntanos quién eres',
-          subtitle:
-              'Usa tus datos tal como aparecen en tu documento de identidad.',
+        GuideHeading(
+          title: l10n.guideAccessIdentityTitle,
+          subtitle: l10n.guideAccessIdentitySubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Nombre completo',
+          label: l10n.commonFullName,
           child: AppTextField(
-            hint: 'Nombre y apellidos',
+            hint: l10n.guideAccessNameHint,
             controller: _nameController,
-            validator: Validators.notEmpty('Ingresa tu nombre completo'),
+            validator: Validators.notEmpty(l10n.guideAccessNameRequired),
             textCapitalization: TextCapitalization.words,
             autofillHints: const [AutofillHints.name],
             textInputAction: TextInputAction.next,
@@ -306,7 +308,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Teléfono de contacto',
+          label: l10n.guideAccessPhoneLabel,
           child: PhoneField(
             controller: _phoneController,
             countryCode: viewModel.countryCode,
@@ -316,12 +318,10 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Correo de contacto',
+          label: l10n.guideAccessEmailLabel,
           child: AppTextField(
-            hint: 'tu@correo.com',
-            helper: viewModel.needsAccount
-                ? 'Con este correo crearás tu cuenta de K’Plan.'
-                : null,
+            hint: l10n.guideAccessEmailHint,
+            helper: viewModel.needsAccount ? l10n.guideAccessEmailHelper : null,
             controller: _emailController,
             validator: Validators.email,
             keyboardType: TextInputType.emailAddress,
@@ -331,34 +331,33 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           ),
         ),
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: _submitIdentity),
+        PrimaryButton(label: l10n.commonNext, onPressed: _submitIdentity),
       ],
     );
   }
 
   Widget _experienceStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final coverage = viewModel.coverage;
     final missingCoverage = viewModel.showCoverageError;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Dónde y cómo guías',
-          subtitle:
-              'Tu certificación define hasta dónde puedes acompañar a los '
-              'viajeros.',
+        GuideHeading(
+          title: l10n.guideAccessExperienceTitle,
+          subtitle: l10n.guideAccessExperienceSubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Tipo de guía',
-          error: missingCoverage ? 'Elige qué tipo de guía eres' : null,
+          label: l10n.guideAccessCoverageLabel,
+          error: missingCoverage ? l10n.guideAccessCoverageError : null,
           child: Column(
             children: [
               CoverageOption(
                 icon: Icons.map_outlined,
-                title: 'Nacional',
-                subtitle: 'Puedes guiar en todo el territorio nicaragüense.',
+                title: l10n.guideAccessCoverageNationalTitle,
+                subtitle: l10n.guideAccessCoverageNationalSubtitle,
                 selected: coverage == GuideCoverage.national,
                 hasError: missingCoverage,
                 onTap: () => viewModel.setCoverage(GuideCoverage.national),
@@ -366,9 +365,8 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
               const SizedBox(height: 12),
               CoverageOption(
                 icon: Icons.location_city_outlined,
-                title: 'Local',
-                subtitle:
-                    'Solo puedes guiar en la ciudad donde estás certificado.',
+                title: l10n.guideAccessCoverageLocalTitle,
+                subtitle: l10n.guideAccessCoverageLocalSubtitle,
                 selected: coverage == GuideCoverage.local,
                 hasError: missingCoverage,
                 onTap: () => viewModel.setCoverage(GuideCoverage.local),
@@ -386,16 +384,18 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
               ? Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: LabeledField(
-                    label: 'Ciudad donde estás certificado',
+                    label: l10n.guideAccessCityLabel,
                     child: DropdownButtonFormField<String>(
                       initialValue: viewModel.certifiedCity,
                       isExpanded: true,
                       dropdownColor: AppColors.fieldFill,
                       borderRadius: BorderRadius.circular(AppTheme.radius),
-                      hint: Text('Elige una ciudad', style: AppTextStyles.hint),
+                      hint: Text(
+                        l10n.guideAccessCityHint,
+                        style: AppTextStyles.hint,
+                      ),
                       decoration: InputDecoration(
-                        helperText:
-                            'Solo podrás guiar recorridos en esta ciudad.',
+                        helperText: l10n.guideAccessCityHelper,
                         helperStyle: AppTextStyles.caption,
                       ),
                       items: [
@@ -403,9 +403,8 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
                           DropdownMenuItem(value: city, child: Text(city)),
                       ],
                       onChanged: viewModel.setCertifiedCity,
-                      validator: (city) => city == null
-                          ? 'Elige la ciudad donde estás certificado'
-                          : null,
+                      validator: (city) =>
+                          city == null ? l10n.guideAccessCityError : null,
                     ),
                   ),
                 )
@@ -413,9 +412,9 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Idiomas',
+          label: l10n.guideAccessLanguagesLabel,
           error: viewModel.showLanguageError
-              ? 'Elige al menos un idioma'
+              ? l10n.guideAccessLanguagesError
               : null,
           child: Wrap(
             spacing: 8,
@@ -423,7 +422,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
             children: [
               for (final language in GuideApplicationViewModel.languageOptions)
                 AppChoiceChip(
-                  label: language,
+                  label: l10n.languageName(language),
                   selected: viewModel.selectedLanguages.contains(language),
                   onSelected: () => viewModel.toggleLanguage(language),
                 ),
@@ -432,11 +431,11 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Experiencia como guía',
+          label: l10n.guideAccessExperienceLabel,
           child: AppTextField(
-            hint: 'Ej.: 3 años en recorridos culturales',
+            hint: l10n.guideAccessExperienceHint,
             controller: _experienceController,
-            validator: Validators.notEmpty('Cuéntanos tu experiencia'),
+            validator: Validators.notEmpty(l10n.guideAccessExperienceRequired),
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
             textCapitalization: TextCapitalization.sentences,
@@ -445,44 +444,41 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           ),
         ),
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: _submitExperience),
+        PrimaryButton(label: l10n.commonNext, onPressed: _submitExperience),
       ],
     );
   }
 
   Widget _documentsStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final identity = viewModel.identityDocument;
     final intur = viewModel.inturCredential;
     final missing = viewModel.showMissingDocuments;
     final subtitle = switch ((identity, intur)) {
-      (null, null) =>
-        'Adjunta archivos legibles. El equipo revisará su vigencia y '
-            'correspondencia.',
-      (_?, null) => 'Tu documento está adjunto. Falta la credencial INTUR.',
-      (null, _?) =>
-        'Tu credencial está adjunta. Falta el documento de identidad.',
-      _ => 'Tus documentos están listos para revisión.',
+      (null, null) => l10n.guideAccessDocumentsSubtitleNone,
+      (_?, null) => l10n.guideAccessDocumentsSubtitleMissingIntur,
+      (null, _?) => l10n.guideAccessDocumentsSubtitleMissingIdentity,
+      _ => l10n.guideAccessDocumentsSubtitleReady,
     };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GuideHeading(title: 'Documentos requeridos', subtitle: subtitle),
+        GuideHeading(title: l10n.guideAccessDocumentsTitle, subtitle: subtitle),
         if (missing) ...[
           const SizedBox(height: 20),
           InlineNotice(
             tone: NoticeTone.error,
             message: switch ((identity, intur)) {
-              (null, null) =>
-                'Adjunta tu documento de identidad y tu credencial INTUR.',
-              (null, _) => 'Adjunta tu documento de identidad para continuar.',
-              _ => 'Adjunta tu credencial INTUR para continuar.',
+              (null, null) => l10n.guideAccessDocumentsMissingBoth,
+              (null, _) => l10n.guideAccessDocumentsMissingIdentity,
+              _ => l10n.guideAccessDocumentsMissingIntur,
             },
           ),
         ],
         const SizedBox(height: 24),
         DocumentSlot(
-          title: 'Documento de identidad',
+          title: l10n.guideAccessIdentityDocumentTitle,
           files: [?identity],
           canAttach: identity == null,
           hasError: missing && identity == null,
@@ -491,12 +487,12 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         DocumentSlot(
-          title: 'Credencial INTUR',
+          title: l10n.guideAccessInturTitle,
           description: switch (viewModel.coverage) {
-            GuideCoverage.local =>
-              'Debe indicar que eres guía local de '
-                  '${viewModel.certifiedCity}.',
-            _ => 'Debe indicar que eres guía nacional.',
+            GuideCoverage.local => l10n.guideAccessInturDescriptionLocal(
+              viewModel.certifiedCity ?? '',
+            ),
+            _ => l10n.guideAccessInturDescriptionNational,
           },
           files: [?intur],
           canAttach: intur == null,
@@ -505,98 +501,101 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           onRemove: (_) => viewModel.removeInturCredential(),
         ),
         const SizedBox(height: 16),
-        const InlineNotice(
-          message:
-              'Solo el equipo de revisión tendrá acceso a estos documentos.',
-        ),
+        InlineNotice(message: l10n.guideAccessDocumentsPrivacyNotice),
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: viewModel.submitDocuments),
+        PrimaryButton(
+          label: l10n.commonNext,
+          onPressed: viewModel.submitDocuments,
+        ),
       ],
     );
   }
 
   Widget _trainingStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final certificates = viewModel.certificates;
-    final subtitle = switch (certificates.length) {
-      0 =>
-        'Añade formación relevante para tus servicios. Este paso es opcional.',
-      1 => 'Este archivo se revisará junto con tu solicitud.',
-      _ => 'Estos archivos se revisarán junto con tu solicitud.',
-    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GuideHeading(title: 'Tu formación adicional', subtitle: subtitle),
+        GuideHeading(
+          title: l10n.guideAccessTrainingTitle,
+          subtitle: l10n.guideAccessTrainingSubtitle(certificates.length),
+        ),
         const SizedBox(height: 24),
         DocumentSlot(
-          title: 'Certificaciones adicionales · Opcional',
+          title: l10n.guideAccessCertificatesTitle,
           files: certificates,
           canAttach: viewModel.canAddCertificate,
           attachLabel: certificates.isEmpty
-              ? 'Adjuntar archivo'
-              : 'Adjuntar otro archivo',
+              ? l10n.guideAccessAttachFile
+              : l10n.guideAccessAttachAnotherFile,
           onAttach: () => _pickFile(viewModel.addCertificate),
           onRemove: viewModel.removeCertificate,
         ),
         if (certificates.isEmpty) ...[
           const SizedBox(height: 20),
-          Text('Por ejemplo', style: AppTextStyles.sectionLabel),
-          const SizedBox(height: 4),
           Text(
-            'Primeros auxilios, idiomas o interpretación del patrimonio.',
-            style: _bodyInk,
+            l10n.guideAccessTrainingExampleLabel,
+            style: AppTextStyles.sectionLabel,
           ),
+          const SizedBox(height: 4),
+          Text(l10n.guideAccessTrainingExamples, style: _bodyInk),
         ],
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: viewModel.submitTraining),
+        PrimaryButton(
+          label: l10n.commonNext,
+          onPressed: viewModel.submitTraining,
+        ),
       ],
     );
   }
 
   Widget _reviewStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final certificates = viewModel.certificates;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Revisa tu postulación',
-          subtitle: 'Confirma tu información antes de enviarla.',
+        GuideHeading(
+          title: l10n.guideAccessReviewTitle,
+          subtitle: l10n.guideAccessReviewSubtitle,
         ),
         const SizedBox(height: 24),
         _ReviewSection(
-          label: 'Identidad y contacto',
+          label: l10n.guideAccessReviewIdentity,
           lines: [viewModel.fullName, viewModel.phone, viewModel.contactEmail],
         ),
         const SizedBox(height: 16),
         _ReviewSection(
-          label: 'Servicios',
+          label: l10n.guideAccessReviewServices,
           lines: [
             viewModel.coverageSummary,
-            viewModel.selectedLanguages.join(' · '),
+            [
+              for (final language in viewModel.selectedLanguages)
+                l10n.languageName(language),
+            ].join(' · '),
             viewModel.experience,
           ],
         ),
         const SizedBox(height: 16),
         _ReviewSection(
-          label: 'Documentos adjuntos · Por verificar',
+          label: l10n.guideAccessReviewDocuments,
           lines: [
             ?viewModel.identityDocument?.name,
             ?viewModel.inturCredential?.name,
             if (certificates.isEmpty)
-              'Sin certificaciones adicionales'
+              l10n.guideAccessReviewNoCertificates
             else
               for (final certificate in certificates) certificate.name,
           ],
         ),
         const SizedBox(height: 24),
         if (viewModel.showConsentError) ...[
-          const InlineNotice(
+          InlineNotice(
             tone: NoticeTone.error,
-            message:
-                'Autoriza la revisión de tus documentos para enviar la '
-                'solicitud.',
+            message: l10n.guideAccessConsentError,
           ),
           const SizedBox(height: 8),
         ],
@@ -608,21 +607,17 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           isError: viewModel.showConsentError,
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          title: Text(
-            'Autorizo al equipo de K’Plan a revisar mi información y '
-            'documentación para evaluar esta solicitud.',
-            style: _bodyInk,
-          ),
+          title: Text(l10n.guideAccessConsentLabel, style: _bodyInk),
         ),
         const SizedBox(height: 28),
         PrimaryButton(
-          label: 'Enviar solicitud',
+          label: l10n.guideAccessSendRequest,
           isLoading: viewModel.isBusy,
           onPressed: _sendApplication,
         ),
         const SizedBox(height: 16),
         SecondaryButton(
-          label: 'Volver y revisar documentos',
+          label: l10n.guideAccessBackToDocuments,
           onPressed: viewModel.isBusy ? null : viewModel.reviewDocuments,
         ),
       ],
@@ -630,24 +625,19 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   Widget _codeStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final isBusy = viewModel.isBusy;
     final email = viewModel.contactEmail;
     final (tone, message) = viewModel.codeRejected
-        ? (
-            NoticeTone.error,
-            'El código no es válido o venció. Revísalo o pide uno nuevo.',
-          )
+        ? (NoticeTone.error, l10n.guideAccessCodeRejected)
         : viewModel.codeResent
-        ? (
-            NoticeTone.info,
-            'Enviamos un nuevo código a $email. Usa el más reciente.',
-          )
-        : (NoticeTone.info, 'Enviamos un código de 6 dígitos a $email.');
+        ? (NoticeTone.info, l10n.guideAccessCodeResent(email))
+        : (NoticeTone.info, l10n.guideAccessCodeSent(email));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(title: 'Ingresa el código de verificación'),
+        GuideHeading(title: l10n.guideAccessCodeTitle),
         const SizedBox(height: 20),
         Center(
           child: SvgPicture.asset(
@@ -668,7 +658,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ListenableBuilder(
           listenable: _codeController,
           builder: (context, _) => PrimaryButton(
-            label: 'Verificar',
+            label: l10n.guideAccessVerify,
             isLoading: isBusy,
             onPressed: _codeController.text.length == 6 ? _verifyCode : null,
           ),
@@ -677,7 +667,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         Center(
           child: TextButton(
             onPressed: isBusy ? null : _resendCode,
-            child: Text('Reenviar código', style: AppTextStyles.link),
+            child: Text(l10n.guideAccessResendCode, style: AppTextStyles.link),
           ),
         ),
       ],
@@ -685,22 +675,22 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   Widget _passwordStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     final isBusy = viewModel.isBusy;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Protege tu cuenta',
-          subtitle:
-              'Tu correo está verificado. Crea una contraseña para tu cuenta.',
+        GuideHeading(
+          title: l10n.guideAccessPasswordTitle,
+          subtitle: l10n.guideAccessPasswordSubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Contraseña',
+          label: l10n.commonPassword,
           child: AppTextField(
-            hint: 'Ingresa tu contraseña',
-            helper: 'Usa al menos 8 caracteres con letras y números.',
+            hint: l10n.guideAccessPasswordHint,
+            helper: l10n.guideAccessPasswordHelper,
             controller: _passwordController,
             validator: Validators.newPassword,
             isPassword: true,
@@ -711,13 +701,13 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Confirma tu contraseña',
+          label: l10n.guideAccessConfirmPasswordLabel,
           child: AppTextField(
-            hint: 'Repite tu contraseña',
+            hint: l10n.guideAccessConfirmPasswordHint,
             controller: _confirmController,
             validator: (value) => value == _passwordController.text
                 ? null
-                : 'Las contraseñas no coinciden',
+                : l10n.guideAccessPasswordMismatch,
             isPassword: true,
             enabled: !isBusy,
             textInputAction: TextInputAction.done,
@@ -726,7 +716,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 28),
         PrimaryButton(
-          label: 'Crear cuenta',
+          label: l10n.commonCreateAccount,
           isLoading: isBusy,
           onPressed: _createAccount,
         ),

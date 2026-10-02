@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
@@ -95,8 +96,11 @@ class GuideApplicationViewModel extends BaseViewModel {
 
   /// Como se muestra en la revisión: "Guía local · Granada".
   String get coverageSummary => switch (_coverage) {
-    GuideCoverage.national => 'Guía nacional · Todo el territorio nicaragüense',
-    GuideCoverage.local => 'Guía local · ${_certifiedCity ?? ''}',
+    GuideCoverage.national =>
+      AppStrings.current.guideAccessCoverageSummaryNational,
+    GuideCoverage.local => AppStrings.current.guideAccessCoverageSummaryLocal(
+      _certifiedCity ?? '',
+    ),
     null => '',
   };
 
@@ -158,10 +162,10 @@ class GuideApplicationViewModel extends BaseViewModel {
     final dot = name.lastIndexOf('.');
     final extension = dot < 0 ? '' : name.substring(dot + 1).toLowerCase();
     if (!allowedExtensions.contains(extension)) {
-      return 'Adjunta un archivo PDF, JPG o PNG.';
+      return AppStrings.current.guideAccessFileTypeProblem;
     }
     if (sizeBytes != null && sizeBytes > maxFileBytes) {
-      return 'El archivo pesa más de 10 MB. Elige uno más liviano.';
+      return AppStrings.current.guideAccessFileSizeProblem;
     }
     return null;
   }

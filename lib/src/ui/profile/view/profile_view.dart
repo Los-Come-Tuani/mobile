@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -19,11 +20,12 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<ProfileViewModel>();
     final user = viewModel.user;
 
     return Scaffold(
-      appBar: const BrandAppBar(title: 'Mi perfil'),
+      appBar: BrandAppBar(title: l10n.profileTitle),
       bottomNavigationBar: const AppBottomNav(
         currentIndex: AppBottomNav.profile,
       ),
@@ -39,7 +41,7 @@ class ProfileView extends StatelessWidget {
                 Expanded(
                   child: _StatItem(
                     value: viewModel.myCircuitsCount,
-                    label: 'Mis viajes',
+                    label: l10n.commonMyTrips,
                     onTap: () => context.push(Routes.myTrips),
                   ),
                 ),
@@ -47,7 +49,7 @@ class ProfileView extends StatelessWidget {
                 Expanded(
                   child: _StatItem(
                     value: viewModel.badgesCount,
-                    label: 'Insignias',
+                    label: l10n.profileStatBadges,
                     onTap: () => context.push(Routes.medals),
                   ),
                 ),
@@ -55,7 +57,7 @@ class ProfileView extends StatelessWidget {
                 Expanded(
                   child: _StatItem(
                     value: viewModel.savedCount,
-                    label: 'Guardados',
+                    label: l10n.commonSaved,
                     onTap: () => context.push(Routes.saved),
                   ),
                 ),
@@ -64,43 +66,43 @@ class ProfileView extends StatelessWidget {
             const SizedBox(height: 16),
             _MenuTile(
               icon: Icons.edit_outlined,
-              label: 'Datos personales',
-              subtitle: 'Nombre y datos de contacto',
+              label: l10n.profilePersonalData,
+              subtitle: l10n.profilePersonalDataSubtitle,
               onTap: () => context.push(Routes.settingsAccount),
             ),
             _MenuTile(
               icon: Icons.bookmark_border,
-              label: 'Guardados',
-              subtitle: 'Circuitos, lugares y eventos que marcaste',
+              label: l10n.commonSaved,
+              subtitle: l10n.profileSavedSubtitle,
               onTap: () => context.push(Routes.saved),
             ),
             _MenuTile(
               icon: Icons.military_tech_outlined,
-              label: 'Mis medallas',
-              subtitle: 'Recuerdos de tus recorridos',
+              label: l10n.commonMyMedals,
+              subtitle: l10n.profileMedalsSubtitle,
               onTap: () => context.push(Routes.medals),
             ),
             _MenuTile(
               icon: Icons.confirmation_number_outlined,
-              label: 'Mis cupones',
-              subtitle: 'Beneficios de negocios locales',
+              label: l10n.profileMyCoupons,
+              subtitle: l10n.profileCouponsSubtitle,
               onTap: () => context.push(Routes.coupons),
             ),
             _MenuTile(
               icon: Icons.notifications_none,
-              label: 'Notificaciones',
-              subtitle: 'Avisos de tus viajes y reservas',
+              label: l10n.commonNotifications,
+              subtitle: l10n.profileNotificationsSubtitle,
               onTap: () => context.push(Routes.settingsNotifications),
             ),
             _MenuTile(
               icon: Icons.settings_outlined,
-              label: 'Configuraciones',
-              subtitle: 'Cuenta, idioma y privacidad',
+              label: l10n.commonSettings,
+              subtitle: l10n.profileSettingsSubtitle,
               onTap: () => context.push(Routes.settings),
             ),
             const SizedBox(height: 4),
             SoftButton(
-              label: 'Cerrar sesión',
+              label: l10n.commonLogout,
               onPressed: () => showLogoutSheet(context),
             ),
           ],
@@ -126,7 +128,9 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = (name == null || name!.isEmpty) ? 'Invitado' : name!;
+    final displayName = (name == null || name!.isEmpty)
+        ? context.l10n.profileGuestName
+        : name!;
 
     return SizedBox(
       height: 80,

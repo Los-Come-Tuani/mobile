@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 
 /// Cliente HTTP único de la app.
@@ -55,14 +56,13 @@ class ApiClient {
 
   /// Mensaje legible para el usuario a partir de un error de red.
   static String describeError(DioException e) {
+    final l10n = AppStrings.current;
     return switch (e.type) {
-      DioExceptionType.connectionError => 'No hay conexión a internet',
-      DioExceptionType.connectionTimeout => 'Tiempo de conexión agotado',
-      DioExceptionType.receiveTimeout =>
-        'El servidor tardó demasiado en responder',
-      _ when e.response?.statusCode == 401 =>
-        'Sesión expirada, vuelve a iniciar sesión',
-      _ => 'Ocurrió un error de comunicación con el servidor',
+      DioExceptionType.connectionError => l10n.repoNetworkNoConnection,
+      DioExceptionType.connectionTimeout => l10n.repoNetworkConnectionTimeout,
+      DioExceptionType.receiveTimeout => l10n.repoNetworkServerTimeout,
+      _ when e.response?.statusCode == 401 => l10n.repoNetworkSessionExpired,
+      _ => l10n.repoNetworkCommunicationError,
     };
   }
 

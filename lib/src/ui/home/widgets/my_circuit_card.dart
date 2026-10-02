@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/circuit_collection.dart';
@@ -47,8 +48,7 @@ class MyCircuitCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${collection.stopCount} '
-              '${collection.stopCount == 1 ? 'parada' : 'paradas'}',
+              context.l10n.homeStopCount(collection.stopCount),
               style: AppTextStyles.caption,
             ),
           ],

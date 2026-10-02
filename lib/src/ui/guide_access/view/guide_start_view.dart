@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -23,14 +24,15 @@ import '../widgets/guide_heading.dart';
 class GuideStartView extends StatelessWidget {
   const GuideStartView({super.key});
 
-  static const _checklist = [
-    'Documento de identidad',
-    'Credencial INTUR',
-    'Certificaciones adicionales (opcionales)',
+  static List<String> _checklist(AppLocalizations l10n) => [
+    l10n.guideAccessIdentityDocumentTitle,
+    l10n.guideAccessInturTitle,
+    l10n.guideAccessStartChecklistCertificates,
   ];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLoggedIn = context.select<AuthRepository, bool>(
       (auth) => auth.isLoggedIn,
     );
@@ -52,21 +54,19 @@ class GuideStartView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const GuideHeading(
-                title: 'Comparte tu territorio',
-                subtitle:
-                    'Puedes postularte para ofrecer tus servicios como guía.',
+              GuideHeading(
+                title: l10n.guideAccessStartTitle,
+                subtitle: l10n.guideAccessStartSubtitle,
               ),
               const SizedBox(height: 20),
-              const InlineNotice(
-                message:
-                    'El equipo de K’Plan revisará tu información antes de '
-                    'habilitar tu acceso.',
-              ),
+              InlineNotice(message: l10n.guideAccessStartNotice),
               const SizedBox(height: 24),
-              Text('Ten a mano', style: AppTextStyles.sectionLabel),
+              Text(
+                l10n.guideAccessStartChecklistLabel,
+                style: AppTextStyles.sectionLabel,
+              ),
               const SizedBox(height: 4),
-              for (final item in _checklist)
+              for (final item in _checklist(l10n))
                 Text(
                   item,
                   style: AppTextStyles.bodySmall.copyWith(
@@ -76,12 +76,12 @@ class GuideStartView extends StatelessWidget {
                 ),
               const SizedBox(height: 40),
               PrimaryButton(
-                label: 'Postularme',
+                label: l10n.guideAccessStartApply,
                 onPressed: () => context.push(Routes.guideApplication),
               ),
               const SizedBox(height: 16),
               SecondaryButton(
-                label: 'Continuar como turista',
+                label: l10n.guideAccessStartContinueAsTourist,
                 onPressed: () =>
                     context.go(isLoggedIn ? Routes.home : Routes.login),
               ),

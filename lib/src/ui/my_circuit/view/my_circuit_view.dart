@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -47,10 +48,11 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   /// Pregunta la razón antes de quitarla: es lo que el portal le muestra al
   /// lugar.
   Future<void> _removeStop(String stopId, String stopName) async {
+    final l10n = context.l10n;
     final viewModel = context.read<MyCircuitViewModel>();
     final reason = await showDropReasonSheet(
       context,
-      title: '¿Por qué quitas $stopName?',
+      title: l10n.myCircuitRemoveWhy(stopName),
     );
     if (reason == null || !mounted) return;
 
@@ -59,9 +61,9 @@ class _MyCircuitViewState extends State<MyCircuitView> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text('$stopName se quitó del circuito'),
+          content: Text(l10n.myCircuitRemoved(stopName)),
           action: SnackBarAction(
-            label: 'Deshacer',
+            label: l10n.myCircuitUndo,
             textColor: AppColors.primary10,
             onPressed: () => viewModel.restoreStop(removal),
           ),
@@ -77,11 +79,12 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   /// Empieza a seguir el itinerario en el orden en que está (recalculado
   /// desde ahora) y abre el mapa del viaje.
   Future<void> _startTrip() async {
+    final l10n = context.l10n;
     final viewModel = context.read<MyCircuitViewModel>();
     if (!await startTripChecked(context, viewModel) || !mounted) return;
 
     if (viewModel.nextTripStop case final first?) {
-      _notify('¡Viaje iniciado! Dirígete a ${first.stop.name}');
+      _notify(l10n.myCircuitTripStarted(first.stop.name));
     }
     _openMap();
   }
@@ -90,7 +93,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     final viewModel = context.read<MyCircuitViewModel>();
     final picked = await showOptionsSheet(
       context,
-      title: 'Hora de salida',
+      title: context.l10n.myCircuitDepartureTime,
       options: viewModel.startTimes,
       selected: viewModel.startTime,
     );
@@ -101,7 +104,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     final viewModel = context.read<MyCircuitViewModel>();
     final picked = await showOptionsSheet(
       context,
-      title: '¿Cómo te vas a mover?',
+      title: context.l10n.myCircuitTravelQuestion,
       options: [for (final mode in TravelMode.values) mode.label],
       selected: viewModel.travelMode.label,
     );
@@ -113,13 +116,14 @@ class _MyCircuitViewState extends State<MyCircuitView> {
 
   /// Elige a qué hora llegar a una parada; en la primera, a qué hora sale.
   Future<void> _pickArrival(int index, ItineraryStop stop) async {
+    final l10n = context.l10n;
     final current = stop.fixedArrival ?? stop.arrival;
     final picked = await showAppTimePicker(
       context,
       initialTime: TimeOfDay.fromDateTime(current),
       helpText: index == 0
-          ? 'Hora de salida'
-          : 'Hora de llegada a ${stop.stop.name}',
+          ? l10n.myCircuitDepartureTime
+          : l10n.myCircuitArrivalAt(stop.stop.name),
     );
     if (picked == null || !mounted) return;
     context.read<MyCircuitViewModel>().setArrival(
@@ -132,9 +136,10 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   Widget? _fixedTimeNote(int index, ItineraryStop stop) {
     final fixed = stop.fixedArrival;
     if (fixed == null) return null;
+    final l10n = context.l10n;
     final text = stop.missesFixedArrival
-        ? 'Querías llegar a las ${Formatters.clock(fixed)}'
-        : 'Hora fija';
+        ? l10n.myCircuitMissedFixedTime(Formatters.clock(fixed))
+        : l10n.myCircuitFixedTime;
 
     return Row(
       children: [
@@ -159,7 +164,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
           ),
           onPressed: () =>
               context.read<MyCircuitViewModel>().clearArrival(index),
-          child: const Text('Quitar'),
+          child: Text(l10n.myCircuitFixedTimeRemove),
         ),
       ],
     );
@@ -168,13 +173,14 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   Future<void> _skipStop(ItineraryStop stop) async {
     final reason = await showDropReasonSheet(
       context,
-      title: '¿Por qué saltas ${stop.stop.name}?',
+      title: context.l10n.myCircuitSkipWhy(stop.stop.name),
     );
     if (reason == null || !mounted) return;
     context.read<MyCircuitViewModel>().skipStop(stop.stop.id, reason);
   }
 
   Future<void> _endTrip() async {
+    final l10n = context.l10n;
     final viewModel = context.read<MyCircuitViewModel>();
     final reasons = await askTripEndReasons(
       context,
@@ -183,11 +189,12 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     if (reasons == null || !mounted) return;
 
     viewModel.endTrip(reasons);
-    _notify('Viaje finalizado');
+    _notify(l10n.myCircuitTripEnded);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<MyCircuitViewModel>();
     final collection = viewModel.collection;
     final stops = viewModel.stops;
@@ -198,16 +205,16 @@ class _MyCircuitViewState extends State<MyCircuitView> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
-        title: Text(collection?.title ?? 'Mis circuitos'),
+        title: Text(collection?.title ?? l10n.commonMyCircuits),
         actions: [
           if (stops.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.map_outlined),
-              tooltip: 'Ver en el mapa',
+              tooltip: l10n.commonSeeOnMap,
               onPressed: _openMap,
             ),
         ],
@@ -221,7 +228,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
                 Text(
-                  '${stops.length} ${stops.length == 1 ? 'parada' : 'paradas'}',
+                  l10n.homeStopCount(stops.length),
                   style: AppTextStyles.caption,
                 ),
                 const SizedBox(height: 16),
@@ -235,7 +242,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                   ),
                   const SizedBox(height: 20),
                   if (tripPlan != null) ...[
-                    const SectionHeader(title: 'Tu recorrido de hoy'),
+                    SectionHeader(title: l10n.myCircuitTodayRoute),
                     const SizedBox(height: 10),
                     TripTimeline(
                       plan: tripPlan,
@@ -249,7 +256,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                 ] else ...[
                   if (stops.isNotEmpty) ...[
                     PrimaryButton(
-                      label: 'Agendar circuito',
+                      label: l10n.myCircuitSchedule,
                       icon: Icons.calendar_month_outlined,
                       onPressed: () => context.push(
                         Routes.myCircuitBookingPath(viewModel.collectionId),
@@ -257,8 +264,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Como lo armaste tú, puedes publicar una propuesta para '
-                      'que guías o traductores se postulen.',
+                      l10n.myCircuitProposalNote,
                       style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 12),
@@ -269,7 +275,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                       ),
                       onPressed: _startTrip,
                       icon: const Icon(Icons.explore_outlined),
-                      label: const Text('Comenzar viaje'),
+                      label: Text(l10n.myCircuitStartTrip),
                     ),
                     const SizedBox(height: 16),
                     _AssistantPromo(
@@ -278,21 +284,21 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Tu día', style: AppTextStyles.title),
+                    Text(l10n.myCircuitYourDay, style: AppTextStyles.title),
                     const SizedBox(height: 10),
                     BookingCard(
                       children: [
                         BookingFieldRow(
                           icon: Icons.schedule,
-                          label: 'Hora de salida',
-                          value: viewModel.startTime,
+                          label: l10n.myCircuitDepartureTime,
+                          value: Formatters.timeText(viewModel.startTime),
                           onTap: _pickStartTime,
                         ),
                         BookingFieldRow(
                           icon: viewModel.travelMode == TravelMode.walking
                               ? Icons.directions_walk
                               : Icons.directions_car_outlined,
-                          label: 'Transporte',
+                          label: l10n.myCircuitTransport,
                           value: viewModel.travelMode.label,
                           showDivider: false,
                           onTap: _pickTravelMode,
@@ -304,13 +310,12 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                   if (itinerary == null)
                     const _EmptyState()
                   else ...[
-                    const SectionHeader(title: 'Paradas del recorrido'),
+                    SectionHeader(title: l10n.myCircuitStopsHeader),
                     const SizedBox(height: 4),
                     Text(
                       viewModel.canReorderStops
-                          ? 'Toca la hora de una parada para cambiarla y '
-                                'arrástrala para cambiar el orden.'
-                          : 'Toca la hora de una parada para cambiarla.',
+                          ? l10n.myCircuitReorderHint
+                          : l10n.myCircuitTimeHint,
                       style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 10),
@@ -328,7 +333,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                       trailingBuilder: (stop) => IconButton(
                         icon: const Icon(Icons.close, size: 18),
                         color: AppColors.secondaryText,
-                        tooltip: 'Quitar del circuito',
+                        tooltip: l10n.myCircuitRemoveTooltip,
                         onPressed: () =>
                             _removeStop(stop.stop.id, stop.stop.name),
                       ),
@@ -350,6 +355,8 @@ class _AssistantPromo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Material(
       color: AppColors.primary30.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(AppTheme.radius),
@@ -366,13 +373,9 @@ class _AssistantPromo extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Organizar con IA', style: AppTextStyles.cardTitle),
+                    Text(l10n.myCircuitAiTitle, style: AppTextStyles.cardTitle),
                     const SizedBox(height: 2),
-                    Text(
-                      'Te pregunta cómo quieres tu día, calcula los traslados '
-                      'y te sugiere qué quitar o agregar.',
-                      style: AppTextStyles.caption,
-                    ),
+                    Text(l10n.myCircuitAiMessage, style: AppTextStyles.caption),
                   ],
                 ),
               ),
@@ -397,7 +400,7 @@ class _EmptyState extends StatelessWidget {
           const Icon(Icons.route_outlined, size: 44, color: AppColors.hintText),
           const SizedBox(height: 12),
           Text(
-            'Este circuito todavía no tiene paradas',
+            context.l10n.myCircuitEmpty,
             textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall,
           ),

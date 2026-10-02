@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../router/routes.dart';
@@ -13,14 +14,14 @@ class DataUsageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SettingsPage(
-      title: 'Uso de tus datos',
-      heading: 'Tú decides qué compartir',
+      title: l10n.settingsDataUsageTitle,
+      heading: l10n.settingsDataUsageHeading,
       children: [
         Text(
-          'La ubicación sirve para mostrarte en el mapa durante un recorrido; '
-          'puedes apagarla en Privacidad. Tu correo y tu nombre se usan para '
-          'gestionar tu cuenta y tus reservas.',
+          l10n.settingsDataUsageBody,
           style: AppTextStyles.body.copyWith(fontSize: 14, height: 1.5),
         ),
         const SizedBox(height: 24),
@@ -33,7 +34,7 @@ class DataUsageView extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Tus derechos',
+              l10n.settingsDataUsageRightsTitle,
               style: AppTextStyles.body.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -46,14 +47,13 @@ class DataUsageView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 28),
           child: Text(
-            'Puedes pedir una copia de tus datos o que los borremos '
-            'escribiéndole al equipo de soporte.',
+            l10n.settingsDataUsageRightsBody,
             style: AppTextStyles.caption,
           ),
         ),
         const SizedBox(height: 24),
         SoftButton(
-          label: 'Escribir a soporte',
+          label: l10n.settingsDataUsageWriteSupport,
           onPressed: () => context.push(Routes.settingsSupport),
         ),
       ],

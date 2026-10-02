@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -47,7 +48,8 @@ class _EventDetailViewState extends State<EventDetailView> {
           : event == null
           ? _ErrorState(
               message:
-                  viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+                  viewModel.errorMessage ??
+                  context.l10n.commonSomethingWentWrong,
             )
           : _EventContent(event: event),
     );
@@ -73,6 +75,7 @@ class _EventContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final topInset = MediaQuery.paddingOf(context).top;
 
     return ListView(
@@ -89,7 +92,7 @@ class _EventContent extends StatelessWidget {
                 children: [
                   CircleIconButton(
                     icon: Icons.arrow_back,
-                    tooltip: 'Regresar',
+                    tooltip: l10n.commonBack,
                     onPressed: () => context.canPop()
                         ? context.pop()
                         : context.go(Routes.home),
@@ -97,7 +100,7 @@ class _EventContent extends StatelessWidget {
                   const Spacer(),
                   CircleIconButton(
                     icon: Icons.more_vert,
-                    tooltip: 'Más opciones',
+                    tooltip: l10n.stopDetailMoreOptions,
                     onPressed: () => _openOptions(context),
                   ),
                 ],
@@ -114,7 +117,7 @@ class _EventContent extends StatelessWidget {
               right: 16,
               child: CircleIconButton(
                 icon: Icons.location_on,
-                tooltip: 'Ver en el mapa',
+                tooltip: l10n.commonSeeOnMap,
                 color: AppColors.primary30,
                 size: 44,
                 onPressed: () => _openMap(context),
@@ -152,7 +155,7 @@ class _EventContent extends StatelessWidget {
                 child: IconLabel(
                   icon: Icons.sell_outlined,
                   label: event.price <= 0
-                      ? 'Entrada libre'
+                      ? l10n.eventDetailFreeEntry
                       : Formatters.currency(event.price),
                   color: AppColors.primaryText,
                   iconColor: AppColors.star,
@@ -200,7 +203,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.go(Routes.home),
-                child: const Text('Volver al inicio'),
+                child: Text(context.l10n.commonBackToHome),
               ),
             ],
           ),

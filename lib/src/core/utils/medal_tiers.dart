@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/l10n.dart';
 import '../theme/app_colors.dart';
 
 /// Nivel de medalla según insignias acumuladas (histórico, no el saldo).
 enum MedalTier {
-  none('Sin medalla', AppColors.medalNone),
-  bronze('Bronce', AppColors.medalBronze),
-  silver('Plata', AppColors.medalSilver),
-  gold('Oro', AppColors.medalGold);
+  none(AppColors.medalNone),
+  bronze(AppColors.medalBronze),
+  silver(AppColors.medalSilver),
+  gold(AppColors.medalGold);
 
-  const MedalTier(this.label, this.color);
+  const MedalTier(this.color);
 
-  final String label;
   final Color color;
+
+  /// "Sin medalla", "Bronce", "Plata" u "Oro", en el idioma de ahora.
+  String get label {
+    final l10n = AppStrings.current;
+    return switch (this) {
+      MedalTier.none => l10n.utilMedalNone,
+      MedalTier.bronze => l10n.utilMedalBronze,
+      MedalTier.silver => l10n.utilMedalSilver,
+      MedalTier.gold => l10n.utilMedalGold,
+    };
+  }
 }
 
 /// Umbrales de insignias para subir de medalla, tanto por categoría como

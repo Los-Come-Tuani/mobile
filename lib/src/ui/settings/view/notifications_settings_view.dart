@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/settings_repository.dart';
 import '../widgets/setting_switch.dart';
@@ -13,10 +14,11 @@ class NotificationsSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsRepository>();
+    final l10n = context.l10n;
 
     return SettingsPage(
-      title: 'Notificaciones',
-      heading: 'Mantente al tanto',
+      title: l10n.commonNotifications,
+      heading: l10n.settingsNotificationsHeading,
       children: [
         for (final topic in NotificationTopic.values)
           SettingSwitch(
@@ -26,8 +28,7 @@ class NotificationsSettingsView extends StatelessWidget {
           ),
         const SizedBox(height: 12),
         Text(
-          'El permiso para mostrar notificaciones se cambia desde la '
-          'configuración del teléfono.',
+          l10n.settingsNotificationsPermissionNote,
           style: AppTextStyles.caption,
         ),
       ],

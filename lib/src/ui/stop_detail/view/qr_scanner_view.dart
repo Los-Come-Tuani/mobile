@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/qr_codes.dart';
@@ -25,7 +26,10 @@ class QrScannerView extends StatefulWidget {
 class _QrScannerViewState extends State<QrScannerView> {
   final _controller = MobileScannerController();
   bool _handled = false;
-  String? _hint;
+
+  /// Se escaneó un código que no es de esta parada. El texto del aviso se
+  /// arma en `build` para que siga el idioma de la app.
+  bool _wrongCode = false;
 
   @override
   void dispose() {
@@ -43,18 +47,20 @@ class _QrScannerViewState extends State<QrScannerView> {
       _handled = true;
       Navigator.of(context).pop(true);
     } else {
-      setState(() => _hint = 'Ese código no es de esta parada');
+      setState(() => _wrongCode = true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: AppColors.white,
-        title: const Text('Escanear código QR'),
+        title: Text(l10n.stopDetailScanQr),
       ),
       body: Stack(
         alignment: Alignment.center,
@@ -75,10 +81,10 @@ class _QrScannerViewState extends State<QrScannerView> {
             left: 24,
             right: 24,
             child: Text(
-              _hint ?? 'Apunta la cámara al código QR de la parada',
+              _wrongCode ? l10n.stopDetailQrWrongStop : l10n.stopDetailQrAim,
               textAlign: TextAlign.center,
               style: AppTextStyles.body.copyWith(
-                color: _hint == null ? AppColors.white : AppColors.star,
+                color: _wrongCode ? AppColors.star : AppColors.white,
               ),
             ),
           ),

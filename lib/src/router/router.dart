@@ -47,6 +47,7 @@ import '../ui/guide_app/home/view/guide_home_view.dart';
 import '../ui/guide_app/home/viewmodels/guide_home_viewmodel.dart';
 import '../ui/guide_app/job/view/guide_job_view.dart';
 import '../ui/guide_app/job/viewmodels/guide_job_viewmodel.dart';
+import '../ui/guide_app/profile/view/guide_language_view.dart';
 import '../ui/guide_app/profile/view/guide_self_profile_view.dart';
 import '../ui/guide_app/tourist/view/tourist_profile_view.dart';
 import '../ui/guide_app/tourist/viewmodels/tourist_profile_viewmodel.dart';
@@ -238,6 +239,10 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.guideSelfProfile,
         builder: (context, state) => const GuideSelfProfileView(),
+      ),
+      GoRoute(
+        path: Routes.guideLanguage,
+        builder: (context, state) => const GuideLanguageView(),
       ),
       GoRoute(
         path: Routes.guideBalance,

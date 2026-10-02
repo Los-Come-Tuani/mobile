@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -36,10 +37,11 @@ class _SavedViewState extends State<SavedView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<SavedViewModel>();
 
     return Scaffold(
-      appBar: const BrandAppBar(title: 'Guardados'),
+      appBar: BrandAppBar(title: l10n.commonSaved),
       bottomNavigationBar: const AppBottomNav(
         currentIndex: AppBottomNav.profile,
       ),
@@ -52,13 +54,10 @@ class _SavedViewState extends State<SavedView> {
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
               children: [
-                Text(
-                  'Tus próximos descubrimientos',
-                  style: AppTextStyles.pageTitle,
-                ),
+                Text(l10n.savedHeadline, style: AppTextStyles.pageTitle),
                 const SizedBox(height: 16),
                 if (viewModel.savedCircuits.isNotEmpty) ...[
-                  const SectionHeader(title: 'Circuitos'),
+                  SectionHeader(title: l10n.homeTabCircuits),
                   const SizedBox(height: 10),
                   for (final circuit in viewModel.savedCircuits)
                     Padding(
@@ -73,7 +72,7 @@ class _SavedViewState extends State<SavedView> {
                   const SizedBox(height: 12),
                 ],
                 if (viewModel.savedPlaces.isNotEmpty) ...[
-                  const SectionHeader(title: 'Lugares'),
+                  SectionHeader(title: l10n.savedSectionPlaces),
                   const SizedBox(height: 10),
                   for (final place in viewModel.savedPlaces)
                     Padding(
@@ -83,7 +82,7 @@ class _SavedViewState extends State<SavedView> {
                   const SizedBox(height: 12),
                 ],
                 if (viewModel.savedStops.isNotEmpty) ...[
-                  const SectionHeader(title: 'Paradas'),
+                  SectionHeader(title: l10n.homeTabStops),
                   const SizedBox(height: 10),
                   for (var i = 0; i < viewModel.savedStops.length; i++)
                     StopListTile(
@@ -100,7 +99,7 @@ class _SavedViewState extends State<SavedView> {
                   const SizedBox(height: 12),
                 ],
                 if (viewModel.savedEvents.isNotEmpty) ...[
-                  const SectionHeader(title: 'Eventos'),
+                  SectionHeader(title: l10n.homeTabEvents),
                   const SizedBox(height: 10),
                   for (final event in viewModel.savedEvents)
                     Padding(
@@ -137,7 +136,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Todavía no guardaste nada',
+              context.l10n.savedEmpty,
               textAlign: TextAlign.center,
               style: AppTextStyles.bodySmall,
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -34,6 +35,7 @@ class _GuideTripsViewState extends State<GuideTripsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideTripsViewModel>();
     final pendingRatings = viewModel.pendingRatings;
 
@@ -62,11 +64,11 @@ class _GuideTripsViewState extends State<GuideTripsView> {
                 AppColors.primary30.withValues(alpha: 0.06),
               ),
               tabs: [
-                const Tab(text: 'Próximos', height: 44),
+                Tab(text: l10n.guideAppTripsTabUpcoming, height: 44),
                 Tab(
                   text: pendingRatings > 0
-                      ? 'Realizados · $pendingRatings por calificar'
-                      : 'Realizados',
+                      ? l10n.guideAppTripsTabDoneToRate(pendingRatings)
+                      : l10n.guideAppTripsTabDone,
                   height: 44,
                 ),
               ],
@@ -81,12 +83,10 @@ class _GuideTripsViewState extends State<GuideTripsView> {
                           viewModel: viewModel,
                           empty: GuideEmptyState(
                             icon: Icons.explore_outlined,
-                            title: 'Todavía no tienes viajes próximos',
-                            message:
-                                'Postúlate a una propuesta desde Inicio; cuando '
-                                'un turista te contrate, el viaje aparece aquí.',
+                            title: l10n.guideAppTripsEmptyUpcomingTitle,
+                            message: l10n.guideAppTripsEmptyUpcomingMessage,
                             action: SecondaryButton(
-                              label: 'Ver propuestas',
+                              label: l10n.guideAppSeeProposals,
                               onPressed: () => context.go(Routes.guideHome),
                             ),
                           ),
@@ -94,12 +94,10 @@ class _GuideTripsViewState extends State<GuideTripsView> {
                         _TripList(
                           trips: viewModel.completed,
                           viewModel: viewModel,
-                          empty: const GuideEmptyState(
+                          empty: GuideEmptyState(
                             icon: Icons.history,
-                            title: 'Aquí verás los viajes que termines',
-                            message:
-                                'Después de cada viaje podrás calificar al '
-                                'turista para ayudar a otros guías.',
+                            title: l10n.guideAppTripsEmptyDoneTitle,
+                            message: l10n.guideAppTripsEmptyDoneMessage,
                           ),
                         ),
                       ],

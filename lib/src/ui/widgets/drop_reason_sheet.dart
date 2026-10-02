@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/models/stop.dart';
 import '../../data/models/visit_event.dart';
 import 'app_choice_chip.dart';
-
-const String _whyWeAsk =
-    'Nos ayuda a mejorar los circuitos y a que cada lugar sepa qué pasó.';
 
 /// Pregunta por qué se deja una parada (al quitarla o saltarla). Devuelve
 /// `null` si el turista cierra la hoja sin elegir.
@@ -32,7 +30,7 @@ Future<DropReason?> showDropReasonSheet(
           children: [
             Text(title, style: AppTextStyles.title),
             const SizedBox(height: 4),
-            Text(_whyWeAsk, style: AppTextStyles.caption),
+            Text(context.l10n.sharedDropWhyWeAsk, style: AppTextStyles.caption),
             const SizedBox(height: 8),
             for (final reason in DropReason.values)
               ListTile(
@@ -104,6 +102,7 @@ class _TripEndSheetState extends State<_TripEndSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final count = widget.pending.length;
 
     return SafeArea(
@@ -113,17 +112,9 @@ class _TripEndSheetState extends State<_TripEndSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              count == 1
-                  ? 'Te quedó 1 parada sin visitar'
-                  : 'Te quedaron $count paradas sin visitar',
-              style: AppTextStyles.title,
-            ),
+            Text(l10n.sharedTripEndTitle(count), style: AppTextStyles.title),
             const SizedBox(height: 4),
-            Text(
-              '¿Por qué no fuiste? Es opcional. $_whyWeAsk',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.sharedTripEndSubtitle, style: AppTextStyles.caption),
             const SizedBox(height: 12),
             Flexible(
               child: ListView(
@@ -159,14 +150,14 @@ class _TripEndSheetState extends State<_TripEndSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Seguir el viaje'),
+                    child: Text(l10n.sharedContinueTrip),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(_reasons),
-                    child: const Text('Finalizar'),
+                    child: Text(l10n.sharedEndTrip),
                   ),
                 ),
               ],

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/result.dart';
 import '../../models/guide_access_request.dart';
@@ -57,6 +58,7 @@ class GuideWorkRepository extends ChangeNotifier {
   final Map<String, _Work> _byAccount = {};
   final List<Timer> _timers = [];
   int _nextWithdrawalId = 1;
+  bool _isDisposed = false;
 
   bool get isLoaded => _jobRows != null && _accountRows != null;
 
@@ -70,6 +72,65 @@ class GuideWorkRepository extends ChangeNotifier {
     _jobRows = rows[0];
     _accountRows = rows[1];
     _prepareAccount();
+    notifyListeners();
+  }
+
+  /// Vuelve a leer, en el idioma de ahora, los textos que vienen del catálogo:
+  /// el circuito de cada propuesta y viaje, los puntos de encuentro y los
+  /// mensajes de ejemplo. Lo que el guía hizo en esta sesión (postulaciones,
+  /// contrataciones, retiros, calificaciones y lo que escribió) se conserva.
+  Future<void> relocalize() async {
+    if (!isLoaded) return;
+    final rows = await Future.wait([
+      _datasource.readList('guide_jobs.json'),
+      _datasource.readList('guide_trips.json'),
+    ]);
+    if (_isDisposed) return;
+    _jobRows = rows[0];
+    _accountRows = rows[1];
+
+    final titles = {
+      for (final row in _jobRows!)
+        row['id'] as String: row['circuitTitle'] as String? ?? '',
+    };
+    // Un viaje que nació de una contratación se llama como su propuesta.
+    final hiredTitles = {
+      for (final entry in titles.entries)
+        GuideTrip.idForJob(entry.key): entry.value,
+    };
+    final seedTrips = <String, Map<String, dynamic>>{
+      for (final account in _accountRows!)
+        for (final trip in account['trips'] as List<dynamic>? ?? const [])
+          (trip as Map<String, dynamic>)['id'] as String: trip,
+    };
+    final messageTexts = <String, String>{
+      for (final trip in seedTrips.entries)
+        for (final (index, message)
+            in (trip.value['messages'] as List<dynamic>? ?? const []).indexed)
+          '${trip.key}-$index':
+              (message as Map<String, dynamic>)['text'] as String? ?? '',
+    };
+
+    for (final work in _byAccount.values) {
+      work.jobs.updateAll((id, job) => job.copyWith(circuitTitle: titles[id]));
+      for (var i = 0; i < work.trips.length; i++) {
+        final trip = work.trips[i];
+        final seed = seedTrips[trip.id];
+        work.trips[i] = trip.copyWith(
+          circuitTitle:
+              seed?['circuitTitle'] as String? ?? hiredTitles[trip.id],
+          meetingPoint: seed?['meetingPoint'] as String?,
+        );
+      }
+      final hire = work.newHire;
+      if (hire != null) {
+        work.newHire = work.trips.firstWhere(
+          (trip) => trip.id == hire.id,
+          orElse: () => hire,
+        );
+      }
+    }
+    _inbox.retext(messageTexts);
     notifyListeners();
   }
 
@@ -207,17 +268,18 @@ class GuideWorkRepository extends ChangeNotifier {
     required num price,
     required String message,
   }) async {
+    final l10n = AppStrings.current;
     final account = _account;
     final work = _current;
     final job = jobById(jobId);
     if (account == null || work == null || job == null) {
-      return const Result.failure('No encontramos esta propuesta');
+      return Result.failure(l10n.repoWorkJobNotFound);
     }
     if (job.status != GuideJobStatus.open) {
-      return const Result.failure('Ya no puedes postularte a esta propuesta');
+      return Result.failure(l10n.repoWorkJobNotOpen);
     }
     if (price <= 0) {
-      return const Result.failure('Escribe un precio mayor a cero');
+      return Result.failure(l10n.repoWorkPriceInvalid);
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 600));
@@ -252,8 +314,7 @@ class GuideWorkRepository extends ChangeNotifier {
         account: account,
         tripId: trip.id,
         touristId: job.touristId,
-        greeting:
-            '¡Hola! Te contraté para ${job.circuitTitle}. ¿Dónde nos vemos?',
+        greeting: AppStrings.current.repoWorkHireGreeting(job.circuitTitle),
       );
     }
     notifyListeners();
@@ -308,7 +369,9 @@ class GuideWorkRepository extends ChangeNotifier {
     final parts = (_guideAccessRepository.request?.fullName ?? '').trim().split(
       RegExp(r'\s+'),
     );
-    if (parts.first.isEmpty) return 'Guía de K’Plan';
+    if (parts.first.isEmpty) {
+      return AppStrings.current.repoWorkGuideFallbackName;
+    }
     if (parts.length < 2) return parts.first;
     return '${parts.first} ${parts.last.substring(0, 1)}.';
   }
@@ -320,7 +383,7 @@ class GuideWorkRepository extends ChangeNotifier {
 
   /// A dónde van los retiros.
   String get bankAccount =>
-      _current?.bankAccount ?? 'Cuenta de ejemplo •••• 0000';
+      _current?.bankAccount ?? AppStrings.current.repoWorkSampleBankAccount;
 
   /// Lo ganado en viajes terminados, menos lo ya retirado (o en camino).
   num get available {
@@ -340,17 +403,18 @@ class GuideWorkRepository extends ChangeNotifier {
         ..sort((a, b) => b.requestedAt.compareTo(a.requestedAt));
 
   Future<Result<void>> withdraw(num amount) async {
+    final l10n = AppStrings.current;
     final account = _account;
     final work = _current;
     if (account == null || work == null) {
-      return const Result.failure('Inicia sesión como guía para retirar');
+      return Result.failure(l10n.repoWorkWithdrawLoginRequired);
     }
     if (amount <= 0) {
-      return const Result.failure('Escribe un monto mayor a cero');
+      return Result.failure(l10n.repoWorkAmountInvalid);
     }
     if (amount > available) {
       return Result.failure(
-        'Solo tienes ${Formatters.currency(available)} disponibles',
+        l10n.repoWorkAmountExceedsAvailable(Formatters.currency(available)),
       );
     }
 
@@ -388,6 +452,7 @@ class GuideWorkRepository extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     _authRepository.removeListener(_prepareAccount);
     for (final timer in _timers) {
       timer.cancel();

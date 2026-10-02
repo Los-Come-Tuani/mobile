@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../router/routes.dart';
 import '../../widgets/action_row.dart';
 import '../widgets/settings_page.dart';
@@ -11,26 +12,28 @@ class HelpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SettingsPage(
-      title: 'Ayuda y soporte',
-      heading: '¿En qué podemos ayudarte?',
+      title: l10n.settingsHelpTitle,
+      heading: l10n.settingsHelpHeading,
       children: [
         ActionRow(
           icon: Icons.confirmation_number_outlined,
-          title: 'Mi reserva',
-          subtitle: 'Confirmaciones y cancelaciones',
+          title: l10n.settingsHelpBookingTitle,
+          subtitle: l10n.settingsHelpBookingSubtitle,
           onTap: () => context.push(Routes.settingsBookingHelp),
         ),
         ActionRow(
           icon: Icons.chat_bubble_outline,
-          title: 'Contactar soporte',
-          subtitle: 'Cuéntanos qué ocurrió',
+          title: l10n.settingsContactSupport,
+          subtitle: l10n.settingsHelpContactSubtitle,
           onTap: () => context.push(Routes.settingsSupport),
         ),
         ActionRow(
           icon: Icons.shield_outlined,
-          title: 'Privacidad',
-          subtitle: 'Controles de tus datos',
+          title: l10n.settingsHelpPrivacyTitle,
+          subtitle: l10n.settingsHelpPrivacySubtitle,
           onTap: () => context.push(Routes.settingsDataUsage),
         ),
       ],

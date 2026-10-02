@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/circuit_group_session.dart';
@@ -26,6 +27,11 @@ class GroupSessionRepository extends ChangeNotifier {
   final DateTime Function() _now;
   List<CircuitGroupSession>? _sessions;
 
+  /// El "hoy" con que se sembraron los horarios: las fechas del JSON son
+  /// relativas a él y no deben moverse al volver a leerlos.
+  DateTime? _seedDay;
+  bool _isDisposed = false;
+
   /// Cuántas personas inscribió el usuario en cada horario.
   final Map<String, int> _enrolledPeople = {};
 
@@ -48,7 +54,7 @@ class GroupSessionRepository extends ChangeNotifier {
       return Result.ok(upcoming);
     } catch (e, st) {
       log.e('getSessionsForCircuit: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 
@@ -56,14 +62,22 @@ class GroupSessionRepository extends ChangeNotifier {
     final cached = _sessions;
     if (cached != null) return cached;
 
+    final today = _seedDay ??= _now();
+    final sessions = await _seed(today);
+    _sessions = sessions;
+    return sessions;
+  }
+
+  /// Los horarios del catálogo, con los textos (el mensaje del guía y su
+  /// perfil) en el idioma de ahora.
+  Future<List<CircuitGroupSession>> _seed(DateTime today) async {
     final rows = await _datasource.readList('circuit_groups.json');
     // Sin catálogo de guías los horarios se muestran igual, sólo sin perfil.
     final guides = switch (await _guideRepository.getGuides()) {
       Ok(:final value) => {for (final guide in value) guide.id: guide},
       Failure() => const <String, TourGuide>{},
     };
-    final today = _now();
-    final sessions = [
+    return [
       for (final row in rows)
         CircuitGroupSession.fromJson(
           row,
@@ -71,8 +85,32 @@ class GroupSessionRepository extends ChangeNotifier {
           guide: guides[row['guideId']],
         ),
     ];
-    _sessions = sessions;
-    return sessions;
+  }
+
+  /// Vuelve a leer los mensajes y los perfiles de los guías en el idioma de
+  /// ahora. Los cupos (incluidos los que ocupó el usuario) y las fechas no
+  /// cambian.
+  Future<void> relocalize() async {
+    final seedDay = _seedDay;
+    if (_sessions == null || seedDay == null) return;
+    final fresh = {
+      for (final session in await _seed(seedDay)) session.id: session,
+    };
+    final current = _sessions;
+    if (_isDisposed || current == null) return;
+
+    _sessions = [
+      for (final session in current)
+        fresh[session.id]?.copyWith(joinedCount: session.joinedCount) ??
+            session,
+    ];
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 
   /// Inscribe al usuario y a su grupo: [people] personas en total. `false`

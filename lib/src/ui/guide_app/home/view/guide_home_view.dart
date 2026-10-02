@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -38,6 +39,7 @@ class _GuideHomeViewState extends State<GuideHomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideHomeViewModel>();
     final newHire = viewModel.newHire;
     final nextTrip = viewModel.nextTrip;
@@ -62,7 +64,7 @@ class _GuideHomeViewState extends State<GuideHomeView> {
           Semantics(
             header: true,
             child: Text(
-              'Hola, ${viewModel.firstName}',
+              l10n.guideAppHomeGreeting(viewModel.firstName),
               style: AppTextStyles.formTitle,
             ),
           ),
@@ -79,7 +81,7 @@ class _GuideHomeViewState extends State<GuideHomeView> {
           ),
           if (nextTrip != null) ...[
             const SizedBox(height: 24),
-            Text('Próximo viaje', style: AppTextStyles.title),
+            Text(l10n.guideAppHomeNextTrip, style: AppTextStyles.title),
             const SizedBox(height: 10),
             _NextTrip(
               trip: nextTrip,
@@ -90,14 +92,13 @@ class _GuideHomeViewState extends State<GuideHomeView> {
           const SizedBox(height: 28),
           Semantics(
             header: true,
-            child: Text('Propuestas para ti', style: AppTextStyles.title),
+            child: Text(l10n.guideAppHomeProposals, style: AppTextStyles.title),
           ),
           const SizedBox(height: 2),
           Text(
             viewModel.isLocal
-                ? 'Solo ves propuestas de ${viewModel.city}, donde tienes tu '
-                      'certificación.'
-                : 'De todo el país, en los idiomas que hablas.',
+                ? l10n.guideAppHomeProposalsLocal(viewModel.city ?? '')
+                : l10n.guideAppHomeProposalsNational,
             style: AppTextStyles.caption,
           ),
           const SizedBox(height: 4),
@@ -112,13 +113,14 @@ class _GuideHomeViewState extends State<GuideHomeView> {
 
     final jobs = viewModel.jobs;
     if (jobs.isEmpty) {
+      final l10n = context.l10n;
       return [
         GuideEmptyState(
           icon: Icons.inbox_outlined,
           title: viewModel.isLocal
-              ? 'No hay propuestas nuevas en ${viewModel.city}'
-              : 'No hay propuestas nuevas por ahora',
-          message: 'Cuando un turista publique una, aparecerá aquí.',
+              ? l10n.guideAppHomeEmptyLocal(viewModel.city ?? '')
+              : l10n.guideAppHomeEmptyNational,
+          message: l10n.guideAppHomeEmptyMessage,
         ),
       ];
     }
@@ -152,6 +154,7 @@ class _BalanceLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     Widget amount(String label, num value, {Color? color}) => Text.rich(
       TextSpan(
         style: AppTextStyles.bodySmall.copyWith(color: AppColors.primaryText),
@@ -181,11 +184,11 @@ class _BalanceLine extends StatelessWidget {
                     runSpacing: 2,
                     children: [
                       amount(
-                        'Disponible',
+                        l10n.guideAppHomeAvailable,
                         available,
                         color: AppColors.accentSecondaryGreen,
                       ),
-                      amount('Por cobrar', pending),
+                      amount(l10n.guideAppHomePending, pending),
                     ],
                   ),
                 ),
@@ -246,7 +249,9 @@ class _NextTrip extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Recibes ${Formatters.currency(trip.earnings)}',
+                          context.l10n.guideAppYouReceive(
+                            Formatters.currency(trip.earnings),
+                          ),
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.accentSecondaryGreen,
                             fontWeight: FontWeight.w600,
@@ -283,19 +288,23 @@ class _HireNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final who = tourist?.shortName ?? 'Un turista';
+    final l10n = context.l10n;
+    final who = tourist?.shortName ?? l10n.guideAppHomeATourist;
     return InlineNotice(
       tone: NoticeTone.success,
-      message:
-          '¡$who te contrató para ${trip.circuitTitle}! '
-          '${Formatters.relativeDay(trip.date)} · ${trip.startTime}',
+      message: l10n.guideAppHomeHiredNotice(
+        who,
+        trip.circuitTitle,
+        Formatters.relativeDay(trip.date),
+        Formatters.timeText(trip.startTime),
+      ),
       action: Align(
         alignment: Alignment.centerLeft,
         child: TextButton(
           onPressed: onOpen,
           style: TextButton.styleFrom(padding: EdgeInsets.zero),
           child: Text(
-            'Ver viaje',
+            l10n.guideAppViewTrip,
             style: AppTextStyles.link.copyWith(
               color: AppColors.accentSecondaryGreen,
             ),
@@ -313,7 +322,7 @@ class _JobsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Cargando propuestas',
+      label: context.l10n.guideAppHomeLoadingProposals,
       child: Column(
         children: [
           for (var i = 0; i < 3; i++)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
@@ -14,6 +15,7 @@ class HomeMenuDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<HomeViewModel>();
     final user = viewModel.user;
 
@@ -45,7 +47,7 @@ class HomeMenuDrawer extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          user?.name ?? 'Invitado',
+                          user?.name ?? l10n.profileGuestName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.title,
@@ -65,7 +67,7 @@ class HomeMenuDrawer extends StatelessWidget {
             const Divider(color: AppColors.divider, height: 1),
             _MenuItem(
               icon: Icons.person_outline,
-              label: 'Mi perfil',
+              label: l10n.profileTitle,
               onTap: () {
                 Navigator.of(context).pop();
                 context.push(Routes.profile);
@@ -73,7 +75,7 @@ class HomeMenuDrawer extends StatelessWidget {
             ),
             _MenuItem(
               icon: Icons.bookmark_border,
-              label: 'Guardados',
+              label: l10n.commonSaved,
               onTap: () {
                 Navigator.of(context).pop();
                 context.push(Routes.saved);
@@ -81,7 +83,7 @@ class HomeMenuDrawer extends StatelessWidget {
             ),
             _MenuItem(
               icon: Icons.military_tech_outlined,
-              label: 'Mis medallas',
+              label: l10n.commonMyMedals,
               onTap: () {
                 Navigator.of(context).pop();
                 context.push(Routes.medals);
@@ -89,7 +91,7 @@ class HomeMenuDrawer extends StatelessWidget {
             ),
             _MenuItem(
               icon: Icons.confirmation_number_outlined,
-              label: 'Cupones',
+              label: l10n.commonCoupons,
               onTap: () {
                 Navigator.of(context).pop();
                 context.push(Routes.coupons);
@@ -97,7 +99,7 @@ class HomeMenuDrawer extends StatelessWidget {
             ),
             _MenuItem(
               icon: Icons.settings_outlined,
-              label: 'Configuraciones',
+              label: l10n.commonSettings,
               onTap: () {
                 Navigator.of(context).pop();
                 context.push(Routes.settings);
@@ -109,7 +111,7 @@ class HomeMenuDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.logout, color: AppColors.primary30),
               title: Text(
-                'Cerrar sesión',
+                l10n.commonLogout,
                 style: AppTextStyles.body.copyWith(color: AppColors.primary30),
               ),
               // Al perder la sesión, el redirect del router vuelve al welcome.
@@ -130,13 +132,14 @@ class _GuideModeItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isGuide = context.select<GuideAccessRepository, bool>(
       (access) => access.isApproved,
     );
 
     return _MenuItem(
       icon: Icons.tour_outlined,
-      label: isGuide ? 'Modo guía' : 'Ser guía en K’Plan',
+      label: isGuide ? l10n.homeDrawerGuideMode : l10n.homeDrawerBecomeGuide,
       onTap: () {
         Navigator.of(context).pop();
         context.go(isGuide ? Routes.guideHome : Routes.guideAccess);
@@ -154,6 +157,8 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListTile(
       leading: Icon(icon, color: AppColors.primaryText),
       title: Text(label, style: AppTextStyles.body),
@@ -163,7 +168,9 @@ class _MenuItem extends StatelessWidget {
             Navigator.of(context).pop();
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text('$label: próximamente')));
+              ..showSnackBar(
+                SnackBar(content: Text(l10n.homeDrawerComingSoon(label))),
+              );
           },
     );
   }

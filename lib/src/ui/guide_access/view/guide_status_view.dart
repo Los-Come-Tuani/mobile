@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
@@ -82,34 +83,31 @@ class _Pending extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final review = this.review;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Solicitud en revisión',
-          subtitle: 'El equipo de K’Plan está revisando tu información.',
+        GuideHeading(
+          title: l10n.guideAccessStatusPendingTitle,
+          subtitle: l10n.guideAccessStatusPendingSubtitle,
         ),
         if (review != null) ...[
           const SizedBox(height: 28),
           ReviewTimeline(review: review, contactEmail: contactEmail),
         ],
         const SizedBox(height: 28),
-        const InlineNotice(
-          message:
-              'El acceso de guía estará disponible únicamente si tu solicitud '
-              'es aprobada.',
-        ),
+        InlineNotice(message: l10n.guideAccessStatusPendingNotice),
         const SizedBox(height: 28),
         if (canGoHome)
           PrimaryButton(
-            label: 'Volver al inicio',
+            label: l10n.commonBackToHome,
             onPressed: () => context.go(Routes.home),
           )
         else
           // Al perder la sesión, el redirect del router vuelve al welcome.
           SoftButton(
-            label: 'Cerrar sesión',
+            label: l10n.commonLogout,
             onPressed: () => context.read<AuthRepository>().logout(),
           ),
       ],
@@ -122,25 +120,22 @@ class _Approved extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Acceso de guía habilitado',
-          subtitle:
-              'Tu solicitud fue aprobada. Tu cuenta ya tiene habilitado el rol '
-              'de guía.',
+        GuideHeading(
+          title: l10n.guideAccessStatusApprovedTitle,
+          subtitle: l10n.guideAccessStatusApprovedSubtitle,
         ),
         const SizedBox(height: 20),
-        const InlineNotice(
+        InlineNotice(
           tone: NoticeTone.success,
-          message:
-              'Puedes usar la misma cuenta para entrar como turista o como '
-              'guía.',
+          message: l10n.guideAccessStatusApprovedNotice,
         ),
         const SizedBox(height: 28),
         PrimaryButton(
-          label: 'Entrar como guía',
+          label: l10n.guideAccessStatusEnterAsGuide,
           onPressed: () => context.go(Routes.guideHome),
         ),
       ],

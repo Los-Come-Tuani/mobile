@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/validators.dart';
@@ -47,14 +48,15 @@ Future<T?> showAppDialog<T>(
 }
 
 /// Pide confirmar algo que importa: contratar, canjear, eliminar. `true` si
-/// se confirma; cerrar el diálogo cuenta como no.
+/// se confirma; cerrar el diálogo cuenta como no. Sin [cancelLabel], la salida
+/// dice "Cancelar" (o su equivalente en el idioma de ahora).
 Future<bool> showConfirmDialog(
   BuildContext context, {
   required IconData icon,
   required String title,
   String? message,
   required String confirmLabel,
-  String cancelLabel = 'Cancelar',
+  String? cancelLabel,
   bool destructive = false,
 }) async {
   final confirmed = await showAppDialog<bool>(
@@ -66,7 +68,7 @@ Future<bool> showConfirmDialog(
       destructive: destructive,
       primaryLabel: confirmLabel,
       onPrimary: () => Navigator.of(context).pop(true),
-      secondaryLabel: cancelLabel,
+      secondaryLabel: cancelLabel ?? context.l10n.commonCancel,
       onSecondary: () => Navigator.of(context).pop(false),
     ),
   );
@@ -355,7 +357,7 @@ class _TextInputDialogState extends State<_TextInputDialog> {
       ),
       primaryLabel: widget.confirmLabel,
       onPrimary: _submit,
-      secondaryLabel: 'Cancelar',
+      secondaryLabel: context.l10n.commonCancel,
       onSecondary: () => Navigator.of(context).pop(),
     );
   }

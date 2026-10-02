@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/datasources/repository/saved_repository.dart';
 
@@ -28,7 +29,9 @@ class BookmarkButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       constraints: BoxConstraints.tight(Size.square(size + 16)),
       visualDensity: VisualDensity.compact,
-      tooltip: isSaved ? 'Quitar de guardados' : 'Guardar',
+      tooltip: isSaved
+          ? context.l10n.sharedRemoveFromSaved
+          : context.l10n.commonSave,
       icon: Icon(
         isSaved ? Icons.bookmark : Icons.bookmark_border,
         color: isSaved ? AppColors.primary30 : color,

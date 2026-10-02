@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -18,6 +19,7 @@ class ReviewTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     const steps = GuideReviewStep.values;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -26,8 +28,8 @@ class ReviewTimeline extends StatelessWidget {
           _StepRow(
             number: step.index + 1,
             total: steps.length,
-            title: _titleOf(step),
-            detail: _detailOf(step),
+            title: _titleOf(l10n, step),
+            detail: _detailOf(l10n, step),
             finishedAt: review.finishedAt(step),
             isCurrent: step == review.current,
             isLast: step == steps.last,
@@ -36,22 +38,26 @@ class ReviewTimeline extends StatelessWidget {
     );
   }
 
-  static String _titleOf(GuideReviewStep step) => switch (step) {
-    GuideReviewStep.submitted => 'Solicitud enviada',
-    GuideReviewStep.documents => 'Revisión de documentos',
-    GuideReviewStep.experience => 'Revisión de experiencia',
-    GuideReviewStep.decision => 'Decisión final',
-  };
+  static String _titleOf(AppLocalizations l10n, GuideReviewStep step) =>
+      switch (step) {
+        GuideReviewStep.submitted => l10n.guideAccessTimelineSubmitted,
+        GuideReviewStep.documents => l10n.guideAccessTimelineDocuments,
+        GuideReviewStep.experience => l10n.guideAccessTimelineExperience,
+        GuideReviewStep.decision => l10n.guideAccessTimelineDecision,
+      };
 
-  String? _detailOf(GuideReviewStep step) => switch (step) {
-    GuideReviewStep.submitted => null,
-    GuideReviewStep.documents => 'Documento de identidad y credencial INTUR',
-    GuideReviewStep.experience => 'Cobertura, idiomas y trayectoria',
-    GuideReviewStep.decision =>
-      contactEmail == null
-          ? 'Te escribiremos el resultado por correo'
-          : 'Te escribiremos el resultado a $contactEmail',
-  };
+  String? _detailOf(AppLocalizations l10n, GuideReviewStep step) {
+    final email = contactEmail;
+    return switch (step) {
+      GuideReviewStep.submitted => null,
+      GuideReviewStep.documents => l10n.guideAccessTimelineDocumentsDetail,
+      GuideReviewStep.experience => l10n.guideAccessTimelineExperienceDetail,
+      GuideReviewStep.decision =>
+        email == null
+            ? l10n.guideAccessTimelineDecisionDetail
+            : l10n.guideAccessTimelineDecisionDetailTo(email),
+    };
+  }
 }
 
 class _StepRow extends StatelessWidget {
@@ -76,11 +82,13 @@ class _StepRow extends StatelessWidget {
   bool get _isDone => finishedAt != null;
 
   /// "Listo · 6:20 p.m." (con el día si no fue hoy) o "Revisando ahora".
-  String? get _status {
+  String? _status(AppLocalizations l10n) {
     final finishedAt = this.finishedAt;
-    if (finishedAt == null) return isCurrent ? 'Revisando ahora' : null;
+    if (finishedAt == null) {
+      return isCurrent ? l10n.guideAccessTimelineReviewingNow : null;
+    }
     return Formatters.facts([
-      'Listo',
+      l10n.commonDone,
       if (!DateUtils.isSameDay(finishedAt, DateTime.now()))
         Formatters.relativeDay(finishedAt),
       Formatters.clock(finishedAt),
@@ -89,16 +97,17 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final detail = this.detail;
-    final status = _status;
+    final status = _status(l10n);
     final isStarted = _isDone || isCurrent;
 
     return Semantics(
       label: [
-        'Paso $number de $total',
+        l10n.guideAccessTimelineStepLabel(number, total),
         title,
         ?detail,
-        status ?? 'Pendiente',
+        status ?? l10n.guideAccessTimelinePending,
       ].join('. '),
       excludeSemantics: true,
       child: IntrinsicHeight(

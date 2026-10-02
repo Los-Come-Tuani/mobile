@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../widgets/app_text_field.dart';
@@ -55,6 +56,8 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SafeArea(
@@ -68,13 +71,13 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Calificar a ${widget.touristName}',
+                      l10n.guideAppRateTourist(widget.touristName),
                       style: AppTextStyles.title,
                     ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    tooltip: 'Cerrar',
+                    tooltip: l10n.commonClose,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -87,7 +90,7 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                     Text(widget.tripLabel, style: AppTextStyles.caption),
                     const SizedBox(height: 16),
                     Text(
-                      '¿Cómo fue trabajar con ${widget.touristName}?',
+                      l10n.guideAppRateQuestion(widget.touristName),
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.primaryText,
                       ),
@@ -102,8 +105,7 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                               size: 34,
                               color: AppColors.star,
                             ),
-                            tooltip:
-                                '$star ${star == 1 ? 'estrella' : 'estrellas'}',
+                            tooltip: l10n.guideAppRateStars(star),
                             isSelected: star <= _stars,
                             onPressed: () => setState(() {
                               _stars = star;
@@ -116,7 +118,7 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                       Semantics(
                         liveRegion: true,
                         child: Text(
-                          'Elige cuántas estrellas le das',
+                          l10n.guideAppRateMissingStars,
                           style: AppTextStyles.caption.copyWith(
                             color: AppColors.error,
                           ),
@@ -124,9 +126,7 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                       ),
                     const SizedBox(height: 12),
                     AppTextField(
-                      hint:
-                          'Cuenta cómo fue: puntualidad, trato, si siguió las '
-                          'indicaciones…',
+                      hint: l10n.guideAppRateCommentHint,
                       controller: _comment,
                       keyboardType: TextInputType.multiline,
                       textInputAction: TextInputAction.newline,
@@ -136,12 +136,12 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Solo otros guías verán tu calificación.',
+                      l10n.guideAppRateVisibility,
                       style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 20),
                     PrimaryButton(
-                      label: 'Enviar calificación',
+                      label: l10n.guideAppRateSubmit,
                       onPressed: _send,
                     ),
                   ],

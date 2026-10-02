@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
@@ -63,19 +64,19 @@ class _SupportViewState extends State<SupportView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_sent) {
       final isDemo = context.read<SupportRepository>().isDemo;
       return SettingsPage(
-        title: 'Consulta enviada',
+        title: l10n.settingsSupportSentTitle,
         children: [
           DonePanel(
             icon: Icons.chat_bubble_outline,
-            title: 'Tu consulta está lista',
-            message: 'El equipo de soporte te responderá a $_email.',
-            note: isDemo
-                ? 'Demostración: por ahora el mensaje no sale de tu teléfono.'
-                : null,
-            actionLabel: 'Volver a Ayuda',
+            title: l10n.settingsSupportSentPanelTitle,
+            message: l10n.settingsSupportSentMessage(_email),
+            note: isDemo ? l10n.settingsSupportDemoNote : null,
+            actionLabel: l10n.settingsSupportBackToHelp,
             onAction: context.pop,
           ),
         ],
@@ -83,41 +84,45 @@ class _SupportViewState extends State<SupportView> {
     }
 
     return SettingsPage(
-      title: 'Contactar soporte',
+      title: l10n.settingsContactSupport,
       children: [
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Asunto', style: AppTextStyles.caption),
+              Text(l10n.settingsSupportSubject, style: AppTextStyles.caption),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Ej. Consulta sobre mi reserva',
+                hint: l10n.settingsSupportSubjectHint,
                 controller: _subjectController,
                 textInputAction: TextInputAction.next,
                 enabled: !_isSending,
                 validator: (value) =>
-                    _required(value, 'Cuéntanos de qué se trata'),
+                    _required(value, l10n.settingsSupportSubjectRequired),
               ),
               const SizedBox(height: 16),
-              Text('Mensaje', style: AppTextStyles.caption),
+              Text(l10n.settingsSupportMessage, style: AppTextStyles.caption),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Qué pasó, en qué circuito y cuándo',
+                hint: l10n.settingsSupportMessageHint,
                 controller: _messageController,
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.newline,
                 minLines: 4,
                 maxLines: 8,
                 enabled: !_isSending,
-                validator: (value) => _required(value, 'Escribe tu mensaje'),
+                validator: (value) =>
+                    _required(value, l10n.settingsSupportMessageRequired),
               ),
               const SizedBox(height: 12),
-              Text('Te responderemos a $_email.', style: AppTextStyles.caption),
+              Text(
+                l10n.settingsSupportReplyTo(_email),
+                style: AppTextStyles.caption,
+              ),
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Enviar consulta',
+                label: l10n.settingsSupportSend,
                 isLoading: _isSending,
                 onPressed: _submit,
               ),

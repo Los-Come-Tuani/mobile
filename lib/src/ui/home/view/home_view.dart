@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -65,6 +66,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<HomeViewModel>();
 
     return Scaffold(
@@ -81,15 +83,12 @@ class _HomeViewState extends State<HomeView> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Text(
-                  'Descubre tu próximo plan',
-                  style: AppTextStyles.pageTitle,
-                ),
+                child: Text(l10n.homeTitle, style: AppTextStyles.pageTitle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                 child: AppSearchField(
-                  hint: '¿Qué quieres descubrir?',
+                  hint: l10n.homeSearchHint,
                   controller: _searchController,
                   onChanged: viewModel.onQueryChanged,
                 ),
@@ -116,6 +115,8 @@ class _HomeViewState extends State<HomeView> {
   }
 
   List<Widget> _buildSections(HomeViewModel viewModel) {
+    final l10n = context.l10n;
+
     return switch (viewModel.tab) {
       DiscoverTab.forYou => [
         if (viewModel.activeTrip case final trip?) ...[
@@ -175,7 +176,7 @@ class _HomeViewState extends State<HomeView> {
       DiscoverTab.circuits => [
         Padding(
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
-          child: const SectionHeader(title: 'Circuitos completos'),
+          child: SectionHeader(title: l10n.homeSectionCircuits),
         ),
         for (final circuit in viewModel.circuits)
           Padding(
@@ -217,7 +218,7 @@ class _HomeViewState extends State<HomeView> {
       DiscoverTab.events => [
         Padding(
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
-          child: const SectionHeader(title: 'Eventos Próximos'),
+          child: SectionHeader(title: l10n.homeSectionEvents),
         ),
         for (final event in viewModel.events)
           Padding(
@@ -284,7 +285,7 @@ class _MyCircuitsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: 'Mis circuitos',
+      title: context.l10n.commonMyCircuits,
       height: 132,
       itemCount: collections.length,
       itemBuilder: (context, index) => MyCircuitCard(
@@ -304,7 +305,7 @@ class _CircuitsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: 'Circuitos completos',
+      title: context.l10n.homeSectionCircuits,
       height: 244,
       itemCount: circuits.length,
       itemBuilder: (context, index) => CircuitCard(
@@ -335,13 +336,16 @@ class _ActiveTripBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final next = trip.nextStop;
     final map = trip.map;
     final subtitle = next == null
-        ? 'Ya pasaste por todas las paradas · toca para finalizar'
-        : 'Siguiente: ${next.stop.name} · '
-              '${Formatters.clock(next.arrival)} · '
-              '${delayLabel(trip.delay).toLowerCase()}';
+        ? l10n.homeActiveTripAllVisited
+        : l10n.homeActiveTripNext(
+            next.stop.name,
+            Formatters.clock(next.arrival),
+            delayLabel(trip.delay).toLowerCase(),
+          );
 
     return Padding(
       padding: AppTheme.screenPadding,
@@ -382,7 +386,7 @@ class _ActiveTripBanner extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Viaje en curso: ${trip.title}',
+                            l10n.homeActiveTripTitle(trip.title),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.body.copyWith(
@@ -422,6 +426,8 @@ class _UpcomingTripBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: AppTheme.screenPadding,
       child: Material(
@@ -453,8 +459,10 @@ class _UpcomingTripBanner extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tu viaje a ${booking.circuitTitle} es el '
-                        '${Formatters.dayAndMonth(booking.date)}',
+                        l10n.homeUpcomingTripTitle(
+                          booking.circuitTitle,
+                          Formatters.dayAndMonth(booking.date),
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.body.copyWith(
@@ -464,7 +472,7 @@ class _UpcomingTripBanner extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Toca para ver los detalles del circuito',
+                        l10n.homeUpcomingTripHint,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.white.withValues(alpha: 0.85),
                         ),
@@ -492,25 +500,29 @@ class _GuideRequestBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isHired = request.status == GuideRequestStatus.hired;
     final count = request.applications.length;
-    final hiredNames = request.hired
+    final hiredFirstNames = request.hired
         .map((application) => application.guide.name.split(' ').first)
-        .join(' y ');
+        .toList(growable: false);
+    // "Ana y Luis": el conector cambia de idioma, por eso es una frase.
+    final hiredNames = hiredFirstNames.isEmpty
+        ? ''
+        : hiredFirstNames.reduce(l10n.homeGuideRequestNamesJoin);
     final (title, subtitle) = isHired
         ? (
-            'Contrataste a $hiredNames para ${request.circuitTitle}',
-            'Toca para chatear',
+            l10n.homeGuideRequestHiredTitle(hiredNames, request.circuitTitle),
+            l10n.homeGuideRequestHiredHint,
           )
         : count == 0
         ? (
-            'Tu propuesta para ${request.circuitTitle} está publicada',
-            'Esperando que los guías se postulen',
+            l10n.homeGuideRequestPublishedTitle(request.circuitTitle),
+            l10n.homeGuideRequestPublishedHint,
           )
         : (
-            '$count ${count == 1 ? 'postulación' : 'postulaciones'} para '
-                '${request.circuitTitle}',
-            'Toca para revisarlas y elegir',
+            l10n.homeGuideRequestApplicationsTitle(count, request.circuitTitle),
+            l10n.homeGuideRequestApplicationsHint,
           );
 
     return Padding(
@@ -583,6 +595,8 @@ class _RewardsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: AppTheme.screenPadding,
       child: Material(
@@ -615,8 +629,8 @@ class _RewardsBanner extends StatelessWidget {
                     children: [
                       Text(
                         available > 0
-                            ? 'Tienes $available insignias para canjear'
-                            : 'Gana insignias visitando paradas',
+                            ? l10n.homeRewardsAvailable(available)
+                            : l10n.homeRewardsEarn,
                         style: AppTextStyles.body.copyWith(
                           color: AppColors.white,
                           fontWeight: FontWeight.w700,
@@ -624,7 +638,7 @@ class _RewardsBanner extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Cámbialas por cupones y descuentos',
+                        l10n.homeRewardsHint,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.white.withValues(alpha: 0.85),
                         ),
@@ -652,7 +666,7 @@ class _StopsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: 'Paradas destacadas',
+      title: context.l10n.homeSectionStops,
       height: 186,
       itemCount: stops.length,
       itemBuilder: (context, index) =>
@@ -670,7 +684,7 @@ class _EventsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _HorizontalSection(
-      title: 'Eventos Próximos',
+      title: context.l10n.homeSectionEvents,
       height: 194,
       itemCount: events.length,
       itemBuilder: (context, index) => EventCard(
@@ -707,7 +721,7 @@ class _EmptyState extends StatelessWidget {
           const Icon(Icons.travel_explore, size: 48, color: AppColors.hintText),
           const SizedBox(height: 12),
           Text(
-            'No encontramos resultados para tu búsqueda',
+            context.l10n.homeEmptyResults,
             textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall,
           ),

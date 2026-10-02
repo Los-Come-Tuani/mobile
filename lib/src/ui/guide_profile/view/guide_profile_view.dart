@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -49,8 +50,8 @@ class _GuideProfileViewState extends State<GuideProfileView> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('Esta postulación ya no está disponible'),
+          SnackBar(
+            content: Text(context.l10n.guideRequestApplicationUnavailable),
           ),
         );
       return;
@@ -65,6 +66,7 @@ class _GuideProfileViewState extends State<GuideProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideProfileViewModel>();
     final guide = viewModel.guide;
     final application = viewModel.application;
@@ -75,12 +77,12 @@ class _GuideProfileViewState extends State<GuideProfileView> {
         foregroundColor: AppColors.white,
         centerTitle: true,
         title: Text(
-          'Perfil del guía',
+          l10n.guideProfileTitle,
           style: AppTextStyles.title.copyWith(color: AppColors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
@@ -104,15 +106,15 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                   const SizedBox(height: 16),
                   if (viewModel.isHired)
                     PrimaryButton(
-                      label: 'Chatear',
+                      label: l10n.guideProfileChat,
                       icon: Icons.chat_bubble_outline,
                       onPressed: () => context.push(Routes.guideChat),
                     )
                   else if (viewModel.canHire)
                     PrimaryButton(
-                      label:
-                          'Contratar por '
-                          '${Formatters.currency(application.proposedPrice)}',
+                      label: l10n.guideProfileHireFor(
+                        Formatters.currency(application.proposedPrice),
+                      ),
                       icon: Icons.handshake_outlined,
                       onPressed: _hire,
                     ),
@@ -120,7 +122,7 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                 if (guide.reviews.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   Text(
-                    'Reseñas (${guide.reviewsCount})',
+                    l10n.guideProfileReviewsCount(guide.reviewsCount),
                     style: AppTextStyles.title,
                   ),
                   for (final review in guide.reviews)
@@ -139,6 +141,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         ClipOval(
@@ -160,7 +163,7 @@ class _Header extends StatelessWidget {
           children: [
             IconLabel(
               icon: Icons.badge_outlined,
-              label: roleLabel(guide.role),
+              label: roleLabel(guide.role, l10n),
               color: AppColors.secondaryText,
             ),
             if (guide.role.canGuide)
@@ -171,12 +174,15 @@ class _Header extends StatelessWidget {
               ),
             IconLabel(
               icon: Icons.translate,
-              label: guide.languages.join(', '),
+              label: [
+                for (final language in guide.languages)
+                  l10n.languageName(language),
+              ].join(', '),
               color: AppColors.secondaryText,
             ),
             IconLabel(
               icon: Icons.work_outline,
-              label: '${guide.yearsExperience} años de experiencia',
+              label: l10n.guideRequestYearsExperience(guide.yearsExperience),
               color: AppColors.secondaryText,
             ),
             if (guide.role.canGuide)
@@ -185,8 +191,8 @@ class _Header extends StatelessWidget {
                     ? Icons.directions_car_outlined
                     : Icons.directions_walk,
                 label: guide.hasTransport
-                    ? 'Tiene vehículo propio'
-                    : 'Sin vehículo propio',
+                    ? l10n.guideProfileHasVehicle
+                    : l10n.guideProfileNoVehicle,
                 color: AppColors.secondaryText,
               ),
           ],
@@ -236,14 +242,19 @@ class _ApplicationSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roleName = application.role == ApplicationRole.guide
-        ? 'guía'
-        : 'traductor';
+    final l10n = context.l10n;
+    final isGuide = application.role == ApplicationRole.guide;
+    final title = switch ((isHired, isGuide)) {
+      (true, true) => l10n.guideProfileHiredAsGuide,
+      (true, false) => l10n.guideProfileHiredAsTranslator,
+      (false, true) => l10n.guideProfileAppliedAsGuide,
+      (false, false) => l10n.guideProfileAppliedAsTranslator,
+    };
     final difference = application.proposedPrice - budget;
     final comparison = switch (difference) {
-      0 => 'Acepta tu presupuesto',
-      > 0 => '${Formatters.currency(difference)} más que tu presupuesto',
-      _ => '${Formatters.currency(-difference)} menos que tu presupuesto',
+      0 => l10n.guideProfileAcceptsBudget,
+      > 0 => l10n.guideProfileMoreThanBudget(Formatters.currency(difference)),
+      _ => l10n.guideProfileLessThanBudget(Formatters.currency(-difference)),
     };
 
     return Container(
@@ -261,12 +272,7 @@ class _ApplicationSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isHired
-                ? 'Contratado como $roleName'
-                : 'Se postuló como $roleName a tu propuesta',
-            style: AppTextStyles.cardTitle,
-          ),
+          Text(title, style: AppTextStyles.cardTitle),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -287,8 +293,8 @@ class _ApplicationSummary extends StatelessWidget {
                   ? Icons.directions_car_outlined
                   : Icons.directions_walk,
               label: application.offersTransport
-                  ? 'Pone transporte para tu grupo'
-                  : 'No pone transporte',
+                  ? l10n.guideProfileOffersTransport
+                  : l10n.guideProfileNoTransport,
               highlighted: application.offersTransport,
             ),
           ],
@@ -301,7 +307,7 @@ class _ApplicationSummary extends StatelessWidget {
           ),
           if (isHired) ...[
             const SizedBox(height: 8),
-            Text('Pago y reserva: a definir', style: AppTextStyles.caption),
+            Text(l10n.guideProfilePaymentPending, style: AppTextStyles.caption),
           ],
         ],
       ),

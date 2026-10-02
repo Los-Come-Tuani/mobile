@@ -1,6 +1,7 @@
 import '../../data/models/itinerary.dart';
 import '../../data/models/stop.dart';
 import '../../data/models/visit_event.dart';
+import '../l10n/l10n.dart';
 import 'formatters.dart';
 import 'itinerary_planner.dart';
 import 'time_parser.dart';
@@ -61,7 +62,7 @@ final class SwitchToVehicleSuggestion extends ItinerarySuggestion {
   String get key => suggestionKey;
 
   @override
-  String get title => 'Moverte en vehículo';
+  String get title => AppStrings.current.utilAdvisorVehicleTitle;
 }
 
 final class ReorderSuggestion extends ItinerarySuggestion {
@@ -79,12 +80,11 @@ final class ReorderSuggestion extends ItinerarySuggestion {
   String get key => suggestionKey;
 
   @override
-  String get title => 'Cambiar el orden';
+  String get title => AppStrings.current.utilAdvisorReorderTitle;
 
   @override
   String get message =>
-      'Si cambias el orden de las paradas ahorras '
-      '${Formatters.duration(saved)} de traslado.';
+      AppStrings.current.utilAdvisorReorderMessage(Formatters.duration(saved));
 }
 
 final class StartLaterSuggestion extends ItinerarySuggestion {
@@ -100,7 +100,7 @@ final class StartLaterSuggestion extends ItinerarySuggestion {
   String get key => 'start:$startTime';
 
   @override
-  String get title => 'Salir a las $startTime';
+  String get title => AppStrings.current.utilAdvisorStartLaterTitle(startTime);
 }
 
 final class RemoveStopSuggestion extends ItinerarySuggestion {
@@ -122,7 +122,7 @@ final class RemoveStopSuggestion extends ItinerarySuggestion {
   String get key => 'remove:${stop.id}';
 
   @override
-  String get title => 'Quitar ${stop.name}';
+  String get title => AppStrings.current.utilAdvisorRemoveTitle(stop.name);
 }
 
 final class AddStopSuggestion extends ItinerarySuggestion {
@@ -146,8 +146,12 @@ final class AddStopSuggestion extends ItinerarySuggestion {
   String get key => 'add:${stop.id}';
 
   @override
-  String get title =>
-      isLunch ? 'Almorzar en ${stop.name}' : 'Agregar ${stop.name}';
+  String get title {
+    final l10n = AppStrings.current;
+    return isLunch
+        ? l10n.utilAdvisorLunchTitle(stop.name)
+        : l10n.utilAdvisorAddTitle(stop.name);
+  }
 }
 
 /// Las reglas del asistente de itinerarios. No hay un modelo de IA detrás:
@@ -282,11 +286,11 @@ abstract final class ItineraryAdvisor {
     );
     final saved = itinerary.totalDuration - byVehicle.totalDuration;
     return SwitchToVehicleSuggestion(
-      message:
-          '${longWalks == 1 ? 'Hay un tramo' : 'Hay $longWalks tramos'} de '
-          'más de ${ItineraryLeg.longWalkKm.toStringAsFixed(0)} km a pie. En '
-          'vehículo ahorras ${Formatters.duration(saved)} y los cortos los '
-          'sigues caminando.',
+      message: AppStrings.current.utilAdvisorVehicleMessage(
+        longWalks,
+        ItineraryLeg.longWalkKm.toStringAsFixed(0),
+        Formatters.duration(saved),
+      ),
     );
   }
 
@@ -335,14 +339,16 @@ abstract final class ItineraryAdvisor {
       final needed = start + hours.opensAt - arrives;
       // A la hora en punto siguiente, que es como se ofrecen las salidas.
       final startTime = Formatters.minutesOfDay((needed / 60).ceil() * 60);
-      // Las horas terminan en "a.m." o "p.m.": ese punto cierra la oración.
+      // En español las horas terminan en "a.m." o "p.m.": ese punto cierra la
+      // oración, así que el texto no lleva otro.
       final suggestion = StartLaterSuggestion(
         startTime: startTime,
-        message:
-            'Llegarías a ${stop.stop.name} a las '
-            '${Formatters.clock(stop.arrival)} y abre a las '
-            '${Formatters.minutesOfDay(hours.opensAt)} Si sales a las '
-            '$startTime, llegas con todo abierto.',
+        message: AppStrings.current.utilAdvisorStartLaterMessage(
+          stop.stop.name,
+          Formatters.clock(stop.arrival),
+          Formatters.minutesOfDay(hours.opensAt),
+          startTime,
+        ),
       );
       return dismissed.contains(suggestion.key) ? null : suggestion;
     }
@@ -370,10 +376,11 @@ abstract final class ItineraryAdvisor {
       return RemoveStopSuggestion(
         stop: stop.stop,
         reason: DropReason.closed,
-        message:
-            '${stop.stop.name} cierra a las '
-            '${Formatters.minutesOfDay(hours.closesAt)} y no alcanzarías a '
-            'visitarla: saldrías a las ${Formatters.clock(stop.departure)}',
+        message: AppStrings.current.utilAdvisorRemoveClosedMessage(
+          stop.stop.name,
+          Formatters.minutesOfDay(hours.closesAt),
+          Formatters.clock(stop.departure),
+        ),
       );
     }
 
@@ -401,9 +408,7 @@ abstract final class ItineraryAdvisor {
       return RemoveStopSuggestion(
         stop: stop,
         reason: DropReason.noTime,
-        message:
-            '${_tooLongReason(itinerary, preferences)} Si quitas '
-            '${stop.name}, terminas a las ${Formatters.clock(without.end)}',
+        message: _tooLongMessage(itinerary, preferences, stop, without),
       );
     }
     return null;
@@ -451,15 +456,16 @@ abstract final class ItineraryAdvisor {
       if (best != null && added >= bestAdded) continue;
       final planned = lunchPlan.stops[index];
       bestAdded = added;
+      final l10n = AppStrings.current;
       best = AddStopSuggestion(
         stop: candidate,
         index: index,
         isLunch: true,
-        message:
-            'Tu día pasa por el mediodía y no tiene parada para comer. En '
-            '${candidate.name} llegarías a las '
-            '${Formatters.clock(planned.arrival)} '
-            '(${planned.leg?.label.toLowerCase() ?? 'es la primera parada'}).',
+        message: l10n.utilAdvisorLunchMessage(
+          candidate.name,
+          Formatters.clock(planned.arrival),
+          planned.leg?.label.toLowerCase() ?? l10n.utilAdvisorFirstStopNote,
+        ),
       );
     }
     return best;
@@ -506,16 +512,26 @@ abstract final class ItineraryAdvisor {
 
       final index = placement.index;
       final planned = placement.itinerary.stops[index];
-      final why = preferences.interests.contains(candidate.category)
-          ? 'Como te interesa ${candidate.category.toLowerCase()}, agrega '
-          : 'Agrega ';
+      final l10n = AppStrings.current;
+      final leg =
+          planned.leg?.label.toLowerCase() ?? l10n.utilAdvisorToStartNote;
       return AddStopSuggestion(
         stop: candidate,
         index: index,
-        message:
-            'Te sobra ${Formatters.duration(slack)} en el día. $why'
-            '${candidate.name}: ${candidate.duration} de visita, '
-            '${planned.leg?.label.toLowerCase() ?? 'para empezar'}.',
+        message: preferences.interests.contains(candidate.category)
+            ? l10n.utilAdvisorExtraInterestMessage(
+                Formatters.duration(slack),
+                l10n.categoryName(candidate.category).toLowerCase(),
+                candidate.name,
+                candidate.duration,
+                leg,
+              )
+            : l10n.utilAdvisorExtraMessage(
+                Formatters.duration(slack),
+                candidate.name,
+                candidate.duration,
+                leg,
+              ),
       );
     }
     return null;
@@ -567,17 +583,31 @@ abstract final class ItineraryAdvisor {
             ItineraryPlanner.nightFromMinutes;
   }
 
-  static String _tooLongReason(
+  /// Por qué conviene quitar [removed] (el día es más largo de lo que aguanta
+  /// su ritmo o termina de noche) y a qué hora se terminaría sin ella
+  /// ([without]).
+  static String _tooLongMessage(
     Itinerary itinerary,
     ItineraryPreferences preferences,
+    Stop removed,
+    Itinerary without,
   ) {
+    final l10n = AppStrings.current;
     final maxDay = Duration(minutes: preferences.pace.maxDayMinutes);
     if (itinerary.totalDuration > maxDay) {
-      return 'Tu día duraría ${Formatters.duration(itinerary.totalDuration)} '
-          'y con ritmo ${preferences.pace.label.toLowerCase()} conviene no '
-          'pasar de ${Formatters.duration(maxDay)}.';
+      return l10n.utilAdvisorRemoveTooLongMessage(
+        Formatters.duration(itinerary.totalDuration),
+        preferences.pace.label.toLowerCase(),
+        Formatters.duration(maxDay),
+        removed.name,
+        Formatters.clock(without.end),
+      );
     }
-    return 'Terminarías a las ${Formatters.clock(itinerary.end)}, ya de noche.';
+    return l10n.utilAdvisorRemoveEndsLateMessage(
+      Formatters.clock(itinerary.end),
+      removed.name,
+      Formatters.clock(without.end),
+    );
   }
 
   /// Cuánto le interesa: su categoría pesa más que la calificación.

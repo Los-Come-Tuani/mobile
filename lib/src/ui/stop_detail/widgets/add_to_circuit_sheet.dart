@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -49,11 +50,14 @@ class _AddToCircuitSheet extends StatelessWidget {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('Circuito "$title" creado')));
+      ..showSnackBar(
+        SnackBar(content: Text(context.l10n.stopDetailCircuitCreated(title))),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final repository = context.watch<CircuitCollectionsRepository>();
     final collections = repository.collections;
     final maxHeight = MediaQuery.sizeOf(context).height * 0.7;
@@ -77,7 +81,7 @@ class _AddToCircuitSheet extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 4),
               child: Column(
                 children: [
-                  Text('Añadir a un circuito', style: AppTextStyles.title),
+                  Text(l10n.stopDetailAddToCircuit, style: AppTextStyles.title),
                   const SizedBox(height: 4),
                   Text(
                     stopName,
@@ -93,9 +97,9 @@ class _AddToCircuitSheet extends StatelessWidget {
             const Divider(height: 1, color: AppColors.divider),
             Flexible(
               child: collections.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 32),
-                      child: Text('Todavía no tienes circuitos'),
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 32),
+                      child: Text(l10n.stopDetailNoCircuits),
                     )
                   : ListView.builder(
                       shrinkWrap: true,
@@ -127,6 +131,8 @@ class _NewCircuitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListTile(
       onTap: onTap,
       leading: Container(
@@ -139,10 +145,13 @@ class _NewCircuitRow extends StatelessWidget {
         child: const Icon(Icons.add, color: AppColors.primary30),
       ),
       title: Text(
-        'Crear circuito nuevo',
+        l10n.stopDetailNewCircuit,
         style: AppTextStyles.body.copyWith(color: AppColors.primary30),
       ),
-      subtitle: Text('Y añadir esta parada ahí', style: AppTextStyles.caption),
+      subtitle: Text(
+        l10n.stopDetailNewCircuitHint,
+        style: AppTextStyles.caption,
+      ),
     );
   }
 }
@@ -161,6 +170,8 @@ class _CollectionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListTile(
       onTap: onTap,
       leading: collection.image.isEmpty
@@ -191,8 +202,8 @@ class _CollectionRow extends StatelessWidget {
       ),
       subtitle: Text(
         isSelected
-            ? 'Añadida a este circuito'
-            : '${collection.stopCount} paradas',
+            ? l10n.stopDetailAddedToCircuit
+            : l10n.circuitDetailStopsCount(collection.stopCount),
         style: AppTextStyles.caption.copyWith(
           color: isSelected ? AppColors.accentSecondaryGreen : null,
         ),

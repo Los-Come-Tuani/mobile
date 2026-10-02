@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -47,10 +48,15 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
   }
 
   String? _validate(String? value) {
+    final l10n = context.l10n;
     final amount = int.tryParse(value?.trim() ?? '');
-    if (amount == null || amount <= 0) return 'Escribe cuánto quieres retirar';
+    if (amount == null || amount <= 0) {
+      return l10n.guideAppWithdrawAmountRequired;
+    }
     if (amount > widget.available) {
-      return 'Solo tienes ${Formatters.currency(widget.available)} disponibles';
+      return l10n.guideAppWithdrawOverBalance(
+        Formatters.currency(widget.available),
+      );
     }
     return null;
   }
@@ -62,6 +68,8 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SafeArea(
@@ -76,11 +84,14 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: Text('Retirar', style: AppTextStyles.title),
+                      child: Text(
+                        l10n.guideAppWithdraw,
+                        style: AppTextStyles.title,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      tooltip: 'Cerrar',
+                      tooltip: l10n.commonClose,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -92,12 +103,12 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                     children: [
                       const SizedBox(height: 8),
                       LabeledField(
-                        label: 'Monto (C\$)',
+                        label: l10n.guideAppWithdrawAmountLabel,
                         child: AppTextField(
                           hint: '${widget.available}',
-                          helper:
-                              'Disponible: '
-                              '${Formatters.currency(widget.available)}',
+                          helper: l10n.guideAppWithdrawAvailable(
+                            Formatters.currency(widget.available),
+                          ),
                           controller: _amount,
                           validator: _validate,
                           keyboardType: TextInputType.number,
@@ -119,7 +130,7 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'A tu cuenta',
+                                    l10n.guideAppWithdrawToAccount,
                                     style: AppTextStyles.caption,
                                   ),
                                   Text(
@@ -134,11 +145,14 @@ class _WithdrawSheetState extends State<_WithdrawSheet> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Te avisaremos aquí cuando llegue a tu cuenta.',
+                        l10n.guideAppWithdrawNotice,
                         style: AppTextStyles.caption,
                       ),
                       const SizedBox(height: 20),
-                      PrimaryButton(label: 'Retirar', onPressed: _submit),
+                      PrimaryButton(
+                        label: l10n.guideAppWithdraw,
+                        onPressed: _submit,
+                      ),
                     ],
                   ),
                 ),

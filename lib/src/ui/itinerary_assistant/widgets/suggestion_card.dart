@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -20,6 +21,8 @@ class SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
@@ -61,7 +64,7 @@ class SuggestionCard extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onDismiss,
-                child: const Text('No, gracias'),
+                child: Text(l10n.assistantDismiss),
               ),
               const SizedBox(width: 4),
               TextButton.icon(
@@ -70,7 +73,7 @@ class SuggestionCard extends StatelessWidget {
                 ),
                 onPressed: onApply,
                 icon: const Icon(Icons.check, size: 18),
-                label: const Text('Aplicar'),
+                label: Text(l10n.assistantApply),
               ),
             ],
           ),

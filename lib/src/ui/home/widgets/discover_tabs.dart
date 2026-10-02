@@ -1,19 +1,30 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
 /// Pestañas de descubrimiento del home.
 enum DiscoverTab {
-  forYou('Para ti', Icons.location_on_outlined),
-  circuits('Circuitos', Icons.map_outlined),
-  stops('Paradas', Icons.route_outlined),
-  events('Eventos', Icons.calendar_month_outlined);
+  forYou(Icons.location_on_outlined),
+  circuits(Icons.map_outlined),
+  stops(Icons.route_outlined),
+  events(Icons.calendar_month_outlined);
 
-  const DiscoverTab(this.label, this.icon);
+  const DiscoverTab(this.icon);
 
-  final String label;
   final IconData icon;
+
+  /// El nombre de la pestaña en el idioma de [l10n].
+  String labelOf(AppLocalizations l10n) => switch (this) {
+    forYou => l10n.homeTabForYou,
+    circuits => l10n.homeTabCircuits,
+    stops => l10n.homeTabStops,
+    events => l10n.homeTabEvents,
+  };
+
+  /// El nombre en el idioma de ahora, para quien no tiene un `BuildContext`.
+  String get label => labelOf(AppStrings.current);
 }
 
 class DiscoverTabs extends StatelessWidget {
@@ -69,7 +80,7 @@ class _TabItem extends StatelessWidget {
           const SizedBox(width: 4),
           Flexible(
             child: Text(
-              tab.label,
+              tab.labelOf(context.l10n),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.caption.copyWith(

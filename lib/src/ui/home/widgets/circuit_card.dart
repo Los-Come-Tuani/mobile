@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/circuit.dart';
@@ -30,6 +31,7 @@ class CircuitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isCreative = circuit.isCreativeCircuit;
 
     return ContentCard(
@@ -95,7 +97,7 @@ class CircuitCard extends StatelessWidget {
                   children: [
                     IconLabel(
                       icon: Icons.location_on_outlined,
-                      label: '${circuit.stops} paradas',
+                      label: l10n.homeCircuitStops(circuit.stops),
                     ),
                     const SizedBox(width: 12),
                     Flexible(
@@ -113,9 +115,7 @@ class CircuitCard extends StatelessWidget {
                     iconColor: AppColors.creativeCircuit,
                     iconSize: 16,
                     color: AppColors.primaryText,
-                    label:
-                        '+${Circuit.creativeBonusBadges} insignias extra '
-                        'y medalla',
+                    label: l10n.homeCircuitBonus(Circuit.creativeBonusBadges),
                   ),
                 ],
               ],

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../models/guide_trip.dart';
 import '../../models/tourist_profile.dart';
@@ -18,6 +19,7 @@ class TouristRepository extends ChangeNotifier {
   final MockDatasource _datasource;
   Map<String, TouristProfile>? _tourists;
   Future<void>? _loading;
+  bool _isDisposed = false;
 
   bool get isLoaded => _tourists != null;
 
@@ -28,6 +30,33 @@ class TouristRepository extends ChangeNotifier {
     _tourists = {
       for (final row in rows) row['id'] as String: TouristProfile.fromJson(row),
     };
+    notifyListeners();
+  }
+
+  /// Vuelve a leer lo que viene del catálogo (el país y las calificaciones de
+  /// ejemplo) en el idioma de ahora. Las calificaciones que dio el guía en
+  /// esta sesión se conservan tal como las escribió.
+  Future<void> relocalize() async {
+    if (_tourists == null) return;
+    final rows = await _datasource.readList('tourists.json');
+    final tourists = _tourists;
+    if (_isDisposed || tourists == null) return;
+
+    for (final row in rows) {
+      final seed = TouristProfile.fromJson(row);
+      final current = tourists[seed.id];
+      if (current == null) continue;
+      // Las calificaciones nuevas entran al frente: las de ejemplo van al
+      // final, así que sólo ellas se reemplazan.
+      final added = (current.ratings.length - seed.ratings.length).clamp(
+        0,
+        current.ratings.length,
+      );
+      tourists[seed.id] = current.copyWith(
+        country: seed.country,
+        ratings: [...current.ratings.take(added), ...seed.ratings],
+      );
+    }
     notifyListeners();
   }
 
@@ -44,18 +73,17 @@ class TouristRepository extends ChangeNotifier {
     required int stars,
     required String comment,
   }) async {
+    final l10n = AppStrings.current;
     final trip = _work.tripById(tripId);
     if (trip == null || !trip.canRateTourist) {
-      return const Result.failure(
-        'Solo puedes calificar una vez, después de terminar el viaje',
-      );
+      return Result.failure(l10n.repoTouristRateOnce);
     }
     if (stars < 1 || stars > 5) {
-      return const Result.failure('Elige de 1 a 5 estrellas');
+      return Result.failure(l10n.repoTouristRateStars);
     }
     final tourist = _tourists?[trip.touristId];
     if (tourist == null) {
-      return const Result.failure('No encontramos a este turista');
+      return Result.failure(l10n.repoTouristNotFound);
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -65,7 +93,7 @@ class TouristRepository extends ChangeNotifier {
           guideName: _work.guideShortName,
           rating: stars,
           text: comment.trim(),
-          timeAgo: 'hoy',
+          timeAgo: AppStrings.current.repoTouristRatingToday,
         ),
         ...tourist.ratings,
       ],
@@ -73,5 +101,11 @@ class TouristRepository extends ChangeNotifier {
     _work.markTouristRated(tripId);
     notifyListeners();
     return const Result.ok(null);
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

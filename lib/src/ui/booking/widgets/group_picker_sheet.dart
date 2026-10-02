@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -38,21 +39,23 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Grupo', style: AppTextStyles.title),
+            Text(l10n.bookingGroup, style: AppTextStyles.title),
             const SizedBox(height: 16),
             _CounterRow(
-              label: 'Adultos',
+              label: l10n.bookingAdults,
               value: _adults,
               onChanged: (value) => setState(() => _adults = value),
             ),
             _CounterRow(
-              label: 'Niños',
+              label: l10n.bookingChildren,
               value: _children,
               onChanged: (value) => setState(() => _children = value),
             ),
@@ -62,7 +65,7 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancelar'),
+                    child: Text(l10n.commonCancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -73,7 +76,7 @@ class _GroupPickerSheetState extends State<_GroupPickerSheet> {
                         : () => Navigator.of(
                             context,
                           ).pop((adults: _adults, children: _children)),
-                    child: const Text('Aceptar'),
+                    child: Text(l10n.commonAccept),
                   ),
                 ),
               ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/formatters.dart';
@@ -44,6 +45,7 @@ class _GuideThreadViewState extends State<GuideThreadView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideThreadViewModel>();
     final trip = viewModel.trip;
     final tourist = viewModel.tourist;
@@ -52,7 +54,7 @@ class _GuideThreadViewState extends State<GuideThreadView> {
     final messages = viewModel.messages.reversed.toList();
 
     return Scaffold(
-      appBar: GuideBar(title: tourist?.name ?? 'Conversación'),
+      appBar: GuideBar(title: tourist?.name ?? l10n.guideAppThreadTitle),
       body: SafeArea(
         child: Column(
           children: [
@@ -67,8 +69,9 @@ class _GuideThreadViewState extends State<GuideThreadView> {
                 child: Text(
                   Formatters.facts([
                     trip.circuitTitle,
-                    '${Formatters.relativeDay(trip.date)} ${trip.startTime}',
-                    'Recibes ${Formatters.currency(trip.earnings)}',
+                    '${Formatters.relativeDay(trip.date)} '
+                        '${Formatters.timeText(trip.startTime)}',
+                    l10n.guideAppYouReceive(Formatters.currency(trip.earnings)),
                   ]),
                   style: AppTextStyles.caption,
                 ),
@@ -80,7 +83,7 @@ class _GuideThreadViewState extends State<GuideThreadView> {
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Text(
-                          'Escribe para acordar el punto de encuentro.',
+                          l10n.guideAppThreadEmpty,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodySmall,
                         ),
@@ -100,7 +103,7 @@ class _GuideThreadViewState extends State<GuideThreadView> {
                 children: [
                   Expanded(
                     child: AppTextField(
-                      hint: 'Escribe un mensaje…',
+                      hint: l10n.guideAppThreadHint,
                       controller: _controller,
                       textCapitalization: TextCapitalization.sentences,
                       textInputAction: TextInputAction.send,
@@ -109,7 +112,7 @@ class _GuideThreadViewState extends State<GuideThreadView> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
-                    tooltip: 'Enviar',
+                    tooltip: l10n.guideAppThreadSend,
                     color: AppColors.primary30,
                     onPressed: _send,
                   ),

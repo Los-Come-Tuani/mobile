@@ -100,12 +100,13 @@ class GuideJob {
     GuideJobStatus? status,
     num? offeredPrice,
     String? message,
+    String? circuitTitle,
   }) {
     return GuideJob(
       id: id,
       touristId: touristId,
       circuitId: circuitId,
-      circuitTitle: circuitTitle,
+      circuitTitle: circuitTitle ?? this.circuitTitle,
       city: city,
       date: date,
       startTime: startTime,

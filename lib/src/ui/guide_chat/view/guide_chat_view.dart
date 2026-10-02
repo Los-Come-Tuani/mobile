@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -38,6 +39,7 @@ class _GuideChatViewState extends State<GuideChatView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideChatViewModel>();
     final participants = viewModel.participants;
     final showSenderLabel = participants.length > 1;
@@ -48,7 +50,7 @@ class _GuideChatViewState extends State<GuideChatView> {
         foregroundColor: AppColors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
@@ -66,7 +68,7 @@ class _GuideChatViewState extends State<GuideChatView> {
             ],
             Expanded(
               child: Text(
-                _headerTitle(participants),
+                _headerTitle(l10n, participants),
                 style: AppTextStyles.title.copyWith(color: AppColors.white),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -86,9 +88,9 @@ class _GuideChatViewState extends State<GuideChatView> {
                   vertical: 10,
                 ),
                 child: Text(
-                  'Precio acordado: '
-                  '${Formatters.currency(viewModel.agreedPrice!)} · '
-                  'Pago y reserva: a definir',
+                  l10n.guideChatAgreedPrice(
+                    Formatters.currency(viewModel.agreedPrice!),
+                  ),
                   style: AppTextStyles.caption,
                 ),
               ),
@@ -96,7 +98,7 @@ class _GuideChatViewState extends State<GuideChatView> {
               child: viewModel.messages.isEmpty
                   ? Center(
                       child: Text(
-                        'Escribe para coordinar el punto de encuentro.',
+                        l10n.guideChatEmpty,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall,
                       ),
@@ -118,7 +120,7 @@ class _GuideChatViewState extends State<GuideChatView> {
                 children: [
                   Expanded(
                     child: AppTextField(
-                      hint: 'Escribe un mensaje…',
+                      hint: l10n.guideChatMessageHint,
                       controller: _controller,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(),
@@ -139,10 +141,12 @@ class _GuideChatViewState extends State<GuideChatView> {
     );
   }
 
-  String _headerTitle(List<TourGuide> participants) {
-    if (participants.isEmpty) return 'Guía';
+  String _headerTitle(AppLocalizations l10n, List<TourGuide> participants) {
+    if (participants.isEmpty) return l10n.commonGuide;
     if (participants.length == 1) return participants.first.name;
-    return participants.map((p) => p.name.split(' ').first).join(' y ');
+    return participants
+        .map((p) => p.name.split(' ').first)
+        .reduce((names, next) => l10n.guideChatNamePair(names, next));
   }
 }
 

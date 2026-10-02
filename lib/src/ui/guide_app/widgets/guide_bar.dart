@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -70,7 +71,7 @@ class _ModeTag extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
         child: Text(
-          'Guías',
+          context.l10n.guideAppBarModeTag,
           style: AppTextStyles.caption.copyWith(
             color: AppColors.primaryText,
             fontWeight: FontWeight.w600,

@@ -1,14 +1,24 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
+
 /// Avisos que el turista puede encender o apagar.
 enum NotificationTopic {
-  tripReminders('Recordatorios de viajes'),
-  bookingChanges('Cambios en mis reservas'),
-  savedEvents('Eventos guardados'),
-  newsAndBenefits('Beneficios y novedades');
+  tripReminders,
+  bookingChanges,
+  savedEvents,
+  newsAndBenefits;
 
-  const NotificationTopic(this.label);
-  final String label;
+  /// El nombre del aviso en el idioma de ahora.
+  String get label {
+    final l10n = AppStrings.current;
+    return switch (this) {
+      tripReminders => l10n.repoNotificationTripReminders,
+      bookingChanges => l10n.repoNotificationBookingChanges,
+      savedEvents => l10n.repoNotificationSavedEvents,
+      newsAndBenefits => l10n.repoNotificationNewsAndBenefits,
+    };
+  }
 }
 
 /// Preferencias de Configuraciones.

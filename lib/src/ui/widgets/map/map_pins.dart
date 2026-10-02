@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/trip_progress.dart';
@@ -123,7 +124,7 @@ class StartPin extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Inicio',
+                    context.l10n.sharedMapStart,
                     maxLines: 1,
                     textScaler: TextScaler.noScaling,
                     style: AppTextStyles.mapPin.copyWith(

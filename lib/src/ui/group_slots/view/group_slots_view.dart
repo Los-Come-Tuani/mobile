@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -69,16 +70,18 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
 
     final enrolled = await viewModel.enroll(session);
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             enrolled
-                ? '¡Listo! Tu grupo quedó inscrito el '
-                      '${Formatters.dayAndMonth(session.date)}, '
-                      '${session.startTime}'
-                : 'Ya no quedan cupos suficientes en ese horario',
+                ? l10n.groupSlotsEnrolled(
+                    Formatters.dayAndMonth(session.date),
+                    Formatters.timeText(session.startTime),
+                  )
+                : l10n.groupSlotsNoSpotsLeft,
           ),
         ),
       );
@@ -86,6 +89,7 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GroupSlotsViewModel>();
     final circuit = viewModel.circuit;
 
@@ -95,12 +99,12 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
         foregroundColor: AppColors.white,
         centerTitle: true,
         title: Text(
-          'Horarios disponibles',
+          l10n.groupSlotsTitle,
           style: AppTextStyles.title.copyWith(color: AppColors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
@@ -113,21 +117,20 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
           : circuit == null
           ? _Message(
               icon: Icons.error_outline,
-              text:
-                  viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+              text: viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
             )
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
                 _CircuitHeader(circuit: circuit),
                 const SizedBox(height: 24),
-                Text('Tu grupo', style: AppTextStyles.title),
+                Text(l10n.groupSlotsYourGroup, style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 BookingCard(
                   children: [
                     BookingFieldRow(
                       icon: Icons.group_outlined,
-                      label: 'Personas',
+                      label: l10n.groupSlotsPeople,
                       value: Formatters.groupLabel(
                         adults: viewModel.adults,
                         children: viewModel.children,
@@ -138,21 +141,16 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                Text(
-                  'Horarios publicados por guías',
-                  style: AppTextStyles.title,
-                ),
+                Text(l10n.groupSlotsPublishedTitle, style: AppTextStyles.title),
                 const SizedBox(height: 4),
                 Text(
-                  'Cada guía fija la hora, el cupo y si pone transporte.',
+                  l10n.groupSlotsPublishedHint,
                   style: AppTextStyles.caption,
                 ),
                 if (viewModel.sessions.isEmpty)
-                  const _Message(
+                  _Message(
                     icon: Icons.event_busy_outlined,
-                    text:
-                        'Todavía no hay horarios publicados para este '
-                        'circuito. Vuelve a revisar pronto.',
+                    text: l10n.groupSlotsEmpty,
                   )
                 else
                   ..._buildSessions(viewModel),
@@ -208,6 +206,8 @@ class _CircuitHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -217,14 +217,18 @@ class _CircuitHeader extends StatelessWidget {
         const SizedBox(height: 12),
         _InfoLine(
           icon: Icons.location_on_outlined,
-          text: 'Punto de encuentro: ${circuit.meetingPoint}',
+          text: l10n.groupSlotsMeetingPoint(circuit.meetingPoint),
         ),
-        _InfoLine(icon: Icons.schedule, text: 'Duración: ${circuit.duration}'),
+        _InfoLine(
+          icon: Icons.schedule,
+          text: l10n.groupSlotsDuration(circuit.duration),
+        ),
         _InfoLine(
           icon: Icons.sell_outlined,
-          text:
-              '${Formatters.currency(circuit.priceAdult)} por adulto · '
-              '${Formatters.currency(circuit.priceChild)} por niño',
+          text: l10n.groupSlotsPrices(
+            Formatters.currency(circuit.priceAdult),
+            Formatters.currency(circuit.priceChild),
+          ),
         ),
       ],
     );

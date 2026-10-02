@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../data/datasources/repository/location_repository.dart';
 import '../../../data/datasources/repository/settings_repository.dart';
 import '../../../router/routes.dart';
@@ -17,38 +18,39 @@ class PrivacyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsRepository>();
     final location = context.watch<LocationRepository>();
+    final l10n = context.l10n;
 
     return SettingsPage(
-      title: 'Privacidad y seguridad',
+      title: l10n.settingsPrivacyTitle,
       children: [
         SettingSwitch(
-          label: 'Usar ubicación al explorar',
-          description: 'Para verte en el mapa durante un recorrido',
+          label: l10n.settingsPrivacyUseLocation,
+          description: l10n.settingsPrivacyUseLocationDescription,
           value: location.useLocation,
           onChanged: (value) => location.useLocation = value,
         ),
         SettingSwitch(
-          label: 'Personalizar recomendaciones',
-          description: 'Según los circuitos que guardas y recorres',
+          label: l10n.settingsPrivacyPersonalize,
+          description: l10n.settingsPrivacyPersonalizeDescription,
           value: settings.personalizedRecommendations,
           onChanged: (value) => settings.personalizedRecommendations = value,
         ),
         SettingSwitch(
-          label: 'Mostrar insignias en mi perfil',
+          label: l10n.settingsPrivacyShowBadges,
           value: settings.showBadgesOnProfile,
           onChanged: (value) => settings.showBadgesOnProfile = value,
         ),
         const SizedBox(height: 8),
         ActionRow(
           icon: Icons.shield_outlined,
-          title: 'Uso de tus datos',
-          subtitle: 'Información y controles',
+          title: l10n.settingsDataUsageTitle,
+          subtitle: l10n.settingsPrivacyDataUsageSubtitle,
           onTap: () => context.push(Routes.settingsDataUsage),
         ),
         ActionRow(
           icon: Icons.lock_outline,
-          title: 'Seguridad de la cuenta',
-          subtitle: 'Cambiar contraseña',
+          title: l10n.settingsPrivacyAccountSecurity,
+          subtitle: l10n.settingsChangePassword,
           onTap: () => context.push(Routes.settingsPassword),
         ),
       ],

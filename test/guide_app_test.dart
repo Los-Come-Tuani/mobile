@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:k_plan_mobile/main.dart';
+import 'package:k_plan_mobile/src/core/l10n/l10n.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_access_repository.dart';
+import 'package:k_plan_mobile/src/data/datasources/repository/language_repository.dart';
 import 'package:k_plan_mobile/src/data/models/guide_access_request.dart';
 import 'package:k_plan_mobile/src/data/models/guide_job.dart';
 import 'package:k_plan_mobile/src/router/routes.dart';
@@ -36,7 +38,14 @@ Future<void> _openApp(WidgetTester tester) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(KPlanApp(authRepository: AuthRepository()));
+  // El idioma ya está elegido: aquí se prueba la app del guía, no la
+  // pregunta del login.
+  await tester.pumpWidget(
+    KPlanApp(
+      authRepository: AuthRepository(),
+      language: LanguageRepository.memory(chosen: AppLanguage.es),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 

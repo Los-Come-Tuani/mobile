@@ -35,7 +35,7 @@ class DateBadge extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            time,
+            Formatters.timeText(time),
             textAlign: TextAlign.center,
             maxLines: 1,
             style: AppTextStyles.caption.copyWith(color: AppColors.primaryText),

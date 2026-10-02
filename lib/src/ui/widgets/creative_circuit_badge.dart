@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -28,7 +29,7 @@ class CreativeCircuitBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            'Circuito creativo',
+            context.l10n.sharedCreativeCircuitBadge,
             style: AppTextStyles.caption.copyWith(
               color: AppColors.onCreativeCircuit,
               fontWeight: FontWeight.w700,
@@ -49,9 +50,8 @@ class CreativeCircuitBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final organizer = circuit.organizer.isEmpty
-        ? 'una alcaldía'
-        : 'la ${circuit.organizer}';
+    final l10n = context.l10n;
+    final organizer = circuit.organizer;
 
     return Container(
       width: double.infinity,
@@ -83,11 +83,12 @@ class CreativeCircuitBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Circuito creativo oficial', style: AppTextStyles.body),
+                Text(l10n.sharedCreativeBannerTitle, style: AppTextStyles.body),
                 const SizedBox(height: 2),
                 Text(
-                  'Lo creó $organizer. Se hace en grupo: te inscribes en un '
-                  'horario publicado por un guía certificado.',
+                  organizer.isEmpty
+                      ? l10n.sharedCreativeBannerBodyNoOrganizer
+                      : l10n.sharedCreativeBannerBody(organizer),
                   style: AppTextStyles.caption,
                 ),
                 const SizedBox(height: 10),
@@ -97,11 +98,13 @@ class CreativeCircuitBanner extends StatelessWidget {
                   children: [
                     _RewardPill(
                       icon: Icons.military_tech,
-                      label: '+${Circuit.creativeBonusBadges} insignias extra',
+                      label: l10n.sharedCreativeExtraBadges(
+                        Circuit.creativeBonusBadges,
+                      ),
                     ),
                     _RewardPill(
                       icon: Icons.workspace_premium,
-                      label: 'Medalla de ${circuit.city}',
+                      label: l10n.sharedCreativeCityMedal(circuit.city),
                     ),
                   ],
                 ),

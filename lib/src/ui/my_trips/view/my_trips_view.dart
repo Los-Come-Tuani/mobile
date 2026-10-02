@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -81,12 +82,13 @@ class _MyTripsViewState extends State<MyTripsView>
   }
 
   Future<void> _deleteTrip(CircuitCollection trip) async {
+    final l10n = context.l10n;
     final confirmed = await showConfirmDialog(
       context,
       icon: Icons.delete_outline,
-      title: '¿Eliminar "${trip.title}"?',
-      message: 'Se borrarán sus paradas guardadas. No se puede deshacer.',
-      confirmLabel: 'Eliminar',
+      title: l10n.myTripsDeleteTitle(trip.title),
+      message: l10n.myTripsDeleteMessage,
+      confirmLabel: l10n.myTripsDeleteConfirm,
       destructive: true,
     );
     if (!confirmed || !mounted) return;
@@ -95,10 +97,11 @@ class _MyTripsViewState extends State<MyTripsView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<MyTripsViewModel>();
 
     return Scaffold(
-      appBar: const BrandAppBar(title: 'Mis viajes'),
+      appBar: BrandAppBar(title: l10n.commonMyTrips),
       bottomNavigationBar: const AppBottomNav(
         currentIndex: AppBottomNav.myTrips,
       ),
@@ -107,10 +110,7 @@ class _MyTripsViewState extends State<MyTripsView>
         children: [
           Padding(
             padding: AppTheme.screenPadding.copyWith(top: 24),
-            child: Text(
-              'El próximo destino te espera',
-              style: AppTextStyles.pageTitle,
-            ),
+            child: Text(l10n.myTripsHeadline, style: AppTextStyles.pageTitle),
           ),
           const SizedBox(height: 8),
           Padding(
@@ -160,6 +160,8 @@ class _TripTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return TabBar(
       controller: controller,
       labelColor: AppColors.primary30,
@@ -174,10 +176,10 @@ class _TripTabs extends StatelessWidget {
       overlayColor: WidgetStatePropertyAll(
         AppColors.primary30.withValues(alpha: 0.06),
       ),
-      tabs: const [
-        Tab(text: 'Próximos', height: 44),
-        Tab(text: 'En curso', height: 44),
-        Tab(text: 'Mis circuitos', height: 44),
+      tabs: [
+        Tab(text: l10n.myTripsTabUpcoming, height: 44),
+        Tab(text: l10n.myTripsTabOngoing, height: 44),
+        Tab(text: l10n.commonMyCircuits, height: 44),
       ],
     );
   }
@@ -199,23 +201,22 @@ class _UpcomingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final bookings = viewModel.upcomingBookings;
 
     if (bookings.isEmpty) {
       return _EmptyTab(
         icon: Icons.explore_outlined,
-        title: 'Tu historia está por empezar',
-        message:
-            'Elige un circuito y organiza tu primera salida. Aquí '
-            'encontrarás los detalles de cada viaje.',
+        title: l10n.myTripsUpcomingEmptyTitle,
+        message: l10n.myTripsUpcomingEmptyMessage,
         action: PrimaryButton(
-          label: 'Explorar circuitos',
+          label: l10n.myTripsExploreCircuits,
           onPressed: () => context.go(Routes.home),
         ),
         secondaryAction: TextButton.icon(
           onPressed: () => context.push(Routes.assistant),
           icon: const Icon(Icons.auto_awesome, size: 18),
-          label: const Text('O arma tu viaje con IA'),
+          label: Text(l10n.myTripsUpcomingEmptyOrAi),
           style: TextButton.styleFrom(foregroundColor: AppColors.primary30),
         ),
       );
@@ -242,7 +243,7 @@ class _UpcomingTab extends StatelessWidget {
             _GuideRow(guide: guide),
           const SizedBox(height: 20),
         ],
-        SoftButton(label: 'Planificar otro viaje', onPressed: onPlanAnother),
+        SoftButton(label: l10n.myTripsPlanAnother, onPressed: onPlanAnother),
       ],
     );
   }
@@ -262,6 +263,7 @@ class _BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final people = Formatters.people(booking.adults + booking.children);
 
     return Material(
@@ -290,7 +292,7 @@ class _BookingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Reserva confirmada · $people',
+                    l10n.myTripsBookingConfirmed(people),
                     style: AppTextStyles.caption,
                   ),
                   const SizedBox(height: 8),
@@ -303,7 +305,9 @@ class _BookingCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Salida ${booking.startTime}',
+                        l10n.myTripsBookingDeparture(
+                          Formatters.timeText(booking.startTime),
+                        ),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -333,10 +337,12 @@ class _GuideRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final role = guide.role == ApplicationRole.guide
-        ? 'Tu guía'
-        : 'Tu traductora';
-    final languages = guide.guide.languages.join(' / ');
+        ? l10n.myTripsYourGuide
+        : l10n.myTripsYourTranslator;
+    // Los idiomas viajan en español en los datos: se traducen al mostrarlos.
+    final languages = guide.guide.languages.map(l10n.languageName).join(' / ');
 
     return MergeSemantics(
       child: Semantics(
@@ -378,7 +384,9 @@ class _GuideRow extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        languages.isEmpty ? role : '$role · $languages',
+                        languages.isEmpty
+                            ? role
+                            : l10n.myTripsGuideRoleLanguages(role, languages),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -414,23 +422,22 @@ class _OngoingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final trip = viewModel.ongoingTrip;
 
     if (trip == null) {
       final hasBookings = viewModel.upcomingBookings.isNotEmpty;
       return _EmptyTab(
         icon: Icons.directions_walk,
-        title: 'Ningún recorrido en curso',
-        message:
-            'Cuando empieces un circuito, aquí verás tu próxima parada, '
-            'la hora de llegada y el mapa.',
+        title: l10n.myTripsOngoingEmptyTitle,
+        message: l10n.myTripsOngoingEmptyMessage,
         action: hasBookings
             ? PrimaryButton(
-                label: 'Ver mis próximos viajes',
+                label: l10n.myTripsSeeUpcoming,
                 onPressed: onShowUpcoming,
               )
             : PrimaryButton(
-                label: 'Explorar circuitos',
+                label: l10n.myTripsExploreCircuits,
                 onPressed: () => context.go(Routes.home),
               ),
       );
@@ -456,7 +463,7 @@ class _OngoingTab extends StatelessWidget {
         if (trip.totalStops > 0) ...[
           const SizedBox(height: 12),
           Text(
-            '${trip.visitedStops} de ${trip.totalStops} paradas',
+            l10n.myTripsProgress(trip.visitedStops, trip.totalStops),
             style: AppTextStyles.caption.copyWith(
               color: AppColors.accentSecondaryGreen,
               fontWeight: FontWeight.w600,
@@ -464,7 +471,10 @@ class _OngoingTab extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Semantics(
-            label: 'Llevas ${trip.visitedStops} de ${trip.totalStops} paradas',
+            label: l10n.myTripsProgressSemantics(
+              trip.visitedStops,
+              trip.totalStops,
+            ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
@@ -489,17 +499,19 @@ class _OngoingTab extends StatelessWidget {
         const SizedBox(height: 20),
         _NextStop(
           title: next == null
-              ? 'Ya pasaste por todas las paradas'
-              : 'Siguiente: ${next.stop.name}',
+              ? l10n.myTripsAllVisited
+              : l10n.myTripsNextStop(next.stop.name),
           subtitle: next == null
-              ? 'Entra al detalle para finalizar el recorrido'
-              : 'Llegada ${Formatters.clock(next.arrival)} · '
-                    '${delayText.toLowerCase()}',
+              ? l10n.myTripsAllVisitedHint
+              : l10n.myTripsArrival(
+                  Formatters.clock(next.arrival),
+                  delayText.toLowerCase(),
+                ),
           isLate: isLate,
         ),
         const SizedBox(height: 20),
         PrimaryButton(
-          label: 'Abrir el mapa',
+          label: l10n.myTripsOpenMap,
           icon: Icons.map_outlined,
           onPressed: openMap,
         ),
@@ -508,15 +520,15 @@ class _OngoingTab extends StatelessWidget {
           ActionRow(
             icon: Icons.chat_bubble_outline,
             title: guide.role == ApplicationRole.guide
-                ? 'Contactar a mi guía'
-                : 'Contactar a mi traductora',
+                ? l10n.myTripsContactGuide
+                : l10n.myTripsContactTranslator,
             subtitle: guide.guide.name,
             onTap: () => context.push(Routes.guideChat),
           ),
         ],
         const SizedBox(height: 12),
         SoftButton(
-          label: 'Ver detalle del recorrido',
+          label: l10n.myTripsSeeDetails,
           onPressed: () =>
               onOpenCircuit(trip.circuitId, isUserCircuit: trip.isUserCircuit),
         ),
@@ -595,6 +607,8 @@ class _CircuitsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return ListView(
       padding: AppTheme.screenPadding.copyWith(top: 20, bottom: 24),
       children: [
@@ -610,8 +624,8 @@ class _CircuitsTab extends StatelessWidget {
             child: ActionRow(
               icon: Icons.auto_awesome,
               iconColor: AppColors.primary30,
-              title: 'Arma tu viaje con IA',
-              subtitle: 'Te organiza el día con horarios y traslados',
+              title: l10n.myTripsAiTitle,
+              subtitle: l10n.myTripsAiSubtitle,
               onTap: () => context.push(Routes.assistant),
             ),
           ),
@@ -621,14 +635,16 @@ class _CircuitsTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: ActionRow(
             icon: Icons.add_circle_outline,
-            title: 'Crear un circuito desde cero',
-            subtitle: 'Elige tú las paradas y el orden',
+            title: l10n.myTripsCreateTitle,
+            subtitle: l10n.myTripsCreateSubtitle,
             onTap: onCreate,
           ),
         ),
         const SizedBox(height: 24),
         Text(
-          trips.isEmpty ? 'Tus circuitos' : 'Tus circuitos · ${trips.length}',
+          trips.isEmpty
+              ? l10n.myTripsYourCircuits
+              : l10n.myTripsYourCircuitsCount(trips.length),
           style: AppTextStyles.fieldLabel,
         ),
         const SizedBox(height: 8),
@@ -636,8 +652,7 @@ class _CircuitsTab extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(
-              'Todavía no armaste ninguno. Los que crees aparecen aquí para '
-              'editarlos, reservarlos o salir a recorrerlos.',
+              l10n.myTripsCircuitsEmpty,
               style: AppTextStyles.bodySmall,
             ),
           )
@@ -666,9 +681,8 @@ class _CircuitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stops =
-        '${trip.stopCount} '
-        '${trip.stopCount == 1 ? 'parada' : 'paradas'}';
+    final l10n = context.l10n;
+    final stops = l10n.homeStopCount(trip.stopCount);
 
     return InkWell(
       borderRadius: BorderRadius.circular(AppTheme.radius),
@@ -720,7 +734,7 @@ class _CircuitRow extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.delete_outline),
               color: AppColors.secondaryText,
-              tooltip: 'Eliminar ${trip.title}',
+              tooltip: l10n.myTripsDeleteTooltip(trip.title),
               onPressed: onDelete,
             ),
           ],

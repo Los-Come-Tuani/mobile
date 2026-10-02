@@ -1,18 +1,34 @@
+import '../../core/l10n/l10n.dart';
+
 /// Por qué se quitó o no se visitó una parada: lo que el portal le muestra
 /// a cada lugar para entender a quienes no llegaron.
 enum DropReason {
-  closed('closed', 'Estaba cerrado'),
-  tooFar('too_far', 'Muy lejos o sin transporte'),
-  noTime('no_time', 'Falta de tiempo'),
-  tooExpensive('too_expensive', 'Muy caro'),
-  notInterested('not_interested', 'No me interesó'),
-  weather('weather', 'Por el clima'),
-  other('other', 'Otro motivo');
+  closed('closed'),
+  tooFar('too_far'),
+  noTime('no_time'),
+  tooExpensive('too_expensive'),
+  notInterested('not_interested'),
+  weather('weather'),
+  other('other');
 
-  const DropReason(this.jsonValue, this.label);
+  const DropReason(this.jsonValue);
 
+  /// Cómo viaja la razón al portal; no cambia con el idioma.
   final String jsonValue;
-  final String label;
+
+  /// Lo que lee el turista al elegirla, en el idioma de ahora.
+  String get label {
+    final l10n = AppStrings.current;
+    return switch (this) {
+      DropReason.closed => l10n.modelDropReasonClosed,
+      DropReason.tooFar => l10n.modelDropReasonTooFar,
+      DropReason.noTime => l10n.modelDropReasonNoTime,
+      DropReason.tooExpensive => l10n.modelDropReasonTooExpensive,
+      DropReason.notInterested => l10n.modelDropReasonNotInterested,
+      DropReason.weather => l10n.modelDropReasonWeather,
+      DropReason.other => l10n.modelDropReasonOther,
+    };
+  }
 }
 
 /// En qué momento se dejó una parada.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
@@ -27,6 +28,8 @@ class _LogoutSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 12, 12, 24),
@@ -36,11 +39,11 @@ class _LogoutSheet extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('Cerrar sesión', style: AppTextStyles.title),
+                  child: Text(l10n.commonLogout, style: AppTextStyles.title),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  tooltip: 'Cerrar',
+                  tooltip: l10n.commonClose,
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
               ],
@@ -57,21 +60,21 @@ class _LogoutSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '¿Cerrar tu sesión?',
+                    l10n.settingsLogoutTitle,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.pageTitle,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Tus guardados y viajes siguen asociados a tu cuenta.',
+                    l10n.settingsLogoutNote,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.bodySmall,
                   ),
                   const SizedBox(height: 32),
                   DialogActions(
-                    primaryLabel: 'Cerrar sesión',
+                    primaryLabel: l10n.commonLogout,
                     onPrimary: () => Navigator.of(context).pop(true),
-                    secondaryLabel: 'Cancelar',
+                    secondaryLabel: l10n.commonCancel,
                     onSecondary: () => Navigator.of(context).pop(false),
                   ),
                 ],

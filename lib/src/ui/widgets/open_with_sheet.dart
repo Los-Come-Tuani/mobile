@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -34,12 +35,13 @@ enum NavigationApp {
 /// Resultado de la hoja: app elegida y si debe recordarse.
 typedef OpenWithSelection = ({NavigationApp app, bool remember});
 
-/// Hoja "Abrir circuito con..." del diseño.
+/// Hoja "Abrir circuito con..." del diseño. Sin [title] usa ese texto (en el
+/// idioma de ahora).
 ///
 /// Devuelve `null` si el usuario cancela.
 Future<OpenWithSelection?> showOpenWithSheet(
   BuildContext context, {
-  String title = 'Abrir circuito con...',
+  String? title,
 }) {
   return showModalBottomSheet<OpenWithSelection>(
     context: context,
@@ -61,7 +63,7 @@ Future<void> openInNavigationApp(
 }) async {
   final selection = await showOpenWithSheet(
     context,
-    title: 'Cómo llegar con...',
+    title: context.l10n.sharedDirectionsWithTitle,
   );
   if (selection == null || !context.mounted) return;
 
@@ -74,7 +76,9 @@ Future<void> openInNavigationApp(
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text('No se pudo abrir ${selection.app.label}')),
+        SnackBar(
+          content: Text(context.l10n.sharedOpenAppFailed(selection.app.label)),
+        ),
       );
   }
 }
@@ -82,7 +86,7 @@ Future<void> openInNavigationApp(
 class _OpenWithSheet extends StatefulWidget {
   const _OpenWithSheet({required this.title});
 
-  final String title;
+  final String? title;
 
   @override
   State<_OpenWithSheet> createState() => _OpenWithSheetState();
@@ -94,6 +98,8 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -109,7 +115,10 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(widget.title, style: AppTextStyles.title),
+            Text(
+              widget.title ?? l10n.sharedOpenWithTitle,
+              style: AppTextStyles.title,
+            ),
             const SizedBox(height: 20),
             for (final app in NavigationApp.values) ...[
               _AppOption(
@@ -132,7 +141,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                 ),
                 Flexible(
                   child: Text(
-                    'Usar siempre esta opción',
+                    l10n.sharedAlwaysUseOption,
                     style: AppTextStyles.bodySmall,
                   ),
                 ),
@@ -148,7 +157,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                       foregroundColor: AppColors.primary30,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancelar'),
+                    child: Text(l10n.commonCancel),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -157,7 +166,7 @@ class _OpenWithSheetState extends State<_OpenWithSheet> {
                     onPressed: () => Navigator.of(
                       context,
                     ).pop((app: _selected, remember: _remember)),
-                    child: const Text('Aceptar'),
+                    child: Text(l10n.commonAccept),
                   ),
                 ),
               ],

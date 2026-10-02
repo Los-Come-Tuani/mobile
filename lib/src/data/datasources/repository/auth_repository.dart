@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/user.dart';
@@ -44,25 +45,25 @@ class AuthRepository extends ChangeNotifier {
       _setUser(user);
       return Result.ok(user);
     } on MissingAccount {
-      return const Result.failure(
-        'No hemos encontrado esta cuenta',
-        MissingAccount(),
+      return Result.failure(
+        AppStrings.current.repoAuthAccountNotFound,
+        const MissingAccount(),
       );
     } on DioException catch (e, st) {
       log.e('login: ${e.message}', error: e, stackTrace: st);
       if (_isMissingAccount(e)) {
-        return const Result.failure(
-          'No hemos encontrado esta cuenta',
-          MissingAccount(),
+        return Result.failure(
+          AppStrings.current.repoAuthAccountNotFound,
+          const MissingAccount(),
         );
       }
       if (e.response?.statusCode == 401) {
-        return const Result.failure('Correo o contraseña incorrectos');
+        return Result.failure(AppStrings.current.repoAuthWrongCredentials);
       }
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('login: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 
@@ -81,7 +82,7 @@ class AuthRepository extends ChangeNotifier {
   }) async {
     await Future<void>.delayed(const Duration(milliseconds: 600));
     if (!RegExp(r'^\d{6}$').hasMatch(code)) {
-      return const Result.failure('El código no es válido');
+      return Result.failure(AppStrings.current.repoAuthInvalidCode);
     }
     return const Result.ok(null);
   }
@@ -119,7 +120,7 @@ class AuthRepository extends ChangeNotifier {
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('register: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 
