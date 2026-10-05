@@ -44,4 +44,30 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Variables de entorno.
 .env
+.env.*
+!.env.example
+
+# Configuración por entorno (`--dart-define-from-file`): se versionan solo las
+# plantillas `*.example.json`. Todo lo que se compila dentro de la app es extraíble
+# del APK/IPA, así que ahí solo van valores públicos (URL del API, Client ID de
+# Google), nunca claves de servidor.
+/env/*.json
+!/env/*.example.json
+
+# Llaves, certificados y credenciales (firma de apps, Google, Firebase, Apple).
+*.jks
+*.key
+*.keystore
+*.mobileprovision
+*.p12
+*.p8
+*.pem
+*.pfx
+*-firebase-adminsdk-*.json
+*service-account*.json
+GoogleService-Info.plist
+client_secret*.json
+google-services.json
+key.properties
