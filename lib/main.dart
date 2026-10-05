@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'src/core/theme/app_theme.dart';
+import 'src/data/datasources/remote/api_client.dart';
 import 'src/data/datasources/repository/active_trip_repository.dart';
 import 'src/data/datasources/repository/api_repository.dart';
 import 'src/data/datasources/repository/auth_repository.dart';
@@ -29,6 +30,8 @@ import 'src/router/router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // En release solo se acepta un API por https (ver `ApiClient.baseUrl`).
+  ApiClient.ensureSafeConfiguration();
   runApp(KPlanApp(authRepository: AuthRepository()));
 }
 
