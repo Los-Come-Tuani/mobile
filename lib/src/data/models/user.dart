@@ -10,6 +10,7 @@ class User {
     this.birthDate,
     this.nationality = '',
     this.twoFactorEnabled = false,
+    this.role,
   });
 
   final String id;
@@ -28,6 +29,20 @@ class User {
   /// Si la cuenta tiene la verificación en dos pasos activa.
   final bool twoFactorEnabled;
 
+  /// El papel que le da el API: en la app, `turista`, `guia` o `traductor`. Si tiene
+  /// varios, el API manda el de más rango (el de guía antes que el de traductor). Nulo en
+  /// la demo y en una cuenta sin rol.
+  final String? role;
+
+  /// El equipo de K'Plan ya la habilitó como guía.
+  bool get isGuide => role == 'guia';
+
+  /// El equipo de K'Plan ya la habilitó como traductora (y no como guía).
+  bool get isTranslator => role == 'traductor';
+
+  /// Puede entrar a la app del guía: ofrece sus servicios como guía o como traductor.
+  bool get providesServices => isGuide || isTranslator;
+
   factory User.fromApi(Map<String, dynamic> json) {
     final twoFactor = json['two_factor'];
     return User(
@@ -40,6 +55,7 @@ class User {
       birthDate: DateTime.tryParse('${json['birth_date'] ?? ''}'),
       nationality: '${json['nationality'] ?? ''}',
       twoFactorEnabled: twoFactor is Map && twoFactor['enabled'] == true,
+      role: json['role'] as String?,
     );
   }
 
@@ -53,6 +69,7 @@ class User {
     DateTime? birthDate,
     String? nationality,
     bool? twoFactorEnabled,
+    String? role,
   }) {
     return User(
       id: id ?? this.id,
@@ -64,6 +81,7 @@ class User {
       birthDate: birthDate ?? this.birthDate,
       nationality: nationality ?? this.nationality,
       twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
+      role: role ?? this.role,
     );
   }
 }

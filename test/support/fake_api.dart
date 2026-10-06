@@ -92,6 +92,7 @@ Map<String, dynamic> apiUser({
   String email = 'ana@example.com',
   String name = 'Ana Gómez',
   bool twoFactor = false,
+  String? role = 'turista',
 }) => {
   'id': id,
   'email': email,
@@ -103,7 +104,7 @@ Map<String, dynamic> apiUser({
   'nationality': 'NI',
   'status': 'active',
   'verified': true,
-  'role': 'turista',
+  'role': role,
   'groups': <Object>[],
   'permissions': <String>[],
   'organization_id': null,

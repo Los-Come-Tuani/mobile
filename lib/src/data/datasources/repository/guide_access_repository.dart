@@ -4,14 +4,18 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/result.dart';
 import '../../models/guide_access_request.dart';
+import '../remote/api_client.dart';
 import 'auth_repository.dart';
 
 /// El acceso de guía de cada cuenta: si todavía no se postula, si su
 /// solicitud está en revisión o si ya puede entrar como guía.
 ///
-/// El portal donde el equipo de K'Plan revisa las solicitudes todavía no
-/// existe, así que la revisión se simula: cada solicitud pasa por los pasos
-/// de [GuideReviewStep] durante [reviewTime] y después se aprueba sola.
+/// Con el API real manda el rol de la cuenta: quien el equipo de K'Plan habilitó
+/// como guía o traductor (`User.providesServices`) entra a la app del guía, y nadie
+/// más. La postulación desde la app todavía no llega al API (es la fase de guías y
+/// traductores), así que solo existe en el modo demo, donde la revisión se simula:
+/// cada solicitud pasa por los pasos de [GuideReviewStep] durante [reviewTime] y
+/// después se aprueba sola.
 class GuideAccessRepository extends ChangeNotifier {
   GuideAccessRepository(
     this._authRepository, {
@@ -24,6 +28,8 @@ class GuideAccessRepository extends ChangeNotifier {
         review: null,
       );
     }
+    // El rol llega con la sesión: al entrar o salir cambia el acceso de guía.
+    _authRepository.addListener(notifyListeners);
   }
 
   /// Cuentas de guía ya aprobadas, para probar la app del guía sin pasar
@@ -95,9 +101,21 @@ class GuideAccessRepository extends ChangeNotifier {
 
   bool get isApproved => status == GuideAccessStatus.approved;
 
+  /// Si se puede postular desde la app. Con el API real todavía no: el equipo
+  /// habilita a los guías y traductores directamente.
+  bool get canApplyInApp => !ApiClient.isConfigured;
+
   /// En qué va la cuenta con sesión iniciada.
-  GuideAccessStatus get status =>
-      _byAccount[_account]?.status ?? GuideAccessStatus.none;
+  GuideAccessStatus get status {
+    if (ApiClient.isConfigured) {
+      final providesServices =
+          _authRepository.currentUser?.providesServices ?? false;
+      return providesServices
+          ? GuideAccessStatus.approved
+          : GuideAccessStatus.none;
+    }
+    return _byAccount[_account]?.status ?? GuideAccessStatus.none;
+  }
 
   /// Lo que envió la cuenta con sesión iniciada, si ya se postuló.
   GuideAccessRequest? get request => _byAccount[_account]?.request;
@@ -119,6 +137,12 @@ class GuideAccessRepository extends ChangeNotifier {
     GuideAccessRequest request, {
     bool signedUpAsGuide = false,
   }) async {
+    if (!canApplyInApp) {
+      return const Result.failure(
+        'Por ahora el equipo de K’Plan habilita a los guías y traductores '
+        'directamente: la postulación desde la app llega pronto.',
+      );
+    }
     final account = _account;
     if (account == null) {
       return const Result.failure('Inicia sesión para enviar tu solicitud');
@@ -173,6 +197,7 @@ class GuideAccessRepository extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authRepository.removeListener(notifyListeners);
     for (final timers in _reviews.values) {
       for (final timer in timers) {
         timer.cancel();

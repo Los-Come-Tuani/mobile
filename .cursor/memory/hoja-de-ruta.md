@@ -62,11 +62,18 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    con el Client ID iOS invertido en `ios/Runner/Info.plist` (`CFBundleURLTypes`). Paso a paso:
    `api/docs/google.md`. Probar el botón de Google en un dispositivo real.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
-3. **F2 (roles y permisos) ya está en el API y la app no cambió**: `mobile` solo admite turista,
-   guía y traductor (y cuentas sin rol). Una cuenta del equipo o de un negocio que intente entrar
-   por la app recibe `401` con el mismo mensaje que una contraseña mala, así que la pantalla de
-   inicio de sesión ya lo muestra bien. Si un día la app necesita saber de sus permisos, la
-   sesión trae `user.role` y `user.permissions` (ver `api/docs/roles.md`).
+3. **Roles en la app (hecho, 2026-10-06)**: `mobile` solo admite turista, guía y traductor (y
+   cuentas sin rol); una cuenta del equipo o de un negocio recibe `401` como una contraseña mala.
+   `User` lee `role` de la sesión (`isGuide`, `isTranslator`, `providesServices`). Con el API real,
+   `GuideAccessRepository.status` sale del rol: guía o traductor -> aprobado (entra al "Modo guía",
+   que en el menú dice "Modo traductor" a una traductora), cualquier otro -> sin acceso. La
+   postulación desde la app **no existe con el API** (`canApplyInApp` falso): la pantalla de
+   inicio de la postulación lo explica y no ofrece "Postularme", y `submit` falla en lugar de
+   aprobarse sola a los 60 s como en la demo. El rol de guía o traductor hoy solo se da a mano
+   (no hay ruta del API para eso); llega con la fase de guías y traductores (F5), que es cuando
+   la postulación tendrá su endpoint y la revisión del equipo en el portal. Pruebas:
+   `test/guide_access_roles_test.dart`. El API manda un solo rol, el de más rango: una cuenta que
+   es guía y traductora llega como `guia`.
 4. **Datos del dominio** (circuitos, lugares, reservas, guías...): siguen simulados. Cada fase
    (F3 en adelante) reemplaza su repositorio por llamadas al API; la app no consume nada de eso
    todavía. El mejor checklist es `portal/src/data/api/endpoints.ts`.

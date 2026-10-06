@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../router/routes.dart';
 import '../viewmodels/home_viewmodel.dart';
@@ -133,10 +134,16 @@ class _GuideModeItem extends StatelessWidget {
     final isGuide = context.select<GuideAccessRepository, bool>(
       (access) => access.isApproved,
     );
+    // Con el API, una traductora (sin el rol de guía) entra a la misma app.
+    final isTranslator = context.select<AuthRepository, bool>(
+      (auth) => auth.currentUser?.isTranslator ?? false,
+    );
 
     return _MenuItem(
       icon: Icons.tour_outlined,
-      label: isGuide ? 'Modo guía' : 'Ser guía en K’Plan',
+      label: isGuide
+          ? (isTranslator ? 'Modo traductor' : 'Modo guía')
+          : 'Ser guía en K’Plan',
       onTap: () {
         Navigator.of(context).pop();
         context.go(isGuide ? Routes.guideHome : Routes.guideAccess);

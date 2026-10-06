@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
+import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../router/routes.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
@@ -34,6 +35,9 @@ class GuideStartView extends StatelessWidget {
     final isLoggedIn = context.select<AuthRepository, bool>(
       (auth) => auth.isLoggedIn,
     );
+    final canApply = context.select<GuideAccessRepository, bool>(
+      (access) => access.canApplyInApp,
+    );
 
     void back() => context.canPop()
         ? context.pop()
@@ -58,11 +62,21 @@ class GuideStartView extends StatelessWidget {
                     'Puedes postularte para ofrecer tus servicios como guía.',
               ),
               const SizedBox(height: 20),
-              const InlineNotice(
-                message:
-                    'El equipo de K’Plan revisará tu información antes de '
-                    'habilitar tu acceso.',
-              ),
+              if (canApply)
+                const InlineNotice(
+                  message:
+                      'El equipo de K’Plan revisará tu información antes de '
+                      'habilitar tu acceso.',
+                )
+              else
+                // Con el API real la postulación todavía no existe: el equipo
+                // habilita la cuenta y la app lo sabe por su rol.
+                const InlineNotice(
+                  message:
+                      'Por ahora el equipo de K’Plan habilita a los guías y '
+                      'traductores directamente: la postulación desde la app '
+                      'llega pronto. Si ya te habilitaron, sal y vuelve a entrar.',
+                ),
               const SizedBox(height: 24),
               Text('Ten a mano', style: AppTextStyles.sectionLabel),
               const SizedBox(height: 4),
@@ -75,11 +89,13 @@ class GuideStartView extends StatelessWidget {
                   ),
                 ),
               const SizedBox(height: 40),
-              PrimaryButton(
-                label: 'Postularme',
-                onPressed: () => context.push(Routes.guideApplication),
-              ),
-              const SizedBox(height: 16),
+              if (canApply) ...[
+                PrimaryButton(
+                  label: 'Postularme',
+                  onPressed: () => context.push(Routes.guideApplication),
+                ),
+                const SizedBox(height: 16),
+              ],
               SecondaryButton(
                 label: 'Continuar como turista',
                 onPressed: () =>
