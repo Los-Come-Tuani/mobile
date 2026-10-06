@@ -62,9 +62,11 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    con el Client ID iOS invertido en `ios/Runner/Info.plist` (`CFBundleURLTypes`). Paso a paso:
    `api/docs/google.md`. Probar el botón de Google en un dispositivo real.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
-3. **F2 (roles y permisos, API primero)**: el API dejará `mobile` solo para turista, guía y
-   traductor (hoy acepta cualquier cuenta). La app no debe cambiar; solo cuidar el mensaje cuando
-   una cuenta de equipo intente entrar (el API responderá como credenciales inválidas).
+3. **F2 (roles y permisos) ya está en el API y la app no cambió**: `mobile` solo admite turista,
+   guía y traductor (y cuentas sin rol). Una cuenta del equipo o de un negocio que intente entrar
+   por la app recibe `401` con el mismo mensaje que una contraseña mala, así que la pantalla de
+   inicio de sesión ya lo muestra bien. Si un día la app necesita saber de sus permisos, la
+   sesión trae `user.role` y `user.permissions` (ver `api/docs/roles.md`).
 4. **Datos del dominio** (circuitos, lugares, reservas, guías...): siguen simulados. Cada fase
    (F3 en adelante) reemplaza su repositorio por llamadas al API; la app no consume nada de eso
    todavía. El mejor checklist es `portal/src/data/api/endpoints.ts`.
