@@ -31,6 +31,45 @@ apuntar según corras en el emulador de Android, el simulador de iOS o un teléf
 - Lo que se compila dentro de la app se puede extraer del APK/IPA: solo valores públicos, nunca
   claves de servidor.
 
+## Cuenta y sesión
+
+Con el API configurado, la identidad va contra el API real (`/auth/mobile/*`, ver
+`docs/autenticacion.md` del repo del API):
+
+- **Tokens**: `access` (3 horas) y `refresh` (1 día, de un solo uso) se guardan en el almacén
+  seguro del dispositivo (Keychain en iOS, Keystore en Android) con `flutter_secure_storage`,
+  nunca en `shared_preferences`. Los pone el `ApiClient` en cada petición; ante un `401` renueva la
+  sesión **una sola vez** aunque fallen varias peticiones a la vez y reintenta. Si el API rechaza la
+  renovación, la sesión termina y el router vuelve a la bienvenida. Al abrir la app se recupera la
+  sesión guardada.
+- **Entrar**: correo y contraseña. Si la cuenta tiene verificación en dos pasos, llega el reto y la
+  pantalla "Verifica que eres tú" pide el código de la app de autenticación o uno de recuperación.
+  Cinco intentos fallidos bloquean el acceso quince minutos (la app dice cuánto esperar).
+- **Crear cuenta**: correo -> código de 6 dígitos que llega al correo -> contraseña (8+, una
+  mayúscula y un número) -> fecha de nacimiento (mayor de 18) -> nacionalidad -> nombre -> usuario.
+  La postulación de guías pide la fecha y la nacionalidad en su primer paso si todavía no hay cuenta.
+- **Recuperar la contraseña**: código al correo y contraseña nueva. **Cambiarla** desde la cuenta
+  cierra todas las sesiones.
+- **Verificación en dos pasos**: en Configuraciones -> Cuenta (QR, clave, códigos de recuperación
+  que se muestran una sola vez, regenerarlos y desactivar).
+- **Google**: el botón "Continuar con Google" solo aparece con `GOOGLE_SERVER_CLIENT_ID`. La primera
+  vez pide fecha de nacimiento y nacionalidad. Configuración paso a paso en `docs/google.md` del
+  repo del API.
+- Los registros de red redactan contraseñas, tokens y códigos (`lib/src/core/utils/redact.dart`).
+
+Sin API (modo demo) todo esto se simula con cuentas de ejemplo y no se guarda nada en disco.
+
+### Probar contra el API de verdad
+
+Con el API local corriendo y el correo en consola (`DEBUG=True`):
+
+```bash
+KPLAN_API_URL=http://localhost:8080 KPLAN_MAIL_LOG=<archivo con la salida del API> flutter test test/integration
+```
+
+Crea una cuenta de turista nueva y recorre el registro con código, la renovación de la sesión y el
+2FA completo con códigos reales. Sin esas variables, las pruebas se saltan.
+
 ## Calidad
 
 ```bash

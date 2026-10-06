@@ -1,3 +1,5 @@
 {
-  "API_BASE_URL": "https://api.tu-dominio.com"
+  "API_BASE_URL": "https://api.tu-dominio.com",
+  "GOOGLE_SERVER_CLIENT_ID": "",
+  "GOOGLE_IOS_CLIENT_ID": ""
 }

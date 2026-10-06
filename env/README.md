@@ -9,9 +9,14 @@ cp env/dev.example.json env/dev.json
 flutter run --dart-define-from-file=env/dev.json
 ```
 
-| Variable       | Qué es                                                                 |
-| -------------- | ---------------------------------------------------------------------- |
-| `API_BASE_URL` | URL base del API, sin `/` al final. Vacía o ausente = modo demo (sin backend). |
+| Variable                  | Qué es                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| `API_BASE_URL`            | URL base del API, sin `/` al final. Vacía o ausente = modo demo (sin backend).                  |
+| `GOOGLE_SERVER_CLIENT_ID` | Client ID de tipo **Web** de Google Cloud (el que valida el API). Vacío = sin botón de Google.   |
+| `GOOGLE_IOS_CLIENT_ID`    | Client ID de tipo **iOS**. Solo iOS lo usa; en Android se deja vacío.                            |
+
+Los dos Client ID de Google son públicos (no son secretos), pero se crean con el
+identificador definitivo de la app: ver `docs/google.md` en el repo del API.
 
 > Todo lo que se compila dentro de la app se puede extraer del APK/IPA. Aquí solo van valores
 > públicos (la URL del API, un Client ID de Google), **nunca** claves de servidor ni tokens.
@@ -38,3 +43,19 @@ completa la URL y compila con ese archivo:
 ```bash
 flutter build apk --release --dart-define-from-file=env/prod.json
 ```
+
+### Firma del release (Android)
+
+El release se firma con una llave propia que **no** se versiona. Crea `android/key.properties`
+(ignorado por git) con:
+
+```properties
+storeFile=../../ruta/fuera/del/repo/kplan-release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Sin ese archivo, `build.gradle.kts` firma el release con la llave de debug y lo avisa: sirve
+para probar con `flutter run --release`, no para publicar. La misma llave (y la de Play App
+Signing) hay que registrarla con su huella SHA-1 en el Client ID Android de Google.
