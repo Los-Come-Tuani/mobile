@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/redact.dart';
+import '../local/session_store.dart';
+import 'api_routes.dart';
 
 /// Cliente HTTP único de la app.
 ///
@@ -13,15 +17,21 @@ import '../../../core/utils/redact.dart';
 /// `--dart-define-from-file=env/<entorno>.json` (ver `env/README.md`). Así el mismo
 /// código apunta al API local en desarrollo y a la URL de producción en release, y
 /// ninguna URL real se versiona.
+///
+/// **Sesión.** Los tokens viven en el [sessionStore] (almacén seguro del dispositivo);
+/// aquí solo se guarda una copia en memoria del de acceso. Cada petición lleva
+/// `Authorization: Bearer`. Si el API responde 401, el acceso venció: se renueva con el
+/// `refresh` (una sola vez aunque fallen varias peticiones a la vez, porque el `refresh`
+/// es de un solo uso) y la petición se reintenta. Si el API rechaza la renovación, la
+/// sesión terminó: se borran los tokens y se avisa por [onSessionExpired].
 class ApiClient {
   ApiClient._();
 
-  static String? _token;
+  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static String? _baseUrlForTests;
 
   /// URL base del API, sin "/" al final. Viene de `API_BASE_URL`; vacía = demo.
-  static final String baseUrl = _normalize(
-    const String.fromEnvironment('API_BASE_URL'),
-  );
+  static String get baseUrl => _normalize(_baseUrlForTests ?? _envBaseUrl);
 
   /// `false` mientras no se configure [baseUrl]: permite trabajar la UI sin backend.
   static bool get isConfigured => baseUrl.isNotEmpty;
@@ -34,57 +44,266 @@ class ApiClient {
     }
   }
 
-  static final Dio _dio =
-      Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: const Duration(seconds: 15),
-            receiveTimeout: const Duration(seconds: 45),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-          ),
-        )
-        ..interceptors.addAll([
-          // Solo en debug, y nunca con cabeceras ni cuerpos sin redactar: un log de
-          // red con contraseñas o tokens es una filtración.
-          if (kDebugMode) SafeLogInterceptor(),
-          InterceptorsWrapper(
-            onRequest: (options, handler) {
-              // Inyectar el token dinámico si existe
-              if (_token != null && _token!.isNotEmpty) {
-                options.headers['Authorization'] = 'Bearer $_token';
-              }
-              return handler.next(options);
-            },
-            onError: (DioException e, handler) {
-              log.e(describeError(e));
-              return handler.next(e);
-            },
-          ),
-        ]);
+  // ── Sesión ────────────────────────────────────────────────────────────────
+
+  /// Dónde se guardan los tokens. `main` pone el almacén seguro; sin él (pruebas, demo)
+  /// quedan solo en memoria.
+  static SessionStore sessionStore = MemorySessionStore();
+
+  /// El API rechazó la renovación: la sesión terminó. `AuthRepository` sale de la cuenta.
+  static VoidCallback? onSessionExpired;
+
+  static String? _access;
+  static bool _accessLoaded = false;
+  static Future<bool>? _renewing;
+  static const String _retriedKey = 'kplan.retried';
+
+  /// Guarda la sesión recién abierta (inicio de sesión, 2FA, Google).
+  static Future<void> openSession(SessionTokens tokens) async {
+    _access = tokens.access;
+    _accessLoaded = true;
+    await sessionStore.write(tokens);
+  }
+
+  /// Borra los tokens de este dispositivo.
+  static Future<void> closeSession() async {
+    _access = null;
+    _accessLoaded = true;
+    await sessionStore.clear();
+  }
+
+  /// Los tokens guardados, si hay una sesión de una vez anterior.
+  static Future<SessionTokens?> storedTokens() => sessionStore.read();
+
+  static Future<String?> _currentAccess() async {
+    if (!_accessLoaded) {
+      _access = (await sessionStore.read())?.access;
+      _accessLoaded = true;
+    }
+    return _access;
+  }
+
+  /// Renueva la sesión con el `refresh`. `true`: renovada. `false`: el API la rechazó.
+  /// Un fallo de red se lanza (la sesión sigue en pie, solo no hubo conexión).
+  static Future<bool> _renew() =>
+      _renewing ??= _renewOnce().whenComplete(() => _renewing = null);
+
+  static Future<bool> _renewOnce() async {
+    final tokens = await sessionStore.read();
+    if (tokens == null || tokens.refresh.isEmpty) return false;
+
+    try {
+      final response = await _plain.post<Map<String, dynamic>>(
+        ApiRoutes.refresh,
+        data: {'access': tokens.access, 'refresh': tokens.refresh},
+      );
+      final body = response.data;
+      final access = body?['access'];
+      final refresh = body?['refresh'];
+      if (access is! String || refresh is! String) return false;
+      await openSession(SessionTokens(access: access, refresh: refresh));
+      return true;
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 400 || status == 401 || status == 403) return false;
+      rethrow;
+    }
+  }
+
+  static Future<void> _expire() async {
+    await closeSession();
+    onSessionExpired?.call();
+  }
+
+  // ── Cliente ───────────────────────────────────────────────────────────────
+
+  static Dio _build({required bool withSession}) {
+    return Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 45),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      )
+      ..interceptors.addAll([
+        // Solo en debug, y nunca con cabeceras ni cuerpos sin redactar: un log de
+        // red con contraseñas o tokens es una filtración.
+        if (kDebugMode) SafeLogInterceptor(),
+        if (withSession) _SessionInterceptor(),
+      ]);
+  }
+
+  static final Dio _dio = _build(withSession: true);
+
+  /// El mismo API sin el manejo de sesión: la renovación no puede depender de sí misma.
+  static final Dio _plain = _build(withSession: false);
+
+  static Dio get instance => _dio;
 
   /// Mensaje legible para el usuario a partir de un error de red.
+  ///
+  /// Si el API explicó qué pasó (`detail`), se usa su texto: ya viene en español y pensado
+  /// para la persona.
   static String describeError(DioException e) {
+    final status = e.response?.statusCode;
+    final detail = _detailOf(e);
+
+    if (status == 429) {
+      final wait = retryAfter(e);
+      final base =
+          detail ?? 'Demasiados intentos, espera un momento e intenta de nuevo';
+      return wait == null
+          ? base
+          : '$base Puedes reintentar en ${waitText(wait)}.';
+    }
+    if (detail != null && status != null && status < 500) return detail;
+
     return switch (e.type) {
       DioExceptionType.connectionError => 'No hay conexión a internet',
       DioExceptionType.connectionTimeout => 'Tiempo de conexión agotado',
       DioExceptionType.receiveTimeout =>
         'El servidor tardó demasiado en responder',
-      _ when e.response?.statusCode == 401 =>
-        'Sesión expirada, vuelve a iniciar sesión',
+      _ when status == 401 => 'Sesión expirada, vuelve a iniciar sesión',
       _ => 'Ocurrió un error de comunicación con el servidor',
     };
   }
 
-  static void setToken(String token) => _token = token;
+  /// El `detail` que manda el API (`{ "detail": "...", "field_errors": {...} }`).
+  static String? _detailOf(DioException e) {
+    final data = e.response?.data;
+    if (data is Map && data['detail'] is String) {
+      final detail = (data['detail'] as String).trim();
+      if (detail.isNotEmpty) return detail;
+    }
+    return null;
+  }
 
-  static void clearToken() => _token = null;
+  static const _scopes = {
+    'body',
+    'cookies',
+    'files',
+    'headers',
+    'path',
+    'query',
+  };
 
-  static Dio get instance => _dio;
+  /// Los errores por campo del API, con el nombre del campo sin el origen:
+  /// `body.birth_date` -> `birth_date`.
+  static Map<String, String> fieldErrors(DioException e) {
+    final data = e.response?.data;
+    final raw = data is Map ? data['field_errors'] : null;
+    if (raw is! Map) return const {};
 
-  static String _normalize(String url) => url.trim().replaceAll(RegExp(r'/+$'), '');
+    final result = <String, String>{};
+    for (final entry in raw.entries) {
+      if (entry.value is! String) continue;
+      final parts = '${entry.key}'.split('.');
+      if (parts.length > 1 && _scopes.contains(parts.first)) parts.removeAt(0);
+      result.putIfAbsent(parts.join('.'), () => entry.value as String);
+    }
+    return result;
+  }
+
+  /// Segundos que pide esperar el API (`Retry-After`), sobre todo en un 429.
+  static int? retryAfter(DioException e) {
+    final value = e.response?.headers.value('retry-after');
+    final seconds = value == null ? null : int.tryParse(value);
+    return seconds != null && seconds >= 0 ? seconds : null;
+  }
+
+  /// "15 minutos", "40 segundos": para decirle a la persona cuánto esperar.
+  static String waitText(int seconds) {
+    if (seconds < 60) {
+      return '$seconds ${seconds == 1 ? 'segundo' : 'segundos'}';
+    }
+    final minutes = (seconds / 60).ceil();
+    return '$minutes ${minutes == 1 ? 'minuto' : 'minutos'}';
+  }
+
+  /// Para las pruebas: apunta a otra URL y cambia el transporte (sin red de verdad).
+  @visibleForTesting
+  static void configureForTest({
+    String? baseUrl,
+    HttpClientAdapter? adapter,
+    SessionStore? store,
+  }) {
+    _baseUrlForTests = baseUrl;
+    _dio.options.baseUrl = ApiClient.baseUrl;
+    _plain.options.baseUrl = ApiClient.baseUrl;
+    if (adapter != null) {
+      _dio.httpClientAdapter = adapter;
+      _plain.httpClientAdapter = adapter;
+    }
+    if (store != null) sessionStore = store;
+    _access = null;
+    _accessLoaded = false;
+    _renewing = null;
+    onSessionExpired = null;
+  }
+
+  static String _normalize(String url) =>
+      url.trim().replaceAll(RegExp(r'/+$'), '');
+}
+
+/// Pone el token de acceso y, ante un 401, renueva la sesión y reintenta una vez.
+class _SessionInterceptor extends Interceptor {
+  @override
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    if (!ApiRoutes.own401.contains(options.path)) {
+      final token = await ApiClient._currentAccess();
+      if (token != null && token.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $token';
+      }
+    }
+    handler.next(options);
+  }
+
+  @override
+  Future<void> onError(
+    DioException err,
+    ErrorInterceptorHandler handler,
+  ) async {
+    final request = err.requestOptions;
+    final isSessionRequest = !ApiRoutes.own401.contains(request.path);
+
+    if (err.response?.statusCode != 401 || !isSessionRequest) {
+      log.e(ApiClient.describeError(err));
+      return handler.next(err);
+    }
+
+    // Ya se reintentó con una sesión renovada y sigue el 401: la sesión terminó.
+    if (request.extra[ApiClient._retriedKey] == true) {
+      await ApiClient._expire();
+      return handler.next(err);
+    }
+
+    final tokens = await ApiClient.storedTokens();
+    if (tokens == null) return handler.next(err);
+
+    try {
+      final renewed = await ApiClient._renew();
+      if (!renewed) {
+        await ApiClient._expire();
+        return handler.next(err);
+      }
+      final retry = await ApiClient._dio.fetch<dynamic>(
+        request.copyWith(
+          extra: {...request.extra, ApiClient._retriedKey: true},
+        ),
+      );
+      return handler.resolve(retry);
+    } on DioException catch (e) {
+      // Sin conexión o error del servidor al renovar: la sesión sigue, esta petición falla.
+      return handler.next(e);
+    }
+  }
 }
 
 /// Registra método, ruta, estado y duración de cada petición. En debug añade los
@@ -100,7 +319,10 @@ class SafeLogInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
     final request = response.requestOptions;
     log.d(
       '<-- ${response.statusCode} ${request.method} ${request.uri.path}'

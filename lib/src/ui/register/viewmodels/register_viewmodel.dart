@@ -1,9 +1,18 @@
+import '../../../core/utils/age.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../core/base_viewmodel.dart';
 
 /// Los pasos de "Crear cuenta", en el orden en que se muestran.
-enum RegisterStep { email, code, password, birthDate, name, username }
+enum RegisterStep {
+  email,
+  code,
+  password,
+  birthDate,
+  nationality,
+  name,
+  username,
+}
 
 /// Registro por pasos: cada pantalla guarda su dato y la cuenta se crea
 /// al final, con todo junto.
@@ -18,9 +27,14 @@ class RegisterViewModel extends BaseViewModel {
   String _email = '';
   String get email => _email;
 
+  /// El código que llegó al correo: el API lo vuelve a pedir al crear la cuenta.
+  String _code = '';
+
   String _password = '';
   DateTime? _birthDate;
   DateTime? get birthDate => _birthDate;
+  String? _nationality;
+  String? get nationality => _nationality;
   String _name = '';
 
   bool get isFirstStep => _step == RegisterStep.values.first;
@@ -66,6 +80,7 @@ class RegisterViewModel extends BaseViewModel {
 
     switch (result) {
       case Ok():
+        _code = code;
         _next();
         return true;
       case Failure(:final message):
@@ -84,8 +99,27 @@ class RegisterViewModel extends BaseViewModel {
     safeNotify();
   }
 
-  void submitBirthDate() {
-    if (_birthDate == null) return;
+  /// Sigue al paso siguiente; `false` si falta la fecha o es menor de edad (el motivo
+  /// queda en [errorMessage]).
+  bool submitBirthDate() {
+    final date = _birthDate;
+    if (date == null) return false;
+    if (!isAdult(date)) {
+      setError('Debes ser mayor de $adultAge años para crear una cuenta');
+      return false;
+    }
+    clearError();
+    _next();
+    return true;
+  }
+
+  void setNationality(String code) {
+    _nationality = code;
+    safeNotify();
+  }
+
+  void submitNationality() {
+    if (_nationality == null) return;
     _next();
   }
 
@@ -104,8 +138,10 @@ class RegisterViewModel extends BaseViewModel {
       name: _name,
       email: _email,
       password: _password,
+      code: _code,
       username: username.trim().replaceFirst(RegExp('^@'), ''),
       birthDate: _birthDate,
+      nationality: _nationality,
     );
     setBusy(false);
 

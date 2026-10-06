@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'src/core/theme/app_theme.dart';
+import 'src/data/datasources/local/session_store.dart';
 import 'src/data/datasources/remote/api_client.dart';
 import 'src/data/datasources/repository/active_trip_repository.dart';
 import 'src/data/datasources/repository/api_repository.dart';
@@ -21,6 +22,7 @@ import 'src/data/datasources/repository/guide_work_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
 import 'src/data/datasources/repository/map_tiles_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
+import 'src/data/datasources/repository/security_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
 import 'src/data/datasources/repository/support_repository.dart';
 import 'src/data/datasources/repository/tour_repository.dart';
@@ -28,11 +30,23 @@ import 'src/data/datasources/repository/tourist_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // En release solo se acepta un API por https (ver `ApiClient.baseUrl`).
   ApiClient.ensureSafeConfiguration();
-  runApp(KPlanApp(authRepository: AuthRepository()));
+
+  // Con API real, los tokens van al almacén seguro del dispositivo (Keychain / Keystore);
+  // en la demo no hay sesión de verdad y no se guarda nada.
+  if (ApiClient.isConfigured) ApiClient.sessionStore = SecureSessionStore();
+
+  final authRepository = AuthRepository();
+  // Si quedó una sesión de la vez anterior, se recupera antes de pintar la primera pantalla.
+  // Sin conexión no se espera de más: se entra sin sesión y se vuelve a intentar al abrir.
+  await authRepository.restoreSession().timeout(
+    const Duration(seconds: 6),
+    onTimeout: () {},
+  );
+  runApp(KPlanApp(authRepository: authRepository));
 }
 
 class KPlanApp extends StatefulWidget {
@@ -79,6 +93,8 @@ class _KPlanAppState extends State<KPlanApp> {
               TouristRepository(context.read<GuideWorkRepository>()),
         ),
         Provider<ApiRepository>(create: (_) => ApiRepository()),
+        // El segundo factor (2FA) de la cuenta.
+        Provider<SecurityRepository>(create: (_) => SecurityRepository()),
         Provider<TourRepository>(create: (_) => TourRepository()),
         // Las "playlists" de paradas: se siembran del catálogo y el usuario
         // puede añadir paradas o crear circuitos propios.

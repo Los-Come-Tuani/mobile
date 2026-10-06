@@ -6,6 +6,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../data/datasources/remote/google_sign_in_service.dart';
 import '../../../data/models/user_role.dart';
 import '../../../router/routes.dart';
 import '../../guide_access/widgets/guide_app_bar.dart';
@@ -14,7 +15,9 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/illustration_header.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/secondary_button.dart';
+import '../viewmodels/google_profile_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
+import '../viewmodels/two_factor_login_viewmodel.dart';
 
 /// Inicio de sesión de turistas y de guías: es la misma cuenta, sólo cambia
 /// a dónde lleva al entrar y qué se ofrece a quien todavía no tiene acceso.
@@ -51,12 +54,44 @@ class _LoginViewState extends State<LoginView> {
       password: _passwordController.text,
     );
     if (!mounted) return;
+    await _handle(result, viewModel);
+  }
 
+  Future<void> _signInWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    final viewModel = context.read<LoginViewModel>();
+    final result = await viewModel.loginWithGoogle();
+    if (!mounted) return;
+    await _handle(result, viewModel);
+  }
+
+  /// Lo que sigue a intentar entrar, con contraseña o con Google.
+  Future<void> _handle(LoginResult result, LoginViewModel viewModel) async {
     switch (result) {
       case LoginResult.success:
         // El redirect del router también protege estas rutas; navegamos
         // explícito para reemplazar la pila de autenticación.
         context.go(_isGuide ? Routes.guideAccess : Routes.home);
+      case LoginResult.twoFactor:
+        // Falta el código de verificación en dos pasos.
+        context.push(
+          Routes.loginTwoFactor,
+          extra: TwoFactorLoginArgs(
+            challenge: viewModel.challenge!,
+            role: widget.role,
+          ),
+        );
+      case LoginResult.needsProfile:
+        // Cuenta nueva con Google: faltan la fecha de nacimiento y la nacionalidad.
+        context.push(
+          Routes.googleProfile,
+          extra: GoogleProfileArgs(
+            idToken: viewModel.googleToken!,
+            role: widget.role,
+          ),
+        );
+      case LoginResult.cancelled:
+        break;
       case LoginResult.missingAccount:
         // Ofrece el registro del rol con el que intentó entrar.
         final wantsAccount = await showConfirmDialog(
@@ -181,6 +216,16 @@ class _LoginViewState extends State<LoginView> {
                                   isLoading: isBusy,
                                   onPressed: _submit,
                                 ),
+                                // Solo con el API real y el Client ID de Google configurado.
+                                if (GoogleSignInService.isAvailable) ...[
+                                  const SizedBox(height: 12),
+                                  SecondaryButton(
+                                    label: 'Continuar con Google',
+                                    onPressed: isBusy
+                                        ? null
+                                        : _signInWithGoogle,
+                                  ),
+                                ],
                                 const SizedBox(height: 16),
                                 TextButton(
                                   onPressed: isBusy

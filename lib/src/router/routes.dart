@@ -5,6 +5,13 @@ abstract final class Routes {
   static const register = '/register';
   static const forgotPassword = '/forgot-password';
 
+  /// Segundo paso de entrar a una cuenta con verificación en dos pasos. Se llega con el
+  /// reto del API en `extra` (`TwoFactorLoginArgs`); sin él vuelve a [login].
+  static const loginTwoFactor = '/login/two-factor';
+
+  /// "Completa tu perfil" tras entrar con Google por primera vez (`GoogleProfileArgs`).
+  static const googleProfile = '/login/google-profile';
+
   /// El mismo login, pero al entrar lleva a [guideAccess] y abajo ofrece
   /// postularse en vez de crear cuenta.
   static const guideLogin = '/guide-login';
@@ -57,6 +64,7 @@ abstract final class Routes {
   static const settings = '/settings';
   static const settingsAccount = '/settings/account';
   static const settingsPassword = '/settings/account/password';
+  static const settingsTwoFactor = '/settings/account/two-factor';
   static const settingsNotifications = '/settings/notifications';
   static const settingsLanguage = '/settings/language';
   static const settingsPrivacy = '/settings/privacy';
@@ -143,6 +151,8 @@ abstract final class Routes {
   static const Set<String> public = {
     welcome,
     login,
+    loginTwoFactor,
+    googleProfile,
     register,
     forgotPassword,
     guideLogin,

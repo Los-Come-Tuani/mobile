@@ -26,11 +26,13 @@ void main() {
     });
 
     test('ignora mayúsculas y separadores en el nombre de la clave', () {
-      final redacted = redactSensitive({
-        'Id_Token': 'g-token',
-        'X-CSRFToken': 'csrf',
-        'Authorization': 'Bearer abc',
-      }) as Map<dynamic, dynamic>;
+      final redacted =
+          redactSensitive({
+                'Id_Token': 'g-token',
+                'X-CSRFToken': 'csrf',
+                'Authorization': 'Bearer abc',
+              })
+              as Map<dynamic, dynamic>;
 
       expect(redacted.values, everyElement(redactedValue));
     });

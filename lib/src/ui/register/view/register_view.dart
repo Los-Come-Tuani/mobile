@@ -8,16 +8,19 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../data/models/nationality.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
+import '../../widgets/nationality_sheet.dart';
+import '../../widgets/picker_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/verification_code_field.dart';
 import '../viewmodels/register_viewmodel.dart';
 import '../widgets/birth_date_sheet.dart';
 
 /// "Crear cuenta" por pasos: correo, código, contraseña, fecha de
-/// nacimiento, nombre y nombre de usuario.
+/// nacimiento, nacionalidad, nombre y nombre de usuario.
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -92,6 +95,20 @@ class _RegisterViewState extends State<RegisterView> {
       initialDate: viewModel.birthDate,
     );
     if (date != null) viewModel.setBirthDate(date);
+  }
+
+  void _submitBirthDate() {
+    final viewModel = context.read<RegisterViewModel>();
+    if (!viewModel.submitBirthDate()) _showError(viewModel);
+  }
+
+  Future<void> _pickNationality() async {
+    final viewModel = context.read<RegisterViewModel>();
+    final picked = await showNationalitySheet(
+      context,
+      selectedCode: viewModel.nationality,
+    );
+    if (picked != null) viewModel.setNationality(picked.code);
   }
 
   void _submitName() {
@@ -283,9 +300,25 @@ class _RegisterViewState extends State<RegisterView> {
         field: _DateField(date: viewModel.birthDate, onTap: _pickBirthDate),
         button: PrimaryButton(
           label: 'Siguiente',
-          onPressed: viewModel.birthDate == null
+          onPressed: viewModel.birthDate == null ? null : _submitBirthDate,
+        ),
+      ),
+      RegisterStep.nationality => _StepLayout(
+        title: '¿De dónde eres?',
+        subtitle:
+            'Tu nacionalidad es privada: nos ayuda a recomendarte mejor y a '
+            'cumplir con la ley.',
+        label: 'País',
+        field: PickerField(
+          text: Nationality.byCode(viewModel.nationality)?.name,
+          hint: 'Elige tu país',
+          onTap: _pickNationality,
+        ),
+        button: PrimaryButton(
+          label: 'Siguiente',
+          onPressed: viewModel.nationality == null
               ? null
-              : viewModel.submitBirthDate,
+              : viewModel.submitNationality,
         ),
       ),
       RegisterStep.name => _StepLayout(
@@ -382,7 +415,7 @@ class _PasswordChecklist extends StatelessWidget {
           children: [
             _Rule(label: '8 caracteres', met: rules.length),
             const SizedBox(height: 12),
-            _Rule(label: 'Una letra', met: rules.letter),
+            _Rule(label: 'Una mayúscula', met: rules.upper),
             const SizedBox(height: 12),
             _Rule(label: 'Un número', met: rules.number),
           ],

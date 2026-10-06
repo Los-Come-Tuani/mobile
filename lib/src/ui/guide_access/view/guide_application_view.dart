@@ -10,11 +10,15 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/guide_access_request.dart';
+import '../../../data/models/nationality.dart';
 import '../../../router/routes.dart';
+import '../../register/widgets/birth_date_sheet.dart';
 import '../../widgets/app_choice_chip.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
+import '../../widgets/nationality_sheet.dart';
+import '../../widgets/picker_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/secondary_button.dart';
 import '../../widgets/verification_code_field.dart';
@@ -108,11 +112,42 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
 
   void _submitIdentity() {
     if (!_validate(GuideApplicationStep.identity)) return;
-    context.read<GuideApplicationViewModel>().submitIdentity(
+    final viewModel = context.read<GuideApplicationViewModel>();
+    if (!viewModel.hasAccountProfile) {
+      _showMessage('Elige tu fecha de nacimiento y tu nacionalidad.');
+      return;
+    }
+    if (!viewModel.isAdult) {
+      _showMessage('Debes ser mayor de 18 años para crear una cuenta.');
+      return;
+    }
+    viewModel.submitIdentity(
       fullName: _nameController.text,
       phoneNumber: _phoneController.text,
       contactEmail: _emailController.text,
     );
+  }
+
+  static String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+  Future<void> _pickBirthDate() async {
+    final viewModel = context.read<GuideApplicationViewModel>();
+    final date = await showBirthDateSheet(
+      context,
+      initialDate: viewModel.birthDate,
+    );
+    if (date != null) viewModel.setBirthDate(date);
+  }
+
+  Future<void> _pickNationality() async {
+    final viewModel = context.read<GuideApplicationViewModel>();
+    final picked = await showNationalitySheet(
+      context,
+      selectedCode: viewModel.nationality,
+    );
+    if (picked != null) viewModel.setNationality(picked.code);
   }
 
   void _submitExperience() {
@@ -330,6 +365,30 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
             onSubmitted: (_) => _submitIdentity(),
           ),
         ),
+        // La cuenta nueva (con el API real) necesita estos dos datos.
+        if (viewModel.asksAccountProfile) ...[
+          const SizedBox(height: 16),
+          LabeledField(
+            label: 'Fecha de nacimiento',
+            child: PickerField(
+              text: viewModel.birthDate == null
+                  ? null
+                  : _formatDate(viewModel.birthDate!),
+              hint: '00/00/0000',
+              icon: Icons.calendar_month_outlined,
+              onTap: _pickBirthDate,
+            ),
+          ),
+          const SizedBox(height: 16),
+          LabeledField(
+            label: 'Nacionalidad',
+            child: PickerField(
+              text: Nationality.byCode(viewModel.nationality)?.name,
+              hint: 'Elige tu país',
+              onTap: _pickNationality,
+            ),
+          ),
+        ],
         const SizedBox(height: 28),
         PrimaryButton(label: 'Siguiente', onPressed: _submitIdentity),
       ],
@@ -700,7 +759,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           label: 'Contraseña',
           child: AppTextField(
             hint: 'Ingresa tu contraseña',
-            helper: 'Usa al menos 8 caracteres con letras y números.',
+            helper: 'Usa al menos 8 caracteres, una mayúscula y un número.',
             controller: _passwordController,
             validator: Validators.newPassword,
             isPassword: true,

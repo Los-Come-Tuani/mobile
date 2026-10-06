@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/utils/result.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../router/routes.dart';
 import '../../widgets/action_row.dart';
@@ -10,7 +12,7 @@ import '../../widgets/soft_button.dart';
 import '../widgets/logout_sheet.dart';
 import '../widgets/settings_page.dart';
 
-/// Cuenta: nombre, correo de acceso y contraseña.
+/// Cuenta: nombre, correo de acceso, contraseña y verificación en dos pasos.
 class AccountView extends StatelessWidget {
   const AccountView({super.key});
 
@@ -25,7 +27,14 @@ class AccountView extends StatelessWidget {
       textCapitalization: TextCapitalization.words,
     );
     if (name == null || !context.mounted) return;
-    context.read<AuthRepository>().updateName(name);
+
+    final result = await context.read<AuthRepository>().updateName(name);
+    if (!context.mounted) return;
+    if (result case Failure(:final message)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   @override
@@ -50,9 +59,19 @@ class AccountView extends StatelessWidget {
         ActionRow(
           icon: Icons.lock_outline,
           title: 'Cambiar contraseña',
-          subtitle: 'Solicitar un enlace de recuperación',
+          subtitle: 'Con tu contraseña actual',
           onTap: () => context.push(Routes.settingsPassword),
         ),
+        // La verificación en dos pasos es del API: sin él (demo) no hay nada que activar.
+        if (ApiClient.isConfigured)
+          ActionRow(
+            icon: Icons.verified_user_outlined,
+            title: 'Verificación en dos pasos',
+            subtitle: (user?.twoFactorEnabled ?? false)
+                ? 'Activa'
+                : 'Pide un código extra al entrar',
+            onTap: () => context.push(Routes.settingsTwoFactor),
+          ),
         const SizedBox(height: 16),
         SoftButton(
           label: 'Cerrar sesión',

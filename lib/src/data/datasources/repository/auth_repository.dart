@@ -3,11 +3,15 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
+import '../../models/login_outcome.dart';
 import '../../models/user.dart';
+import '../local/session_store.dart';
 import '../remote/api_client.dart';
 import '../remote/api_routes.dart';
+import '../remote/google_sign_in_service.dart';
 
-/// El correo con el que se intentó entrar no tiene cuenta.
+/// El correo con el que se intentó entrar no tiene cuenta (solo en el modo demo: el API
+/// responde igual con o sin cuenta para no revelar quién está registrado).
 class MissingAccount implements Exception {
   const MissingAccount();
 }
@@ -16,7 +20,17 @@ class MissingAccount implements Exception {
 ///
 /// Es un [ChangeNotifier] para que `GoRouter` pueda escucharlo
 /// (`refreshListenable`) y reevaluar los guards al entrar o salir de sesión.
+///
+/// Con `ApiClient.isConfigured` habla con el API real; sin él, corre en modo demo con
+/// cuentas simuladas. Los tokens nunca pasan por aquí: viven en el almacén seguro
+/// (`ApiClient.sessionStore`).
 class AuthRepository extends ChangeNotifier {
+  AuthRepository({GoogleIdTokenProvider? google})
+    : _google = google ?? GoogleSignInService() {
+    ApiClient.onSessionExpired = _handleSessionExpired;
+  }
+
+  final GoogleIdTokenProvider _google;
   User? _currentUser;
 
   /// Correos que ya tienen cuenta mientras no hay backend. Cualquier otro
@@ -32,17 +46,27 @@ class AuthRepository extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoggedIn => _currentUser != null;
 
-  Future<Result<User>> login({
+  /// Crear una cuenta con el API real exige fecha de nacimiento y nacionalidad; en la
+  /// demo no.
+  bool get registrationNeedsProfile => ApiClient.isConfigured;
+
+  // ── Entrar ────────────────────────────────────────────────────────────────
+
+  Future<Result<LoginOutcome>> login({
     required String email,
     required String password,
   }) async {
     try {
-      final user = ApiClient.isConfigured
-          ? await _loginRemote(email: email, password: password)
-          : await _loginDemo(email);
-
-      _setUser(user);
-      return Result.ok(user);
+      if (!ApiClient.isConfigured) {
+        final user = await _loginDemo(email);
+        _setUser(user);
+        return Result.ok(LoggedIn(user));
+      }
+      final response = await ApiClient.instance.post<Map<String, dynamic>>(
+        ApiRoutes.login,
+        data: {'email': email, 'password': password},
+      );
+      return Result.ok(await _outcomeOf(response));
     } on MissingAccount {
       return const Result.failure(
         'No hemos encontrado esta cuenta',
@@ -50,14 +74,9 @@ class AuthRepository extends ChangeNotifier {
       );
     } on DioException catch (e, st) {
       log.e('login: ${e.message}', error: e, stackTrace: st);
-      if (_isMissingAccount(e)) {
-        return const Result.failure(
-          'No hemos encontrado esta cuenta',
-          MissingAccount(),
-        );
-      }
+      // El API responde igual si el correo no existe o la contraseña es mala.
       if (e.response?.statusCode == 401) {
-        return const Result.failure('Correo o contraseña incorrectos');
+        return Result.failure('Correo o contraseña incorrectos', e);
       }
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
@@ -66,32 +85,118 @@ class AuthRepository extends ChangeNotifier {
     }
   }
 
-  /// Envía el código de 6 dígitos que confirma que el correo es del usuario.
-  ///
-  /// El backend todavía no tiene este paso: por ahora sólo se simula.
-  Future<Result<void>> sendVerificationCode(String email) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    return const Result.ok(null);
+  /// Termina el inicio de sesión de una cuenta con verificación en dos pasos, con el código
+  /// de la app de autenticación o uno de recuperación.
+  Future<Result<User>> verifyTwoFactor({
+    required String challenge,
+    required String code,
+  }) async {
+    try {
+      final response = await ApiClient.instance.post<Map<String, dynamic>>(
+        ApiRoutes.twoFactorLogin,
+        data: {'challenge': challenge, 'code': code.trim()},
+      );
+      return Result.ok(await _openSession(response.data));
+    } on DioException catch (e, st) {
+      log.e('verifyTwoFactor: ${e.message}', error: e, stackTrace: st);
+      return Result.failure(ApiClient.describeError(e), e);
+    } catch (e, st) {
+      log.e('verifyTwoFactor: $e', error: e, stackTrace: st);
+      return Result.failure('Algo salió mal, intenta de nuevo', e);
+    }
   }
 
-  /// Mientras no exista el endpoint, cualquier código de 6 dígitos es válido.
+  /// Entra con Google. La primera vez, el API pide la fecha de nacimiento y la
+  /// nacionalidad (Google no las entrega): responde [NeedsProfile] y se reintenta con
+  /// [idToken], [birthDate] y [nationality]. [idToken] sin valor abre el selector de cuentas.
+  Future<Result<LoginOutcome>> loginWithGoogle({
+    String? idToken,
+    DateTime? birthDate,
+    String? nationality,
+  }) async {
+    var token = idToken;
+    try {
+      token ??= await _google.obtainIdToken();
+      if (token == null) return const Result.ok(Cancelled());
+
+      final response = await ApiClient.instance.post<Map<String, dynamic>>(
+        ApiRoutes.google,
+        data: {
+          'id_token': token,
+          if (birthDate != null) 'birth_date': _isoDate(birthDate),
+          'nationality': ?nationality,
+        },
+      );
+      return Result.ok(await _outcomeOf(response));
+    } on DioException catch (e, st) {
+      log.e('loginWithGoogle: ${e.message}', error: e, stackTrace: st);
+      final fields = ApiClient.fieldErrors(e);
+      final missesProfile =
+          fields.containsKey('birth_date') || fields.containsKey('nationality');
+      // Cuenta nueva sin fecha ni nacionalidad: se piden y se reintenta con el mismo token.
+      if (e.response?.statusCode == 400 &&
+          missesProfile &&
+          token != null &&
+          birthDate == null) {
+        return Result.ok(NeedsProfile(token));
+      }
+      return Result.failure(ApiClient.describeError(e), e);
+    } catch (e, st) {
+      log.e('loginWithGoogle: $e', error: e, stackTrace: st);
+      return const Result.failure(
+        'No pudimos entrar con Google, intenta de nuevo',
+      );
+    }
+  }
+
+  // ── Crear cuenta ──────────────────────────────────────────────────────────
+
+  /// Envía el código de 6 dígitos que confirma que el correo es del usuario. El API
+  /// responde igual si el correo ya tiene cuenta, y no vuelve a mandar antes de un minuto.
+  Future<Result<void>> sendVerificationCode(String email) async {
+    if (!ApiClient.isConfigured) {
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      return const Result.ok(null);
+    }
+    return _call('sendVerificationCode', () async {
+      await ApiClient.instance.post<void>(
+        ApiRoutes.registerCode,
+        data: {'email': email},
+      );
+    });
+  }
+
+  /// Comprueba el código sin gastarlo: la cuenta se crea después, con el mismo código.
+  /// En el modo demo cualquier código de 6 dígitos sirve.
   Future<Result<void>> verifyCode({
     required String email,
     required String code,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    if (!RegExp(r'^\d{6}$').hasMatch(code)) {
-      return const Result.failure('El código no es válido');
+    if (!ApiClient.isConfigured) {
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      if (!RegExp(r'^\d{6}$').hasMatch(code)) {
+        return const Result.failure('El código no es válido');
+      }
+      return const Result.ok(null);
     }
-    return const Result.ok(null);
+    return _call('verifyCode', () async {
+      await ApiClient.instance.post<void>(
+        ApiRoutes.registerVerify,
+        data: {'email': email, 'code': code},
+      );
+    });
   }
 
+  /// Crea la cuenta y abre la sesión. Con el API real hacen falta el [code] que llegó al
+  /// correo, la fecha de nacimiento (mayor de 18) y la [nationality] (código de dos letras).
   Future<Result<User>> register({
     required String name,
     required String email,
     required String password,
+    String? code,
     String? username,
     DateTime? birthDate,
+    String? nationality,
   }) async {
     try {
       if (!ApiClient.isConfigured) {
@@ -99,114 +204,253 @@ class AuthRepository extends ChangeNotifier {
         _setUser(user);
         return Result.ok(user);
       }
+      if (code == null || birthDate == null || nationality == null) {
+        return const Result.failure('Faltan datos para crear la cuenta');
+      }
 
-      final response = await ApiClient.instance.post(
+      final names = _splitName(name);
+      await ApiClient.instance.post<void>(
         ApiRoutes.register,
         data: {
-          'name': name,
           'email': email,
+          'code': code,
           'password': password,
-          'username': ?username,
-          if (birthDate != null)
-            'birthDate': birthDate.toIso8601String().split('T').first,
+          'first_name': names.first,
+          'last_name': names.last,
+          'birth_date': _isoDate(birthDate),
+          'nationality': nationality,
+          if (username != null && username.isNotEmpty) 'username': username,
         },
       );
-      final user = User.fromJson(_payloadOf(response));
-      _setUser(user);
-      return Result.ok(user);
+      // El API crea la cuenta pero no abre la sesión: se entra con las mismas credenciales.
+      final login = await this.login(email: email, password: password);
+      return switch (login) {
+        Ok(value: LoggedIn(:final user)) => Result.ok(user),
+        Ok() => const Result.failure(
+          'Tu cuenta quedó creada. Inicia sesión para entrar.',
+        ),
+        Failure(:final message, :final error) => Result.failure(message, error),
+      };
     } on DioException catch (e, st) {
       log.e('register: ${e.message}', error: e, stackTrace: st);
-      return Result.failure(ApiClient.describeError(e), e);
+      return Result.failure(_messageWithFields(e), e);
     } catch (e, st) {
       log.e('register: $e', error: e, stackTrace: st);
       return Result.failure('Algo salió mal, intenta de nuevo', e);
     }
   }
 
-  /// Cambia el nombre visible del usuario. No hay endpoint de perfil todavía:
-  /// por ahora el cambio vive sólo en esta sesión.
-  void updateName(String name) {
+  // ── Perfil y contraseña ───────────────────────────────────────────────────
+
+  /// Cambia el nombre visible del usuario (primer nombre y apellidos).
+  Future<Result<void>> updateName(String name) async {
     final user = _currentUser;
     final trimmed = name.trim();
-    if (user == null || trimmed.isEmpty || trimmed == user.name) return;
-    _currentUser = user.copyWith(name: trimmed);
-    notifyListeners();
+    if (user == null || trimmed.isEmpty || trimmed == user.name) {
+      return const Result.ok(null);
+    }
+
+    if (!ApiClient.isConfigured) {
+      _currentUser = user.copyWith(name: trimmed);
+      notifyListeners();
+      return const Result.ok(null);
+    }
+    return _call('updateName', () async {
+      final names = _splitName(trimmed);
+      final response = await ApiClient.instance.patch<Map<String, dynamic>>(
+        ApiRoutes.profile,
+        data: {'first_name': names.first, 'last_name': names.last},
+      );
+      _setUser(User.fromApi(response.data ?? const {}));
+    });
+  }
+
+  /// Vuelve a pedir a la persona de la sesión (p. ej. tras activar el 2FA).
+  Future<void> refreshUser() async {
+    if (!ApiClient.isConfigured || !isLoggedIn) return;
+    try {
+      final response = await ApiClient.instance.get<Map<String, dynamic>>(
+        ApiRoutes.profile,
+      );
+      _setUser(User.fromApi(response.data ?? const {}));
+    } on DioException catch (e) {
+      log.w('refreshUser: ${e.message}');
+    }
   }
 
   /// `true` mientras [requestPasswordReset] no mande correos de verdad, para
   /// decírselo al turista en la confirmación.
-  bool get isPasswordResetSimulated => true;
+  bool get isPasswordResetSimulated => !ApiClient.isConfigured;
 
-  /// Pide el enlace para crear una contraseña nueva. El backend todavía no
-  /// tiene este paso: por ahora sólo se simula.
+  /// Pide el código de 6 dígitos para crear una contraseña nueva. El API responde igual
+  /// exista o no la cuenta.
   Future<Result<void>> requestPasswordReset(String email) async {
-    await Future<void>.delayed(const Duration(milliseconds: 700));
-    return const Result.ok(null);
+    if (!ApiClient.isConfigured) {
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      return const Result.ok(null);
+    }
+    return _call('requestPasswordReset', () async {
+      await ApiClient.instance.post<void>(
+        ApiRoutes.passwordForgot,
+        data: {'email': email},
+      );
+    });
   }
 
+  /// Cambia la contraseña con el código del correo. Cierra todas las sesiones de la cuenta.
+  Future<Result<void>> resetPassword({
+    required String email,
+    required String code,
+    required String password,
+  }) async {
+    if (!ApiClient.isConfigured) {
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      return const Result.ok(null);
+    }
+    return _call('resetPassword', () async {
+      await ApiClient.instance.post<void>(
+        ApiRoutes.passwordReset,
+        data: {'email': email, 'code': code, 'password': password},
+      );
+    });
+  }
+
+  /// Cambia la contraseña desde la cuenta. El API cierra todas las sesiones, la de este
+  /// teléfono incluida: hay que volver a entrar.
+  Future<Result<void>> changePassword({
+    required String current,
+    required String password,
+  }) async {
+    if (!ApiClient.isConfigured) {
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      return const Result.ok(null);
+    }
+    final result = await _call('changePassword', () async {
+      await ApiClient.instance.post<void>(
+        ApiRoutes.passwordChange,
+        data: {'current_password': current, 'password': password},
+      );
+    });
+    if (result.isOk) await _endSessionLocally();
+    return result;
+  }
+
+  // ── Sesión ────────────────────────────────────────────────────────────────
+
+  /// Al abrir la app: si quedó una sesión guardada, pregunta quién es. Sin conexión no la
+  /// borra, solo no entra esta vez.
+  Future<void> restoreSession() async {
+    if (!ApiClient.isConfigured) return;
+    try {
+      if (await ApiClient.storedTokens() == null) return;
+      final response = await ApiClient.instance.get<Map<String, dynamic>>(
+        ApiRoutes.profile,
+      );
+      _setUser(User.fromApi(response.data ?? const {}));
+    } on DioException catch (e) {
+      // Un 401 sin renovación ya borró los tokens (`onSessionExpired`).
+      log.w('restoreSession: ${e.message}');
+    }
+  }
+
+  /// Cierra la sesión: el API invalida los tokens y se borran de este teléfono.
   Future<void> logout() async {
-    ApiClient.clearToken();
-    _currentUser = null;
-    notifyListeners();
+    if (ApiClient.isConfigured) {
+      final tokens = await ApiClient.storedTokens();
+      if (tokens != null) {
+        try {
+          await ApiClient.instance.post<void>(
+            ApiRoutes.logout,
+            data: {'access': tokens.access, 'refresh': tokens.refresh},
+          );
+        } on DioException catch (e) {
+          // Sin conexión también se sale de este teléfono.
+          log.w('logout: ${e.message}');
+        }
+      }
+      await _google.signOut().catchError((_) {});
+    }
+    await _endSessionLocally();
   }
 
   // ── Privados ──────────────────────────────────────────────────────────────
 
-  Future<User> _loginRemote({
-    required String email,
-    required String password,
-  }) async {
-    final response = await ApiClient.instance.post(
-      ApiRoutes.login,
-      data: {'email': email, 'password': password},
-    );
-    if (_saysAccountMissing(response.data)) throw const MissingAccount();
-    final payload = _payloadOf(response);
-    if (_saysAccountMissing(payload)) throw const MissingAccount();
-    final user = User.fromJson(payload);
-    if (user.id.isEmpty && user.email.isEmpty) {
+  Future<void> _endSessionLocally() async {
+    await ApiClient.closeSession();
+    _currentUser = null;
+    notifyListeners();
+  }
+
+  void _handleSessionExpired() {
+    if (_currentUser == null) return;
+    _currentUser = null;
+    notifyListeners();
+  }
+
+  /// Una llamada que no devuelve datos: los errores del API quedan como mensaje.
+  Future<Result<void>> _call(
+    String name,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+      return const Result.ok(null);
+    } on DioException catch (e, st) {
+      log.e('$name: ${e.message}', error: e, stackTrace: st);
+      return Result.failure(_messageWithFields(e), e);
+    } catch (e, st) {
+      log.e('$name: $e', error: e, stackTrace: st);
+      return Result.failure('Algo salió mal, intenta de nuevo', e);
+    }
+  }
+
+  /// El mensaje del API; si un solo campo falló, el motivo de ese campo.
+  String _messageWithFields(DioException e) {
+    final fields = ApiClient.fieldErrors(e);
+    if (e.response?.statusCode == 400 && fields.length == 1) {
+      return fields.values.first;
+    }
+    return ApiClient.describeError(e);
+  }
+
+  /// Un 200 trae la sesión; un 202, el reto del segundo factor.
+  Future<LoginOutcome> _outcomeOf(
+    Response<Map<String, dynamic>> response,
+  ) async {
+    final body = response.data;
+    if (response.statusCode == 202) {
+      final challenge = body?['challenge'];
+      if (challenge is! String || challenge.isEmpty) {
+        throw const FormatException('Respuesta inesperada del servidor');
+      }
+      return NeedsTwoFactor(challenge);
+    }
+    return LoggedIn(await _openSession(body));
+  }
+
+  Future<User> _openSession(Map<String, dynamic>? body) async {
+    final access = body?['access'];
+    final refresh = body?['refresh'];
+    final user = body?['user'];
+    if (access is! String ||
+        refresh is! String ||
+        user is! Map<String, dynamic>) {
       throw const FormatException('Respuesta inesperada del servidor');
     }
-    return user;
+    await ApiClient.openSession(
+      SessionTokens(access: access, refresh: refresh),
+    );
+    final parsed = User.fromApi(user);
+    _setUser(parsed);
+    return parsed;
   }
 
-  /// 404, o un mensaje del servidor que dice que ese correo no tiene cuenta.
-  /// Una contraseña incorrecta sigue siendo 401 y no entra aquí.
-  bool _isMissingAccount(DioException e) =>
-      e.response?.statusCode == 404 || _saysAccountMissing(e.response?.data);
-
-  bool _saysAccountMissing(Object? data) {
-    final text = _collectText(data).toLowerCase();
-    const hints = [
-      'no encontrado',
-      'no encontrada',
-      'not found',
-      'no existe',
-      'does not exist',
-      "doesn't exist",
-      'no registrado',
-      'no registrada',
-      'not registered',
-      'usuario inexistente',
-      'user_not_found',
-      'usernotfound',
-      'account_not_found',
-      'accountnotfound',
-      'sin cuenta',
-      'no account',
-      'cuenta inexistente',
-    ];
-    return hints.any(text.contains);
+  ({String first, String last}) _splitName(String name) {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    return (first: parts.first, last: parts.skip(1).join(' '));
   }
 
-  String _collectText(Object? data) {
-    return switch (data) {
-      String value => value,
-      Map value => value.values.map(_collectText).join(' '),
-      List value => value.map(_collectText).join(' '),
-      _ => '',
-    };
-  }
+  String _isoDate(DateTime date) => date.toIso8601String().split('T').first;
 
   /// Sesión simulada mientras no exista backend (`ApiClient.baseUrl` vacío).
   ///
@@ -227,24 +471,11 @@ class AuthRepository extends ChangeNotifier {
       id: 'demo-user',
       email: email,
       name: name.isEmpty ? email.split('@').first : name,
-      token: 'demo-token',
     );
-  }
-
-  /// Soporta respuestas planas y envueltas en `data` / `Data`.
-  Map<String, dynamic> _payloadOf(Response<dynamic> response) {
-    final body = response.data;
-    if (body is Map<String, dynamic>) {
-      final inner = body['data'] ?? body['Data'];
-      if (inner is Map<String, dynamic>) return inner;
-      return body;
-    }
-    throw const FormatException('Respuesta inesperada del servidor');
   }
 
   void _setUser(User user) {
     _currentUser = user;
-    if (user.token.isNotEmpty) ApiClient.setToken(user.token);
     notifyListeners();
   }
 }

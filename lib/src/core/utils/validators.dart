@@ -18,19 +18,20 @@ abstract final class Validators {
     return null;
   }
 
-  /// Reglas de una contraseña nueva, para la lista que se marca al escribir.
-  static ({bool length, bool letter, bool number}) newPasswordRules(
+  /// Reglas de una contraseña nueva, para la lista que se marca al escribir. Son las
+  /// mismas que exige el API: ocho caracteres, una mayúscula y un número.
+  static ({bool length, bool upper, bool number}) newPasswordRules(
     String value,
   ) => (
     length: value.length >= 8,
-    letter: RegExp('[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]').hasMatch(value),
-    number: RegExp(r'\d').hasMatch(value),
+    upper: RegExp(r'\p{Lu}', unicode: true).hasMatch(value),
+    number: RegExp(r'\p{Nd}', unicode: true).hasMatch(value),
   );
 
   static String? newPassword(String? value) {
     final rules = newPasswordRules(value ?? '');
-    if (rules.length && rules.letter && rules.number) return null;
-    return 'Usa al menos 8 caracteres con letras y números';
+    if (rules.length && rules.upper && rules.number) return null;
+    return 'Usa al menos 8 caracteres, una mayúscula y un número';
   }
 
   /// Para campos obligatorios sin un formato especial.

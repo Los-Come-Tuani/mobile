@@ -17,6 +17,7 @@ import '../data/datasources/repository/guide_request_repository.dart';
 import '../data/datasources/repository/guide_work_repository.dart';
 import '../data/datasources/repository/location_repository.dart';
 import '../data/datasources/repository/saved_repository.dart';
+import '../data/datasources/repository/security_repository.dart';
 import '../data/datasources/repository/tour_repository.dart';
 import '../data/datasources/repository/tourist_repository.dart';
 import '../data/datasources/repository/visit_log_repository.dart';
@@ -31,6 +32,7 @@ import '../ui/coupons/viewmodels/coupons_viewmodel.dart';
 import '../ui/event_detail/view/event_detail_view.dart';
 import '../ui/event_detail/viewmodels/event_detail_viewmodel.dart';
 import '../ui/forgot_password/view/forgot_password_view.dart';
+import '../ui/forgot_password/viewmodels/forgot_password_viewmodel.dart';
 import '../ui/group_slots/view/group_slots_view.dart';
 import '../ui/group_slots/viewmodels/group_slots_viewmodel.dart';
 import '../ui/guide_access/view/guide_application_view.dart';
@@ -64,8 +66,12 @@ import '../ui/home/view/home_view.dart';
 import '../ui/home/viewmodels/home_viewmodel.dart';
 import '../ui/itinerary_assistant/view/itinerary_assistant_view.dart';
 import '../ui/itinerary_assistant/viewmodels/itinerary_assistant_viewmodel.dart';
+import '../ui/login/view/google_profile_view.dart';
 import '../ui/login/view/login_view.dart';
+import '../ui/login/view/two_factor_login_view.dart';
+import '../ui/login/viewmodels/google_profile_viewmodel.dart';
 import '../ui/login/viewmodels/login_viewmodel.dart';
+import '../ui/login/viewmodels/two_factor_login_viewmodel.dart';
 import '../ui/medals/view/medals_view.dart';
 import '../ui/medals/viewmodels/medals_viewmodel.dart';
 import '../ui/my_circuit/view/my_circuit_view.dart';
@@ -90,6 +96,8 @@ import '../ui/settings/view/password_reset_view.dart';
 import '../ui/settings/view/privacy_view.dart';
 import '../ui/settings/view/settings_view.dart';
 import '../ui/settings/view/support_view.dart';
+import '../ui/settings/view/two_factor_view.dart';
+import '../ui/settings/viewmodels/two_factor_viewmodel.dart';
 import '../ui/stop_detail/view/stop_detail_view.dart';
 import '../ui/stop_detail/viewmodels/stop_detail_viewmodel.dart';
 import '../ui/welcome/view/welcome_view.dart';
@@ -142,6 +150,43 @@ GoRouter createRouter(AuthRepository authRepository) {
         ),
       ),
       GoRoute(
+        path: Routes.loginTwoFactor,
+        // Sin el reto del API (la app se reinició a medias) no hay nada que verificar.
+        redirect: (context, state) =>
+            state.extra is TwoFactorLoginArgs ? null : Routes.login,
+        pageBuilder: (context, state) {
+          final args = state.extra! as TwoFactorLoginArgs;
+          return _fadePage(
+            state,
+            ChangeNotifierProvider<TwoFactorLoginViewModel>(
+              create: (context) => TwoFactorLoginViewModel(
+                context.read<AuthRepository>(),
+                args.challenge,
+              ),
+              child: TwoFactorLoginView(role: args.role),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.googleProfile,
+        redirect: (context, state) =>
+            state.extra is GoogleProfileArgs ? null : Routes.login,
+        pageBuilder: (context, state) {
+          final args = state.extra! as GoogleProfileArgs;
+          return _fadePage(
+            state,
+            ChangeNotifierProvider<GoogleProfileViewModel>(
+              create: (context) => GoogleProfileViewModel(
+                context.read<AuthRepository>(),
+                args.idToken,
+              ),
+              child: GoogleProfileView(role: args.role),
+            ),
+          );
+        },
+      ),
+      GoRoute(
         path: Routes.register,
         pageBuilder: (context, state) => _fadePage(
           state,
@@ -154,8 +199,14 @@ GoRouter createRouter(AuthRepository authRepository) {
       ),
       GoRoute(
         path: Routes.forgotPassword,
-        pageBuilder: (context, state) =>
-            _fadePage(state, const ForgotPasswordView()),
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ChangeNotifierProvider<ForgotPasswordViewModel>(
+            create: (context) =>
+                ForgotPasswordViewModel(context.read<AuthRepository>()),
+            child: const ForgotPasswordView(),
+          ),
+        ),
       ),
       GoRoute(
         path: Routes.guideLogin,
@@ -589,6 +640,16 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.settingsPassword,
         builder: (context, state) => const PasswordResetView(),
+      ),
+      GoRoute(
+        path: Routes.settingsTwoFactor,
+        builder: (context, state) => ChangeNotifierProvider<TwoFactorViewModel>(
+          create: (context) => TwoFactorViewModel(
+            context.read<SecurityRepository>(),
+            context.read<AuthRepository>(),
+          ),
+          child: const TwoFactorView(),
+        ),
       ),
       GoRoute(
         path: Routes.settingsNotifications,

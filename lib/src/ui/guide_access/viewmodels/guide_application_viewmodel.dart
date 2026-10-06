@@ -1,3 +1,4 @@
+import '../../../core/utils/age.dart' as age;
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
@@ -82,6 +83,38 @@ class GuideApplicationViewModel extends BaseViewModel {
 
   String _contactEmail = '';
   String get contactEmail => _contactEmail;
+
+  // Sólo sin sesión: la cuenta que se crea al final los pide (mayor de 18 años).
+  DateTime? _birthDate;
+  DateTime? get birthDate => _birthDate;
+
+  String? _nationality;
+  String? get nationality => _nationality;
+
+  /// El formulario pide fecha de nacimiento y nacionalidad: la cuenta nueva las necesita
+  /// con el API real. Con sesión (o en la demo) no hacen falta.
+  bool get asksAccountProfile =>
+      needsAccount && _authRepository.registrationNeedsProfile;
+
+  /// Si ya eligió fecha de nacimiento y nacionalidad, o no hace falta.
+  bool get hasAccountProfile =>
+      !asksAccountProfile || (_birthDate != null && _nationality != null);
+
+  void setBirthDate(DateTime date) {
+    _birthDate = date;
+    safeNotify();
+  }
+
+  void setNationality(String code) {
+    _nationality = code;
+    safeNotify();
+  }
+
+  /// `false` si la fecha elegida es de una persona menor de edad.
+  bool get isAdult => _birthDate == null || age.isAdult(_birthDate!);
+
+  /// El código del correo, ya comprobado: el API lo vuelve a pedir al crear la cuenta.
+  String _verifiedCode = '';
 
   // ── Experiencia ───────────────────────────────────────────────────────────
   GuideCoverage? _coverage;
@@ -322,6 +355,7 @@ class GuideApplicationViewModel extends BaseViewModel {
 
     switch (result) {
       case Ok():
+        _verifiedCode = code;
         _goTo(GuideApplicationStep.password);
         return true;
       case Failure():
@@ -345,6 +379,9 @@ class GuideApplicationViewModel extends BaseViewModel {
         name: _fullName,
         email: _contactEmail,
         password: password,
+        code: _verifiedCode,
+        birthDate: _birthDate,
+        nationality: _nationality,
       );
       setBusy(false);
       if (result case Failure(:final message)) {

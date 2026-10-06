@@ -8,7 +8,7 @@ class ApiRepository {
   Future<bool> testApiConnection() async {
     if (!ApiClient.isConfigured) return true;
     try {
-      final response = await ApiClient.instance.get(ApiRoutes.testdBConnection);
+      final response = await ApiClient.instance.get(ApiRoutes.health);
       return response.statusCode == 200;
     } catch (e, st) {
       log.e('testApiConnection: $e', error: e, stackTrace: st);

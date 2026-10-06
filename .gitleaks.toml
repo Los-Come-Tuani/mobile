@@ -1,0 +1,10 @@
+title = "kplan-mobile"
+
+[extend]
+  useDefault = true
+
+# Contraseñas inventadas de las pruebas (`test/`). Se ignoran por su contenido y no por
+# archivo, de modo que un secreto real pegado en esos mismos archivos siga detectándose.
+[[allowlists]]
+  description = "Contraseñas de prueba"
+  stopwords   = ["Otra-Clave-2026", "Clave-Prueba-2026"]
