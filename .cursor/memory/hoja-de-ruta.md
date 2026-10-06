@@ -1,6 +1,6 @@
 # Memoria de trabajo: app y la hoja de ruta del API
 
-Actualizada el 2026-10-05. Traspaso para el siguiente agente. La memoria general (estado de
+Actualizada el 2026-10-06. Traspaso para el siguiente agente. La memoria general (estado de
 todas las tareas, API, F2 a F8, avisos y cómo correr el API en esta máquina) está en
 `C:\development\kplan\api\.cursor\memory\hoja-de-ruta.md`: léela primero.
 
@@ -9,99 +9,77 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 
 ## Estado
 
-- **Hecho (F0, `f0-secrets-gitignore` y `f0-env-config`)**:
-  - `.gitignore` ignora `.env.*`, `env/*.json` (salvo `env/*.example.json`),
-    `google-services.json`, `GoogleService-Info.plist`, llaves `*.p8`, perfiles de
-    aprovisionamiento, keystores y `key.properties`.
-  - `.github/workflows/secrets.yml`: escaneo de secretos en CI.
-  - `lib/src/data/datasources/remote/api_client.dart` reescrito: la URL ya no está en el
-    código, viene de `API_BASE_URL` (`--dart-define-from-file=env/<entorno>.json`); vacía =
-    modo demo (los repositorios devuelven datos simulados, `ApiClient.isConfigured`).
-    `ApiClient.ensureSafeConfiguration()` (se llama en `main.dart`) impide abrir un build
-    release que no use `https`. Los logs de red solo van en debug y pasan por
-    `lib/src/core/utils/redact.dart` (`redactSensitive`), con prueba en
-    `test/redact_test.dart`.
-  - `env/dev.example.json`, `staging.example.json`, `prod.example.json` y `env/README.md`
-    (cómo apuntar al API local: emulador `http://10.0.2.2:8080`, simulador iOS
-    `http://localhost:8080`, teléfono físico `adb reverse tcp:8080 tcp:8080`).
-  - HTTP en claro solo en debug: `android/app/src/debug/AndroidManifest.xml`
-    (`usesCleartextTraffic`) y `NSAllowsLocalNetworking` en `ios/Runner/Info.plist`.
-- **Pendiente: `f1-app-link`**. No hay código de autenticación real todavía.
-- Al cerrar F0 `flutter pub get` cambió `pubspec.lock` por diferencias de SDK; se revirtió.
-  Si lo vuelves a ver cambiar sin que agregues paquetes, revierte con
-  `git checkout -- pubspec.lock`.
+- **Hecho: F0** (`.gitignore`, gitleaks, URL por entorno con `--dart-define-from-file`, https
+  obligatorio en release, logs redactados).
+- **Hecho: `f1-app-link`** (identidad contra el API real; con `API_BASE_URL` vacío la app sigue
+  en modo demo, como antes):
+  - `lib/src/data/datasources/local/session_store.dart`: `SessionStore` con `SecureSessionStore`
+    (`flutter_secure_storage`: Keychain/Keystore) y `MemorySessionStore` (demo y pruebas).
+  - `remote/api_client.dart`: pone `Bearer`, y ante un 401 renueva con el `refresh` **una sola
+    vez** aunque fallen varias peticiones (el refresh es de un solo uso) y reintenta; si el API
+    rechaza la renovación, borra los tokens y llama a `ApiClient.onSessionExpired` (el
+    `AuthRepository` sale de la cuenta); un corte de red no cierra la sesión. Helpers
+    `describeError` (usa el `detail` del API), `fieldErrors` (sin `body.`), `retryAfter`.
+    `ApiClient.configureForTest(...)` cambia la URL, el transporte y el almacén en pruebas.
+  - `repository/auth_repository.dart`: `login` (devuelve `LoginOutcome`: `LoggedIn`,
+    `NeedsTwoFactor`, `NeedsProfile` de Google o `Cancelled`), `verifyTwoFactor`,
+    `loginWithGoogle`, registro con código (`sendVerificationCode`, `verifyCode`, `register` con
+    código, fecha de nacimiento y nacionalidad; luego entra), `requestPasswordReset`,
+    `resetPassword`, `changePassword` (el API cierra todas las sesiones: sale), `updateName`
+    (PATCH del perfil), `restoreSession` (al abrir), `refreshUser`, `logout`. Sin API configurada
+    sigue la simulación de cuentas de ejemplo.
+  - `repository/security_repository.dart`: estado, activar (QR y clave), confirmar (diez códigos
+    de recuperación, una sola vez), regenerar y desactivar el 2FA.
+  - `remote/google_sign_in_service.dart`: `google_sign_in` 7.x con `GOOGLE_SERVER_CLIENT_ID`
+    (Client ID **Web**) y `GOOGLE_IOS_CLIENT_ID`; el botón solo aparece si el primero existe.
+  - Pantallas: login con paso de 2FA (`/login/two-factor`), "Completa tu perfil" de Google
+    (`/login/google-profile`), registro con paso de **nacionalidad** y mayoría de edad, recuperar
+    contraseña en dos pasos (código + contraseña nueva), cambiar contraseña con la actual, y
+    Configuraciones -> Cuenta -> "Verificación en dos pasos" (QR con `qr_flutter`, códigos).
+    La postulación de guía pide fecha de nacimiento y nacionalidad en su primer paso si todavía
+    no hay cuenta.
+  - Android: `allowBackup="false"` (requisito de `flutter_secure_storage`) y firma del release con
+    `android/key.properties` (ignorado por git; sin él cae a la llave de debug y avisa).
+  - Contraseña: ocho caracteres, una mayúscula y un número (igual que el API).
+  - Pruebas: 56 nuevas (`api_client_test`, `auth_repository_test`, `security_repository_test`,
+    `auth_viewmodels_test`, con un API falso en `test/support/fake_api.dart`) y
+    `test/integration/api_contract_test.dart` contra un API local (se salta sin
+    `KPLAN_API_URL` y `KPLAN_MAIL_LOG`; ver README). Esa prueba pasó contra el API real:
+    registro con código del correo, renovación de tokens, 2FA completo con TOTP, cambio de
+    contraseña.
+  - `flutter analyze` solo reporta dos avisos de `onReorder` que ya estaban; `flutter test` pasa
+    completo.
+- No se probó en un dispositivo o emulador: la pantalla se verificó con pruebas y analizador.
+
+## Qué falta
+
+1. **Decisión del usuario: identificador de la app (bloquea Google y publicar).** Hoy el
+   `applicationId` es `com.example.k_plan_mobile` (`android/app/build.gradle.kts`) y el bundle id
+   `com.example.kPlanMobile` (`ios/Runner.xcodeproj/project.pbxproj`). Los Client ID de Google
+   quedan atados a ellos: **preguntar el definitivo antes de crearlos**. Luego: la llave de
+   firma del release (`android/key.properties`), el Client ID Android (paquete + SHA-1 de
+   debug, release y Play App Signing), el Client ID iOS (bundle id) y, en iOS, el esquema de URL
+   con el Client ID iOS invertido en `ios/Runner/Info.plist` (`CFBundleURLTypes`). Paso a paso:
+   `api/docs/google.md`. Probar el botón de Google en un dispositivo real.
+2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
+3. **F2 (roles y permisos, API primero)**: el API dejará `mobile` solo para turista, guía y
+   traductor (hoy acepta cualquier cuenta). La app no debe cambiar; solo cuidar el mensaje cuando
+   una cuenta de equipo intente entrar (el API responderá como credenciales inválidas).
+4. **Datos del dominio** (circuitos, lugares, reservas, guías...): siguen simulados. Cada fase
+   (F3 en adelante) reemplaza su repositorio por llamadas al API; la app no consume nada de eso
+   todavía. El mejor checklist es `portal/src/data/api/endpoints.ts`.
+5. **Eliminar la cuenta** (`POST /auth/account-close/`, baja a 30 días) no tiene pantalla todavía.
+6. Opcional: borrar la sesión del Keychain en una reinstalación de iOS (el Keychain sobrevive a
+   desinstalar la app); con un `refresh` de un día el riesgo es bajo.
 
 ## Cómo está armada la app
 
-- Flutter con `go_router`, `provider` (MVVM), `dio`, `logger`, `flutter_map`,
-  `mobile_scanner`, `qr_flutter`. **No** están `flutter_secure_storage` ni `google_sign_in`.
-- `lib/src/ui/<pantalla>/{view,viewmodels,widgets}`. Pantallas relacionadas:
-  `ui/login`, `ui/register`, `ui/forgot_password`, `ui/welcome`, `ui/settings`
-  (`account_view.dart`, `logout_sheet.dart`), `ui/profile`, `ui/guide_access`.
-- `lib/src/data/datasources/repository/*` (repositorios con datos simulados),
-  `lib/src/data/models/user.dart`, `lib/src/router/{router,routes}.dart`,
-  `lib/src/core/utils/{result,validators,logger}.dart`.
-- `ApiClient` guarda el token en una variable estática (`setToken`/`clearToken`) y lo manda
-  como `Authorization: Bearer`. No lo persiste ni lo refresca.
-
-## Qué trae el API para la app (detalle en `api/docs/autenticacion.md` y `docs/google.md`)
-
-- Sesión: `POST /auth/mobile/login/` (`{email, password}` -> 200 `{access, refresh, user}`
-  o 202 `{challenge, expires_in}`), `POST /auth/mobile/two-factor/` (`{challenge, code}` ->
-  200 igual que el login), `POST /auth/mobile/refresh/` (`{refresh}` -> 200 `{access,
-  refresh}`; el `refresh` es de un solo uso y rota), `POST /auth/mobile/logout/`.
-- Registro: `POST /auth/register-code/` (`{email}` -> 204, manda un código de seis dígitos),
-  `POST /auth/register-verify/` (`{email, code}` -> 204, no gasta el código),
-  `POST /auth/register/` (`{email, code, password, first_name, last_name?, birth_date,
-  nationality, username?}` -> 201; la cuenta nace activa y verificada con rol turista;
-  luego se llama a `login`). `birth_date` en `YYYY-MM-DD` y mayor de 18; `nationality` es el
-  código de dos letras (`NI`, `US`); contraseña de 8+ con una mayúscula y un número.
-- Contraseña: `password-forgot` (`{email}`), `password-reset` (`{email, code, password}`),
-  `password-change` (con sesión). `GET/PATCH /auth/profile/`, `POST /auth/account-close/`.
-- 2FA con `Bearer`: `GET /auth/two-factor/`, `POST /auth/two-factor-setup/` (201 `{secret,
-  uri}`), `two-factor-confirm` (201 `{codes}`), `two-factor-recovery`, `two-factor-disable`.
-- Google: `POST /auth/mobile/google/` `{id_token, birth_date?, nationality?}`. La primera vez
-  sin fecha y nacionalidad responde 400 con esos campos en `field_errors`: la app muestra
-  "completa tu perfil" y reintenta **con el mismo token**.
-- Errores: `{ "detail": "...", "field_errors": { "body.campo": "..." } }`. 401 genérico, 403
-  con el motivo, 429 con `Retry-After`.
-- El `access` vive 3 horas y el `refresh` 1 día. La app debe refrescar con una sola petición
-  en vuelo ante un 401 y reintentar una vez; si falla, cerrar sesión.
-
-## Diseño decidido para `f1-app-link`
-
-1. **Almacenamiento**: agregar `flutter_secure_storage` (última versión en pub.dev al
-   escribir esto: 11.2.0; revisar su requisito de SDK mínimo en Android) y guardar ahí
-   `access` y `refresh`. Nunca en `shared_preferences`.
-2. **`ApiClient`**: interceptor que (a) pone el `Bearer`, (b) ante 401 refresca con una sola
-   petición compartida y reintenta una vez, (c) si el refresco falla borra la sesión y avisa
-   al router. Mantener los logs redactados. Mapear `detail`/`field_errors` a errores de
-   formulario.
-3. **Repositorio de autenticación** nuevo (`AuthRepository`) detrás de la misma interfaz que
-   hoy usa la demo: con `ApiClient.isConfigured == false` sigue en modo demo; configurado,
-   habla con el API. Restaurar la sesión al arrancar (leer el almacén seguro y llamar a
-   `GET /auth/profile/`).
-4. **Pantallas**: login (con el paso de código cuando responde 202), registro (agregar
-   **nacionalidad** y **fecha de nacimiento**; flujo: correo -> código -> datos), recuperar
-   contraseña con código, y las pantallas de 2FA (activar con `qr_flutter`, confirmar,
-   mostrar los códigos de recuperación una sola vez, desactivar) en Ajustes/Cuenta.
-5. **Google**: paquete `google_sign_in` (7.x; `GoogleSignIn.instance.initialize(clientId:,
-   serverClientId:)`, `authenticate()` y `account.authentication.idToken`). Variables nuevas
-   en `env/*.json`: `GOOGLE_SERVER_CLIENT_ID` (Client ID **Web**) y `GOOGLE_IOS_CLIENT_ID`.
-   Ocultar el botón si no hay `GOOGLE_SERVER_CLIENT_ID`. iOS necesita en `Info.plist` el
-   esquema de URL con el Client ID de iOS invertido (`CFBundleURLTypes`). Guía completa:
-   `api/docs/google.md`. Apple exige ofrecer también "Iniciar sesión con Apple" si se
-   publica en iOS con Google.
-6. **Identificadores y firma (bloquea Google y la publicación)**: hoy el `applicationId` es
-   `com.example.k_plan_mobile` (`android/app/build.gradle.kts`) y el bundle id
-   `com.example.kPlanMobile` (`ios/Runner.xcodeproj/project.pbxproj`), y el release se firma
-   con la llave de debug. **Preguntar al usuario el identificador definitivo antes de crear
-   los Client ID de Google**; cambiarlo después los invalida. Luego, firma release con
-   `key.properties` (ya ignorado) y un keystore fuera del repo.
-7. **Pruebas**: `flutter test` para el interceptor de refresco, el mapeo de errores y los
-   viewmodels. Antes de cerrar: `flutter analyze` y `flutter test`.
-
-## Límite conocido
-
-El resto de la app (circuitos, lugares, reservas...) sigue con datos simulados: el API no
-publica esos recursos hasta F3 en adelante. Solo la identidad va contra el API en F1.
+- Flutter con `go_router`, `provider` (MVVM), `dio`, `logger`, `flutter_secure_storage`,
+  `google_sign_in`, `qr_flutter`, `flutter_map`, `mobile_scanner`.
+- `lib/src/ui/<pantalla>/{view,viewmodels,widgets}`; las rutas están en `router/routes.dart` (nunca
+  escribas un path a mano) y los guards en `router/router.dart` (`refreshListenable` con el
+  `AuthRepository`).
+- Los viewmodels extienden `BaseViewModel` (`isBusy`, `errorMessage`) y los repositorios devuelven
+  `Result<T>` (`Ok`/`Failure`); las vistas no lanzan excepciones de red.
+- Para probar un repositorio sin red: `FakeApi` (`test/support/fake_api.dart`) se conecta con
+  `api.connect(store: ...)` y se limpia con `ApiClient.configureForTest()` en `tearDown`.
