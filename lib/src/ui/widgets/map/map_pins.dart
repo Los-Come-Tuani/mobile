@@ -21,7 +21,8 @@ class StopPin extends StatelessWidget {
   final int? number;
   final TripStopStatus status;
 
-  /// La siguiente parada o la elegida: más grande y con un halo que late.
+  /// La siguiente parada o la elegida: más grande, y el mapa le pone detrás
+  /// un [PinPulse].
   final bool emphasized;
   final IconData icon;
 
@@ -31,14 +32,23 @@ class StopPin extends StatelessWidget {
   static Size sizeFor({required bool emphasized}) =>
       emphasized ? _emphasized : _normal;
 
+  /// Cuánto sube el centro de la cabeza desde la punta del pin: ahí late el
+  /// [PinPulse].
+  static double headAbovePoint({required bool emphasized}) {
+    final size = sizeFor(emphasized: emphasized);
+    return size.height - size.width / 2;
+  }
+
+  static Color colorFor(TripStopStatus status) => switch (status) {
+    TripStopStatus.done => AppColors.accentSecondaryGreen,
+    TripStopStatus.skipped => AppColors.hintText,
+    TripStopStatus.next || TripStopStatus.pending => AppColors.primary30,
+  };
+
   @override
   Widget build(BuildContext context) {
     final size = sizeFor(emphasized: emphasized);
-    final color = switch (status) {
-      TripStopStatus.done => AppColors.accentSecondaryGreen,
-      TripStopStatus.skipped => AppColors.hintText,
-      TripStopStatus.next || TripStopStatus.pending => AppColors.primary30,
-    };
+    final color = colorFor(status);
     final inner = size.width * 0.62;
     final content = switch (status) {
       TripStopStatus.done => Icon(
@@ -68,12 +78,6 @@ class StopPin extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          if (emphasized)
-            Positioned(
-              left: size.width / 2 - _Pulse.size / 2,
-              top: size.width / 2 - _Pulse.size / 2,
-              child: _Pulse(color: color),
-            ),
           Positioned.fill(child: CustomPaint(painter: _DropPainter(color))),
           Positioned(
             left: (size.width - inner) / 2,
@@ -239,27 +243,35 @@ class UserLocationMarker extends StatelessWidget {
 }
 
 /// Halo que se expande y se desvanece detrás del pin de la siguiente parada.
-class _Pulse extends StatefulWidget {
-  const _Pulse({required this.color});
+///
+/// Late sin parar: sólo se repinta él, sin reconstruir ni repintar el mapa.
+class PinPulse extends StatefulWidget {
+  const PinPulse({super.key, required this.color});
 
   final Color color;
 
   static const double size = 64;
+  static const Duration period = Duration(milliseconds: 1600);
+
+  /// Radio del halo en el momento [t] de cada latido (de 0 a 1).
+  static double radiusAt(double t) =>
+      size / 2 * (0.45 + 0.55 * Curves.easeOut.transform(t));
+
+  static double opacityAt(double t) => 0.35 * (1 - Curves.easeOut.transform(t));
 
   @override
-  State<_Pulse> createState() => _PulseState();
+  State<PinPulse> createState() => _PinPulseState();
 }
 
-class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
+class _PinPulseState extends State<PinPulse>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1600),
-    )..repeat();
+    _controller = AnimationController(vsync: this, duration: PinPulse.period)
+      ..repeat();
   }
 
   @override
@@ -271,27 +283,35 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          final t = Curves.easeOut.transform(_controller.value);
-          return Container(
-            width: _Pulse.size,
-            height: _Pulse.size,
-            alignment: Alignment.center,
-            child: Container(
-              width: _Pulse.size * (0.45 + 0.55 * t),
-              height: _Pulse.size * (0.45 + 0.55 * t),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: widget.color.withValues(alpha: 0.35 * (1 - t)),
-              ),
-            ),
-          );
-        },
+      child: RepaintBoundary(
+        child: CustomPaint(
+          size: const Size.square(PinPulse.size),
+          painter: _PulsePainter(_controller, widget.color),
+        ),
       ),
     );
   }
+}
+
+class _PulsePainter extends CustomPainter {
+  _PulsePainter(this.progress, this.color) : super(repaint: progress);
+
+  final Animation<double> progress;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = progress.value;
+    canvas.drawCircle(
+      size.center(Offset.zero),
+      PinPulse.radiusAt(t),
+      Paint()..color = color.withValues(alpha: PinPulse.opacityAt(t)),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PulsePainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.color != color;
 }
 
 /// La gota: un círculo arriba que se afina hasta una punta abajo, con borde

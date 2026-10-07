@@ -50,11 +50,9 @@ dependencies:
   mobile_scanner: ^7.4.0
   qr_flutter: ^4.1.0
   flutter_svg: ^2.3.0
-  # Mapa propio: tiles vectoriales de OpenFreeMap (gratis, sin API key).
-  flutter_map: ^8.3.2
-  # Beta fijada exacta: es la línea que soporta flutter_map 8.
-  vector_map_tiles: 9.0.0-beta.13
-  vector_tile_renderer: ^6.1.0
+  # Mapa nativo (MapLibre, dibujado en la GPU) con los tiles vectoriales de
+  # OpenFreeMap: gratis y sin API key.
+  maplibre_gl: ^0.27.1
   latlong2: ^0.10.1
   # Ubicación del turista en el mapa (GPS del teléfono).
   geolocator: ^14.0.3

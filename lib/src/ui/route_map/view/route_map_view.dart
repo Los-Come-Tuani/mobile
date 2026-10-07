@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -37,11 +36,8 @@ class RouteMapView extends StatefulWidget {
   State<RouteMapView> createState() => _RouteMapViewState();
 }
 
-class _RouteMapViewState extends State<RouteMapView>
-    with SingleTickerProviderStateMixin {
-  final _mapController = MapController();
-  late final AnimationController _flight;
-  VoidCallback? _flightStep;
+class _RouteMapViewState extends State<RouteMapView> {
+  final _mapController = KPlanMapController();
 
   /// Se pidió "mi ubicación" y el GPS todavía no respondía.
   bool _centerOnUserWhenLocated = false;
@@ -50,7 +46,10 @@ class _RouteMapViewState extends State<RouteMapView>
   double _sheetExtent = StopSheet.initialSize;
 
   /// Al tocar una parada, el mapa se acerca por lo menos hasta aquí.
-  static const double _focusZoom = 16.5;
+  static const double _focusZoom = MapZoom.fitMax;
+
+  /// Al buscar al turista, el mapa se acerca por lo menos hasta aquí.
+  static const double _userZoom = 15;
 
   /// Alto de la barra de arriba, sin el área segura.
   static const double _topBarHeight = 64;
@@ -58,18 +57,7 @@ class _RouteMapViewState extends State<RouteMapView>
   @override
   void initState() {
     super.initState();
-    _flight = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  void dispose() {
-    _flight.dispose();
-    _mapController.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -91,28 +79,14 @@ class _RouteMapViewState extends State<RouteMapView>
   }
 
   /// Mueve la cámara con una animación corta.
-  void _flyTo(LatLng center, double zoom) {
-    final camera = _mapController.camera;
-    final from = camera.center;
-    final fromZoom = camera.zoom;
-    double lerp(double a, double b, double t) => a + (b - a) * t;
+  void _flyTo(LatLng center, double zoom) =>
+      _mapController.flyTo(MapCamera(center, zoom));
 
-    if (_flightStep case final previous?) _flight.removeListener(previous);
-    void step() {
-      final t = Curves.easeInOutCubic.transform(_flight.value);
-      _mapController.move(
-        LatLng(
-          lerp(from.latitude, center.latitude, t),
-          lerp(from.longitude, center.longitude, t),
-        ),
-        lerp(fromZoom, zoom, t),
-      );
-    }
-
-    _flightStep = step;
-    _flight
-      ..addListener(step)
-      ..forward(from: 0);
+  /// Centra [point] y se acerca hasta [minZoom] si el mapa está más lejos.
+  Future<void> _flyCloserTo(LatLng point, double minZoom) async {
+    final camera = await _mapController.camera();
+    if (!mounted) return;
+    _flyTo(point, math.max(camera?.zoom ?? minZoom, minZoom));
   }
 
   /// Deja libres los controles de arriba, la hoja si está abierta y, a los
@@ -126,30 +100,32 @@ class _RouteMapViewState extends State<RouteMapView>
   }
 
   void _showWholeRoute(RouteMap map, {required bool withSheet}) {
-    final target = KPlanMap.fitFor(
-      map,
-      user: context.read<RouteMapViewModel>().user?.point,
-      padding: _mapPadding(withSheet: withSheet),
-    ).fit(_mapController.camera);
-    _flyTo(target.center, target.zoom);
+    final size = _mapController.size;
+    if (size == null) return;
+    _mapController.flyTo(
+      KPlanMap.fitFor(
+        map,
+        user: context.read<RouteMapViewModel>().user?.point,
+        padding: _mapPadding(withSheet: withSheet),
+        size: size,
+      ),
+    );
   }
 
   /// Abre la hoja de [point] y acerca el mapa: el pin queda en el medio de
   /// lo que la hoja deja libre arriba.
-  void _selectPoint(RouteMapPoint point) {
+  Future<void> _selectPoint(RouteMapPoint point) async {
     context.read<RouteMapViewModel>().select(point.id);
     setState(() => _sheetExtent = StopSheet.initialSize);
 
-    final camera = _mapController.camera;
-    final zoom = math.max(camera.zoom, _focusZoom);
     final height = MediaQuery.sizeOf(context).height;
     final topBar = MediaQuery.paddingOf(context).top + _topBarHeight;
     final shift = Offset(0, (height * StopSheet.initialSize - topBar) / 2);
+    final camera = await _mapController.camera();
+    if (camera == null || !mounted) return;
+    final zoom = math.max(camera.zoom, _focusZoom);
     _flyTo(
-      camera.unprojectAtZoom(
-        camera.projectAtZoom(point.point, zoom) + shift,
-        zoom,
-      ),
+      MapCamera.unproject(MapCamera.project(point.point, zoom) + shift, zoom),
       zoom,
     );
   }
@@ -168,7 +144,7 @@ class _RouteMapViewState extends State<RouteMapView>
     final viewModel = context.read<RouteMapViewModel>();
     final user = viewModel.user;
     if (user != null) {
-      _flyTo(user.point, math.max(_mapController.camera.zoom, 16));
+      await _flyCloserTo(user.point, _userZoom);
       return;
     }
 
@@ -264,9 +240,7 @@ class _RouteMapViewState extends State<RouteMapView>
     if (_centerOnUserWhenLocated && user != null) {
       _centerOnUserWhenLocated = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _flyTo(user.point, math.max(_mapController.camera.zoom, 16));
-        }
+        if (mounted) _flyCloserTo(user.point, _userZoom);
       });
     }
 

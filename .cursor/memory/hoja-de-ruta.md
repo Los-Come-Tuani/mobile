@@ -111,7 +111,15 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 ## Cómo está armada la app
 
 - Flutter con `go_router`, `provider` (MVVM), `dio`, `logger`, `flutter_secure_storage`,
-  `google_sign_in`, `qr_flutter`, `flutter_map`, `mobile_scanner`.
+  `google_sign_in`, `qr_flutter`, `maplibre_gl`, `mobile_scanner`.
+- Mapa (`lib/src/ui/widgets/map/`): `KPlanMap` usa MapLibre nativo en Android e iOS
+  (`native_map.dart`); las calles, los tramos, los pines y el turista son capas del mapa. Los pines
+  son los widgets de `map_pins.dart` pintados a PNG (`map_icon_renderer.dart`), y `map_scene.dart`
+  decide qué se destaca y arma el GeoJSON. En pruebas y escritorio no hay MapLibre: queda
+  `paper_map.dart` con los mismos pines, y por eso las pruebas pueden tocarlos. El estilo
+  (`core/theme/map_style.dart`) usa tiles y glifos de OpenFreeMap (Noto Sans: MapLibre no puede
+  usar Poppins). Los zoom son los de MapLibre: uno menos que los de `flutter_map` para la misma
+  vista.
 - `lib/src/ui/<pantalla>/{view,viewmodels,widgets}`; las rutas están en `router/routes.dart` (nunca
   escribas un path a mano) y los guards en `router/router.dart` (`refreshListenable` con el
   `AuthRepository`).

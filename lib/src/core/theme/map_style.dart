@@ -1,40 +1,27 @@
+import 'dart:convert';
 import 'dart:ui';
 
-import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
-
 import 'app_colors.dart';
-import 'app_text_styles.dart';
 
-/// Estilo de las calles del mapa de K'Plan.
+/// Estilo de las calles del mapa de K'Plan, para MapLibre.
 ///
 /// Sigue las capas del estilo Positron de OpenFreeMap (esquema OpenMapTiles),
 /// pintadas con la paleta de la app. No trae íconos de lugares ni escudos de
 /// carreteras: en el mapa sólo resaltan nuestras paradas.
 abstract final class KPlanMapStyle {
-  /// Fuente de los tiles en el estilo: la llave de `TileProviders`.
+  /// Fuente de los tiles en el estilo.
   static const String source = 'openmaptiles';
 
-  /// Súbelo al cambiar el estilo: invalida los tiles ya pintados en caché.
-  static const String version = '1';
+  /// Las fuentes que sirve OpenFreeMap para las etiquetas. MapLibre sólo
+  /// dibuja texto con los glifos del servidor, así que no puede usar Poppins.
+  static const String regularFont = 'Noto Sans Regular';
+  static const String boldFont = 'Noto Sans Bold';
+  static const String italicFont = 'Noto Sans Italic';
 
-  static vtr.Theme? _theme;
+  /// El estilo listo para `MapLibreMap.styleString`.
+  static final String json = jsonEncode(build());
 
-  /// El estilo ya leído, con las etiquetas en Poppins como el resto de la app.
-  static vtr.Theme get theme => _theme ??= vtr.ThemeReader().read(
-    build(
-      regularFont: AppTextStyles.mapLabel.fontFamily,
-      boldFont: AppTextStyles.mapPlace.fontFamily,
-      italicFont: AppTextStyles.mapWater.fontFamily,
-    ),
-  );
-
-  /// El estilo en formato MapLibre. Sin fuentes, las etiquetas usan la del
-  /// sistema.
-  static Map<String, dynamic> build({
-    String? regularFont,
-    String? boldFont,
-    String? italicFont,
-  }) {
+  static Map<String, dynamic> build() {
     const minorRoads = ['minor', 'service', 'track'];
     const majorRoads = ['primary', 'secondary', 'tertiary', 'trunk'];
 
@@ -42,7 +29,7 @@ abstract final class KPlanMapStyle {
       'version': 8,
       'id': 'kplan',
       'name': "K'Plan",
-      'metadata': {'version': version},
+      'glyphs': 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
       'sources': {
         source: {
           'type': 'vector',
@@ -419,7 +406,7 @@ abstract final class KPlanMapStyle {
     Object? filter,
     required Color color,
     required Object size,
-    String? font,
+    required String font,
     bool alongLine = false,
     bool uppercase = false,
     double? maxWidth,
@@ -436,7 +423,7 @@ abstract final class KPlanMapStyle {
     'layout': {
       'text-field': _name,
       'text-size': size,
-      if (font != null) 'text-font': [font],
+      'text-font': [font],
       if (alongLine) ...{
         'symbol-placement': 'line',
         'text-rotation-alignment': 'map',
