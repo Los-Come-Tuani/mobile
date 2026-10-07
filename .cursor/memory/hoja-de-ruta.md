@@ -47,8 +47,7 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     `KPLAN_API_URL` y `KPLAN_MAIL_LOG`; ver README). Esa prueba pasó contra el API real:
     registro con código del correo, renovación de tokens, 2FA completo con TOTP, cambio de
     contraseña.
-  - `flutter analyze` solo reporta dos avisos de `onReorder` que ya estaban; `flutter test` pasa
-    completo.
+  - `flutter analyze` y `flutter test` pasan limpios (estado actual al final de esta sección).
 - **Hecho: F5 en la app** (guías y traductores, 2026-10-07; contrato en `api/docs/prestadores.md`):
   - **Una cuenta, un papel.** La de un guía o traductor se crea al postularse desde la app; un
     turista que quiere ser guía usa otro correo ("Salir para postularme" en la pantalla de
@@ -81,6 +80,14 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     `test/integration/provider_contract_test.dart` contra el API real (postulación con subida
     firmada; pasó con el S3 local de pruebas, ver la memoria del API, sección 10).
 - No se probó en un dispositivo o emulador: la pantalla se verificó con pruebas y analizador.
+- **Hecho: idiomas español e inglés** (merge de `respaldo/idiomas-local`, 2026-10-07): gen-l10n,
+  catálogo de ejemplo en inglés (`assets/mock/en/`), selector de idioma la primera vez en el login
+  y en Configuraciones (y en el perfil del guía). Se quedó el mapa de esta rama (OpenFreeMap con
+  `maplibre_gl`); el motor viejo de `a85d7c2` (paquete `maplibre`, `map_engine`,
+  `maplibre_engine`, `map_marker_layer`, `route_geojson`, `core/utils/map_camera`) se descartó.
+  Los textos que la rama agregó (2FA, Google, registro con nacionalidad, recuperar y cambiar
+  contraseña, postulación F5, estados vacíos, documentos del guía) tienen sus claves en los dos
+  ARB. `flutter analyze` queda sin avisos y `flutter test` pasa completo (347, 4 saltadas).
 
 ## Qué falta
 
@@ -107,11 +114,23 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 5. **Eliminar la cuenta** (`POST /auth/account-close/`, baja a 30 días) no tiene pantalla todavía.
 6. Opcional: borrar la sesión del Keychain en una reinstalación de iOS (el Keychain sobrevive a
    desinstalar la app); con un `refresh` de un día el riesgo es bajo.
+7. **Textos sin traducir** (siguen en español en los dos idiomas):
+   - Configuraciones -> Cuenta -> "Verificación en dos pasos" (`settings/view/two_factor_view.dart`
+     y su viewmodel).
+   - App del guía: "Editar mi perfil" y "Mis documentos"/renovación
+     (`guide_app/profile/view/guide_profile_edit_view.dart`, `guide_renewal_view.dart` y sus
+     viewmodels).
+   - Nombres de países (`models/nationality.dart`) y las etiquetas de `models/provider.dart`
+     (`ProviderServices.label`, nombres de respaldo de los documentos).
+   - Lo que manda el API llega en español: el `detail` de los errores (`describeError` lo muestra
+     tal cual) y los catálogos de prestadores (ciudades, idiomas, tipos de documento). Si se
+     quiere en inglés, el API tendría que leer `Accept-Language`.
 
 ## Cómo está armada la app
 
 - Flutter con `go_router`, `provider` (MVVM), `dio`, `logger`, `flutter_secure_storage`,
-  `google_sign_in`, `qr_flutter`, `maplibre_gl`, `mobile_scanner`.
+  `google_sign_in`, `qr_flutter`, `maplibre_gl`, `mobile_scanner`, `shared_preferences` (solo
+  el idioma) e `intl`.
 - Mapa (`lib/src/ui/widgets/map/`): `KPlanMap` usa MapLibre nativo en Android e iOS
   (`native_map.dart`); las calles, los tramos, los pines y el turista son capas del mapa. Los pines
   son los widgets de `map_pins.dart` pintados a PNG (`map_icon_renderer.dart`), y `map_scene.dart`
@@ -127,3 +146,19 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `Result<T>` (`Ok`/`Failure`); las vistas no lanzan excepciones de red.
 - Para probar un repositorio sin red: `FakeApi` (`test/support/fake_api.dart`) se conecta con
   `api.connect(store: ...)` y se limpia con `ApiClient.configureForTest()` en `tearDown`.
+- Idiomas (gen-l10n, `l10n.yaml`): los textos viven en `lib/l10n/arb/app_es.arb` (plantilla) y
+  `app_en.arb`; `flutter gen-l10n` genera `lib/l10n/app_localizations*.dart`, que se versionan
+  (córrelo después de tocar un ARB). En las vistas se usa `context.l10n.clave`
+  (`core/l10n/l10n.dart`); sin `BuildContext` (viewmodels, repositorios, validadores, el pintado
+  de los pines del mapa) se usa `AppStrings.current.clave`, que sigue el idioma elegido.
+  `ContentLabels` traduce valores de datos que siguen en español (`l10n.categoryName`,
+  `l10n.languageName`). `LanguageRepository` guarda el idioma en `shared_preferences`
+  (`LanguageRepository.memory()` en pruebas) y `LanguageContentSync` recarga el contenido de
+  ejemplo al cambiarlo. Los íconos del mapa se cachean por nombre: si un pin lleva texto, el
+  nombre lleva el código del idioma (`pin/start/es`).
+- Para agregar un texto: la clave va en los dos ARB con el prefijo de su pantalla (`common*`,
+  `login*`, `register*`, `settings*`, `guideAccess*`, `guideApp*`, `repo*`, `validator*`...),
+  en orden alfabético sin distinguir mayúsculas; el bloque `@clave` con `placeholders` solo en
+  `app_es.arb` y solo si lleva parámetros. Las pruebas corren en español salvo que usen
+  `AppStrings.use(AppLanguage.en)` (y lo devuelvan en `tearDown`); un widget suelto necesita
+  `localizationsDelegates` y `supportedLocales` de `AppLocalizations` para traducirse.
