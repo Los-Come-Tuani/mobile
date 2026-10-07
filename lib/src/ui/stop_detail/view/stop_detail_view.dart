@@ -15,6 +15,7 @@ import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/item_options_sheet.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../viewmodels/stop_detail_viewmodel.dart';
@@ -47,9 +48,7 @@ class _StopDetailViewState extends State<StopDetailView> {
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy || stop == null
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : _StopContent(
               stop: stop,
               circuitsWithStop: viewModel.circuitsWithStop,

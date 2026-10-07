@@ -19,6 +19,7 @@ import '../../stop_detail/view/qr_scanner_view.dart';
 import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/drop_reason_sheet.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/map/kplan_map.dart';
 import '../../widgets/map/paper_texture.dart';
 import '../../widgets/open_with_sheet.dart';
@@ -621,7 +622,7 @@ class _Backdrop extends StatelessWidget {
         const PaperTexture(),
         Center(
           child: isBusy
-              ? const CircularProgressIndicator(color: AppColors.primary30)
+              ? const KPlanLoader()
               : Padding(
                   padding: const EdgeInsets.all(32),
                   child: Column(

@@ -8,6 +8,7 @@ import '../../../data/models/coupon.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/coupons_viewmodel.dart';
 
@@ -65,9 +66,7 @@ class _CouponsViewState extends State<CouponsView> {
         currentIndex: AppBottomNav.coupons,
       ),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
               children: [

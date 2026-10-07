@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../widgets/mascot.dart';
 
 /// Un mensaje del chat con el asistente: los suyos a la izquierda, con su
 /// avatar; los del turista a la derecha, en el color de marca.
@@ -64,7 +65,7 @@ class ChatBubble extends StatelessWidget {
   }
 }
 
-/// El avatar del asistente.
+/// El avatar del asistente: la cabeza de la vaca de K'Plan.
 class AssistantAvatar extends StatelessWidget {
   const AssistantAvatar({super.key, this.size = 30});
 
@@ -75,15 +76,19 @@ class AssistantAvatar extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      alignment: Alignment.center,
-      decoration: const BoxDecoration(
-        color: AppColors.primary30,
+      decoration: BoxDecoration(
+        color: AppColors.card,
         shape: BoxShape.circle,
+        border: Border.all(color: AppColors.divider),
       ),
-      child: Icon(
-        Icons.auto_awesome,
-        size: size * 0.55,
-        color: AppColors.white,
+      child: ClipOval(
+        // La mascota es de cuerpo entero: se acerca hasta que sólo quede la
+        // cabeza con sus cuernos.
+        child: Transform.scale(
+          scale: 1.7,
+          alignment: const Alignment(0, -0.62),
+          child: Mascot(size: size),
+        ),
       ),
     );
   }

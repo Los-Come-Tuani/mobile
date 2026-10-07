@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../router/routes.dart';
@@ -12,6 +11,9 @@ import '../../home/widgets/place_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/kplan_loader.dart';
+import '../../widgets/primary_button.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../viewmodels/saved_viewmodel.dart';
@@ -44,11 +46,22 @@ class _SavedViewState extends State<SavedView> {
         currentIndex: AppBottomNav.profile,
       ),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : viewModel.isEmpty
-          ? const _EmptyState()
+          ? ListView(
+              children: [
+                EmptyState(
+                  title: 'Todavía no guardaste nada',
+                  message:
+                      'Toca el marcador de un circuito, una parada o un '
+                      'evento y lo encontrarás aquí.',
+                  action: PrimaryButton(
+                    label: 'Explorar circuitos',
+                    onPressed: () => context.go(Routes.home),
+                  ),
+                ),
+              ],
+            )
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
               children: [
@@ -115,35 +128,6 @@ class _SavedViewState extends State<SavedView> {
                 ],
               ],
             ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.bookmark_border,
-              size: 44,
-              color: AppColors.hintText,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Todavía no guardaste nada',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

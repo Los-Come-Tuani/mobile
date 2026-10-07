@@ -12,12 +12,13 @@ import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
 import '../../../guide_access/widgets/labeled_field.dart';
 import '../../../widgets/app_text_field.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/offer_chip.dart';
 import '../../../widgets/primary_button.dart';
 import '../../widgets/detail_line.dart';
 import '../../widgets/guide_bar.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/tourist_identity.dart';
 import '../viewmodels/guide_job_viewmodel.dart';
 
@@ -89,9 +90,8 @@ class _GuideJobViewState extends State<GuideJobView> {
       return Scaffold(
         appBar: const GuideBar(title: 'Propuesta'),
         body: !viewModel.isLoaded
-            ? const Center(child: CircularProgressIndicator())
-            : const GuideEmptyState(
-                icon: Icons.search_off,
+            ? const Center(child: KPlanLoader())
+            : const EmptyState(
                 title: 'No encontramos esta propuesta',
                 message: 'Puede que el turista la haya retirado.',
               ),

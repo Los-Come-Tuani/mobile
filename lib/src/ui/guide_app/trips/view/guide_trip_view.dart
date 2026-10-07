@@ -9,11 +9,12 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
+import '../../../widgets/empty_state.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/secondary_button.dart';
 import '../../widgets/detail_line.dart';
 import '../../widgets/guide_bar.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/money_breakdown.dart';
 import '../../widgets/rate_tourist_sheet.dart';
 import '../../widgets/tourist_identity.dart';
@@ -73,9 +74,8 @@ class _GuideTripViewState extends State<GuideTripView> {
       return Scaffold(
         appBar: const GuideBar(title: 'Viaje'),
         body: !viewModel.isLoaded
-            ? const Center(child: CircularProgressIndicator())
-            : const GuideEmptyState(
-                icon: Icons.search_off,
+            ? const Center(child: KPlanLoader())
+            : const EmptyState(
                 title: 'No encontramos este viaje',
                 message: 'Revisa tus viajes desde la pestaña Viajes.',
               ),

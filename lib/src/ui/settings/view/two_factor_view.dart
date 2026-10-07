@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/secondary_button.dart';
 import '../../widgets/soft_button.dart';
@@ -117,7 +118,7 @@ class _TwoFactorViewState extends State<TwoFactorView> {
         else if (status == null)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 48),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: KPlanLoader(size: 88)),
           )
         else if (status.enabled)
           _enabled(viewModel)

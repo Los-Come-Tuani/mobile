@@ -10,9 +10,10 @@ import '../../../../data/models/guide_chat_thread.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
+import '../../../widgets/empty_state.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../widgets/guide_bar.dart';
 import '../../widgets/guide_bottom_nav.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/tourist_identity.dart';
 import '../viewmodels/guide_chats_viewmodel.dart';
 
@@ -44,13 +45,12 @@ class _GuideChatsViewState extends State<GuideChatsView> {
         currentIndex: GuideBottomNav.chats,
       ),
       body: !viewModel.isLoaded
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: KPlanLoader())
           : threads.isEmpty
           ? ListView(
               padding: AppTheme.screenPadding,
               children: const [
-                GuideEmptyState(
-                  icon: Icons.chat_bubble_outline,
+                EmptyState(
                   title: 'Todavía no tienes conversaciones',
                   message:
                       'Cuando un turista te contrate, aquí coordinan el punto '

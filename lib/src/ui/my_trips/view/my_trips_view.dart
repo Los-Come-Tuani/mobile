@@ -15,6 +15,8 @@ import '../../widgets/action_row.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/new_circuit_dialog.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/remote_image.dart';
@@ -119,11 +121,7 @@ class _MyTripsViewState extends State<MyTripsView>
           ),
           Expanded(
             child: viewModel.isBusy
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary30,
-                    ),
-                  )
+                ? const Center(child: KPlanLoader())
                 : TabBarView(
                     controller: _tabController,
                     children: [
@@ -203,7 +201,6 @@ class _UpcomingTab extends StatelessWidget {
 
     if (bookings.isEmpty) {
       return _EmptyTab(
-        icon: Icons.explore_outlined,
         title: 'Tu historia está por empezar',
         message:
             'Elige un circuito y organiza tu primera salida. Aquí '
@@ -419,7 +416,6 @@ class _OngoingTab extends StatelessWidget {
     if (trip == null) {
       final hasBookings = viewModel.upcomingBookings.isNotEmpty;
       return _EmptyTab(
-        icon: Icons.directions_walk,
         title: 'Ningún recorrido en curso',
         message:
             'Cuando empieces un circuito, aquí verás tu próxima parada, '
@@ -735,14 +731,12 @@ class _CircuitRow extends StatelessWidget {
 /// Estado vacío de una pestaña: qué va a aparecer aquí y cómo llegar.
 class _EmptyTab extends StatelessWidget {
   const _EmptyTab({
-    required this.icon,
     required this.title,
     required this.message,
     required this.action,
     this.secondaryAction,
   });
 
-  final IconData icon;
   final String title;
   final String message;
   final Widget action;
@@ -751,40 +745,16 @@ class _EmptyTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: AppTheme.screenPadding.copyWith(top: 48, bottom: 24),
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
       children: [
-        Center(
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.accentSecondaryGreen,
-                width: 2,
-              ),
-            ),
-            child: Icon(icon, color: AppColors.accentSecondaryGreen, size: 28),
-          ),
+        EmptyState(
+          title: title,
+          message: message,
+          action: action,
+          secondaryAction: secondaryAction == null
+              ? null
+              : Center(child: secondaryAction),
         ),
-        const SizedBox(height: 20),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.pageTitle,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodySmall,
-        ),
-        const SizedBox(height: 32),
-        action,
-        if (secondaryAction != null) ...[
-          const SizedBox(height: 8),
-          Center(child: secondaryAction),
-        ],
       ],
     );
   }

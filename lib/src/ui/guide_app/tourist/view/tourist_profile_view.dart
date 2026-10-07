@@ -6,12 +6,13 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/tourist_profile.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/offer_chip.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/rating_stars.dart';
 import '../../widgets/guide_bar.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/rate_tourist_sheet.dart';
 import '../../widgets/tourist_identity.dart';
 import '../viewmodels/tourist_profile_viewmodel.dart';
@@ -73,9 +74,8 @@ class _TouristProfileViewState extends State<TouristProfileView> {
       return Scaffold(
         appBar: const GuideBar(title: 'Turista'),
         body: !viewModel.isLoaded
-            ? const Center(child: CircularProgressIndicator())
-            : const GuideEmptyState(
-                icon: Icons.person_off_outlined,
+            ? const Center(child: KPlanLoader())
+            : const EmptyState(
                 title: 'No encontramos a este turista',
                 message: 'Puede que haya cerrado su cuenta.',
               ),
@@ -195,8 +195,8 @@ class _TouristProfileViewState extends State<TouristProfileView> {
             ),
           const SizedBox(height: 12),
           if (tourist.ratings.isEmpty)
-            GuideEmptyState(
-              icon: Icons.reviews_outlined,
+            EmptyState(
+              compact: true,
               title: 'Todavía sin calificaciones',
               message:
                   'Cuando un guía termine un viaje con ${tourist.firstName}, '

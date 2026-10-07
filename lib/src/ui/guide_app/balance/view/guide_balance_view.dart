@@ -7,10 +7,11 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/guide_withdrawal.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/primary_button.dart';
 import '../../widgets/guide_bar.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/withdraw_sheet.dart';
 import '../viewmodels/guide_balance_viewmodel.dart';
 
@@ -63,7 +64,7 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
     if (!viewModel.isLoaded) {
       return const Scaffold(
         appBar: GuideBar(title: 'Balance'),
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(child: KPlanLoader()),
       );
     }
 
@@ -131,8 +132,8 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
           ),
           const SizedBox(height: 4),
           if (movements.isEmpty)
-            const GuideEmptyState(
-              icon: Icons.receipt_long_outlined,
+            const EmptyState(
+              compact: true,
               title: 'Todavía no hay movimientos',
               message:
                   'Aquí verás lo que recibes por cada viaje y tus retiros.',

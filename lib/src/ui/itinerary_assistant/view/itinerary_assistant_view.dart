@@ -9,6 +9,7 @@ import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_choice_chip.dart';
 import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../viewmodels/itinerary_assistant_viewmodel.dart';
 import '../widgets/chat_bubble.dart';
@@ -103,9 +104,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
         ),
       ),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

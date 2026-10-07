@@ -20,6 +20,7 @@ import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../../widgets/reorder_stops_sheet.dart';
@@ -107,9 +108,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : circuit == null
           ? _ErrorState(
               message:

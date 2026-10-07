@@ -59,6 +59,8 @@ dependencies:
   file_picker: ^13.1.0
   flutter_secure_storage: ^11.2.0
   google_sign_in: ^7.2.0
+  # Animaciones de la mascota (la vaca de K'Plan).
+  lottie: ^3.6.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +88,8 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/animation/
+    - assets/images/kplanMascota.svg
     - assets/images/background/
     - assets/images/logo/
     - assets/images/register/

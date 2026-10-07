@@ -13,6 +13,7 @@ import '../../booking/widgets/booking_card.dart';
 import '../../booking/widgets/group_picker_sheet.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/creative_circuit_badge.dart';
+import '../../widgets/kplan_loader.dart';
 import '../viewmodels/group_slots_viewmodel.dart';
 import '../widgets/enroll_sheet.dart';
 import '../widgets/group_slot_card.dart';
@@ -107,9 +108,7 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy || (circuit == null && !viewModel.hasError)
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : circuit == null
           ? _Message(
               icon: Icons.error_outline,

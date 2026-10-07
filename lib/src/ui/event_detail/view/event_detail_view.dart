@@ -14,6 +14,7 @@ import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/item_options_sheet.dart';
+import '../../widgets/kplan_loader.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
 
 /// Detalle de un evento próximo.
@@ -41,9 +42,7 @@ class _EventDetailViewState extends State<EventDetailView> {
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : event == null
           ? _ErrorState(
               message:

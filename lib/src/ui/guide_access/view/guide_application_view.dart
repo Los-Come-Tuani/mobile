@@ -18,6 +18,7 @@ import '../../widgets/app_choice_chip.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/nationality_sheet.dart';
 import '../../widgets/picker_field.dart';
 import '../../widgets/primary_button.dart';
@@ -426,7 +427,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
               onPressed: viewModel.retryCatalogs,
             ),
           ] else
-            const Center(child: CircularProgressIndicator()),
+            const Center(child: KPlanLoader(size: 88)),
         ],
       );
     }

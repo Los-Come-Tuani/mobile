@@ -16,6 +16,8 @@ import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_search_field.dart';
 import '../../widgets/category_filter_bar.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../../widgets/trip_progress.dart';
@@ -103,9 +105,16 @@ class _HomeViewState extends State<HomeView> {
               ),
               const SizedBox(height: 20),
               if (viewModel.isBusy)
-                const _LoadingState()
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 64),
+                  child: Center(child: KPlanLoader()),
+                )
               else if (viewModel.isEmpty)
-                const _EmptyState()
+                const EmptyState(
+                  title: 'No encontramos nada con esa búsqueda',
+                  message:
+                      'Prueba con otra palabra o revisa cómo está escrita.',
+                )
               else
                 ..._buildSections(viewModel),
             ],
@@ -197,7 +206,10 @@ class _HomeViewState extends State<HomeView> {
         ),
         const SizedBox(height: 16),
         if (viewModel.stops.isEmpty)
-          const _EmptyState()
+          const EmptyState(
+            title: 'No hay paradas que coincidan',
+            message: 'Prueba con otra categoría o con otra búsqueda.',
+          )
         else
           Padding(
             padding: AppTheme.screenPadding,
@@ -676,42 +688,6 @@ class _EventsSection extends StatelessWidget {
       itemBuilder: (context, index) => EventCard(
         event: events[index],
         onTap: () => onEventTap(events[index]),
-      ),
-    );
-  }
-}
-
-class _LoadingState extends StatelessWidget {
-  const _LoadingState();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 80),
-      child: Center(
-        child: CircularProgressIndicator(color: AppColors.primary30),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
-      child: Column(
-        children: [
-          const Icon(Icons.travel_explore, size: 48, color: AppColors.hintText),
-          const SizedBox(height: 12),
-          Text(
-            'No encontramos resultados para tu búsqueda',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall,
-          ),
-        ],
       ),
     );
   }

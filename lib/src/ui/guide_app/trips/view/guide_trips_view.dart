@@ -7,10 +7,11 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../router/routes.dart';
+import '../../../widgets/empty_state.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/secondary_button.dart';
 import '../../widgets/guide_bar.dart';
 import '../../widgets/guide_bottom_nav.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/trip_row.dart';
 import '../viewmodels/guide_trips_viewmodel.dart';
 
@@ -73,14 +74,13 @@ class _GuideTripsViewState extends State<GuideTripsView> {
             ),
             Expanded(
               child: !viewModel.isLoaded
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: KPlanLoader())
                   : TabBarView(
                       children: [
                         _TripList(
                           trips: viewModel.upcoming,
                           viewModel: viewModel,
-                          empty: GuideEmptyState(
-                            icon: Icons.explore_outlined,
+                          empty: EmptyState(
                             title: 'Todavía no tienes viajes próximos',
                             message:
                                 'Postúlate a una propuesta desde Inicio; cuando '
@@ -94,8 +94,7 @@ class _GuideTripsViewState extends State<GuideTripsView> {
                         _TripList(
                           trips: viewModel.completed,
                           viewModel: viewModel,
-                          empty: const GuideEmptyState(
-                            icon: Icons.history,
+                          empty: const EmptyState(
                             title: 'Aquí verás los viajes que termines',
                             message:
                                 'Después de cada viaje podrás calificar al '

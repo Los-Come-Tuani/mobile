@@ -12,7 +12,9 @@ import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_time_picker.dart';
 import '../../widgets/drop_reason_sheet.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/section_header.dart';
@@ -214,9 +216,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
@@ -302,7 +302,16 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                     const SizedBox(height: 20),
                   ],
                   if (itinerary == null)
-                    const _EmptyState()
+                    EmptyState(
+                      title: 'Este circuito todavía no tiene paradas',
+                      message:
+                          'En cualquier parada, toca "Añadir a un circuito" '
+                          'y elige este.',
+                      action: PrimaryButton(
+                        label: 'Explorar paradas',
+                        onPressed: () => context.go(Routes.home),
+                      ),
+                    )
                   else ...[
                     const SectionHeader(title: 'Paradas del recorrido'),
                     const SizedBox(height: 4),
@@ -380,28 +389,6 @@ class _AssistantPromo extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 48),
-      child: Column(
-        children: [
-          const Icon(Icons.route_outlined, size: 44, color: AppColors.hintText),
-          const SizedBox(height: 12),
-          Text(
-            'Este circuito todavía no tiene paradas',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall,
-          ),
-        ],
       ),
     );
   }

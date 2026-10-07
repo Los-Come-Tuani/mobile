@@ -13,6 +13,7 @@ import '../../../guide_access/widgets/credential_card.dart';
 import '../../../guide_access/widgets/guide_heading.dart';
 import '../../../guide_access/widgets/labeled_field.dart';
 import '../../../widgets/inline_notice.dart';
+import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/primary_button.dart';
 import '../../widgets/guide_bar.dart';
 import '../viewmodels/guide_renewal_viewmodel.dart';
@@ -95,7 +96,7 @@ class GuideRenewalView extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           if (viewModel.types.isEmpty)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: KPlanLoader(size: 88))
           else ...[
             LabeledField(
               label: 'Documento',

@@ -13,6 +13,7 @@ import '../../guide_request/widgets/application_card.dart';
 import '../../guide_request/widgets/hire_flow.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/icon_label.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/offer_chip.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
@@ -87,9 +88,7 @@ class _GuideProfileViewState extends State<GuideProfileView> {
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.isBusy || guide == null
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            )
+          ? const Center(child: KPlanLoader())
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 24, bottom: 24),
               children: [

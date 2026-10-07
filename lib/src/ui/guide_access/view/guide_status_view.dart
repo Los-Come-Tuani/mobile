@@ -14,6 +14,7 @@ import '../../../data/models/provider.dart';
 import '../../../router/routes.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/soft_button.dart';
 import '../widgets/guide_app_bar.dart';
@@ -78,7 +79,7 @@ class _GuideStatusViewState extends State<GuideStatusView> {
                 ? const Padding(
                     key: ValueKey('loading'),
                     padding: EdgeInsets.only(top: 48),
-                    child: Center(child: CircularProgressIndicator()),
+                    child: Center(child: KPlanLoader(size: 88)),
                   )
                 : _Status(
                     key: ValueKey('${application.id}-${application.status}'),

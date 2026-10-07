@@ -11,6 +11,7 @@ import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/itinerary_timeline.dart';
+import '../../widgets/kplan_loader.dart';
 import '../../widgets/options_sheet.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../widgets/booking_card.dart';
@@ -237,9 +238,7 @@ class _BookingViewState extends State<BookingView> {
             )
           : viewModel.hasError && !viewModel.isBusy
           ? _LoadError(message: viewModel.errorMessage!, onBack: _goBack)
-          : const Center(
-              child: CircularProgressIndicator(color: AppColors.primary30),
-            ),
+          : const Center(child: KPlanLoader()),
     );
   }
 }

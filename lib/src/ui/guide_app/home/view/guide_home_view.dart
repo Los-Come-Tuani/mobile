@@ -9,12 +9,12 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../widgets/coverage_chip.dart';
 import '../../widgets/date_badge.dart';
 import '../../widgets/guide_bar.dart';
 import '../../widgets/guide_bottom_nav.dart';
-import '../../widgets/guide_empty_state.dart';
 import '../../widgets/job_row.dart';
 import '../viewmodels/guide_home_viewmodel.dart';
 
@@ -113,8 +113,8 @@ class _GuideHomeViewState extends State<GuideHomeView> {
     final jobs = viewModel.jobs;
     if (jobs.isEmpty) {
       return [
-        GuideEmptyState(
-          icon: Icons.inbox_outlined,
+        EmptyState(
+          compact: true,
           title: viewModel.isLocal
               ? 'No hay propuestas nuevas en ${viewModel.city}'
               : 'No hay propuestas nuevas por ahora',
