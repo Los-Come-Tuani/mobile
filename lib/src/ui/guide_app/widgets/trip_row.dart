@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -23,6 +24,9 @@ class TripRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final earnings = Formatters.currency(trip.earnings);
+
     return MergeSemantics(
       child: Semantics(
         button: true,
@@ -50,8 +54,9 @@ class TripRow extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${trip.isCompleted ? 'Recibiste' : 'Recibes'} '
-                        '${Formatters.currency(trip.earnings)}',
+                        trip.isCompleted
+                            ? l10n.guideAppYouReceived(earnings)
+                            : l10n.guideAppYouReceive(earnings),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.accentSecondaryGreen,
                           fontWeight: FontWeight.w600,
@@ -101,7 +106,7 @@ class _RatePill extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              'Calificar',
+              context.l10n.guideAppTripRate,
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.primaryText,
                 fontWeight: FontWeight.w600,

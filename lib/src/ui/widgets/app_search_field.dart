@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -38,7 +39,7 @@ class AppSearchField extends StatelessWidget {
         prefixIcon: const Icon(Icons.search, color: AppColors.primaryText),
         suffixIcon: IconButton(
           icon: const Icon(Icons.mic_none, color: AppColors.primaryText),
-          tooltip: 'Buscar por voz',
+          tooltip: context.l10n.sharedSearchByVoice,
           onPressed: onMicPressed,
         ),
         border: _border(AppColors.outline),

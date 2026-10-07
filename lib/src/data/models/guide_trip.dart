@@ -104,12 +104,16 @@ class GuideTrip {
 
   num get earnings => GuidePay.earningsOf(agreedPrice);
 
-  GuideTrip copyWith({bool? touristRated}) {
+  GuideTrip copyWith({
+    bool? touristRated,
+    String? circuitTitle,
+    String? meetingPoint,
+  }) {
     return GuideTrip(
       id: id,
       touristId: touristId,
       circuitId: circuitId,
-      circuitTitle: circuitTitle,
+      circuitTitle: circuitTitle ?? this.circuitTitle,
       city: city,
       date: date,
       startTime: startTime,
@@ -117,7 +121,7 @@ class GuideTrip {
       terms: terms,
       agreedPrice: agreedPrice,
       status: status,
-      meetingPoint: meetingPoint,
+      meetingPoint: meetingPoint ?? this.meetingPoint,
       touristRated: touristRated ?? this.touristRated,
     );
   }

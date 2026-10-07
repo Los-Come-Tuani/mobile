@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/guide_inbox_repository.dart';
@@ -19,46 +20,48 @@ class GuideBottomNav extends StatelessWidget {
 
   final int currentIndex;
 
-  static const List<
-    ({IconData icon, IconData selected, String label, String route})
-  >
-  _items = [
+  /// Las pestañas. Los nombres se arman al construir para que sigan el idioma
+  /// de ahora.
+  static List<({IconData icon, IconData selected, String label, String route})>
+  _items(AppLocalizations l10n) => [
     (
       icon: Icons.home_outlined,
       selected: Icons.home,
-      label: 'Inicio',
+      label: l10n.commonHome,
       route: Routes.guideHome,
     ),
     (
       icon: Icons.explore_outlined,
       selected: Icons.explore,
-      label: 'Viajes',
+      label: l10n.guideAppNavTrips,
       route: Routes.guideTrips,
     ),
     (
       icon: Icons.chat_bubble_outline,
       selected: Icons.chat_bubble,
-      label: 'Chats',
+      label: l10n.guideAppNavChats,
       route: Routes.guideChats,
     ),
     (
       icon: Icons.person_outline,
       selected: Icons.person,
-      label: 'Perfil',
+      label: l10n.guideAppNavProfile,
       route: Routes.guideSelfProfile,
     ),
   ];
 
   void _onTap(BuildContext context, int index) {
+    final route = _items(context.l10n)[index].route;
     // Desde una pantalla que cuelga de una pestaña, tocarla también regresa.
-    final isOnRoot =
-        GoRouterState.of(context).matchedLocation == _items[index].route;
+    final isOnRoot = GoRouterState.of(context).matchedLocation == route;
     if (index == currentIndex && isOnRoot) return;
-    context.go(_items[index].route);
+    context.go(route);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final items = _items(l10n);
     final unread = context.select<GuideInboxRepository, int>(
       (inbox) => inbox.unreadCount,
     );
@@ -96,13 +99,13 @@ class GuideBottomNav extends StatelessWidget {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: (index) => _onTap(context, index),
           destinations: [
-            for (final (index, item) in _items.indexed)
+            for (final (index, item) in items.indexed)
               NavigationDestination(
                 icon: _withBadge(Icon(item.icon), index, unread),
                 selectedIcon: _withBadge(Icon(item.selected), index, unread),
                 label: item.label,
                 tooltip: index == chats && unread > 0
-                    ? 'Chats, $unread sin leer'
+                    ? l10n.guideAppNavChatsUnread(unread)
                     : item.label,
               ),
           ],

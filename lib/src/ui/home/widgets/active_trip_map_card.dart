@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/route_map.dart';
@@ -63,7 +64,7 @@ class ActiveTripMap extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Ver mapa',
+                  context.l10n.homeActiveTripViewMap,
                   style: AppTextStyles.caption.copyWith(
                     color: AppColors.primaryText,
                     fontWeight: FontWeight.w600,

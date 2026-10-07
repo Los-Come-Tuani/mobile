@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/validators.dart';
@@ -44,6 +45,7 @@ class _PasswordResetViewState extends State<PasswordResetView> {
 
     // Al cerrarse la sesión esta pantalla se va: el aviso va por el mensajero de la app.
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     final auth = context.read<AuthRepository>();
     final simulated = auth.isPasswordResetSimulated;
 
@@ -60,9 +62,7 @@ class _PasswordResetViewState extends State<PasswordResetView> {
           if (mounted) setState(() => _done = true);
         } else {
           messenger.showSnackBar(
-            const SnackBar(
-              content: Text('Contraseña actualizada. Vuelve a entrar.'),
-            ),
+            SnackBar(content: Text(l10n.settingsPasswordChangedLogInAgain)),
           );
         }
       case Failure(:final message):
@@ -72,16 +72,18 @@ class _PasswordResetViewState extends State<PasswordResetView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_done) {
       return SettingsPage(
-        title: 'Contraseña',
+        title: l10n.commonPassword,
         children: [
           DonePanel(
             icon: Icons.lock_outline,
-            title: 'Contraseña actualizada',
-            message: 'Tu contraseña nueva ya sirve.',
-            note: 'Demostración: no hay un servidor que la guarde.',
-            actionLabel: 'Volver a Cuenta',
+            title: l10n.settingsPasswordChangedTitle,
+            message: l10n.settingsPasswordChangedMessage,
+            note: l10n.settingsPasswordChangedDemoNote,
+            actionLabel: l10n.settingsPasswordResetBackToAccount,
             onAction: context.pop,
           ),
         ],
@@ -89,27 +91,26 @@ class _PasswordResetViewState extends State<PasswordResetView> {
     }
 
     return SettingsPage(
-      title: 'Contraseña',
-      heading: 'Cambiar contraseña',
+      title: l10n.commonPassword,
+      heading: l10n.settingsChangePassword,
       children: [
-        Text(
-          'Por seguridad, al cambiarla cerraremos tu sesión en todos tus dispositivos y '
-          'tendrás que volver a entrar.',
-          style: AppTextStyles.bodySmall,
-        ),
+        Text(l10n.settingsPasswordChangeIntro, style: AppTextStyles.bodySmall),
         const SizedBox(height: 20),
         Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Contraseña actual', style: AppTextStyles.caption),
+              Text(
+                l10n.settingsPasswordChangeCurrent,
+                style: AppTextStyles.caption,
+              ),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Contraseña actual',
+                hint: l10n.settingsPasswordChangeCurrent,
                 controller: _currentController,
                 validator: (value) => (value ?? '').isEmpty
-                    ? 'Escribe tu contraseña actual'
+                    ? l10n.settingsPasswordChangeCurrentRequired
                     : null,
                 isPassword: true,
                 enabled: !_isSending,
@@ -117,11 +118,11 @@ class _PasswordResetViewState extends State<PasswordResetView> {
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              Text('Contraseña nueva', style: AppTextStyles.caption),
+              Text(l10n.commonNewPassword, style: AppTextStyles.caption),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Contraseña nueva',
-                helper: 'Usa al menos 8 caracteres, una mayúscula y un número.',
+                hint: l10n.commonNewPassword,
+                helper: l10n.commonNewPasswordHelper,
                 controller: _newController,
                 validator: Validators.newPassword,
                 isPassword: true,
@@ -130,14 +131,17 @@ class _PasswordResetViewState extends State<PasswordResetView> {
                 textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
-              Text('Repite la contraseña nueva', style: AppTextStyles.caption),
+              Text(
+                l10n.settingsPasswordChangeRepeat,
+                style: AppTextStyles.caption,
+              ),
               const SizedBox(height: 6),
               AppTextField(
-                hint: 'Repite la contraseña',
+                hint: l10n.commonRepeatPassword,
                 controller: _confirmController,
                 validator: (value) => value == _newController.text
                     ? null
-                    : 'Las contraseñas no coinciden',
+                    : l10n.commonPasswordsDontMatch,
                 isPassword: true,
                 enabled: !_isSending,
                 textInputAction: TextInputAction.done,
@@ -145,7 +149,7 @@ class _PasswordResetViewState extends State<PasswordResetView> {
               ),
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Cambiar contraseña',
+                label: l10n.commonChangePassword,
                 isLoading: _isSending,
                 onPressed: _submit,
               ),

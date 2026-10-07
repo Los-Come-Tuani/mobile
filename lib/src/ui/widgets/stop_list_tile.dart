@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -59,6 +60,7 @@ class StopListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final timeRange = this.timeRange;
     final footer = this.footer;
 
@@ -182,9 +184,9 @@ class StopListTile extends StatelessWidget {
                                           label: stop.duration,
                                         ),
                                         if (stop.hasBadge)
-                                          const IconLabel(
+                                          IconLabel(
                                             icon: Icons.military_tech_outlined,
-                                            label: 'Insignia',
+                                            label: l10n.sharedStopBadge,
                                             color: AppColors.primary30,
                                           ),
                                       ],
@@ -241,7 +243,7 @@ class _TimeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Cambiar hora de llegada, $label',
+      label: context.l10n.sharedChangeArrivalTime(label),
       excludeSemantics: true,
       child: Material(
         color: AppColors.primary30.withValues(alpha: 0.08),

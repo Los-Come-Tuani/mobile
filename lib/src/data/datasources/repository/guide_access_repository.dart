@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/guide_access_request.dart';
@@ -81,6 +82,7 @@ class GuideAccessRepository extends ChangeNotifier {
       _demo[demo.contactEmail] = _DemoEntry(
         profile: demo,
         application: _approvedDemoApplication(demo),
+        seeded: true,
       );
     }
     // La sesión dice qué papel tiene la cuenta: al entrar o salir cambia el acceso.
@@ -89,14 +91,17 @@ class GuideAccessRepository extends ChangeNotifier {
 
   /// Cuentas de guía ya aprobadas, para probar la app del guía sin pasar por la
   /// postulación. Entran con cualquier contraseña.
-  static const demoGuides = [
+  ///
+  /// Se arma en cada lectura y no una sola vez: la experiencia va en el
+  /// idioma de ahora.
+  static List<GuideAccessRequest> get demoGuides => [
     GuideAccessRequest(
       fullName: 'Esteban Vado',
       phone: '+505 8854 2210',
       contactEmail: 'guia@kplan.com',
       coverage: GuideCoverage.national,
-      languages: ['Español', 'Inglés', 'Francés'],
-      experience: '9 años con recorridos de arquitectura colonial y leyendas.',
+      languages: const ['Español', 'Inglés', 'Francés'],
+      experience: AppStrings.current.repoAccessDemoExperienceNational,
     ),
     GuideAccessRequest(
       fullName: 'Marlene Ríos',
@@ -104,8 +109,8 @@ class GuideAccessRepository extends ChangeNotifier {
       contactEmail: 'guia.granada@kplan.com',
       coverage: GuideCoverage.local,
       certifiedCity: 'Granada',
-      languages: ['Español', 'Inglés'],
-      experience: '6 años en Granada: historia colonial y gastronomía.',
+      languages: const ['Español', 'Inglés'],
+      experience: AppStrings.current.repoAccessDemoExperienceLocal,
     ),
   ];
 
@@ -295,7 +300,9 @@ class GuideAccessRepository extends ChangeNotifier {
   }) async {
     if (!ApiClient.isConfigured) {
       final entry = _demo[_account];
-      if (entry == null) return const Result.failure('Inicia sesión primero');
+      if (entry == null) {
+        return Result.failure(AppStrings.current.repoAccessSignInFirst);
+      }
       final old = entry.profile;
       entry.profile = GuideAccessRequest(
         fullName: old.fullName,
@@ -341,7 +348,9 @@ class GuideAccessRepository extends ChangeNotifier {
       return Result.failure(message, error);
     }
     final account = _account;
-    if (account == null) return const Result.failure('Inicia sesión primero');
+    if (account == null) {
+      return Result.failure(AppStrings.current.repoAccessSignInFirst);
+    }
 
     final city = ProviderCatalogs.demo.cityName(draft.profile.cityId);
     _demo[account] = _DemoEntry(
@@ -373,7 +382,9 @@ class GuideAccessRepository extends ChangeNotifier {
     List<DocumentDraft> documents,
   ) async {
     final entry = _demo[_account];
-    if (entry == null) return const Result.failure('Inicia sesión primero');
+    if (entry == null) {
+      return Result.failure(AppStrings.current.repoAccessSignInFirst);
+    }
     await Future<void>.delayed(const Duration(milliseconds: 600));
     entry.application = _demoApplication(
       id: 'demo-${DateTime.now().millisecondsSinceEpoch}',
@@ -393,7 +404,9 @@ class GuideAccessRepository extends ChangeNotifier {
 
   Future<Result<void>> _renewDemo(List<DocumentDraft> documents) async {
     final entry = _demo[_account];
-    if (entry == null) return const Result.failure('Inicia sesión primero');
+    if (entry == null) {
+      return Result.failure(AppStrings.current.repoAccessSignInFirst);
+    }
     await Future<void>.delayed(const Duration(milliseconds: 600));
     entry.application = _demoApplication(
       id: 'demo-${DateTime.now().millisecondsSinceEpoch}',
@@ -581,7 +594,7 @@ class GuideAccessRepository extends ChangeNotifier {
       return Result.failure(ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('$name: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 
@@ -600,8 +613,27 @@ class GuideAccessRepository extends ChangeNotifier {
 
 /// Lo que guarda la demo de cada cuenta de guía.
 class _DemoEntry {
-  _DemoEntry({required this.profile, required this.application});
+  _DemoEntry({
+    required GuideAccessRequest profile,
+    required this.application,
+    this.seeded = false,
+  }) : _profile = profile;
 
-  GuideAccessRequest profile;
+  GuideAccessRequest _profile;
   ProviderApplication application;
+
+  /// Una de [GuideAccessRepository.demoGuides] que no ha cambiado su perfil:
+  /// se arma al leerlo, para que siga el idioma de ahora.
+  bool seeded;
+
+  GuideAccessRequest get profile => seeded
+      ? GuideAccessRepository.demoGuides.firstWhere(
+          (demo) => demo.contactEmail == _profile.contactEmail,
+        )
+      : _profile;
+
+  set profile(GuideAccessRequest value) {
+    _profile = value;
+    seeded = false;
+  }
 }

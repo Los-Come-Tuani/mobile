@@ -1,3 +1,4 @@
+import '../../../../core/l10n/l10n.dart';
 import '../../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../../data/datasources/repository/guide_work_repository.dart';
 import '../../../../data/datasources/repository/tourist_repository.dart';
@@ -31,7 +32,9 @@ class GuideHomeViewModel extends BaseViewModel {
 
   String get firstName {
     final name = _profile?.fullName.trim() ?? '';
-    return name.isEmpty ? 'guía' : name.split(RegExp(r'\s+')).first;
+    return name.isEmpty
+        ? AppStrings.current.guideAppHomeDefaultName
+        : name.split(RegExp(r'\s+')).first;
   }
 
   bool get isLocal => _profile?.coverage == GuideCoverage.local;

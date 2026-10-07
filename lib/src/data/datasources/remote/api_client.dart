@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/redact.dart';
 import '../local/session_store.dart';
@@ -149,26 +150,25 @@ class ApiClient {
   /// Si el API explicó qué pasó (`detail`), se usa su texto: ya viene en español y pensado
   /// para la persona.
   static String describeError(DioException e) {
+    final l10n = AppStrings.current;
     final status = e.response?.statusCode;
     final detail = _detailOf(e);
 
     if (status == 429) {
       final wait = retryAfter(e);
-      final base =
-          detail ?? 'Demasiados intentos, espera un momento e intenta de nuevo';
+      final base = detail ?? l10n.repoNetworkTooManyAttempts;
       return wait == null
           ? base
-          : '$base Puedes reintentar en ${waitText(wait)}.';
+          : l10n.repoNetworkRetryIn(base, waitText(wait));
     }
     if (detail != null && status != null && status < 500) return detail;
 
     return switch (e.type) {
-      DioExceptionType.connectionError => 'No hay conexión a internet',
-      DioExceptionType.connectionTimeout => 'Tiempo de conexión agotado',
-      DioExceptionType.receiveTimeout =>
-        'El servidor tardó demasiado en responder',
-      _ when status == 401 => 'Sesión expirada, vuelve a iniciar sesión',
-      _ => 'Ocurrió un error de comunicación con el servidor',
+      DioExceptionType.connectionError => l10n.repoNetworkNoConnection,
+      DioExceptionType.connectionTimeout => l10n.repoNetworkConnectionTimeout,
+      DioExceptionType.receiveTimeout => l10n.repoNetworkServerTimeout,
+      _ when status == 401 => l10n.repoNetworkSessionExpired,
+      _ => l10n.repoNetworkCommunicationError,
     };
   }
 
@@ -217,11 +217,8 @@ class ApiClient {
 
   /// "15 minutos", "40 segundos": para decirle a la persona cuánto esperar.
   static String waitText(int seconds) {
-    if (seconds < 60) {
-      return '$seconds ${seconds == 1 ? 'segundo' : 'segundos'}';
-    }
-    final minutes = (seconds / 60).ceil();
-    return '$minutes ${minutes == 1 ? 'minuto' : 'minutos'}';
+    if (seconds < 60) return AppStrings.current.repoNetworkWaitSeconds(seconds);
+    return AppStrings.current.repoNetworkWaitMinutes((seconds / 60).ceil());
   }
 
   /// Para las pruebas: apunta a otra URL y cambia el transporte (sin red de verdad).

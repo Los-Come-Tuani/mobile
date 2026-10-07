@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -17,18 +18,19 @@ class ApplicationProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final duration = MediaQuery.disableAnimationsOf(context)
         ? Duration.zero
         : const Duration(milliseconds: 250);
 
     return Semantics(
-      label: 'Postulación, paso $step de $total',
+      label: l10n.guideAccessProgressSemantics(step, total),
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'POSTULACIÓN  ·  PASO $step DE $total',
+            l10n.guideAccessProgressLabel(step, total),
             style: AppTextStyles.sectionLabel,
           ),
           const SizedBox(height: 8),

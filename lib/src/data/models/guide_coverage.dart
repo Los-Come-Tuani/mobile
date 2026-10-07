@@ -1,3 +1,5 @@
+import '../../core/l10n/l10n.dart';
+
 /// Hasta dónde puede guiar alguien, según su certificación: un guía nacional
 /// cubre todo el territorio nicaragüense; uno local, sólo la ciudad donde se
 /// certificó.
@@ -9,9 +11,15 @@ enum GuideCoverage {
   static GuideCoverage fromJson(String? value) =>
       value == 'local' ? GuideCoverage.local : GuideCoverage.national;
 
-  /// "Guía nacional" o "Guía local · Granada".
-  String labelFor(String? city) => switch (this) {
-    GuideCoverage.national => 'Guía nacional',
-    GuideCoverage.local => city == null ? 'Guía local' : 'Guía local · $city',
-  };
+  /// "Guía nacional" o "Guía local · Granada", en el idioma de ahora.
+  String labelFor(String? city) {
+    final l10n = AppStrings.current;
+    return switch (this) {
+      GuideCoverage.national => l10n.modelGuideCoverageNational,
+      GuideCoverage.local =>
+        city == null
+            ? l10n.commonLocalGuide
+            : l10n.modelGuideCoverageLocalCity(city),
+    };
+  }
 }

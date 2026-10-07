@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
@@ -44,7 +45,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   }
 
   void _showError(ForgotPasswordViewModel viewModel) =>
-      _show(viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo');
+      _show(viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong);
 
   Future<void> _sendCode() async {
     FocusScope.of(context).unfocus();
@@ -65,7 +66,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     final sent = await viewModel.resendCode();
     if (!mounted) return;
     if (sent) {
-      _show('Si pasó un minuto desde el último, te enviamos otro código.');
+      _show(context.l10n.forgotPasswordCodeResent);
     } else {
       _showError(viewModel);
     }
@@ -74,7 +75,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   Future<void> _reset() async {
     FocusScope.of(context).unfocus();
     if (_codeController.text.length != 6) {
-      _show('Escribe el código de 6 dígitos que te llegó al correo.');
+      _show(context.l10n.forgotPasswordCodeMissing);
       return;
     }
     if (!(_resetKey.currentState?.validate() ?? false)) return;
@@ -86,7 +87,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     );
     if (!mounted) return;
     if (done) {
-      _show('Contraseña actualizada. Entra con la nueva.');
+      _show(context.l10n.forgotPasswordUpdated);
       context.go(Routes.login);
     } else {
       _showError(viewModel);
@@ -116,7 +117,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            tooltip: 'Regresar',
+            tooltip: context.l10n.commonBack,
             onPressed: _back,
           ),
         ),
@@ -131,6 +132,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   }
 
   Widget _emailStep(ForgotPasswordViewModel viewModel) {
+    final l10n = context.l10n;
     final isBusy = viewModel.isBusy;
 
     return Form(
@@ -139,15 +141,12 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Text('¿Olvidaste tu contraseña?', style: AppTextStyles.headline),
+          Text(l10n.forgotPasswordTitle, style: AppTextStyles.headline),
           const SizedBox(height: 8),
-          Text(
-            'Ingresa tu correo y te enviaremos un código de 6 dígitos.',
-            style: AppTextStyles.bodySmall,
-          ),
+          Text(l10n.forgotPasswordCodeSubtitle, style: AppTextStyles.bodySmall),
           const SizedBox(height: 24),
           AppTextField(
-            hint: 'Correo electrónico',
+            hint: l10n.commonEmail,
             controller: _emailController,
             validator: Validators.email,
             keyboardType: TextInputType.emailAddress,
@@ -157,7 +156,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Enviar código',
+            label: l10n.forgotPasswordSendCode,
             isLoading: isBusy,
             onPressed: _sendCode,
           ),
@@ -167,6 +166,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   }
 
   Widget _resetStep(ForgotPasswordViewModel viewModel) {
+    final l10n = context.l10n;
     final isBusy = viewModel.isBusy;
 
     return Form(
@@ -175,31 +175,21 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          Text('Escribe el código', style: AppTextStyles.headline),
+          Text(l10n.forgotPasswordCodeTitle, style: AppTextStyles.headline),
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
               style: AppTextStyles.bodySmall,
-              children: [
-                const TextSpan(text: 'Si '),
-                TextSpan(
-                  text: viewModel.email,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                const TextSpan(
-                  text:
-                      ' tiene una cuenta, le enviamos un código de 6 dígitos. '
-                      'Vence en 15 minutos.',
-                ),
-              ],
+              children: _withHighlight(
+                l10n.forgotPasswordCodeSentTo(viewModel.email),
+                viewModel.email,
+                const TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           if (viewModel.isSimulated) ...[
             const SizedBox(height: 8),
-            Text(
-              'Demostración: todavía no se envían correos; sirve cualquier código de 6 dígitos.',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.forgotPasswordDemoNote, style: AppTextStyles.caption),
           ],
           const SizedBox(height: 24),
           VerificationCodeField(
@@ -209,8 +199,8 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           ),
           const SizedBox(height: 24),
           AppTextField(
-            hint: 'Contraseña nueva',
-            helper: 'Usa al menos 8 caracteres, una mayúscula y un número.',
+            hint: l10n.commonNewPassword,
+            helper: l10n.commonNewPasswordHelper,
             controller: _passwordController,
             validator: Validators.newPassword,
             isPassword: true,
@@ -220,11 +210,11 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           ),
           const SizedBox(height: 16),
           AppTextField(
-            hint: 'Repite la contraseña',
+            hint: l10n.commonRepeatPassword,
             controller: _confirmController,
             validator: (value) => value == _passwordController.text
                 ? null
-                : 'Las contraseñas no coinciden',
+                : l10n.commonPasswordsDontMatch,
             isPassword: true,
             enabled: !isBusy,
             textInputAction: TextInputAction.done,
@@ -232,7 +222,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Cambiar contraseña',
+            label: l10n.commonChangePassword,
             isLoading: isBusy,
             onPressed: _reset,
           ),
@@ -240,17 +230,37 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
           Center(
             child: TextButton(
               onPressed: isBusy ? null : _resend,
-              child: Text('Reenviar código', style: AppTextStyles.link),
+              child: Text(l10n.commonResendCode, style: AppTextStyles.link),
             ),
           ),
           Center(
             child: TextButton(
               onPressed: isBusy ? null : viewModel.useAnotherEmail,
-              child: Text('Usar otro correo', style: AppTextStyles.link),
+              child: Text(
+                l10n.forgotPasswordUseAnotherEmail,
+                style: AppTextStyles.link,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+/// [message] con [highlight] resaltado, esté donde esté en la frase de cada
+/// idioma.
+List<InlineSpan> _withHighlight(
+  String message,
+  String highlight,
+  TextStyle style,
+) {
+  final start = highlight.isEmpty ? -1 : message.indexOf(highlight);
+  if (start < 0) return [TextSpan(text: message)];
+  final end = start + highlight.length;
+  return [
+    if (start > 0) TextSpan(text: message.substring(0, start)),
+    TextSpan(text: highlight, style: style),
+    if (end < message.length) TextSpan(text: message.substring(end)),
+  ];
 }

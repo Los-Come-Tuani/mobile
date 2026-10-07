@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/age.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
@@ -105,7 +106,7 @@ class RegisterViewModel extends BaseViewModel {
     final date = _birthDate;
     if (date == null) return false;
     if (!isAdult(date)) {
-      setError('Debes ser mayor de $adultAge años para crear una cuenta');
+      setError(AppStrings.current.registerAdultOnly(adultAge));
       return false;
     }
     clearError();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/guide_application.dart';
 import '../../../data/models/guide_request.dart';
@@ -11,19 +12,17 @@ import '../../widgets/guide_hired_overlay.dart';
 /// Pregunta antes de contratar a quien mandó [application]. `true` si el
 /// turista confirmó.
 Future<bool> confirmHire(BuildContext context, GuideApplication application) {
-  final roleName = application.role == ApplicationRole.guide
-      ? 'guía'
-      : 'traductor';
+  final l10n = context.l10n;
+  final price = Formatters.currency(application.proposedPrice);
 
   return showConfirmDialog(
     context,
     icon: Icons.handshake_outlined,
-    title: '¿Contratar a ${application.guide.name}?',
-    message:
-        'Será tu $roleName por '
-        '${Formatters.currency(application.proposedPrice)}. Las demás '
-        'postulaciones para este puesto quedan descartadas.',
-    confirmLabel: 'Contratar',
+    title: l10n.guideRequestHireTitle(application.guide.name),
+    message: application.role == ApplicationRole.guide
+        ? l10n.guideRequestHireMessageGuide(price)
+        : l10n.guideRequestHireMessageTranslator(price),
+    confirmLabel: l10n.guideRequestHire,
   );
 }
 
@@ -44,14 +43,15 @@ Future<bool> showHireOutcome(BuildContext context, GuideRequest request) async {
     (role) => request.hiredFor(role) == null,
     orElse: () => ApplicationRole.guide,
   );
+  final l10n = context.l10n;
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
         content: Text(
           missing == ApplicationRole.translator
-              ? '¡Listo! Ahora elige a tu traductor.'
-              : '¡Listo! Ahora elige a tu guía.',
+              ? l10n.guideRequestHireNextTranslator
+              : l10n.guideRequestHireNextGuide,
         ),
       ),
     );

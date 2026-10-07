@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/nationality.dart';
@@ -65,7 +66,7 @@ class GoogleProfileView extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+              viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
             ),
           ),
         );
@@ -77,12 +78,13 @@ class GoogleProfileView extends StatelessWidget {
     final viewModel = context.watch<GoogleProfileViewModel>();
     final nationality = Nationality.byCode(viewModel.nationality);
     final birthDate = viewModel.birthDate;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.login),
         ),
@@ -94,16 +96,15 @@ class GoogleProfileView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              Text('Completa tu perfil', style: AppTextStyles.headline),
+              Text(l10n.loginGoogleProfileTitle, style: AppTextStyles.headline),
               const SizedBox(height: 8),
               Text(
-                'Google no nos da estos datos y los necesitamos para crear tu cuenta. '
-                'Debes ser mayor de 18 años.',
+                l10n.loginGoogleProfileSubtitle,
                 style: AppTextStyles.bodySmall,
               ),
               const SizedBox(height: 24),
               LabeledField(
-                label: 'Fecha de nacimiento',
+                label: l10n.commonBirthDate,
                 child: PickerField(
                   text: birthDate == null ? null : _format(birthDate),
                   hint: '00/00/0000',
@@ -114,17 +115,17 @@ class GoogleProfileView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               LabeledField(
-                label: 'Nacionalidad',
+                label: l10n.commonNationality,
                 child: PickerField(
                   text: nationality?.name,
-                  hint: 'Elige tu país',
+                  hint: l10n.commonChooseCountry,
                   enabled: !viewModel.isBusy,
                   onTap: () => _pickNationality(context),
                 ),
               ),
               const SizedBox(height: 28),
               PrimaryButton(
-                label: 'Continuar',
+                label: l10n.commonContinue,
                 isLoading: viewModel.isBusy,
                 onPressed: viewModel.isComplete ? () => _submit(context) : null,
               ),

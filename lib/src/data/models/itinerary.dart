@@ -1,14 +1,17 @@
+import '../../core/l10n/l10n.dart';
 import '../../core/utils/formatters.dart';
 import 'stop.dart';
 
 /// Cómo se mueve el turista entre una parada y la siguiente.
 enum TravelMode {
-  walking('A pie'),
-  vehicle('En vehículo');
+  walking,
+  vehicle;
 
-  const TravelMode(this.label);
-
-  final String label;
+  /// "A pie" o "En vehículo", en el idioma de ahora.
+  String get label => switch (this) {
+    TravelMode.walking => AppStrings.current.modelTravelModeWalking,
+    TravelMode.vehicle => AppStrings.current.modelTravelModeVehicle,
+  };
 
   /// En los JSON va como `walking` o `vehicle`; si falta, es a pie.
   static TravelMode fromJson(Object? value) =>
@@ -17,33 +20,22 @@ enum TravelMode {
 
 /// El ritmo del día: cuánto se queda el turista en cada parada.
 enum ItineraryPace {
-  relaxed(
-    'Relajado',
-    visitFactor: 1.25,
-    marginMinutes: 10,
-    maxDayMinutes: 6 * 60,
-  ),
-  balanced(
-    'Equilibrado',
-    visitFactor: 1,
-    marginMinutes: 0,
-    maxDayMinutes: 8 * 60,
-  ),
-  intense(
-    'Intenso',
-    visitFactor: 0.85,
-    marginMinutes: 0,
-    maxDayMinutes: 10 * 60,
-  );
+  relaxed(visitFactor: 1.25, marginMinutes: 10, maxDayMinutes: 6 * 60),
+  balanced(visitFactor: 1, marginMinutes: 0, maxDayMinutes: 8 * 60),
+  intense(visitFactor: 0.85, marginMinutes: 0, maxDayMinutes: 10 * 60);
 
-  const ItineraryPace(
-    this.label, {
+  const ItineraryPace({
     required this.visitFactor,
     required this.marginMinutes,
     required this.maxDayMinutes,
   });
 
-  final String label;
+  /// "Relajado", "Equilibrado" o "Intenso", en el idioma de ahora.
+  String get label => switch (this) {
+    ItineraryPace.relaxed => AppStrings.current.modelPaceRelaxed,
+    ItineraryPace.balanced => AppStrings.current.modelPaceBalanced,
+    ItineraryPace.intense => AppStrings.current.modelPaceIntense,
+  };
 
   /// Multiplica el tiempo sugerido de cada parada.
   final double visitFactor;
@@ -87,16 +79,20 @@ class ItineraryLeg {
 
   bool get isLongWalk => kind == LegKind.walking && distanceKm > longWalkKm;
 
-  /// `A pasos`, `10 min a pie`, `25 min en vehículo`.
-  String get label => switch (kind) {
-    LegKind.samePlace => 'A pasos',
-    LegKind.walking => '${Formatters.duration(duration)} a pie',
-    LegKind.vehicle => '${Formatters.duration(duration)} en vehículo',
-    LegKind.fixed =>
-      minutes == 0
-          ? 'Sin traslado'
-          : '${Formatters.duration(duration)} de traslado',
-  };
+  /// `A pasos`, `10 min a pie`, `25 min en vehículo` (en inglés, `Steps away`,
+  /// `10 min on foot`, `25 min by vehicle`).
+  String get label {
+    final l10n = AppStrings.current;
+    return switch (kind) {
+      LegKind.samePlace => l10n.modelLegSamePlace,
+      LegKind.walking => l10n.modelLegWalking(Formatters.duration(duration)),
+      LegKind.vehicle => l10n.modelLegVehicle(Formatters.duration(duration)),
+      LegKind.fixed =>
+        minutes == 0
+            ? l10n.modelLegNoTransfer
+            : l10n.modelLegFixed(Formatters.duration(duration)),
+    };
+  }
 }
 
 /// Una parada del itinerario, con su hora de llegada y de salida.

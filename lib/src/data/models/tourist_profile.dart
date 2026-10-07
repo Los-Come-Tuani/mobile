@@ -85,11 +85,11 @@ class TouristProfile {
       ? null
       : ratings.fold<int>(0, (sum, r) => sum + r.rating) / ratings.length;
 
-  TouristProfile copyWith({List<TouristRating>? ratings}) {
+  TouristProfile copyWith({List<TouristRating>? ratings, String? country}) {
     return TouristProfile(
       id: id,
       name: name,
-      country: country,
+      country: country ?? this.country,
       languages: languages,
       tripsCount: tripsCount,
       memberSince: memberSince,

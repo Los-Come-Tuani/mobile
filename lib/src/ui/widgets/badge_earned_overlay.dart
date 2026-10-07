@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../core/constants/app_assets.dart';
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -55,11 +56,12 @@ class _BadgeEarnedCardState extends State<_BadgeEarnedCard>
   @override
   Widget build(BuildContext context) {
     final still = MediaQuery.disableAnimationsOf(context);
+    final l10n = context.l10n;
 
     return Center(
       child: Semantics(
         liveRegion: true,
-        onTapHint: 'cerrar',
+        onTapHint: l10n.sharedCloseHint,
         child: GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Material(
@@ -89,10 +91,15 @@ class _BadgeEarnedCardState extends State<_BadgeEarnedCard>
                       },
                     ),
                   ),
-                  Text('+1 insignia', style: AppTextStyles.headline),
+                  Text(
+                    l10n.sharedBadgeEarnedTitle,
+                    style: AppTextStyles.headline,
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.category} · ¡Sigue así!',
+                    l10n.sharedBadgeEarnedSubtitle(
+                      l10n.categoryName(widget.category),
+                    ),
                     style: AppTextStyles.bodySmall,
                   ),
                 ],

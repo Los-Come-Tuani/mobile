@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -15,7 +16,7 @@ class DocumentSlot extends StatelessWidget {
     required this.onAttach,
     required this.onRemove,
     this.description,
-    this.attachLabel = 'Adjuntar archivo',
+    this.attachLabel,
     this.canAttach = true,
     this.hasError = false,
     this.enabled = true,
@@ -28,7 +29,9 @@ class DocumentSlot extends StatelessWidget {
 
   /// Qué debe mostrar el documento para que lo acepten.
   final String? description;
-  final String attachLabel;
+
+  /// Lo que dice la acción de adjuntar; si es `null`, "Adjuntar archivo".
+  final String? attachLabel;
 
   /// `false` cuando ya no caben más archivos: un documento lleva uno solo.
   final bool canAttach;
@@ -39,6 +42,7 @@ class DocumentSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Material(
       color: AppColors.card,
       clipBehavior: Clip.antiAlias,
@@ -73,7 +77,7 @@ class DocumentSlot extends StatelessWidget {
               ),
             if (canAttach)
               _AttachAction(
-                label: attachLabel,
+                label: attachLabel ?? l10n.guideAccessAttachFile,
                 onTap: enabled ? onAttach : null,
               ),
           ],
@@ -91,6 +95,7 @@ class _AttachedFile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Row(
@@ -114,7 +119,7 @@ class _AttachedFile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Adjunto · Pendiente de revisión',
+                    l10n.guideAccessDocumentAttached,
                     style: AppTextStyles.caption,
                   ),
                 ],
@@ -123,7 +128,7 @@ class _AttachedFile extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            tooltip: 'Quitar ${file.name}',
+            tooltip: l10n.guideAccessRemoveFile(file.name),
             onPressed: onRemove,
           ),
         ],
@@ -140,10 +145,11 @@ class _AttachAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formats = context.l10n.guideAccessFileFormats;
     return Semantics(
       button: true,
       enabled: onTap != null,
-      label: '$label. PDF, JPG o PNG',
+      label: '$label. $formats',
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -160,7 +166,7 @@ class _AttachAction extends StatelessWidget {
                   children: [
                     Text(label, style: AppTextStyles.link),
                     const SizedBox(height: 2),
-                    Text('PDF, JPG o PNG', style: AppTextStyles.caption),
+                    Text(formats, style: AppTextStyles.caption),
                   ],
                 ),
               ),

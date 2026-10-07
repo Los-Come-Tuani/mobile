@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../data/datasources/repository/settings_repository.dart';
 import '../../../router/routes.dart';
 import '../../widgets/action_row.dart';
@@ -15,49 +16,50 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final settings = context.watch<SettingsRepository>();
     final activeTopics = NotificationTopic.values
         .where(settings.isNotificationOn)
         .length;
 
     return SettingsPage(
-      title: 'Configuraciones',
+      title: l10n.commonSettings,
       children: [
         ActionRow(
           icon: Icons.person_outline,
-          title: 'Cuenta',
-          subtitle: 'Datos y acceso',
+          title: l10n.settingsHomeAccount,
+          subtitle: l10n.settingsHomeAccountSubtitle,
           onTap: () => context.push(Routes.settingsAccount),
         ),
         ActionRow(
           icon: Icons.notifications_none,
-          title: 'Notificaciones',
+          title: l10n.commonNotifications,
           subtitle: activeTopics == 0
-              ? 'Todos los avisos apagados'
-              : 'Viajes, reservas y eventos',
+              ? l10n.settingsHomeNotificationsOff
+              : l10n.settingsHomeNotificationsOn,
           onTap: () => context.push(Routes.settingsNotifications),
         ),
         ActionRow(
           icon: Icons.translate,
-          title: 'Idioma',
-          subtitle: 'Español',
+          title: l10n.languageSettingsTitle,
+          subtitle: AppStrings.language.nativeName,
           onTap: () => context.push(Routes.settingsLanguage),
         ),
         ActionRow(
           icon: Icons.shield_outlined,
-          title: 'Privacidad y seguridad',
-          subtitle: 'Ubicación y datos personales',
+          title: l10n.settingsHomePrivacy,
+          subtitle: l10n.settingsHomePrivacySubtitle,
           onTap: () => context.push(Routes.settingsPrivacy),
         ),
         ActionRow(
           icon: Icons.help_outline,
-          title: 'Ayuda y soporte',
-          subtitle: 'Preguntas y contacto',
+          title: l10n.settingsHomeHelp,
+          subtitle: l10n.settingsHomeHelpSubtitle,
           onTap: () => context.push(Routes.settingsHelp),
         ),
         const SizedBox(height: 16),
         SoftButton(
-          label: 'Cerrar sesión',
+          label: l10n.commonLogout,
           onPressed: () => showLogoutSheet(context),
         ),
       ],

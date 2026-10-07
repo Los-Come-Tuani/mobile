@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
@@ -135,11 +136,11 @@ class _DragHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     return ReorderableDragStartListener(
       index: index,
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
         child: Icon(
           Icons.drag_indicator,
-          semanticLabel: 'Arrastrar para cambiar el orden',
+          semanticLabel: context.l10n.sharedDragToReorder,
           color: AppColors.secondaryText,
         ),
       ),
@@ -172,13 +173,15 @@ class ItinerarySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Wrap(
       spacing: 14,
       runSpacing: 6,
       children: [
         IconLabel(
           icon: Icons.flag_outlined,
-          label: 'Termina aprox. ${Formatters.clock(itinerary.end)}',
+          label: l10n.sharedItineraryEnds(Formatters.clock(itinerary.end)),
           iconColor: AppColors.primary30,
           color: AppColors.primaryText,
         ),
@@ -192,8 +195,9 @@ class ItinerarySummary extends StatelessWidget {
           icon: itinerary.mode == TravelMode.walking
               ? Icons.directions_walk
               : Icons.directions_car_outlined,
-          label:
-              '${Formatters.duration(itinerary.travelDuration)} de traslados',
+          label: l10n.sharedItineraryTravelTime(
+            Formatters.duration(itinerary.travelDuration),
+          ),
           iconColor: AppColors.primary30,
           color: AppColors.primaryText,
         ),
@@ -221,7 +225,10 @@ class ItineraryWarningsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Para tener en cuenta', style: AppTextStyles.cardTitle),
+          Text(
+            context.l10n.sharedItineraryWarningsTitle,
+            style: AppTextStyles.cardTitle,
+          ),
           for (final warning in warnings) ...[
             const SizedBox(height: 8),
             Row(
@@ -270,7 +277,10 @@ class _LegRow extends StatelessWidget {
       _ => leg.label,
     };
     final label = wait > Duration.zero
-        ? '$travel · ${Formatters.duration(wait)} libres'
+        ? context.l10n.sharedItineraryFreeTime(
+            travel,
+            Formatters.duration(wait),
+          )
         : travel;
     final icon = switch (leg.kind) {
       LegKind.samePlace => Icons.place_outlined,

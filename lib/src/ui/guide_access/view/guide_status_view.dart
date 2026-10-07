@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -103,26 +104,27 @@ class _Status extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (title, subtitle) = switch (application.status) {
       ApplicationStatus.approved => (
         application.isRenewal
-            ? 'Renovación aprobada'
-            : 'Acceso de guía habilitado',
+            ? l10n.guideAccessStatusRenewalApprovedTitle
+            : l10n.guideAccessStatusApprovedTitle,
         application.isRenewal
-            ? 'Tus documentos nuevos están en vigor.'
-            : 'Tu solicitud fue aprobada: los turistas ya te encuentran en K’Plan.',
+            ? l10n.guideAccessStatusRenewalApprovedSubtitle
+            : l10n.guideAccessStatusApprovedSubtitle,
       ),
       ApplicationStatus.rejected => (
-        'No pudimos aprobar tu solicitud',
-        application.reason ?? 'Revisa lo que hay que corregir.',
+        l10n.guideAccessStatusRejectedTitle,
+        application.reason ?? l10n.guideAccessStatusRejectedSubtitle,
       ),
       _ => (
         application.isRenewal
-            ? 'Renovación en revisión'
-            : 'Solicitud en revisión',
+            ? l10n.guideAccessStatusRenewalPendingTitle
+            : l10n.guideAccessStatusPendingTitle,
         application.status == ApplicationStatus.inReview
-            ? 'El equipo de K’Plan está revisando tus documentos.'
-            : 'Tu solicitud llegó. El equipo la revisa por orden de llegada.',
+            ? l10n.guideAccessStatusPendingSubtitle
+            : l10n.guideAccessStatusReceivedSubtitle,
       ),
     };
 
@@ -136,47 +138,44 @@ class _Status extends StatelessWidget {
             tone: application.approved == false
                 ? NoticeTone.error
                 : NoticeTone.info,
-            message: 'Nota del equipo: ${application.note}',
+            message: l10n.guideAccessStatusTeamNote(application.note),
           ),
         ],
         if (application.missing.isNotEmpty) ...[
           const SizedBox(height: 16),
           InlineNotice(
             tone: NoticeTone.error,
-            message:
-                'Falta: ${application.missing.map((item) => item.$2).join(', ')}.',
+            message: l10n.guideAccessStatusMissing(
+              application.missing.map((item) => item.$2).join(', '),
+            ),
           ),
         ],
         const SizedBox(height: 24),
-        Text('Tus documentos', style: AppTextStyles.sectionLabel),
+        Text(l10n.guideAccessDocumentsTitle, style: AppTextStyles.sectionLabel),
         const SizedBox(height: 8),
         for (final document in application.documents)
           _DocumentLine(document: document),
         const SizedBox(height: 28),
         if (application.canResubmit) ...[
           PrimaryButton(
-            label: 'Corregir y volver a enviar',
+            label: l10n.guideAccessStatusResubmit,
             onPressed: () =>
                 context.push(Routes.guideApplication, extra: application),
           ),
           const SizedBox(height: 12),
         ] else if (approved) ...[
           PrimaryButton(
-            label: 'Entrar como guía',
+            label: l10n.guideAccessStatusEnterAsGuide,
             onPressed: () => context.go(Routes.guideHome),
           ),
           const SizedBox(height: 12),
         ] else ...[
-          const InlineNotice(
-            message:
-                'El acceso de guía estará disponible únicamente si tu solicitud '
-                'es aprobada. Te avisamos por correo.',
-          ),
+          InlineNotice(message: l10n.guideAccessStatusPendingNotice),
           const SizedBox(height: 20),
         ],
         // Al perder la sesión, el redirect del router vuelve al welcome.
         SoftButton(
-          label: 'Cerrar sesión',
+          label: l10n.commonLogout,
           onPressed: () => context.read<AuthRepository>().logout(),
         ),
       ],
@@ -192,30 +191,37 @@ class _DocumentLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final review = document.review;
     final (icon, color, text) = switch (document) {
       _ when document.isRejected => (
         Icons.error_outline,
         AppColors.error,
-        'Rechazado: ${review?.reason ?? 'súbelo de nuevo'}'
-            '${(review?.note ?? '').isEmpty ? '' : '. ${review!.note}'}',
+        l10n.guideAccessDocumentRejected(
+              review?.reason ?? l10n.guideAccessDocumentUploadAgain,
+            ) +
+            ((review?.note ?? '').isEmpty ? '' : '. ${review!.note}'),
       ),
       _ when document.status == DocumentStatus.approved => (
         Icons.verified_outlined,
         AppColors.accentSecondaryGreen,
-        'En vigor',
+        l10n.guideAccessDocumentValid,
       ),
       _ when review?.accepted == true => (
         Icons.check_circle_outline,
         AppColors.accentSecondaryGreen,
-        'Aceptado',
+        l10n.guideAccessDocumentAccepted,
       ),
       _ when document.status == DocumentStatus.inReview => (
         Icons.hourglass_top_outlined,
         AppColors.primary30,
-        'En revisión',
+        l10n.guideAppDocumentInReview,
       ),
-      _ => (Icons.schedule_outlined, AppColors.primary30, 'Por revisar'),
+      _ => (
+        Icons.schedule_outlined,
+        AppColors.primary30,
+        l10n.guideAccessDocumentPending,
+      ),
     };
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

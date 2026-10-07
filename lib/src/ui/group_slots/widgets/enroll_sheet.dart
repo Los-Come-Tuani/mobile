@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -24,79 +25,93 @@ Future<bool> showEnrollSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Inscribirte en este horario', style: AppTextStyles.title),
-            const SizedBox(height: 4),
-            Text(
-              '${Formatters.weekdayDate(session.date)} · ${session.startTime}'
-              '${session.guide == null ? '' : ' · con ${session.guide!.name}'}',
-              style: AppTextStyles.caption,
-            ),
-            const SizedBox(height: 16),
-            if (adults > 0)
-              _Line(
-                label:
-                    '${adults == 1 ? '1 adulto' : '$adults adultos'} × '
-                    '${Formatters.currency(circuit.priceAdult)}',
-                amount: circuit.priceAdult * adults,
+    builder: (context) {
+      final l10n = context.l10n;
+      final guide = session.guide;
+
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l10n.groupSlotsEnrollTitle, style: AppTextStyles.title),
+              const SizedBox(height: 4),
+              Text(
+                guide == null
+                    ? l10n.groupSlotsSessionWhen(
+                        Formatters.weekdayDate(session.date),
+                        Formatters.timeText(session.startTime),
+                      )
+                    : l10n.groupSlotsSessionWhenWithGuide(
+                        Formatters.weekdayDate(session.date),
+                        Formatters.timeText(session.startTime),
+                        guide.name,
+                      ),
+                style: AppTextStyles.caption,
               ),
-            if (children > 0)
-              _Line(
-                label:
-                    '${children == 1 ? '1 niño' : '$children niños'} × '
-                    '${Formatters.currency(circuit.priceChild)}',
-                amount: circuit.priceChild * children,
+              const SizedBox(height: 16),
+              if (adults > 0)
+                _Line(
+                  label: l10n.groupSlotsAdultsLine(
+                    adults,
+                    Formatters.currency(circuit.priceAdult),
+                  ),
+                  amount: circuit.priceAdult * adults,
+                ),
+              if (children > 0)
+                _Line(
+                  label: l10n.groupSlotsChildrenLine(
+                    children,
+                    Formatters.currency(circuit.priceChild),
+                  ),
+                  amount: circuit.priceChild * children,
+                ),
+              _Line(label: l10n.bookingServiceFee, amount: serviceFee),
+              const Divider(height: 20, color: AppColors.divider),
+              _Line(label: l10n.commonTotal, amount: total, highlight: true),
+              const SizedBox(height: 14),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.groups_outlined,
+                    size: 18,
+                    color: AppColors.secondaryText,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.groupSlotsGroupNote(session.capacity),
+                      style: AppTextStyles.caption,
+                    ),
+                  ),
+                ],
               ),
-            _Line(label: 'Servicio (20%)', amount: serviceFee),
-            const Divider(height: 20, color: AppColors.divider),
-            _Line(label: 'Total', amount: total, highlight: true),
-            const SizedBox(height: 14),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.groups_outlined,
-                  size: 18,
-                  color: AppColors.secondaryText,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Es un grupo de hasta ${session.capacity} personas: '
-                    'compartirás el recorrido con gente que no conoces.',
-                    style: AppTextStyles.caption,
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(l10n.commonCancel),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('Cancelar'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(l10n.groupSlotsConfirm),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('Confirmar'),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    ),
+      );
+    },
   );
   return confirmed == true;
 }

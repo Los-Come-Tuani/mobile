@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/itinerary_advisor.dart';
 import '../../../core/utils/result.dart';
@@ -56,14 +57,15 @@ class ItineraryAssistantViewModel extends BaseViewModel {
   final Duration thinkingDelay;
   final DateTime Function() _today;
 
-  static const List<String> startTimeOptions = [
-    '7:00 a.m.',
-    '8:00 a.m.',
-    '9:00 a.m.',
-    '10:00 a.m.',
-    '1:00 p.m.',
+  /// Las horas de salida que ofrece, escritas en el idioma de ahora: se
+  /// arman al pedirlas, no las guardes.
+  static List<String> get startTimeOptions => [
+    for (final hour in const [7, 8, 9, 10, 13])
+      Formatters.minutesOfDay(hour * 60),
   ];
 
+  /// Categorías de parada (claves del catálogo, siempre en español): se
+  /// muestran con `categoryName`.
   static const List<String> interestOptions = [
     'Historia',
     'Cultura',
@@ -130,10 +132,7 @@ class ItineraryAssistantViewModel extends BaseViewModel {
 
     final id = collectionId;
     if (id == null) {
-      _say(
-        '¡Hola! Soy el asistente de K\'Plan. Te armo un día con horarios '
-        'reales, contando los traslados entre cada lugar.',
-      );
+      _say(AppStrings.current.assistantIntroScratch);
       _ask(AssistantStep.city);
     } else {
       await _collectionsRepository.ensureLoaded();
@@ -153,11 +152,7 @@ class ItineraryAssistantViewModel extends BaseViewModel {
           startTime: collection.startTime,
         );
       }
-      _say(
-        '¡Hola! Soy el asistente de K\'Plan. Voy a organizar "$_title" '
-        '(${_stops.length} ${_stops.length == 1 ? 'parada' : 'paradas'}) '
-        'contando los traslados y los horarios de cada lugar.',
-      );
+      _say(AppStrings.current.assistantIntroCircuit(_title, _stops.length));
       _ask(AssistantStep.pace);
     }
 
@@ -203,7 +198,13 @@ class ItineraryAssistantViewModel extends BaseViewModel {
   Future<void> confirmInterests() async {
     if (_step != AssistantStep.interests) return;
     _preferences = _preferences.copyWith(interests: {..._interests});
-    _reply(_interests.isEmpty ? 'Me da igual' : _interests.join(', '));
+    // Las categorías viajan en español: se traducen al escribir la respuesta.
+    final l10n = AppStrings.current;
+    _reply(
+      _interests.isEmpty
+          ? l10n.assistantNoPreference
+          : _interests.map(l10n.categoryName).join(', '),
+    );
     _step = AssistantStep.thinking;
     safeNotify();
 
@@ -225,32 +226,33 @@ class ItineraryAssistantViewModel extends BaseViewModel {
   void apply(ItinerarySuggestion suggestion) {
     if (_step != AssistantStep.proposal) return;
 
+    final l10n = AppStrings.current;
     switch (suggestion) {
       case SwitchToVehicleSuggestion():
         _preferences = _preferences.copyWith(mode: TravelMode.vehicle);
-        _applied.add('Te mueves en vehículo');
+        _applied.add(l10n.assistantAppliedVehicle);
       case ReorderSuggestion(:final stopIds, :final saved):
         _stops = [
           for (final id in stopIds) _stops.firstWhere((s) => s.id == id),
         ];
-        _applied.add(
-          'Cambiaste el orden: ahorras ${Formatters.duration(saved)}',
-        );
+        _applied.add(l10n.assistantAppliedReorder(Formatters.duration(saved)));
       case StartLaterSuggestion(:final startTime):
         _preferences = _preferences.copyWith(startTime: startTime);
-        _applied.add('Sales a las $startTime');
+        _applied.add(l10n.assistantAppliedStartLater(startTime));
       case RemoveStopSuggestion(:final stop, :final reason):
         _stops = [
           for (final s in _stops)
             if (s.id != stop.id) s,
         ];
         if (_originalStopIds.contains(stop.id)) _removed[stop.id] = reason;
-        _applied.add('Quitaste ${stop.name}');
+        _applied.add(l10n.assistantAppliedRemove(stop.name));
       case AddStopSuggestion(:final stop, :final index, :final isLunch):
         _stops = [..._stops]..insert(index.clamp(0, _stops.length), stop);
         _removed.remove(stop.id);
         _applied.add(
-          isLunch ? 'Almuerzas en ${stop.name}' : 'Agregaste ${stop.name}',
+          isLunch
+              ? l10n.assistantAppliedLunch(stop.name)
+              : l10n.assistantAppliedAdd(stop.name),
         );
     }
     _refreshSuggestions();
@@ -273,7 +275,10 @@ class ItineraryAssistantViewModel extends BaseViewModel {
     final id =
         collectionId ??
         _collectionsRepository
-            .createCollection('Mi día en $_city', stopIds: stopIds)
+            .createCollection(
+              AppStrings.current.assistantDefaultTitle(_city),
+              stopIds: stopIds,
+            )
             .id;
     _collectionsRepository.updatePlan(
       id,
@@ -308,28 +313,22 @@ class ItineraryAssistantViewModel extends BaseViewModel {
   }
 
   String _proposalIntro() {
-    if (_stops.isEmpty) {
-      return 'No encontré paradas en $_city que quepan en tu día. Prueba con '
-          'otro ritmo o una hora más temprano.';
-    }
-    final count =
-        '${_stops.length} ${_stops.length == 1 ? 'parada' : 'paradas'}';
+    final l10n = AppStrings.current;
+    if (_stops.isEmpty) return l10n.assistantProposalEmpty(_city);
     return startsFromScratch
-        ? 'Listo. Te armé un día en $_city con $count, en el orden que menos '
-              'traslado pide.'
-        : 'Listo. Calculé cada traslado y la hora a la que llegas a tus '
-              '$count.';
+        ? l10n.assistantProposalScratch(_city, _stops.length)
+        : l10n.assistantProposalCircuit(_stops.length);
   }
 
   void _ask(AssistantStep step) {
     _step = step;
+    final l10n = AppStrings.current;
     _say(switch (step) {
-      AssistantStep.city => '¿A qué ciudad vas?',
-      AssistantStep.pace => '¿Cómo quieres tu día?',
-      AssistantStep.mode => '¿Cómo te vas a mover?',
-      AssistantStep.startTime => '¿A qué hora quieres empezar?',
-      AssistantStep.interests =>
-        '¿Qué te interesa más? Puedes elegir varias cosas.',
+      AssistantStep.city => l10n.assistantAskCity,
+      AssistantStep.pace => l10n.assistantAskPace,
+      AssistantStep.mode => l10n.myCircuitTravelQuestion,
+      AssistantStep.startTime => l10n.assistantAskStartTime,
+      AssistantStep.interests => l10n.assistantAskInterests,
       AssistantStep.thinking || AssistantStep.proposal => '',
     });
     safeNotify();

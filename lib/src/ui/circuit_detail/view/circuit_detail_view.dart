@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -63,7 +64,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     if (!await startTripChecked(context, viewModel) || !mounted) return;
 
     if (viewModel.nextTripStop case final first?) {
-      _notifySoon('¡Viaje iniciado! Dirígete a ${first.stop.name}');
+      _notifySoon(context.l10n.circuitDetailTripStarted(first.stop.name));
     }
     _openMap(circuit);
   }
@@ -78,13 +79,13 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     if (reasons == null || !mounted) return;
 
     viewModel.endTrip(reasons);
-    _notifySoon('Viaje finalizado');
+    _notifySoon(context.l10n.circuitDetailTripEnded);
   }
 
   Future<void> _skipStop(ItineraryStop stop) async {
     final reason = await showDropReasonSheet(
       context,
-      title: '¿Por qué saltas ${stop.stop.name}?',
+      title: context.l10n.circuitDetailSkipWhy(stop.stop.name),
     );
     if (reason == null || !mounted) return;
     context.read<CircuitDetailViewModel>().skipStop(stop.stop.id, reason);
@@ -97,11 +98,12 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
     final order = await showReorderStopsSheet(context, stops: viewModel.stops);
     if (order == null || !mounted) return;
     viewModel.reorderStops(order);
-    _notifySoon('Orden guardado: el itinerario se recalculó');
+    _notifySoon(context.l10n.circuitDetailOrderSaved);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<CircuitDetailViewModel>();
     final circuit = viewModel.circuit;
 
@@ -111,8 +113,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
           ? const Center(child: KPlanLoader())
           : circuit == null
           ? _ErrorState(
-              message:
-                  viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+              message: viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
             )
           : _DetailContent(
               circuit: circuit,
@@ -131,10 +132,9 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
                     )
                   : null,
               onOpenInMaps: () => _openMap(circuit),
-              onDownload: () =>
-                  _notifySoon('Descargar sin conexión: próximamente'),
+              onDownload: () => _notifySoon(l10n.circuitDetailDownloadSoon),
               onSeeAllComments: () =>
-                  _notifySoon('Todas las reseñas: próximamente'),
+                  _notifySoon(l10n.circuitDetailAllReviewsSoon),
               onStartTrip: () => _startTrip(circuit),
               onEndTrip: _endTrip,
               onSkipStop: _skipStop,
@@ -202,6 +202,7 @@ class _DetailContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final topInset = MediaQuery.paddingOf(context).top;
     final comments = circuit.comments
         .take(CircuitDetailViewModel.previewComments)
@@ -222,7 +223,7 @@ class _DetailContent extends StatelessWidget {
                 children: [
                   CircleIconButton(
                     icon: Icons.arrow_back,
-                    tooltip: 'Regresar',
+                    tooltip: l10n.commonBack,
                     onPressed: () => context.canPop()
                         ? context.pop()
                         : context.go(Routes.home),
@@ -238,7 +239,7 @@ class _DetailContent extends StatelessWidget {
                   const SizedBox(width: 10),
                   CircleIconButton(
                     icon: Icons.download_outlined,
-                    tooltip: 'Descargar sin conexión',
+                    tooltip: l10n.circuitDetailDownloadTooltip,
                     onPressed: onDownload,
                   ),
                 ],
@@ -249,7 +250,7 @@ class _DetailContent extends StatelessWidget {
               right: 16,
               child: CircleIconButton(
                 icon: Icons.location_on,
-                tooltip: 'Ver en el mapa',
+                tooltip: l10n.commonSeeOnMap,
                 color: AppColors.primary30,
                 size: 44,
                 onPressed: onOpenInMaps,
@@ -294,7 +295,9 @@ class _DetailContent extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: IconLabel(
                   icon: Icons.sell_outlined,
-                  label: '${Formatters.currency(circuit.priceAdult)} p. adulta',
+                  label: l10n.circuitDetailPricePerAdult(
+                    Formatters.currency(circuit.priceAdult),
+                  ),
                   color: AppColors.primaryText,
                   iconColor: AppColors.star,
                   iconSize: 18,
@@ -306,14 +309,14 @@ class _DetailContent extends StatelessWidget {
               // inscribe en un horario de grupo que publicó un guía.
               if (circuit.isCreativeCircuit)
                 PrimaryButton(
-                  label: 'Ver horarios disponibles',
+                  label: l10n.circuitDetailSeeTimes,
                   icon: Icons.groups_outlined,
                   onPressed: () =>
                       context.push(Routes.groupSlotsPath(circuit.id)),
                 )
               else
                 PrimaryButton(
-                  label: 'Agendar circuito',
+                  label: l10n.circuitDetailBook,
                   icon: Icons.calendar_month_outlined,
                   onPressed: () => context.push(Routes.bookingPath(circuit.id)),
                 ),
@@ -334,11 +337,11 @@ class _DetailContent extends StatelessWidget {
                   ),
                   onPressed: onStartTrip,
                   icon: const Icon(Icons.explore_outlined),
-                  label: const Text('Comenzar viaje'),
+                  label: Text(l10n.circuitDetailStartTrip),
                 ),
               const SizedBox(height: 12),
               if (trip?.plan case final plan?) ...[
-                const SectionHeader(title: 'Tu recorrido de hoy'),
+                SectionHeader(title: l10n.circuitDetailTodayRoute),
                 const SizedBox(height: 10),
                 TripTimeline(
                   plan: plan,
@@ -351,8 +354,10 @@ class _DetailContent extends StatelessWidget {
                 const SizedBox(height: 12),
               ] else if (stops.isNotEmpty) ...[
                 SectionHeader(
-                  title: 'Paradas del recorrido (${stops.length})',
-                  actionLabel: onReorderStops == null ? null : 'Ordenar',
+                  title: l10n.circuitDetailStopsTitle(stops.length),
+                  actionLabel: onReorderStops == null
+                      ? null
+                      : l10n.circuitDetailReorder,
                   actionIcon: Icons.swap_vert,
                   onActionPressed: onReorderStops,
                 ),
@@ -377,8 +382,8 @@ class _DetailContent extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               SectionHeader(
-                title: 'Comentarios (${circuit.reviewsCount})',
-                actionLabel: 'Ver todos',
+                title: l10n.circuitDetailCommentsTitle(circuit.reviewsCount),
+                actionLabel: l10n.circuitDetailSeeAll,
                 onActionPressed: onSeeAllComments,
               ),
               for (final comment in comments) CommentTile(comment: comment),
@@ -407,7 +412,7 @@ class _StartTimePicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Si sales a las…', style: AppTextStyles.caption),
+        Text(context.l10n.circuitDetailLeavingAt, style: AppTextStyles.caption),
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,
@@ -415,7 +420,7 @@ class _StartTimePicker extends StatelessWidget {
           children: [
             for (final time in times)
               AppChoiceChip(
-                label: time,
+                label: Formatters.timeText(time),
                 selected: time == selected,
                 onSelected: () => onSelected(time),
               ),
@@ -438,12 +443,16 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final items = <({IconData icon, String label})>[
       (icon: Icons.schedule, label: duration),
-      (icon: Icons.location_on_outlined, label: '${circuit.stops} paradas'),
+      (
+        icon: Icons.location_on_outlined,
+        label: l10n.circuitDetailStopsCount(circuit.stops),
+      ),
       (
         icon: Icons.military_tech_outlined,
-        label: '${circuit.badges} insignias',
+        label: l10n.circuitDetailBadgesCount(circuit.badges),
       ),
     ];
 
@@ -504,7 +513,7 @@ class _ErrorState extends StatelessWidget {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.go(Routes.home),
-                child: const Text('Volver al inicio'),
+                child: Text(context.l10n.commonBackToHome),
               ),
             ],
           ),

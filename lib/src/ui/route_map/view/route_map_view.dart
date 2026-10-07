@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -142,6 +143,7 @@ class _RouteMapViewState extends State<RouteMapView> {
   }
 
   Future<void> _centerOnUser() async {
+    final l10n = context.l10n;
     final viewModel = context.read<RouteMapViewModel>();
     final user = viewModel.user;
     if (user != null) {
@@ -151,9 +153,9 @@ class _RouteMapViewState extends State<RouteMapView> {
 
     if (!viewModel.useLocation) {
       _notify(
-        'Apagaste la ubicación en Configuraciones',
+        l10n.routeMapLocationOffInSettings,
         action: SnackBarAction(
-          label: 'Activar',
+          label: l10n.routeMapTurnOn,
           textColor: AppColors.primary10,
           onPressed: () {
             viewModel.enableLocation();
@@ -169,20 +171,20 @@ class _RouteMapViewState extends State<RouteMapView> {
     switch (access) {
       case LocationAccess.granted:
         _centerOnUserWhenLocated = true;
-        _notify('Buscando tu ubicación…');
+        _notify(l10n.routeMapSearchingLocation);
       case LocationAccess.deniedForever || LocationAccess.serviceDisabled:
         _notify(
           access == LocationAccess.serviceDisabled
-              ? 'Enciende la ubicación del teléfono para verte en el mapa'
-              : 'Permite la ubicación en los ajustes para verte en el mapa',
+              ? l10n.routeMapTurnOnPhoneLocation
+              : l10n.routeMapAllowLocationInSettings,
           action: SnackBarAction(
-            label: 'Ajustes',
+            label: l10n.routeMapSettingsAction,
             textColor: AppColors.primary10,
             onPressed: viewModel.openLocationSettings,
           ),
         );
       case LocationAccess.denied || LocationAccess.unknown:
-        _notify('Sin tu ubicación, el mapa no puede mostrarte');
+        _notify(l10n.routeMapNoLocation);
     }
   }
 
@@ -196,7 +198,7 @@ class _RouteMapViewState extends State<RouteMapView> {
     if (earnedBadge) {
       await showBadgeEarnedAnimation(context, category: stop.category);
     } else {
-      _notify('¡Visita a ${stop.name} confirmada!');
+      _notify(context.l10n.routeMapVisitConfirmed(stop.name));
     }
   }
 
@@ -212,7 +214,7 @@ class _RouteMapViewState extends State<RouteMapView> {
   Future<void> _skip(RouteMapPoint point) async {
     final reason = await showDropReasonSheet(
       context,
-      title: '¿Por qué saltas ${point.name}?',
+      title: context.l10n.routeMapWhySkip(point.name),
     );
     if (reason == null || !mounted) return;
     context.read<RouteMapViewModel>().skipStop(point.id, reason);
@@ -226,11 +228,12 @@ class _RouteMapViewState extends State<RouteMapView> {
 
   void _endTrip() {
     context.read<RouteMapViewModel>().endTrip();
-    _notify('Viaje finalizado');
+    _notify(context.l10n.routeMapTripEnded);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<RouteMapViewModel>();
     final map = viewModel.map;
     final user = viewModel.user;
@@ -263,9 +266,7 @@ class _RouteMapViewState extends State<RouteMapView> {
               child: map == null
                   ? _Backdrop(
                       isBusy: viewModel.isBusy,
-                      message:
-                          viewModel.errorMessage ??
-                          'Este circuito todavía no tiene paradas',
+                      message: viewModel.errorMessage ?? l10n.routeMapNoStops,
                     )
                   : KPlanMap(
                       map: map,
@@ -286,7 +287,7 @@ class _RouteMapViewState extends State<RouteMapView> {
                 bottom: false,
                 child: _TopBar(
                   title: viewModel.title,
-                  subtitle: map == null ? null : _subtitleOf(map),
+                  subtitle: map == null ? null : _subtitleOf(l10n, map),
                   isPlace: map?.kind == RouteMapKind.place,
                   onFit: map == null
                       ? null
@@ -379,18 +380,18 @@ class _RouteMapViewState extends State<RouteMapView> {
     );
   }
 
-  static String? _subtitleOf(RouteMap map) {
+  static String? _subtitleOf(AppLocalizations l10n, RouteMap map) {
     final total = map.points.length;
     switch (map.kind) {
       case RouteMapKind.trip:
         final next = map.next;
-        if (next == null) return '¡Recorrido completo!';
+        if (next == null) return l10n.routeMapTripComplete;
         final arrival = next.arrival;
         return arrival == null
-            ? 'Siguiente: ${next.name}'
-            : 'Siguiente: ${next.name} · ${Formatters.clock(arrival)}';
+            ? l10n.routeMapNextStop(next.name)
+            : l10n.sharedTripNextStop(next.name, Formatters.clock(arrival));
       case RouteMapKind.preview:
-        return '$total ${total == 1 ? 'parada' : 'paradas'}';
+        return l10n.routeMapStopCount(total);
       case RouteMapKind.place:
         return null;
     }
@@ -418,6 +419,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final subtitle = this.subtitle;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -427,7 +429,7 @@ class _TopBar extends StatelessWidget {
             children: [
               CircleIconButton(
                 icon: Icons.arrow_back,
-                tooltip: 'Regresar',
+                tooltip: l10n.commonBack,
                 onPressed: () =>
                     context.canPop() ? context.pop() : context.go(Routes.home),
               ),
@@ -470,13 +472,15 @@ class _TopBar extends StatelessWidget {
                 icon: isPlace
                     ? Icons.center_focus_strong_outlined
                     : Icons.route_outlined,
-                tooltip: isPlace ? 'Centrar el lugar' : 'Ver todo el recorrido',
+                tooltip: isPlace
+                    ? l10n.routeMapCenterPlace
+                    : l10n.routeMapShowWholeRoute,
                 onPressed: onFit,
               ),
               const SizedBox(width: 8),
               CircleIconButton(
                 icon: Icons.my_location,
-                tooltip: 'Mi ubicación',
+                tooltip: l10n.routeMapMyLocation,
                 color: AppColors.accentSecondaryBlue,
                 onPressed: onMyLocation,
               ),
@@ -505,7 +509,7 @@ class _TopBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Activa tu ubicación para verte en el mapa',
+                        l10n.routeMapLocationHint,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.primary10,
                           fontWeight: FontWeight.w600,
@@ -548,7 +552,7 @@ class _HintChip extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                'Toca una parada para ver su información',
+                context.l10n.routeMapTapStopHint,
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.primary10,
                   fontWeight: FontWeight.w600,
@@ -582,7 +586,7 @@ class _TripCompletePill extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                '¡Recorrido completo!',
+                context.l10n.routeMapTripComplete,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.primary10,
                   fontWeight: FontWeight.w600,
@@ -597,7 +601,7 @@ class _TripCompletePill extends StatelessWidget {
                 shape: const StadiumBorder(),
               ),
               onPressed: onEndTrip,
-              child: const Text('Finalizar viaje'),
+              child: Text(context.l10n.routeMapEndTrip),
             ),
           ],
         ),

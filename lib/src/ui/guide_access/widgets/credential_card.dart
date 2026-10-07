@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -83,6 +84,7 @@ class _CredentialCardState extends State<CredentialCard> {
     final rejected = widget.rejected;
     final review = rejected?.review;
     final formatDate = CredentialCard.formatDate;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -90,8 +92,10 @@ class _CredentialCardState extends State<CredentialCard> {
           title: type.label,
           description: rejected == null
               ? null
-              : 'Lo rechazamos: ${review?.reason ?? 'no pudimos aceptarlo'}'
-                    '${(review?.note ?? '').isEmpty ? '' : '. ${review!.note}'}',
+              : l10n.guideAccessDocumentRejectedByUs(
+                      review?.reason ?? l10n.guideAccessDocumentCouldNotAccept,
+                    ) +
+                    ((review?.note ?? '').isEmpty ? '' : '. ${review!.note}'),
           files: [?file],
           canAttach: file == null,
           hasError: problem != null,
@@ -101,9 +105,9 @@ class _CredentialCardState extends State<CredentialCard> {
         ),
         const SizedBox(height: 12),
         LabeledField(
-          label: 'Número del documento',
+          label: l10n.guideAccessDocumentNumber,
           child: AppTextField(
-            hint: 'Como aparece en el documento',
+            hint: l10n.guideAccessDocumentNumberHint,
             controller: _number,
             enabled: enabled,
             textInputAction: TextInputAction.next,
@@ -115,7 +119,7 @@ class _CredentialCardState extends State<CredentialCard> {
           children: [
             Expanded(
               child: LabeledField(
-                label: 'Emitido el',
+                label: l10n.guideAccessDocumentIssuedOn,
                 child: PickerField(
                   text: issuedOn == null ? null : formatDate(issuedOn),
                   hint: '00/00/0000',
@@ -128,10 +132,14 @@ class _CredentialCardState extends State<CredentialCard> {
             const SizedBox(width: 12),
             Expanded(
               child: LabeledField(
-                label: type.requiresExpiry ? 'Vence el' : 'Vence el · Opcional',
+                label: type.requiresExpiry
+                    ? l10n.guideAccessDocumentExpiresOn
+                    : l10n.guideAccessDocumentExpiresOnOptional,
                 child: PickerField(
                   text: expiresOn == null ? null : formatDate(expiresOn),
-                  hint: type.requiresExpiry ? '00/00/0000' : 'No vence',
+                  hint: type.requiresExpiry
+                      ? '00/00/0000'
+                      : l10n.guideAccessDocumentNoExpiry,
                   icon: Icons.event_outlined,
                   enabled: enabled,
                   onTap: widget.onPickExpires,
@@ -184,8 +192,8 @@ class KeptCredential extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       document.review?.accepted == true
-                          ? 'Aceptado: pasa tal cual a la solicitud nueva'
-                          : 'Pasa tal cual a la solicitud nueva',
+                          ? context.l10n.guideAccessDocumentKeptAccepted
+                          : context.l10n.guideAccessDocumentKept,
                       style: AppTextStyles.caption,
                     ),
                   ],

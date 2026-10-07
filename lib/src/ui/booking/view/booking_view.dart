@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -45,8 +46,8 @@ class _BookingViewState extends State<BookingView> {
       initialDate: _viewModel.date,
       firstDate: _viewModel.firstSelectableDate,
       lastDate: _viewModel.lastSelectableDate,
-      helpText: 'Fecha',
-      locale: const Locale('es'),
+      helpText: context.l10n.commonDate,
+      locale: Localizations.localeOf(context),
     );
     if (picked != null) _viewModel.setDate(picked);
   }
@@ -68,7 +69,7 @@ class _BookingViewState extends State<BookingView> {
   Future<void> _pickTime() async {
     final picked = await showOptionsSheet(
       context,
-      title: 'Hora inicial',
+      title: context.l10n.bookingStartTime,
       options: _viewModel.availableTimes,
       selected: _viewModel.startTime,
     );
@@ -95,15 +96,15 @@ class _BookingViewState extends State<BookingView> {
     final ok = await viewModel.confirm();
     if (!mounted || !ok) return;
 
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             hadGuideRequest
-                ? '¡Listo! Tu circuito quedó agendado y tu propuesta ya '
-                      'está publicada para los guías'
-                : '¡Listo! Tu circuito quedó agendado',
+                ? l10n.bookingConfirmedWithProposal
+                : l10n.bookingConfirmed,
           ),
         ),
       );
@@ -121,6 +122,7 @@ class _BookingViewState extends State<BookingView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<BookingViewModel>();
     final circuit = viewModel.circuit;
 
@@ -130,12 +132,12 @@ class _BookingViewState extends State<BookingView> {
         foregroundColor: AppColors.white,
         centerTitle: true,
         title: Text(
-          'Agendar',
+          l10n.bookingTitle,
           style: AppTextStyles.title.copyWith(color: AppColors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: _goBack,
         ),
       ),
@@ -144,19 +146,19 @@ class _BookingViewState extends State<BookingView> {
           ? ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
-                Text('Detalles de la reserva', style: AppTextStyles.title),
+                Text(l10n.bookingDetailsTitle, style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 BookingCard(
                   children: [
                     BookingFieldRow(
                       icon: Icons.calendar_month_outlined,
-                      label: 'Fecha',
+                      label: l10n.commonDate,
                       value: Formatters.shortDate(viewModel.date),
                       onTap: _pickDate,
                     ),
                     BookingFieldRow(
                       icon: Icons.group_outlined,
-                      label: 'Grupo',
+                      label: l10n.bookingGroup,
                       value: Formatters.groupLabel(
                         adults: viewModel.adults,
                         children: viewModel.children,
@@ -165,13 +167,13 @@ class _BookingViewState extends State<BookingView> {
                     ),
                     BookingFieldRow(
                       icon: Icons.schedule,
-                      label: 'Hora inicial',
-                      value: viewModel.startTime,
+                      label: l10n.bookingStartTime,
+                      value: Formatters.timeText(viewModel.startTime),
                       onTap: _pickTime,
                     ),
                     BookingFieldRow(
                       icon: Icons.person_pin_circle_outlined,
-                      label: 'Guía o traductor',
+                      label: l10n.bookingGuideOrTranslator,
                       value: viewModel.guideRowValue,
                       showDivider: false,
                       onTap: _pickGuide,
@@ -186,7 +188,7 @@ class _BookingViewState extends State<BookingView> {
                   ),
                 ],
                 const SizedBox(height: 24),
-                Text('Información del recorrido', style: AppTextStyles.title),
+                Text(l10n.bookingTourInfoTitle, style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 if (circuit != null)
                   _TourInfoCard(
@@ -211,7 +213,7 @@ class _BookingViewState extends State<BookingView> {
                           foregroundColor: AppColors.primary30,
                         ),
                         onPressed: viewModel.isSaving ? null : _goBack,
-                        child: const Text('Cancelar'),
+                        child: Text(l10n.commonCancel),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -229,7 +231,7 @@ class _BookingViewState extends State<BookingView> {
                                   color: AppColors.buttonTextLight,
                                 ),
                               )
-                            : const Text('Agendar'),
+                            : Text(l10n.bookingTitle),
                       ),
                     ),
                   ],
@@ -253,6 +255,8 @@ class _ProposalNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 8, 4, 8),
       decoration: BoxDecoration(
@@ -273,15 +277,11 @@ class _ProposalNote extends StatelessWidget {
               children: [
                 Text(summary, style: AppTextStyles.cardTitle),
                 const SizedBox(height: 2),
-                Text(
-                  'Al agendar publicamos tu propuesta: los guías se postulan '
-                  'y tú eliges a quién contratar.',
-                  style: AppTextStyles.caption,
-                ),
+                Text(l10n.bookingProposalNote, style: AppTextStyles.caption),
               ],
             ),
           ),
-          TextButton(onPressed: onRemove, child: const Text('Quitar')),
+          TextButton(onPressed: onRemove, child: Text(l10n.bookingRemove)),
         ],
       ),
     );
@@ -297,6 +297,7 @@ class _TourInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final itinerary = this.itinerary;
 
     return BookingCard(
@@ -315,40 +316,40 @@ class _TourInfoCard extends StatelessWidget {
         ),
         TourInfoBlock(
           icon: Icons.wb_sunny_outlined,
-          title: 'Recomendaciones',
+          title: l10n.bookingRecommendations,
           text: circuit.recommendations,
         ),
         TourInfoBlock(
           icon: Icons.schedule,
-          title: 'Duración estimada',
+          title: l10n.bookingEstimatedDuration,
           text: itinerary == null
               ? circuit.duration
-              : '${Formatters.duration(itinerary.totalDuration)} · termina '
-                    'aprox. a las ${Formatters.clock(itinerary.end)}',
+              : l10n.bookingDurationEnds(
+                  Formatters.duration(itinerary.totalDuration),
+                  Formatters.clock(itinerary.end),
+                ),
         ),
         TourInfoBlock(
           icon: Icons.location_on_outlined,
-          title: 'Punto de encuentro',
+          title: l10n.bookingMeetingPoint,
           text: circuit.meetingPoint,
         ),
         TourInfoBlock(
           icon: Icons.check_circle_outline,
-          title: 'Incluye',
+          title: l10n.bookingIncludes,
           text: circuit.includes,
         ),
         TourInfoBlock(
           icon: Icons.military_tech_outlined,
-          title: 'Insignias',
+          title: l10n.bookingBadges,
           text: circuit.badgesNote,
           onTap: () => ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Insignias: próximamente')),
-            ),
+            ..showSnackBar(SnackBar(content: Text(l10n.bookingBadgesSoon))),
         ),
         TourInfoBlock(
           icon: Icons.info_outline,
-          title: 'Notas del recorrido',
+          title: l10n.bookingTourNotes,
           text: circuit.notes,
         ),
       ],
@@ -370,11 +371,7 @@ class _MyCircuitInfoCard extends StatelessWidget {
       children: [
         Text(title, style: AppTextStyles.cardTitle),
         const SizedBox(height: 4),
-        Text(
-          'Lo armaste tú, así que no tiene precio por persona: sólo pagas el '
-          'guía o traductor que contrates.',
-          style: AppTextStyles.caption,
-        ),
+        Text(context.l10n.bookingOwnCircuitNote, style: AppTextStyles.caption),
       ],
     );
   }
@@ -389,15 +386,19 @@ class _ItineraryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BookingCard(
       padding: const EdgeInsets.all(14),
       children: [
-        Text('Horario del día', style: AppTextStyles.cardTitle),
+        Text(l10n.bookingDaySchedule, style: AppTextStyles.cardTitle),
         const SizedBox(height: 4),
         Text(
-          'Saliendo a las ${Formatters.clock(itinerary.start)} · '
-          '${itinerary.mode.label.toLowerCase()} · termina aprox. a las '
-          '${Formatters.clock(itinerary.end)}',
+          l10n.bookingScheduleSummary(
+            Formatters.clock(itinerary.start),
+            itinerary.mode.label.toLowerCase(),
+            Formatters.clock(itinerary.end),
+          ),
           style: AppTextStyles.caption,
         ),
         const SizedBox(height: 12),
@@ -433,7 +434,10 @@ class _LoadError extends StatelessWidget {
               style: AppTextStyles.bodySmall,
             ),
             const SizedBox(height: 16),
-            TextButton(onPressed: onBack, child: const Text('Volver')),
+            TextButton(
+              onPressed: onBack,
+              child: Text(context.l10n.bookingGoBack),
+            ),
           ],
         ),
       ),

@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/age.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/guide_access_request.dart';
 import '../../../data/models/nationality.dart';
@@ -105,7 +107,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   void _showError(GuideApplicationViewModel viewModel) => _showMessage(
-    viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+    viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
   );
 
   void _back() {
@@ -125,11 +127,11 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
     if (!_validate(GuideApplicationStep.identity)) return;
     final viewModel = context.read<GuideApplicationViewModel>();
     if (!viewModel.hasAccountProfile) {
-      _showMessage('Elige tu fecha de nacimiento y tu nacionalidad.');
+      _showMessage(context.l10n.guideAccessProfileMissing);
       return;
     }
     if (!viewModel.isAdult) {
-      _showMessage('Debes ser mayor de 18 años para crear una cuenta.');
+      _showMessage(context.l10n.registerAdultOnly(adultAge));
       return;
     }
     viewModel.submitIdentity(
@@ -177,7 +179,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
       );
     } on Exception {
       if (mounted) {
-        _showMessage('No pudimos abrir tus archivos. Intenta de nuevo.');
+        _showMessage(context.l10n.guideAccessFilePickerFailed);
       }
       return;
     }
@@ -341,22 +343,21 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   }
 
   Widget _identityStep(GuideApplicationViewModel viewModel) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Cuéntanos quién eres',
-          subtitle:
-              'Usa tus datos tal como aparecen en tu cédula. Con este correo se crea '
-              'tu cuenta de guía o traductor.',
+        GuideHeading(
+          title: l10n.guideAccessIdentityTitle,
+          subtitle: l10n.guideAccessIdentitySubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Nombre completo',
+          label: l10n.commonFullName,
           child: AppTextField(
-            hint: 'Nombre y apellidos',
+            hint: l10n.guideAccessNameHint,
             controller: _nameController,
-            validator: Validators.notEmpty('Ingresa tu nombre completo'),
+            validator: Validators.notEmpty(l10n.guideAccessNameRequired),
             textCapitalization: TextCapitalization.words,
             autofillHints: const [AutofillHints.name],
             textInputAction: TextInputAction.next,
@@ -364,10 +365,10 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Correo',
+          label: l10n.guideAccessEmailLabel,
           child: AppTextField(
-            hint: 'tu@correo.com',
-            helper: 'Usa uno que no tenga ya una cuenta de K’Plan.',
+            hint: l10n.guideAccessEmailHint,
+            helper: l10n.guideAccessEmailHelper,
             controller: _emailController,
             validator: Validators.email,
             keyboardType: TextInputType.emailAddress,
@@ -379,7 +380,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         if (viewModel.asksAccountProfile) ...[
           const SizedBox(height: 16),
           LabeledField(
-            label: 'Fecha de nacimiento',
+            label: l10n.commonBirthDate,
             child: PickerField(
               text: viewModel.birthDate == null
                   ? null
@@ -391,16 +392,16 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           ),
           const SizedBox(height: 16),
           LabeledField(
-            label: 'Nacionalidad',
+            label: l10n.commonNationality,
             child: PickerField(
               text: Nationality.byCode(viewModel.nationality)?.name,
-              hint: 'Elige tu país',
+              hint: l10n.commonChooseCountry,
               onTap: _pickNationality,
             ),
           ),
         ],
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: _submitIdentity),
+        PrimaryButton(label: l10n.commonNext, onPressed: _submitIdentity),
       ],
     );
   }
@@ -409,12 +410,13 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
     final catalogs = viewModel.catalogs;
     final coverage = viewModel.coverage;
     final missingCoverage = viewModel.showCoverageError;
+    final l10n = context.l10n;
 
     if (catalogs == null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const GuideHeading(title: 'Qué ofreces y dónde'),
+          GuideHeading(title: l10n.guideAccessServicesTitle),
           const SizedBox(height: 24),
           if (viewModel.catalogError != null) ...[
             InlineNotice(
@@ -423,7 +425,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
             ),
             const SizedBox(height: 16),
             SecondaryButton(
-              label: 'Reintentar',
+              label: l10n.commonRetry,
               onPressed: viewModel.retryCatalogs,
             ),
           ] else
@@ -436,28 +438,29 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GuideHeading(
-          title: 'Qué ofreces y dónde',
+          title: l10n.guideAccessServicesTitle,
           subtitle: viewModel.isCorrecting
-              ? 'Revisa tus datos: puedes cambiarlos antes de volver a enviar.'
-              : 'Tu certificación define hasta dónde puedes acompañar a los '
-                    'viajeros.',
+              ? l10n.guideAccessServicesCorrectingSubtitle
+              : l10n.guideAccessExperienceSubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Ofreces',
-          error: viewModel.showServicesError ? 'Elige al menos uno' : null,
+          label: l10n.guideAccessServicesLabel,
+          error: viewModel.showServicesError
+              ? l10n.guideAccessServicesError
+              : null,
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               AppChoiceChip(
-                label: 'Guía de turismo',
+                label: l10n.guideAccessServiceGuide,
                 selected: viewModel.services.contains(ProviderServices.guide),
                 onSelected: () =>
                     viewModel.toggleService(ProviderServices.guide),
               ),
               AppChoiceChip(
-                label: 'Traductor',
+                label: l10n.commonTranslator,
                 selected: viewModel.services.contains(
                   ProviderServices.translator,
                 ),
@@ -469,14 +472,14 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Dónde trabajas',
-          error: missingCoverage ? 'Elige dónde trabajas' : null,
+          label: l10n.guideAccessCoverageLabel,
+          error: missingCoverage ? l10n.guideAccessCoverageError : null,
           child: Column(
             children: [
               CoverageOption(
                 icon: Icons.map_outlined,
-                title: 'En todo el país',
-                subtitle: 'Por ejemplo, un guía nacional del INTUR.',
+                title: l10n.guideAccessCoverageNationalTitle,
+                subtitle: l10n.guideAccessCoverageNationalSubtitle,
                 selected: coverage == GuideCoverage.national,
                 hasError: missingCoverage,
                 onTap: () => viewModel.setCoverage(GuideCoverage.national),
@@ -484,8 +487,8 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
               const SizedBox(height: 12),
               CoverageOption(
                 icon: Icons.location_city_outlined,
-                title: 'En una ciudad',
-                subtitle: 'Por ejemplo, un guía local certificado en ella.',
+                title: l10n.guideAccessCoverageLocalTitle,
+                subtitle: l10n.guideAccessCoverageLocalSubtitle,
                 selected: coverage == GuideCoverage.local,
                 hasError: missingCoverage,
                 onTap: () => viewModel.setCoverage(GuideCoverage.local),
@@ -503,13 +506,16 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
               ? Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: LabeledField(
-                    label: 'Ciudad',
+                    label: l10n.guideAccessCityLabel,
                     child: DropdownButtonFormField<String>(
                       initialValue: viewModel.cityId,
                       isExpanded: true,
                       dropdownColor: AppColors.fieldFill,
                       borderRadius: BorderRadius.circular(AppTheme.radius),
-                      hint: Text('Elige una ciudad', style: AppTextStyles.hint),
+                      hint: Text(
+                        l10n.guideAccessCityHint,
+                        style: AppTextStyles.hint,
+                      ),
                       items: [
                         for (final city in catalogs.cities)
                           DropdownMenuItem(
@@ -518,9 +524,8 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
                           ),
                       ],
                       onChanged: viewModel.setCity,
-                      validator: (city) => city == null
-                          ? 'Elige la ciudad donde trabajas'
-                          : null,
+                      validator: (city) =>
+                          city == null ? l10n.guideAccessCityError : null,
                     ),
                   ),
                 )
@@ -528,9 +533,9 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Idiomas',
+          label: l10n.guideAccessLanguagesLabel,
           error: viewModel.showLanguageError
-              ? 'Elige al menos un idioma'
+              ? l10n.guideAccessLanguagesError
               : null,
           child: Wrap(
             spacing: 8,
@@ -547,7 +552,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Teléfono de contacto',
+          label: l10n.guideAccessPhoneLabel,
           child: PhoneField(
             controller: _phoneController,
             countryCode: viewModel.countryCode,
@@ -557,11 +562,11 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Preséntate a los turistas',
+          label: l10n.guideAccessExperienceLabel,
           child: AppTextField(
-            hint: 'Ej.: 3 años en recorridos de historia colonial',
+            hint: l10n.guideAccessExperienceHint,
             controller: _presentationController,
-            validator: Validators.notEmpty('Cuéntanos tu experiencia'),
+            validator: Validators.notEmpty(l10n.guideAccessExperienceRequired),
             keyboardType: TextInputType.multiline,
             textInputAction: TextInputAction.newline,
             textCapitalization: TextCapitalization.sentences,
@@ -575,16 +580,16 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           onChanged: viewModel.setCarriesTourists,
           contentPadding: EdgeInsets.zero,
           title: Text(
-            'Llevo turistas en mi vehículo',
+            l10n.guideAccessVehicleTitle,
             style: AppTextStyles.fieldLabel,
           ),
           subtitle: Text(
-            'Te pediremos tu licencia de conducir y el seguro del vehículo.',
+            l10n.guideAccessVehicleSubtitle,
             style: AppTextStyles.caption,
           ),
         ),
         const SizedBox(height: 28),
-        PrimaryButton(label: 'Siguiente', onPressed: _submitServices),
+        PrimaryButton(label: l10n.commonNext, onPressed: _submitServices),
       ],
     );
   }
@@ -594,18 +599,18 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
     final kept = [
       for (final type in viewModel.requiredTypes) ?viewModel.keptFor(type.code),
     ];
+    final l10n = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GuideHeading(
           title: viewModel.isCorrecting
-              ? 'Corrige tus documentos'
-              : 'Tus documentos',
+              ? l10n.guideAccessDocumentsCorrectTitle
+              : l10n.guideAccessDocumentsTitle,
           subtitle: viewModel.isCorrecting
-              ? 'Sube otra vez lo que rechazamos. Lo que aceptamos pasa tal cual.'
-              : 'Adjunta una foto legible o un PDF de cada uno, con sus fechas. '
-                    'Solo el equipo de revisión los verá.',
+              ? l10n.guideAccessDocumentsCorrectSubtitle
+              : l10n.guideAccessDocumentsSubtitle,
         ),
         const SizedBox(height: 24),
         for (final type in toUpload) ...[
@@ -644,43 +649,47 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           const SizedBox(height: 12),
         ],
         const SizedBox(height: 16),
-        PrimaryButton(label: 'Siguiente', onPressed: viewModel.submitDocuments),
+        PrimaryButton(
+          label: l10n.commonNext,
+          onPressed: viewModel.submitDocuments,
+        ),
       ],
     );
   }
 
   Widget _reviewStep(GuideApplicationViewModel viewModel) {
     final toUpload = viewModel.typesToUpload;
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GuideHeading(
           title: viewModel.isCorrecting
-              ? 'Revisa tu corrección'
-              : 'Revisa tu postulación',
-          subtitle: 'Confirma tu información antes de enviarla.',
+              ? l10n.guideAccessReviewCorrectionTitle
+              : l10n.guideAccessReviewTitle,
+          subtitle: l10n.guideAccessReviewSubtitle,
         ),
         const SizedBox(height: 24),
         if (!viewModel.isCorrecting) ...[
           _ReviewSection(
-            label: 'Tu cuenta',
+            label: l10n.guideAccessReviewAccount,
             lines: [viewModel.fullName, viewModel.contactEmail],
           ),
           const SizedBox(height: 16),
         ],
         _ReviewSection(
-          label: 'Lo que ofreces',
+          label: l10n.guideAccessReviewServices,
           lines: [
             ProviderServices.label(viewModel.services),
             viewModel.coverageSummary,
             viewModel.selectedLanguages.map(viewModel.languageName).join(' · '),
             viewModel.phone,
-            if (viewModel.carriesTourists) 'Lleva turistas en su vehículo',
+            if (viewModel.carriesTourists) l10n.guideAccessReviewVehicle,
           ],
         ),
         const SizedBox(height: 16),
         _ReviewSection(
-          label: 'Documentos que envías · Por verificar',
+          label: l10n.guideAccessReviewDocuments,
           lines: [
             for (final type in toUpload)
               '${type.label}: ${viewModel.documentFor(type.code).file?.name ?? ''}',
@@ -688,11 +697,9 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 24),
         if (viewModel.showConsentError) ...[
-          const InlineNotice(
+          InlineNotice(
             tone: NoticeTone.error,
-            message:
-                'Autoriza la revisión de tus documentos para enviar la '
-                'solicitud.',
+            message: l10n.guideAccessConsentError,
           ),
           const SizedBox(height: 8),
         ],
@@ -704,23 +711,19 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
           isError: viewModel.showConsentError,
           controlAffinity: ListTileControlAffinity.leading,
           contentPadding: EdgeInsets.zero,
-          title: Text(
-            'Autorizo al equipo de K’Plan a revisar mi información y '
-            'documentación para evaluar esta solicitud.',
-            style: _bodyInk,
-          ),
+          title: Text(l10n.guideAccessConsentLabel, style: _bodyInk),
         ),
         const SizedBox(height: 28),
         PrimaryButton(
           label: viewModel.isCorrecting
-              ? 'Enviar corrección'
-              : 'Enviar solicitud',
+              ? l10n.guideAccessSendCorrection
+              : l10n.guideAccessSendRequest,
           isLoading: viewModel.isBusy,
           onPressed: _sendApplication,
         ),
         const SizedBox(height: 16),
         SecondaryButton(
-          label: 'Volver y revisar documentos',
+          label: l10n.guideAccessBackToDocuments,
           onPressed: viewModel.isBusy ? null : viewModel.reviewDocuments,
         ),
       ],
@@ -730,22 +733,17 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
   Widget _codeStep(GuideApplicationViewModel viewModel) {
     final isBusy = viewModel.isBusy;
     final email = viewModel.contactEmail;
+    final l10n = context.l10n;
     final (tone, message) = viewModel.codeRejected
-        ? (
-            NoticeTone.error,
-            'El código no es válido o venció. Revísalo o pide uno nuevo.',
-          )
+        ? (NoticeTone.error, l10n.guideAccessCodeRejected)
         : viewModel.codeResent
-        ? (
-            NoticeTone.info,
-            'Enviamos un nuevo código a $email. Usa el más reciente.',
-          )
-        : (NoticeTone.info, 'Enviamos un código de 6 dígitos a $email.');
+        ? (NoticeTone.info, l10n.guideAccessCodeResent(email))
+        : (NoticeTone.info, l10n.guideAccessCodeSent(email));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(title: 'Ingresa el código de verificación'),
+        GuideHeading(title: l10n.guideAccessCodeTitle),
         const SizedBox(height: 20),
         Center(
           child: SvgPicture.asset(
@@ -766,7 +764,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ListenableBuilder(
           listenable: _codeController,
           builder: (context, _) => PrimaryButton(
-            label: 'Verificar',
+            label: l10n.guideAccessVerify,
             isLoading: isBusy,
             onPressed: _codeController.text.length == 6 ? _verifyCode : null,
           ),
@@ -775,7 +773,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         Center(
           child: TextButton(
             onPressed: isBusy ? null : _resendCode,
-            child: Text('Reenviar código', style: AppTextStyles.link),
+            child: Text(l10n.commonResendCode, style: AppTextStyles.link),
           ),
         ),
       ],
@@ -784,22 +782,21 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
 
   Widget _passwordStep(GuideApplicationViewModel viewModel) {
     final isBusy = viewModel.isBusy;
+    final l10n = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const GuideHeading(
-          title: 'Protege tu cuenta',
-          subtitle:
-              'Tu correo está verificado. Crea una contraseña: al enviar, subimos '
-              'tus documentos y tu solicitud queda en revisión.',
+        GuideHeading(
+          title: l10n.guideAccessPasswordTitle,
+          subtitle: l10n.guideAccessPasswordSubtitle,
         ),
         const SizedBox(height: 24),
         LabeledField(
-          label: 'Contraseña',
+          label: l10n.commonPassword,
           child: AppTextField(
-            hint: 'Ingresa tu contraseña',
-            helper: 'Usa al menos 8 caracteres, una mayúscula y un número.',
+            hint: l10n.guideAccessPasswordHint,
+            helper: l10n.commonNewPasswordHelper,
             controller: _passwordController,
             validator: Validators.newPassword,
             isPassword: true,
@@ -810,13 +807,13 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 16),
         LabeledField(
-          label: 'Confirma tu contraseña',
+          label: l10n.guideAccessConfirmPasswordLabel,
           child: AppTextField(
-            hint: 'Repite tu contraseña',
+            hint: l10n.guideAccessConfirmPasswordHint,
             controller: _confirmController,
             validator: (value) => value == _passwordController.text
                 ? null
-                : 'Las contraseñas no coinciden',
+                : l10n.commonPasswordsDontMatch,
             isPassword: true,
             enabled: !isBusy,
             textInputAction: TextInputAction.done,
@@ -825,7 +822,7 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
         ),
         const SizedBox(height: 28),
         PrimaryButton(
-          label: 'Crear cuenta y enviar',
+          label: l10n.guideAccessCreateAccountAndSend,
           isLoading: isBusy,
           onPressed: _createAccount,
         ),

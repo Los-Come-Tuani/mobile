@@ -1,0 +1,42 @@
+[
+  {
+    "id": "cupon-kit-bienvenida",
+    "title": "K'Plan welcome kit",
+    "description": "A notebook and an illustrated map of the circuits, to take with you on the tour.",
+    "discountLabel": "Gift",
+    "cost": 3,
+    "image": "https://picsum.photos/seed/kit-bienvenida/800/600"
+  },
+  {
+    "id": "cupon-5-reserva",
+    "title": "5% off your next booking",
+    "description": "Valid on any circuit booked through the app.",
+    "discountLabel": "5% off",
+    "cost": 4,
+    "image": "https://picsum.photos/seed/cupon5/800/600"
+  },
+  {
+    "id": "cupon-10-reserva",
+    "title": "10% off your next booking",
+    "description": "Valid on any circuit booked through the app.",
+    "discountLabel": "10% off",
+    "cost": 6,
+    "image": "https://picsum.photos/seed/cupon10/800/600"
+  },
+  {
+    "id": "cupon-isletas-gratis",
+    "title": "Boat ride through Las Isletas",
+    "description": "An hour-long boat ride through the Las Isletas archipelago, courtesy of K'Plan.",
+    "discountLabel": "Free",
+    "cost": 8,
+    "image": "https://picsum.photos/seed/isletas-gratis/800/600"
+  },
+  {
+    "id": "cupon-20-circuito",
+    "title": "20% off a full circuit",
+    "description": "The biggest discount in the catalog, for your next full adventure.",
+    "discountLabel": "20% off",
+    "cost": 10,
+    "image": "https://picsum.photos/seed/cupon20/800/600"
+  }
+]

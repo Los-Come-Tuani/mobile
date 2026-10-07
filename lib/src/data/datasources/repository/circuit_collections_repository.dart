@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../core/utils/result.dart';
+import '../../models/circuit.dart';
 import '../../models/circuit_collection.dart';
 import '../../models/itinerary.dart';
 import 'tour_repository.dart';
@@ -18,6 +19,7 @@ class CircuitCollectionsRepository extends ChangeNotifier {
 
   final List<CircuitCollection> _collections = [];
   bool _isLoaded = false;
+  bool _isDisposed = false;
   int _createdCount = 0;
 
   List<CircuitCollection> get collections => List.unmodifiable(_collections);
@@ -40,6 +42,24 @@ class CircuitCollectionsRepository extends ChangeNotifier {
         // Sin catálogo el usuario todavía puede crear sus propios circuitos.
         _isLoaded = true;
     }
+  }
+
+  /// Los circuitos del catálogo cambian de título cuando cambia el idioma de
+  /// la app. Los que creó el usuario conservan el suyo, y el orden y el plan
+  /// de las paradas no se tocan.
+  Future<void> relocalize() async {
+    if (!_isLoaded) return;
+    final result = await _tourRepository.getCircuits();
+    if (_isDisposed || result is! Ok<List<Circuit>>) return;
+
+    final byId = {for (final circuit in result.value) circuit.id: circuit};
+    var changed = false;
+    for (final collection in _collections) {
+      final circuit = byId[collection.id];
+      if (collection.isUserCreated || circuit == null) continue;
+      if (collection.retitle(circuit.shortTitle)) changed = true;
+    }
+    if (changed) notifyListeners();
   }
 
   CircuitCollection? findById(String id) {
@@ -129,5 +149,11 @@ class CircuitCollectionsRepository extends ChangeNotifier {
     final removed = _collections.length;
     _collections.removeWhere((c) => c.id == id && c.isUserCreated);
     if (_collections.length != removed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }

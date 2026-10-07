@@ -1,3 +1,4 @@
+import '../../core/l10n/l10n.dart';
 import 'guide_application.dart';
 
 /// Estado de una propuesta de trabajo para guía y/o traductor.
@@ -116,23 +117,37 @@ class GuideRequestTerms {
   };
 
   /// Para espacios angostos, sin el idioma: "Guía + traductor".
-  String get shortNeedLabel => switch (need) {
-    GuideNeed.localGuide => 'Guía local',
-    GuideNeed.bilingualGuide => 'Guía bilingüe',
-    GuideNeed.localGuideAndTranslator => 'Guía + traductor',
-    GuideNeed.translatorOnly => 'Solo traductor',
-  };
+  String get shortNeedLabel {
+    final l10n = AppStrings.current;
+    return switch (need) {
+      GuideNeed.localGuide => l10n.commonLocalGuide,
+      GuideNeed.bilingualGuide => l10n.modelNeedBilingualGuideShort,
+      GuideNeed.localGuideAndTranslator =>
+        l10n.modelNeedGuideAndTranslatorShort,
+      GuideNeed.translatorOnly => l10n.modelNeedTranslatorOnlyShort,
+    };
+  }
 
   /// Lo que se pide, en corto: "Guía local + traductor de inglés".
   String get needLabel {
-    final language = _lowerFirst(touristLanguage ?? 'tu idioma');
+    final l10n = AppStrings.current;
+    final language = _languageInSentence(l10n, touristLanguage);
     return switch (need) {
-      GuideNeed.localGuide => 'Guía local',
-      GuideNeed.bilingualGuide => 'Guía que habla $language',
+      GuideNeed.localGuide => l10n.commonLocalGuide,
+      GuideNeed.bilingualGuide => l10n.modelNeedBilingualGuide(language),
       GuideNeed.localGuideAndTranslator =>
-        'Guía local + traductor de $language',
-      GuideNeed.translatorOnly => 'Traductor de $language',
+        l10n.modelNeedLocalGuideAndTranslator(language),
+      GuideNeed.translatorOnly => l10n.modelNeedTranslatorOnly(language),
     };
+  }
+
+  /// El idioma del turista como va dentro de una frase. El dato viaja siempre
+  /// en español ("Inglés"); en español se escribe en minúscula ("traductor de
+  /// inglés") y en inglés conserva su mayúscula ("English").
+  static String _languageInSentence(AppLocalizations l10n, String? language) {
+    if (language == null) return l10n.modelNeedYourLanguage;
+    final name = l10n.languageName(language);
+    return AppStrings.language == AppLanguage.es ? _lowerFirst(name) : name;
   }
 
   static String _lowerFirst(String value) => value.isEmpty

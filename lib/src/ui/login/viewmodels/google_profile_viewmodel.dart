@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/models/login_outcome.dart';
@@ -66,7 +67,7 @@ class GoogleProfileViewModel extends BaseViewModel {
         _challenge = challenge;
         return GoogleProfileResult.twoFactor;
       case Ok():
-        setError('No pudimos completar tu perfil, intenta de nuevo');
+        setError(AppStrings.current.loginGoogleProfileFailed);
         return GoogleProfileResult.failed;
       case Failure(:final message):
         setError(message);

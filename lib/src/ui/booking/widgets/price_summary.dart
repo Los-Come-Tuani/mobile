@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -14,6 +15,8 @@ class PriceSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BookingCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       children: [
@@ -25,23 +28,26 @@ class PriceSummary extends StatelessWidget {
           ),
           _Line(
             icon: Icons.child_care_outlined,
-            label:
-                '${viewModel.children} ${viewModel.children == 1 ? 'niño' : 'niños'}',
+            label: l10n.bookingChildrenCount(viewModel.children),
             amount: viewModel.childrenTotal,
           ),
         ],
         if (viewModel.hasGuideRequest)
           _Line(
             icon: Icons.person_pin_circle_outlined,
-            label: 'Presupuesto: ${viewModel.guideSummary}',
+            label: l10n.bookingBudgetLine(viewModel.guideSummary),
             amount: viewModel.guidePrice,
           ),
         if (viewModel.hasPricePerPerson || viewModel.hasGuideRequest)
           const Divider(height: 20, thickness: 1, color: AppColors.divider),
-        _Line(label: 'Subtotal', amount: viewModel.subtotal),
-        _Line(label: 'Servicio (20%)', amount: viewModel.serviceFee),
+        _Line(label: l10n.bookingSubtotal, amount: viewModel.subtotal),
+        _Line(label: l10n.bookingServiceFee, amount: viewModel.serviceFee),
         const SizedBox(height: 6),
-        _Line(label: 'Total', amount: viewModel.total, highlight: true),
+        _Line(
+          label: l10n.commonTotal,
+          amount: viewModel.total,
+          highlight: true,
+        ),
       ],
     );
   }

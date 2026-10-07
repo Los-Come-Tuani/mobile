@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/user_role.dart';
@@ -47,7 +48,7 @@ class _TwoFactorLoginViewState extends State<TwoFactorLoginView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+            viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
           ),
         ),
       );
@@ -60,11 +61,13 @@ class _TwoFactorLoginViewState extends State<TwoFactorLoginView> {
       (vm) => vm.isBusy,
     );
 
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.login),
         ),
@@ -78,19 +81,18 @@ class _TwoFactorLoginViewState extends State<TwoFactorLoginView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                Text('Verifica que eres tú', style: AppTextStyles.headline),
+                Text(l10n.loginTwoFactorTitle, style: AppTextStyles.headline),
                 const SizedBox(height: 8),
                 Text(
-                  'Escribe el código de 6 dígitos de tu app de autenticación. Si perdiste '
-                  'el celular, usa uno de tus códigos de recuperación.',
+                  l10n.loginTwoFactorSubtitle,
                   style: AppTextStyles.bodySmall,
                 ),
                 const SizedBox(height: 24),
                 AppTextField(
-                  hint: 'Código',
+                  hint: l10n.loginTwoFactorCodeHint,
                   controller: _codeController,
                   validator: (value) => (value ?? '').trim().length < 6
-                      ? 'Escribe el código de 6 dígitos o uno de recuperación'
+                      ? l10n.loginTwoFactorCodeRequired
                       : null,
                   keyboardType: TextInputType.visiblePassword,
                   textCapitalization: TextCapitalization.characters,
@@ -102,7 +104,7 @@ class _TwoFactorLoginViewState extends State<TwoFactorLoginView> {
                 ),
                 const SizedBox(height: 24),
                 PrimaryButton(
-                  label: 'Verificar',
+                  label: l10n.loginTwoFactorVerify,
                   isLoading: isBusy,
                   onPressed: _submit,
                 ),

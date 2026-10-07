@@ -1,4 +1,9 @@
+import '../l10n/app_strings.dart';
+
 /// Validadores reutilizables para los formularios de la app.
+///
+/// Los mensajes se arman en el momento de validar, con el idioma de ese
+/// momento.
 abstract final class Validators {
   static final RegExp _emailRegExp = RegExp(
     r'^[\w.!#$%&’*+/=?^`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
@@ -6,15 +11,19 @@ abstract final class Validators {
 
   static String? email(String? value) {
     final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Ingresa tu correo electrónico';
-    if (!_emailRegExp.hasMatch(text)) return 'El correo no es válido';
+    if (text.isEmpty) return AppStrings.current.validatorEmailRequired;
+    if (!_emailRegExp.hasMatch(text)) {
+      return AppStrings.current.validatorEmailInvalid;
+    }
     return null;
   }
 
   static String? password(String? value, {int minLength = 6}) {
     final text = value ?? '';
-    if (text.isEmpty) return 'Ingresa tu contraseña';
-    if (text.length < minLength) return 'Mínimo 6 caracteres';
+    if (text.isEmpty) return AppStrings.current.validatorPasswordRequired;
+    if (text.length < minLength) {
+      return AppStrings.current.validatorPasswordMinLength(minLength);
+    }
     return null;
   }
 
@@ -31,7 +40,7 @@ abstract final class Validators {
   static String? newPassword(String? value) {
     final rules = newPasswordRules(value ?? '');
     if (rules.length && rules.upper && rules.number) return null;
-    return 'Usa al menos 8 caracteres, una mayúscula y un número';
+    return AppStrings.current.validatorNewPasswordRules;
   }
 
   /// Para campos obligatorios sin un formato especial.
@@ -41,9 +50,9 @@ abstract final class Validators {
   /// Sin el código de país, que se elige aparte.
   static String? phone(String? value) {
     final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return 'Ingresa un teléfono de contacto';
+    if (digits.isEmpty) return AppStrings.current.validatorPhoneRequired;
     if (digits.length < 7 || digits.length > 15) {
-      return 'El teléfono no es válido';
+      return AppStrings.current.validatorPhoneInvalid;
     }
     return null;
   }
@@ -53,9 +62,9 @@ abstract final class Validators {
   /// Sin la "@" inicial, que el campo agrega sólo como ayuda visual.
   static String? username(String? value) {
     final text = (value ?? '').trim().replaceFirst(RegExp('^@'), '');
-    if (text.isEmpty) return 'Ingresa un nombre de usuario';
+    if (text.isEmpty) return AppStrings.current.validatorUsernameRequired;
     if (!_usernameRegExp.hasMatch(text)) {
-      return 'De 3 a 20 letras, números, puntos o guiones bajos';
+      return AppStrings.current.validatorUsernameInvalid;
     }
     return null;
   }

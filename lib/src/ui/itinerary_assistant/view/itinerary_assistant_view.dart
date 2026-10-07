@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -69,9 +70,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('¡Listo! Guardamos tu itinerario')),
-      );
+      ..showSnackBar(SnackBar(content: Text(context.l10n.assistantSaved)));
     if (viewModel.startsFromScratch) {
       context.pushReplacement(Routes.myCircuitPath(circuitId));
     } else {
@@ -81,6 +80,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<ItineraryAssistantViewModel>();
     _followConversation(viewModel);
 
@@ -88,7 +88,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.myTrips),
         ),
@@ -97,7 +97,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
           children: [
             const AssistantAvatar(size: 28),
             const SizedBox(width: 10),
-            Text("Asistente K'Plan", style: AppTextStyles.title),
+            Text(l10n.assistantTitle, style: AppTextStyles.title),
             const SizedBox(width: 8),
             const _AiTag(),
           ],
@@ -119,11 +119,9 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
                           fromAssistant: message.fromAssistant,
                         ),
                       if (viewModel.step == AssistantStep.thinking)
-                        const ChatBubble(
+                        ChatBubble(
                           fromAssistant: true,
-                          child: TypingIndicator(
-                            label: 'Calculando traslados y horarios…',
-                          ),
+                          child: TypingIndicator(label: l10n.assistantThinking),
                         ),
                       if (viewModel.step == AssistantStep.proposal)
                         ..._buildProposal(viewModel),
@@ -139,6 +137,7 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
   List<Widget> _buildProposal(ItineraryAssistantViewModel viewModel) {
     final itinerary = viewModel.itinerary;
     if (itinerary == null) return const [];
+    final l10n = context.l10n;
     final count = viewModel.suggestions.length;
 
     return [
@@ -150,9 +149,8 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
       const SizedBox(height: 14),
       ChatBubble.text(
         count == 0
-            ? 'Así queda bien. ¿Lo guardamos?'
-            : 'Tengo $count ${count == 1 ? 'sugerencia' : 'sugerencias'} '
-                  'para mejorarlo:',
+            ? l10n.assistantAllGood
+            : l10n.assistantSuggestionsIntro(count),
         fromAssistant: true,
       ),
       for (final suggestion in viewModel.suggestions)
@@ -179,7 +177,7 @@ class _AiTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'IA',
+        context.l10n.assistantAiTag,
         style: AppTextStyles.caption.copyWith(
           color: AppColors.primary30,
           fontWeight: FontWeight.w700,
@@ -209,8 +207,10 @@ class _ProposalCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Tu día · ${itinerary.mode.label.toLowerCase()} · ritmo '
-            '${itinerary.pace.label.toLowerCase()}',
+            context.l10n.assistantProposalTitle(
+              itinerary.mode.label.toLowerCase(),
+              itinerary.pace.label.toLowerCase(),
+            ),
             style: AppTextStyles.cardTitle,
           ),
           const SizedBox(height: 8),
@@ -272,6 +272,7 @@ class _AnswerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final content = switch (viewModel.step) {
       AssistantStep.city => _QuickReplies(
         labels: viewModel.cities,
@@ -303,7 +304,7 @@ class _AnswerBar extends StatelessWidget {
               for (final interest
                   in ItineraryAssistantViewModel.interestOptions)
                 AppChoiceChip(
-                  label: interest,
+                  label: l10n.categoryName(interest),
                   selected: viewModel.selectedInterests.contains(interest),
                   onSelected: () => viewModel.toggleInterest(interest),
                 ),
@@ -312,8 +313,8 @@ class _AnswerBar extends StatelessWidget {
           const SizedBox(height: 12),
           PrimaryButton(
             label: viewModel.selectedInterests.isEmpty
-                ? 'Me da igual'
-                : 'Listo',
+                ? l10n.assistantNoPreference
+                : l10n.commonDone,
             icon: Icons.auto_awesome,
             onPressed: viewModel.confirmInterests,
           ),
@@ -321,7 +322,7 @@ class _AnswerBar extends StatelessWidget {
       ),
       AssistantStep.thinking => null,
       AssistantStep.proposal => PrimaryButton(
-        label: 'Guardar itinerario',
+        label: l10n.assistantSave,
         icon: Icons.check,
         onPressed: viewModel.canSave ? onSave : null,
       ),

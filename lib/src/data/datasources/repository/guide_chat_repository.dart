@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../models/guide_chat_message.dart';
 
 /// Chat simulado con quienes se contrató (guía y/o traductor) en la
@@ -18,11 +19,15 @@ class GuideChatRepository extends ChangeNotifier {
   final List<GuideChatMessage> _messages = [];
   int _nextId = 1;
 
-  static const List<String> _autoReplies = [
-    '¡Hola! Con gusto te acompaño en el recorrido.',
-    'Perfecto, nos vemos en el punto de encuentro. ¡Puntual!',
-    'Cualquier duda antes del recorrido, escríbeme por aquí.',
-  ];
+  /// Las frases con que contestan, en el idioma de ahora.
+  List<String> get _autoReplies {
+    final l10n = AppStrings.current;
+    return [
+      l10n.repoChatReplyWelcome,
+      l10n.repoChatReplyMeetingPoint,
+      l10n.repoChatReplyQuestions,
+    ];
+  }
 
   List<GuideChatMessage> get messages => List.unmodifiable(_messages);
 
@@ -51,7 +56,8 @@ class GuideChatRepository extends ChangeNotifier {
   }
 
   void _scheduleAutoReply(List<String> participantIds) {
-    final reply = _autoReplies[_random.nextInt(_autoReplies.length)];
+    final replies = _autoReplies;
+    final reply = replies[_random.nextInt(replies.length)];
     final senderId = participantIds[_random.nextInt(participantIds.length)];
     Future.delayed(Duration(seconds: 1 + _random.nextInt(2)), () {
       _messages.add(

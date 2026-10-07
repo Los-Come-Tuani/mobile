@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -62,38 +63,42 @@ class _GuideJobViewState extends State<GuideJobView> {
       message: _messageController.text,
     );
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             ok
-                ? 'Postulación enviada'
-                : viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+                ? l10n.guideAppJobApplicationSent
+                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
           ),
         ),
       );
   }
 
-  static String? _validatePrice(String? value) {
+  String? _validatePrice(String? value) {
     final price = int.tryParse(value?.trim() ?? '');
-    if (price == null || price <= 0) return 'Escribe tu precio en córdobas';
+    if (price == null || price <= 0) {
+      return context.l10n.guideAppJobPriceRequired;
+    }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideJobViewModel>();
     final job = viewModel.job;
 
     if (!viewModel.isLoaded || job == null) {
       return Scaffold(
-        appBar: const GuideBar(title: 'Propuesta'),
+        appBar: GuideBar(title: l10n.guideAppJobTitle),
         body: !viewModel.isLoaded
             ? const Center(child: KPlanLoader())
-            : const EmptyState(
-                title: 'No encontramos esta propuesta',
-                message: 'Puede que el turista la haya retirado.',
+            : EmptyState(
+                title: l10n.guideAppJobNotFoundTitle,
+                message: l10n.guideAppJobNotFoundMessage,
               ),
       );
     }
@@ -106,7 +111,7 @@ class _GuideJobViewState extends State<GuideJobView> {
     final terms = job.terms;
 
     return Scaffold(
-      appBar: const GuideBar(title: 'Propuesta'),
+      appBar: GuideBar(title: l10n.guideAppJobTitle),
       body: ListView(
         padding: AppTheme.screenPadding.copyWith(top: 20, bottom: 32),
         children: [
@@ -116,7 +121,9 @@ class _GuideJobViewState extends State<GuideJobView> {
               const SizedBox(width: 10),
               Flexible(
                 child: Text(
-                  'Publicada ${Formatters.timeAgo(job.publishedAt)}',
+                  l10n.guideAppJobPublished(
+                    Formatters.timeAgo(job.publishedAt),
+                  ),
                   style: AppTextStyles.caption,
                 ),
               ),
@@ -136,11 +143,15 @@ class _GuideJobViewState extends State<GuideJobView> {
                   Formatters.currency(job.budget),
                   style: AppTextStyles.headline,
                 ),
-                Text('presupuesto del turista', style: AppTextStyles.caption),
+                Text(
+                  l10n.guideAppJobTouristBudget,
+                  style: AppTextStyles.caption,
+                ),
                 const SizedBox(height: 6),
                 Text(
-                  'Recibes ${Formatters.currency(GuidePay.earningsOf(job.budget))} '
-                  'después del 20% de K’Plan',
+                  l10n.guideAppJobYouReceiveAfterFee(
+                    Formatters.currency(GuidePay.earningsOf(job.budget)),
+                  ),
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.accentSecondaryGreen,
                     fontWeight: FontWeight.w600,
@@ -152,11 +163,13 @@ class _GuideJobViewState extends State<GuideJobView> {
           const SizedBox(height: 20),
           DetailLine(
             icon: Icons.calendar_month_outlined,
-            text: '${Formatters.weekdayDate(job.date)} · ${job.startTime}',
+            text:
+                '${Formatters.weekdayDate(job.date)} · '
+                '${Formatters.timeText(job.startTime)}',
           ),
           DetailLine(
             icon: Icons.schedule,
-            text: '${terms.serviceHours} h de servicio',
+            text: l10n.guideAppServiceHours(terms.serviceHours),
           ),
           DetailLine(
             icon: Icons.group_outlined,
@@ -171,12 +184,12 @@ class _GuideJobViewState extends State<GuideJobView> {
             text: transportForGuide(terms.transportOption),
           ),
           if (terms.isMultiDay && terms.touristProvidesLodging)
-            const DetailLine(
+            DetailLine(
               icon: Icons.hotel_outlined,
-              text: 'El turista te da alojamiento',
+              text: l10n.guideAppJobLodging,
             ),
           const SizedBox(height: 24),
-          Text('Quién la publicó', style: AppTextStyles.title),
+          Text(l10n.guideAppJobPostedBy, style: AppTextStyles.title),
           const SizedBox(height: 10),
           TouristTile(
             tourist: tourist,
@@ -195,24 +208,25 @@ class _GuideJobViewState extends State<GuideJobView> {
     GuideJob job,
     TouristProfile? tourist,
   ) {
-    final name = tourist?.firstName ?? 'El turista';
+    final l10n = context.l10n;
+    final name = tourist?.firstName ?? l10n.guideAppTheTouristCapital;
 
     return switch (job.status) {
       GuideJobStatus.open => [_applyForm(viewModel, job, tourist)],
       GuideJobStatus.applied => [
         InlineNotice(
-          message:
-              'Te postulaste por '
-              '${Formatters.currency(job.offeredPrice ?? job.budget)}. '
-              '$name está decidiendo; te avisaremos en Inicio.',
+          message: l10n.guideAppJobAppliedNotice(
+            Formatters.currency(job.offeredPrice ?? job.budget),
+            name,
+          ),
         ),
       ],
       GuideJobStatus.hired => [
         InlineNotice(
           tone: NoticeTone.success,
-          message: '¡$name te contrató! Ya es uno de tus viajes.',
+          message: l10n.guideAppJobHiredNotice(name),
           action: _NoticeAction(
-            label: 'Ver viaje',
+            label: l10n.guideAppViewTrip,
             color: AppColors.accentSecondaryGreen,
             onPressed: () {
               final trip = viewModel.trip;
@@ -223,9 +237,9 @@ class _GuideJobViewState extends State<GuideJobView> {
       ],
       GuideJobStatus.taken => [
         InlineNotice(
-          message: '$name contrató a otro guía. Hay más propuestas en Inicio.',
+          message: l10n.guideAppJobTakenNotice(name),
           action: _NoticeAction(
-            label: 'Ver propuestas',
+            label: l10n.guideAppSeeProposals,
             color: AppColors.primaryText,
             onPressed: () => context.go(Routes.guideHome),
           ),
@@ -239,6 +253,8 @@ class _GuideJobViewState extends State<GuideJobView> {
     GuideJob job,
     TouristProfile? tourist,
   ) {
+    final l10n = context.l10n;
+
     return Form(
       key: _formKey,
       child: Column(
@@ -246,16 +262,19 @@ class _GuideJobViewState extends State<GuideJobView> {
         children: [
           Semantics(
             header: true,
-            child: Text('Tu postulación', style: AppTextStyles.title),
+            child: Text(
+              l10n.guideAppJobApplicationTitle,
+              style: AppTextStyles.title,
+            ),
           ),
           const SizedBox(height: 12),
           LabeledField(
-            label: 'Tu precio (C\$)',
+            label: l10n.guideAppJobPriceLabel,
             child: AppTextField(
               hint: '${job.budget}',
-              helper:
-                  'El turista ofrece ${Formatters.currency(job.budget)}. '
-                  'Puedes proponer otro precio.',
+              helper: l10n.guideAppJobPriceHelper(
+                Formatters.currency(job.budget),
+              ),
               controller: _priceController,
               validator: _validatePrice,
               keyboardType: TextInputType.number,
@@ -270,8 +289,9 @@ class _GuideJobViewState extends State<GuideJobView> {
               final price = int.tryParse(_priceController.text.trim()) ?? 0;
               return Text(
                 price > 0
-                    ? 'Recibirías ${Formatters.currency(GuidePay.earningsOf(price))} '
-                          'después del 20%.'
+                    ? l10n.guideAppJobWouldReceive(
+                        Formatters.currency(GuidePay.earningsOf(price)),
+                      )
                     : ' ',
                 style: AppTextStyles.caption.copyWith(
                   color: AppColors.accentSecondaryGreen,
@@ -282,9 +302,11 @@ class _GuideJobViewState extends State<GuideJobView> {
           ),
           const SizedBox(height: 16),
           LabeledField(
-            label: 'Mensaje para ${tourist?.firstName ?? 'el turista'}',
+            label: l10n.guideAppJobMessageLabel(
+              tourist?.firstName ?? l10n.guideAppTheTourist,
+            ),
             child: AppTextField(
-              hint: 'Cuéntale por qué eres buena opción para este recorrido',
+              hint: l10n.guideAppJobMessageHint,
               controller: _messageController,
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.newline,
@@ -296,7 +318,7 @@ class _GuideJobViewState extends State<GuideJobView> {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Postularme',
+            label: l10n.guideAppJobApply,
             isLoading: viewModel.isBusy,
             onPressed: _apply,
           ),

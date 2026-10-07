@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -89,7 +90,9 @@ class _StopContent extends StatelessWidget {
     } else if (context.mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('¡Parada confirmada!')));
+        ..showSnackBar(
+          SnackBar(content: Text(context.l10n.stopDetailConfirmed)),
+        );
     }
   }
 
@@ -123,6 +126,7 @@ class _StopContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final topInset = MediaQuery.paddingOf(context).top;
 
     return ListView(
@@ -139,7 +143,7 @@ class _StopContent extends StatelessWidget {
                 children: [
                   CircleIconButton(
                     icon: Icons.arrow_back,
-                    tooltip: 'Regresar',
+                    tooltip: l10n.commonBack,
                     onPressed: () => context.canPop()
                         ? context.pop()
                         : context.go(Routes.home),
@@ -147,7 +151,7 @@ class _StopContent extends StatelessWidget {
                   const Spacer(),
                   CircleIconButton(
                     icon: Icons.more_vert,
-                    tooltip: 'Más opciones',
+                    tooltip: l10n.stopDetailMoreOptions,
                     onPressed: () => _openOptions(context),
                   ),
                 ],
@@ -163,7 +167,7 @@ class _StopContent extends StatelessWidget {
               right: 16,
               child: CircleIconButton(
                 icon: Icons.location_on,
-                tooltip: 'Ver en el mapa',
+                tooltip: l10n.commonSeeOnMap,
                 color: AppColors.primary30,
                 size: 44,
                 onPressed: () => _openMap(context),
@@ -201,7 +205,7 @@ class _StopContent extends StatelessWidget {
                 const SizedBox(height: 6),
                 IconLabel(
                   icon: Icons.storefront_outlined,
-                  label: 'Abierto de ${hours.label}',
+                  label: l10n.stopDetailOpenHours(hours.label),
                   iconColor: AppColors.primary30,
                   color: AppColors.primaryText,
                   iconSize: 16,
@@ -225,7 +229,7 @@ class _StopContent extends StatelessWidget {
               ],
               const SizedBox(height: 20),
               PrimaryButton(
-                label: 'Añadir a un circuito',
+                label: l10n.stopDetailAddToCircuit,
                 icon: Icons.playlist_add,
                 onPressed: () => showAddToCircuitSheet(
                   context,
@@ -235,7 +239,7 @@ class _StopContent extends StatelessWidget {
               ),
               if (circuitsWithStop.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text('Guardado en', style: AppTextStyles.title),
+                Text(l10n.stopDetailSavedIn, style: AppTextStyles.title),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -271,6 +275,9 @@ class _BadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final categoryName = l10n.categoryName(category);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -295,8 +302,8 @@ class _BadgeCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   isClaimed
-                      ? 'Insignia de $category obtenida'
-                      : 'Esta parada otorga una insignia de $category',
+                      ? l10n.stopDetailBadgeEarned(categoryName)
+                      : l10n.stopDetailBadgeAwarded(categoryName),
                   style: AppTextStyles.bodySmall,
                 ),
               ),
@@ -314,12 +321,12 @@ class _BadgeCard extends StatelessWidget {
                     ),
                     onPressed: onScanQr,
                     icon: const Icon(Icons.qr_code_scanner, size: 18),
-                    label: const Text('Escanear código QR'),
+                    label: Text(l10n.stopDetailScanQr),
                   ),
                 ),
                 IconButton(
                   onPressed: onShowDemoQr,
-                  tooltip: 'Ver código de prueba',
+                  tooltip: l10n.stopDetailShowDemoQr,
                   icon: const Icon(
                     Icons.qr_code,
                     size: 20,
@@ -363,7 +370,10 @@ class _TipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recomendaciones', style: AppTextStyles.infoLabel),
+                Text(
+                  context.l10n.bookingRecommendations,
+                  style: AppTextStyles.infoLabel,
+                ),
                 const SizedBox(height: 2),
                 Text(tip, style: AppTextStyles.caption),
               ],

@@ -1,0 +1,234 @@
+[
+  {
+    "id": "guide-marlene",
+    "name": "Marlene Ríos",
+    "photoUrl": "https://picsum.photos/seed/guide-marlene/300/300",
+    "rating": 4.8,
+    "reviewsCount": 63,
+    "languages": ["Español", "Inglés"],
+    "bio": "Certified guide in Granada for 6 years. I love telling the stories that don't make it into the guidebooks.",
+    "yearsExperience": 6,
+    "specialties": ["Colonial history", "Food"],
+    "role": "guide",
+    "hasTransport": true,
+    "coverage": "local",
+    "certifiedCity": "Granada",
+    "reviews": [
+      {
+        "author": "Carlos M.",
+        "rating": 5,
+        "timeAgo": "2 weeks ago",
+        "text": "Marlene knows so much and is super friendly. The tour felt short."
+      },
+      {
+        "author": "Ana P.",
+        "rating": 5,
+        "timeAgo": "1 month ago",
+        "text": "She recommended places to eat that we didn't even know existed."
+      }
+    ]
+  },
+  {
+    "id": "guide-esteban",
+    "name": "Esteban Vado",
+    "photoUrl": "https://picsum.photos/seed/guide-esteban/300/300",
+    "rating": 4.6,
+    "reviewsCount": 41,
+    "languages": ["Español", "Inglés", "Francés"],
+    "bio": "Former history teacher, now a full-time guide. Specialist in colonial architecture and local legends. Also works as a translator when the group needs it.",
+    "yearsExperience": 9,
+    "specialties": ["Architecture", "Local legends"],
+    "role": "both",
+    "hasTransport": false,
+    "coverage": "national",
+    "reviews": [
+      {
+        "author": "Sophie L.",
+        "rating": 5,
+        "timeAgo": "3 days ago",
+        "text": "Spoke perfect French, very professional."
+      },
+      {
+        "author": "Roberto T.",
+        "rating": 4,
+        "timeAgo": "2 months ago",
+        "text": "Very good historical knowledge, though the tour was a bit long."
+      }
+    ]
+  },
+  {
+    "id": "guide-fatima",
+    "name": "Fátima Duarte",
+    "photoUrl": "https://picsum.photos/seed/guide-fatima/300/300",
+    "rating": 4.9,
+    "reviewsCount": 87,
+    "languages": ["Español", "Inglés"],
+    "bio": "Born and raised in León. I'm passionate about showing the living culture of the city: markets, street art and music.",
+    "yearsExperience": 5,
+    "specialties": ["Living culture", "Street art"],
+    "role": "guide",
+    "hasTransport": true,
+    "coverage": "local",
+    "certifiedCity": "León",
+    "reviews": [
+      {
+        "author": "Daniel K.",
+        "rating": 5,
+        "timeAgo": "1 week ago",
+        "text": "The best guide we've had in Central America, no exaggeration."
+      },
+      {
+        "author": "Mariana G.",
+        "rating": 5,
+        "timeAgo": "3 weeks ago",
+        "text": "Super punctual and full of energy the whole tour."
+      },
+      {
+        "author": "Luis F.",
+        "rating": 5,
+        "timeAgo": "1 month ago",
+        "text": "She made us feel like part of the city, not tourists."
+      }
+    ]
+  },
+  {
+    "id": "guide-oscar",
+    "name": "Óscar Membreño",
+    "photoUrl": "https://picsum.photos/seed/guide-oscar/300/300",
+    "rating": 4.4,
+    "reviewsCount": 28,
+    "languages": ["Español"],
+    "bio": "Nature and volcano guide. If you're looking for adventure and you're in good shape for hiking, I'm your guide.",
+    "yearsExperience": 4,
+    "specialties": ["Volcanoes", "Hiking"],
+    "role": "guide",
+    "hasTransport": false,
+    "coverage": "local",
+    "certifiedCity": "Masaya",
+    "reviews": [
+      {
+        "author": "Patricia N.",
+        "rating": 4,
+        "timeAgo": "2 weeks ago",
+        "text": "He knows the terrain very well, and the sense of safety he gives you is much appreciated."
+      },
+      {
+        "author": "Jorge A.",
+        "rating": 5,
+        "timeAgo": "1 month ago",
+        "text": "Great hiking pace and lots of stories about the volcano."
+      }
+    ]
+  },
+  {
+    "id": "guide-valeria",
+    "name": "Valeria Ortega",
+    "photoUrl": "https://picsum.photos/seed/guide-valeria/300/300",
+    "rating": 4.7,
+    "reviewsCount": 52,
+    "languages": ["Español", "Inglés"],
+    "bio": "Food guide: I take you to try what locals really eat, not just the touristy stuff.",
+    "yearsExperience": 3,
+    "specialties": ["Food", "Local markets"],
+    "role": "guide",
+    "hasTransport": true,
+    "coverage": "national",
+    "reviews": [
+      {
+        "author": "Tom H.",
+        "rating": 5,
+        "timeAgo": "4 days ago",
+        "text": "Best food tour we've done in Nicaragua, hands down."
+      },
+      {
+        "author": "Karla S.",
+        "rating": 4,
+        "timeAgo": "1 month ago",
+        "text": "Very good selection of stalls, though a little tight on time."
+      }
+    ]
+  },
+  {
+    "id": "guide-ramon",
+    "name": "Ramón Castillo",
+    "photoUrl": "https://picsum.photos/seed/guide-ramon/300/300",
+    "rating": 4.3,
+    "reviewsCount": 19,
+    "languages": ["Español", "Inglés"],
+    "bio": "Young, dynamic guide, always with good music to liven up the group tour.",
+    "yearsExperience": 2,
+    "specialties": ["City tours", "Photography"],
+    "role": "guide",
+    "hasTransport": false,
+    "coverage": "local",
+    "certifiedCity": "Granada",
+    "reviews": [
+      {
+        "author": "Diego R.",
+        "rating": 4,
+        "timeAgo": "3 weeks ago",
+        "text": "Great vibe, and he helped us take incredible photos."
+      },
+      {
+        "author": "Emily W.",
+        "rating": 4,
+        "timeAgo": "2 months ago",
+        "text": "Fun and easygoing, great for a casual group tour."
+      }
+    ]
+  },
+  {
+    "id": "guide-translator-hans",
+    "name": "Hans Berger",
+    "photoUrl": "https://picsum.photos/seed/guide-translator-hans/300/300",
+    "rating": 4.6,
+    "reviewsCount": 22,
+    "languages": ["Español", "Alemán", "Inglés"],
+    "bio": "Certified translator. I'm not a tour guide: I work alongside local guides to translate in real time. I've lived in Nicaragua for 8 years.",
+    "yearsExperience": 8,
+    "specialties": ["Simultaneous translation"],
+    "role": "translator",
+    "hasTransport": false,
+    "reviews": [
+      {
+        "author": "Werner K.",
+        "rating": 5,
+        "timeAgo": "1 week ago",
+        "text": "Flawless translation, we understood the whole tour perfectly."
+      },
+      {
+        "author": "Julia S.",
+        "rating": 4,
+        "timeAgo": "1 month ago",
+        "text": "Very professional, although we prefer it when the guide also speaks some German."
+      }
+    ]
+  },
+  {
+    "id": "guide-translator-noemi",
+    "name": "Noemí Vaz",
+    "photoUrl": "https://picsum.photos/seed/guide-translator-noemi/300/300",
+    "rating": 4.8,
+    "reviewsCount": 17,
+    "languages": ["Español", "Portugués", "Italiano"],
+    "bio": "Freelance translator. I work alongside local guides for groups that don't speak Spanish. I don't lead tours on my own.",
+    "yearsExperience": 5,
+    "specialties": ["Simultaneous translation"],
+    "role": "translator",
+    "hasTransport": false,
+    "reviews": [
+      {
+        "author": "Marco B.",
+        "rating": 5,
+        "timeAgo": "2 weeks ago",
+        "text": "Perfect, she helped us understand every detail of the tour."
+      },
+      {
+        "author": "Beatriz F.",
+        "rating": 5,
+        "timeAgo": "3 weeks ago",
+        "text": "Excellent translator, very attentive and punctual."
+      }
+    ]
+  }
+]

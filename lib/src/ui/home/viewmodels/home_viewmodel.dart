@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/route_map_builder.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
@@ -130,7 +131,15 @@ class HomeViewModel extends BaseViewModel {
 
   /// Listas ya filtradas por el buscador: la vista sólo pinta.
   List<Circuit> get circuits => _circuits
-      .where((c) => _matches([c.shortTitle, c.title, c.city, c.category]))
+      .where(
+        (c) => _matches([
+          c.shortTitle,
+          c.title,
+          c.city,
+          c.category,
+          _categoryLabel(c.category),
+        ]),
+      )
       .toList(growable: false);
 
   List<Place> get places => _places
@@ -144,7 +153,14 @@ class HomeViewModel extends BaseViewModel {
   /// Paradas para la pestaña "Para ti": sólo el buscador, sin el filtro de
   /// categoría (que es propio de la pestaña Paradas).
   List<Stop> get featuredStops => _stops
-      .where((s) => _matches([s.name, s.address, s.category]))
+      .where(
+        (s) => _matches([
+          s.name,
+          s.address,
+          s.category,
+          _categoryLabel(s.category),
+        ]),
+      )
       .toList(growable: false);
 
   /// Paradas de la pestaña Paradas: buscador y, si hay una elegida,
@@ -249,6 +265,11 @@ class HomeViewModel extends BaseViewModel {
     if (_isTrackingLocation) _locationRepository.stopTracking();
     super.dispose();
   }
+
+  /// La categoría como se ve en pantalla: quien busca "food" en inglés
+  /// encuentra lo que el dato llama `Gastronomía`.
+  String _categoryLabel(String category) =>
+      AppStrings.current.categoryName(category);
 
   bool _matches(List<String> fields) {
     final query = _query.trim().toLowerCase();

@@ -1,0 +1,303 @@
+[
+  {
+    "id": "granada-historias-sabores",
+    "shortTitle": "Historic Granada",
+    "title": "Granada, stories and flavors",
+    "subtitle": "A walk through history and culture",
+    "category": "Ciudad",
+    "city": "Granada",
+    "rating": 4.5,
+    "reviewsCount": 126,
+    "stopIds": [
+      "granada-catedral",
+      "granada-parque-central",
+      "granada-calle-calzada",
+      "granada-convento-san-francisco",
+      "granada-mercado",
+      "granada-muelle"
+    ],
+    "travelMode": "walking",
+    "duration": "4 h 20 min",
+    "durationShort": "About 4 h",
+    "badges": 3,
+    "difficulty": "Easy",
+    "priceAdult": 250,
+    "priceChild": 0,
+    "description": "A walking tour through the heart of Granada, where colonial history, living culture and food meet on every corner",
+    "images": [
+      "https://picsum.photos/seed/granada-1/900/600",
+      "https://picsum.photos/seed/granada-2/900/600",
+      "https://picsum.photos/seed/granada-3/900/600",
+      "https://picsum.photos/seed/granada-4/900/600",
+      "https://picsum.photos/seed/granada-5/900/600"
+    ],
+    "recommendations": "Wear comfortable clothes and suitable shoes, and bring sunscreen and a bottle of water",
+    "meetingPoint": "Parque Central de Granada, across from the Cathedral",
+    "includes": "Entry tickets and tastings",
+    "badgesNote": "This tour includes 3 collectible badges in total",
+    "notes": "The tour includes walks along cobblestone streets and visits to historic sites",
+    "startTimes": ["8:30 a.m.", "10:00 a.m.", "2:00 p.m."],
+    "location": { "latitude": 11.9344, "longitude": -85.9560 },
+    "comments": [
+      {
+        "author": "Ana Carolina R.",
+        "rating": 5,
+        "timeAgo": "Two days ago",
+        "text": "An incredible tour. Granada is even more beautiful once you know its culture."
+      },
+      {
+        "author": "Silvia H.",
+        "rating": 4,
+        "timeAgo": "A week ago",
+        "text": "The guide we hired through the app knew so much about colonial history. I'd do it again without hesitation."
+      },
+      {
+        "author": "Marcos J.",
+        "rating": 5,
+        "timeAgo": "Two weeks ago",
+        "text": "The tastings at the end are worth every córdoba. Highly recommended."
+      }
+    ]
+  },
+  {
+    "id": "isla-de-ometepe",
+    "shortTitle": "Isla de Ometepe",
+    "title": "Ometepe, the island of two volcanoes",
+    "subtitle": "Nature, legends and adventure",
+    "category": "Naturaleza",
+    "city": "Rivas",
+    "rating": 4.8,
+    "reviewsCount": 89,
+    "stopIds": [
+      "ometepe-ferry",
+      "ometepe-moyogalpa",
+      "ometepe-charco-verde",
+      "ometepe-museo-ceibo",
+      "ometepe-petroglifos",
+      "ometepe-ojo-de-agua",
+      "ometepe-mirador-maderas",
+      "ometepe-playa-santo-domingo"
+    ],
+    "travelMode": "vehicle",
+    "legMinutes": { "ometepe-moyogalpa": 0 },
+    "duration": "9 h 50 min",
+    "durationShort": "1 day",
+    "badges": 4,
+    "difficulty": "Moderate",
+    "priceAdult": 750,
+    "priceChild": 400,
+    "description": "A journey across the island formed by the Concepción and Maderas volcanoes, with petroglyphs, natural springs and local communities, ending at the isthmus beach",
+    "images": [
+      "https://picsum.photos/seed/ometepe-1/900/600",
+      "https://picsum.photos/seed/ometepe-2/900/600",
+      "https://picsum.photos/seed/ometepe-3/900/600"
+    ],
+    "recommendations": "Bring a swimsuit, insect repellent, sunscreen and hiking shoes",
+    "meetingPoint": "Puerto de San Jorge, Rivas",
+    "includes": "Ferry ticket, entry tickets and a traditional lunch",
+    "badgesNote": "This tour includes 4 collectible badges in total",
+    "notes": "The tour starts early and the return depends on the ferry schedule. You get around the island by vehicle: bring your own or ask the guide to add one to your proposal",
+    "startTimes": ["6:00 a.m.", "7:30 a.m."],
+    "location": { "latitude": 11.5060, "longitude": -85.5850 },
+    "comments": [
+      {
+        "author": "Luis P.",
+        "rating": 5,
+        "timeAgo": "Three days ago",
+        "text": "Ojo de Agua and the petroglyphs are impressive. A full day well spent."
+      },
+      {
+        "author": "Karla M.",
+        "rating": 5,
+        "timeAgo": "A month ago",
+        "text": "Excellent organization. The traditional lunch was delicious."
+      }
+    ]
+  },
+  {
+    "id": "leon-colonial",
+    "shortTitle": "Colonial León",
+    "title": "León, cradle of poets and volcanoes",
+    "subtitle": "Art, cathedrals and tradition",
+    "category": "Ciudad",
+    "city": "León",
+    "rating": 4.6,
+    "reviewsCount": 74,
+    "stopIds": [
+      "leon-catedral",
+      "leon-techos",
+      "leon-ruben-dario",
+      "leon-murales",
+      "leon-mercado"
+    ],
+    "travelMode": "walking",
+    "duration": "3 h 5 min",
+    "durationShort": "About 3 h",
+    "badges": 2,
+    "difficulty": "Easy",
+    "priceAdult": 300,
+    "priceChild": 150,
+    "description": "A walk through the university city: the World Heritage cathedral, murals, museums and Rubén Darío's house",
+    "images": [
+      "https://picsum.photos/seed/leon-1/900/600",
+      "https://picsum.photos/seed/leon-2/900/600",
+      "https://picsum.photos/seed/leon-3/900/600"
+    ],
+    "recommendations": "Bring a hat and water: León's sun is strong at midday",
+    "meetingPoint": "Parque Central de León, across from the Cathedral",
+    "includes": "Certified guide, museum tickets and the climb to the Cathedral rooftops",
+    "badgesNote": "This tour includes 2 collectible badges in total, plus 3 extra \"Creative circuits\" badges and a León medal when you complete it",
+    "notes": "You climb to the Cathedral rooftops barefoot",
+    "startTimes": ["9:00 a.m.", "3:00 p.m."],
+    "location": { "latitude": 12.4345, "longitude": -86.8780 },
+    "isCreativeCircuit": true,
+    "organizer": "León City Hall",
+    "comments": [
+      {
+        "author": "Diana C.",
+        "rating": 5,
+        "timeAgo": "Five days ago",
+        "text": "The Cathedral's white rooftops look like a postcard. Absolutely worth it."
+      }
+    ]
+  },
+  {
+    "id": "ruta-del-cafe",
+    "shortTitle": "Coffee Route",
+    "title": "Coffee route in the Segovias",
+    "subtitle": "From bean to cup",
+    "category": "Naturaleza",
+    "city": "Matagalpa",
+    "rating": 4.7,
+    "reviewsCount": 58,
+    "stopIds": [
+      "cafe-selva-negra",
+      "cafe-beneficio",
+      "cafe-secado",
+      "cafe-tueste",
+      "cafe-cata",
+      "cafe-mirador",
+      "cafe-comunidad"
+    ],
+    "travelMode": "vehicle",
+    "duration": "6 h 45 min",
+    "durationShort": "About 7 h",
+    "badges": 3,
+    "difficulty": "Moderate",
+    "priceAdult": 500,
+    "priceChild": 250,
+    "description": "Visit mountain coffee farms to learn the whole process of Nicaraguan coffee and taste the result",
+    "images": [
+      "https://picsum.photos/seed/cafe-1/900/600",
+      "https://picsum.photos/seed/cafe-2/900/600",
+      "https://picsum.photos/seed/cafe-3/900/600"
+    ],
+    "recommendations": "Wear boots or closed shoes: the trails can be muddy",
+    "meetingPoint": "Parque Darío, Matagalpa",
+    "includes": "Farm admission, coffee tasting and a snack",
+    "badgesNote": "This tour includes 3 collectible badges in total",
+    "notes": "The mountain climate is cool and rainy in the afternoon. The coffee community is far from the farm: bring your own vehicle or ask the guide to add one to your proposal",
+    "startTimes": ["7:00 a.m.", "8:00 a.m."],
+    "location": { "latitude": 12.9270, "longitude": -85.9170 },
+    "comments": [
+      {
+        "author": "Roberto A.",
+        "rating": 5,
+        "timeAgo": "A month ago",
+        "text": "I learned the whole coffee process, and the final tasting was really good."
+      }
+    ]
+  },
+  {
+    "id": "masaya-artesanias-volcan",
+    "shortTitle": "Artisan Masaya",
+    "title": "Masaya, cradle of folklore and fire",
+    "subtitle": "Crafts, tradition and the volcano crater",
+    "category": "Ciudad",
+    "city": "Masaya",
+    "rating": 4.7,
+    "reviewsCount": 41,
+    "stopIds": [
+      "masaya-mercado-artesanias",
+      "masaya-parque-central",
+      "masaya-volcan",
+      "masaya-monimbo"
+    ],
+    "travelMode": "vehicle",
+    "duration": "3 h 25 min",
+    "durationShort": "About 3 h",
+    "badges": 2,
+    "difficulty": "Easy",
+    "priceAdult": 280,
+    "priceChild": 140,
+    "description": "A ready-made tour by Masaya City Hall through the crafts market, the Monimbó neighborhood and the volcano viewpoint",
+    "images": [
+      "https://picsum.photos/seed/masaya-1/900/600",
+      "https://picsum.photos/seed/masaya-2/900/600",
+      "https://picsum.photos/seed/masaya-3/900/600"
+    ],
+    "recommendations": "Bring cash for crafts and sunscreen for the volcano viewpoint",
+    "meetingPoint": "Parque Central de Masaya, across from Iglesia San Jerónimo",
+    "includes": "Certified guide, entry to the Crafts Market and the volcano viewpoint",
+    "badgesNote": "This tour includes 2 collectible badges in total, plus 3 extra \"Creative circuits\" badges and a Masaya medal when you complete it",
+    "notes": "Access to the volcano crater depends on the national park's hours",
+    "startTimes": ["9:00 a.m.", "2:00 p.m."],
+    "location": { "latitude": 11.9738, "longitude": -86.0958 },
+    "isCreativeCircuit": true,
+    "organizer": "Masaya City Hall",
+    "comments": [
+      {
+        "author": "Fernando J.",
+        "rating": 5,
+        "timeAgo": "A week ago",
+        "text": "Seeing the lava lake from the crater rim was impressive. The crafts market is also well worth it."
+      }
+    ]
+  },
+  {
+    "id": "esteli-murales-tabaco",
+    "shortTitle": "Creative Estelí",
+    "title": "Estelí, murals and tobacco tradition",
+    "subtitle": "Street art, history and the aroma of tobacco",
+    "category": "Ciudad",
+    "city": "Estelí",
+    "rating": 4.6,
+    "reviewsCount": 33,
+    "stopIds": [
+      "esteli-galeria-heroes",
+      "esteli-catedral",
+      "esteli-tabacalera",
+      "esteli-mirador-tisey"
+    ],
+    "travelMode": "vehicle",
+    "duration": "3 h 35 min",
+    "durationShort": "About 4 h",
+    "badges": 2,
+    "difficulty": "Easy",
+    "priceAdult": 300,
+    "priceChild": 150,
+    "description": "A ready-made tour by Estelí City Hall through its murals, an artisan cigar factory and the viewpoint at the Tisey reserve",
+    "images": [
+      "https://picsum.photos/seed/esteli-1/900/600",
+      "https://picsum.photos/seed/esteli-2/900/600",
+      "https://picsum.photos/seed/esteli-3/900/600"
+    ],
+    "recommendations": "Bring a light jacket for the viewpoint and comfortable shoes for walking",
+    "meetingPoint": "Parque Central de Estelí, across from the Cathedral",
+    "includes": "Certified guide, entry to the Galería de Héroes y Mártires and a cigar factory tour",
+    "badgesNote": "This tour includes 2 collectible badges in total, plus 3 extra \"Creative circuits\" badges and an Estelí medal when you complete it",
+    "notes": "The Tisey viewpoint is on the outskirts of the city; the tour includes transportation",
+    "startTimes": ["9:00 a.m.", "1:00 p.m."],
+    "location": { "latitude": 13.0906, "longitude": -86.3538 },
+    "isCreativeCircuit": true,
+    "organizer": "Estelí City Hall",
+    "comments": [
+      {
+        "author": "Patricia G.",
+        "rating": 5,
+        "timeAgo": "Two weeks ago",
+        "text": "The murals tell a story I didn't know. The cigar factory was a surprise, and the process was explained very well."
+      }
+    ]
+  }
+]

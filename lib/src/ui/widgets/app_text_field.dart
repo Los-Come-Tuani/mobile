@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_text_styles.dart';
 
 /// Campo de texto de la app. Toma la decoración de
@@ -81,7 +82,9 @@ class _AppTextFieldState extends State<AppTextField> {
                       ? Icons.visibility_off_outlined
                       : Icons.visibility_outlined,
                 ),
-                tooltip: _obscure ? 'Mostrar contraseña' : 'Ocultar contraseña',
+                tooltip: _obscure
+                    ? context.l10n.sharedShowPassword
+                    : context.l10n.sharedHidePassword,
                 onPressed: () => setState(() => _obscure = !_obscure),
               )
             : null,

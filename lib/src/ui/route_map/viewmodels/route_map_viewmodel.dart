@@ -1,5 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/route_map_builder.dart';
@@ -79,6 +80,10 @@ class RouteMapViewModel extends BaseViewModel {
   final MapSubject subject;
 
   String _title = '';
+
+  /// El circuito propio ya no existe y no hay título que mostrar: se arma al
+  /// pedirlo ([title]) para que siga el idioma de ahora.
+  bool _isUntitled = false;
   List<Stop> _stops = const [];
   LatLng? _meetingPoint;
   TravelMode _mode = TravelMode.walking;
@@ -86,7 +91,8 @@ class RouteMapViewModel extends BaseViewModel {
   EventItem? _event;
   String? _selectedId;
 
-  String get title => _title;
+  String get title =>
+      _isUntitled ? AppStrings.current.routeMapMyCircuit : _title;
 
   /// El evento de un mapa de evento; `null` en el resto.
   EventItem? get event => _event;
@@ -114,14 +120,14 @@ class RouteMapViewModel extends BaseViewModel {
     final plan = _activeTripRepository.plan;
     if (isTrip && plan != null) {
       return RouteMapBuilder.trip(
-        title: _title,
+        title: title,
         plan: plan,
         progressOf: _activeTripRepository.progressOf,
       );
     }
     if (_stops.isEmpty) return null;
     return RouteMapBuilder.preview(
-      title: _title,
+      title: title,
       stops: _stops,
       start: _meetingPoint,
       mode: _mode,
@@ -246,7 +252,8 @@ class RouteMapViewModel extends BaseViewModel {
   Future<void> _loadMyCircuit(String id) async {
     await _collectionsRepository.ensureLoaded();
     final collection = _collectionsRepository.findById(id);
-    _title = collection?.title ?? 'Mi circuito';
+    _isUntitled = collection == null;
+    _title = collection?.title ?? '';
     _mode = collection?.travelMode ?? TravelMode.walking;
     await _loadStops(_collectionsRepository.stopIdsOf(id));
   }

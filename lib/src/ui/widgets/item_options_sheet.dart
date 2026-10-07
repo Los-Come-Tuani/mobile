@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/datasources/repository/saved_repository.dart';
@@ -45,6 +46,7 @@ class _ItemOptionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final savedRepository = context.watch<SavedRepository>();
     final isSaved = savedRepository.isSaved(itemId);
 
@@ -69,7 +71,7 @@ class _ItemOptionsSheet extends StatelessWidget {
                 color: AppColors.primary30,
               ),
               title: Text(
-                isSaved ? 'Quitar de guardados' : 'Guardar',
+                isSaved ? l10n.sharedRemoveFromSaved : l10n.commonSave,
                 style: AppTextStyles.body,
               ),
               onTap: () {
@@ -83,7 +85,7 @@ class _ItemOptionsSheet extends StatelessWidget {
                   Icons.playlist_add,
                   color: AppColors.primary30,
                 ),
-                title: Text('Añadir a un circuito', style: AppTextStyles.body),
+                title: Text(l10n.sharedAddToCircuit, style: AppTextStyles.body),
                 onTap: () => Navigator.of(context).pop(true),
               ),
           ],

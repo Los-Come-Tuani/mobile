@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/guide_request.dart';
@@ -36,7 +37,8 @@ class DetailLine extends StatelessWidget {
 
 /// Quién pone el transporte, dicho al guía.
 String transportForGuide(TransportOption option) => switch (option) {
-  TransportOption.onFoot => 'Recorrido a pie',
-  TransportOption.touristProvides => 'El turista pone el transporte',
-  TransportOption.guideProvides => 'Tú pones el transporte',
+  TransportOption.onFoot => AppStrings.current.guideAppTransportOnFoot,
+  TransportOption.touristProvides =>
+    AppStrings.current.guideAppTransportTourist,
+  TransportOption.guideProvides => AppStrings.current.guideAppTransportGuide,
 };

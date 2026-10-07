@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -32,10 +33,11 @@ class _MedalsViewState extends State<MedalsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<MedalsViewModel>();
 
     return Scaffold(
-      appBar: const BrandAppBar(title: 'Mis medallas'),
+      appBar: BrandAppBar(title: l10n.commonMyMedals),
       bottomNavigationBar: const AppBottomNav(
         currentIndex: AppBottomNav.profile,
       ),
@@ -50,12 +52,9 @@ class _MedalsViewState extends State<MedalsView> {
             spentTotal: viewModel.spentTotal,
           ),
           const SizedBox(height: 20),
-          Text('Medallas por categoría', style: AppTextStyles.title),
+          Text(l10n.medalsByCategory, style: AppTextStyles.title),
           const SizedBox(height: 4),
-          Text(
-            'Se ganan insignias visitando paradas que las otorgan.',
-            style: AppTextStyles.caption,
-          ),
+          Text(l10n.medalsByCategoryNote, style: AppTextStyles.caption),
           const SizedBox(height: 12),
           for (final category in badgeCategories)
             Padding(
@@ -67,12 +66,9 @@ class _MedalsViewState extends State<MedalsView> {
             ),
           if (viewModel.creativeCircuitCities.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text('Medallas de ciudades creativas', style: AppTextStyles.title),
+            Text(l10n.medalsCreativeCities, style: AppTextStyles.title),
             const SizedBox(height: 4),
-            Text(
-              'Se ganan al completar un circuito creativo de esa ciudad.',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.medalsCreativeCitiesNote, style: AppTextStyles.caption),
             const SizedBox(height: 12),
             for (final city in viewModel.creativeCircuitCities)
               Padding(
@@ -96,6 +92,7 @@ class _OverallMedalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final tier = MedalTiers.overallTierOf(earnedTotal);
     final toNext = MedalTiers.toNextOverallTier(earnedTotal);
 
@@ -120,12 +117,12 @@ class _OverallMedalCard extends StatelessWidget {
             child: Icon(Icons.military_tech, size: 40, color: tier.color),
           ),
           const SizedBox(height: 12),
-          Text('Medalla general: ${tier.label}', style: AppTextStyles.title),
+          Text(l10n.medalsOverall(tier.label), style: AppTextStyles.title),
           const SizedBox(height: 4),
           Text(
             toNext == null
-                ? '¡Nivel máximo alcanzado!'
-                : 'Te faltan $toNext insignias para la siguiente medalla',
+                ? l10n.medalsMaxLevel
+                : l10n.medalsToNextOverall(toNext),
             style: AppTextStyles.caption,
           ),
         ],
@@ -146,8 +143,43 @@ class _BalanceNote extends StatelessWidget {
   final int availableTotal;
   final int spentTotal;
 
+  /// Marcas que envuelven, dentro de la frase ya traducida, lo que va en
+  /// negrita. Así cada idioma acomoda las palabras a su manera y la frase
+  /// sigue siendo una sola.
+  static const _boldStart = '\u0001';
+  static const _boldEnd = '\u0002';
+
+  static String _bold(String text) => '$_boldStart$text$_boldEnd';
+
+  /// Parte [text] en tramos: lo que [_bold] marcó va en negrita.
+  static List<TextSpan> _withBold(String text) {
+    final spans = <TextSpan>[];
+    var start = 0;
+    for (final match in RegExp('$_boldStart(.*?)$_boldEnd').allMatches(text)) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start)));
+      }
+      spans.add(
+        TextSpan(
+          text: match.group(1),
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+      );
+      start = match.end;
+    }
+    if (start < text.length) spans.add(TextSpan(text: text.substring(start)));
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final earned = _bold(l10n.medalsBalanceEarned(earnedTotal));
+    final available = _bold(l10n.medalsBalanceAvailable(availableTotal));
+    final note = spentTotal == 0
+        ? l10n.medalsBalanceNote(earned, available)
+        : l10n.medalsBalanceNoteSpent(earned, available, spentTotal);
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -161,30 +193,7 @@ class _BalanceNote extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text.rich(
-              TextSpan(
-                style: AppTextStyles.caption,
-                children: [
-                  const TextSpan(text: 'Ganaste '),
-                  TextSpan(
-                    text: '$earnedTotal insignias',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const TextSpan(
-                    text:
-                        ' en total: eso es lo que cuenta para tus medallas, '
-                        'y no baja aunque gastes insignias. Tienes ',
-                  ),
-                  TextSpan(
-                    text: '$availableTotal disponibles',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  TextSpan(
-                    text: spentTotal == 0
-                        ? ' para canjear en Cupones.'
-                        : ' para canjear en Cupones ($spentTotal ya gastadas).',
-                  ),
-                ],
-              ),
+              TextSpan(style: AppTextStyles.caption, children: _withBold(note)),
             ),
           ),
         ],
@@ -201,6 +210,7 @@ class _CategoryMedalTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final tier = MedalTiers.categoryTierOf(earned);
     final toNext = MedalTiers.toNextCategoryTier(earned);
 
@@ -232,12 +242,15 @@ class _CategoryMedalTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(category, style: AppTextStyles.cardTitle),
+                Text(
+                  l10n.categoryName(category),
+                  style: AppTextStyles.cardTitle,
+                ),
                 const SizedBox(height: 2),
                 Text(
                   toNext == null
-                      ? '${tier.label} · nivel máximo'
-                      : '${tier.label} · faltan $toNext para subir',
+                      ? l10n.medalsTierMax(tier.label)
+                      : l10n.medalsTierToNext(tier.label, toNext),
                   style: AppTextStyles.caption,
                 ),
               ],
@@ -303,8 +316,8 @@ class _CityMedalTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   earned
-                      ? 'Medalla ganada'
-                      : 'Completa un circuito creativo de $city',
+                      ? context.l10n.medalsCityEarned
+                      : context.l10n.medalsCityLocked(city),
                   style: AppTextStyles.caption,
                 ),
               ],

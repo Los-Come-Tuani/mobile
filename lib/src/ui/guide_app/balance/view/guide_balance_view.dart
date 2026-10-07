@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -44,14 +45,17 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
 
     final ok = await viewModel.withdraw(amount);
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             ok
-                ? 'Retiro de ${Formatters.currency(amount)} en camino'
-                : viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+                ? l10n.guideAppBalanceWithdrawalSent(
+                    Formatters.currency(amount),
+                  )
+                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
           ),
         ),
       );
@@ -59,12 +63,13 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideBalanceViewModel>();
 
     if (!viewModel.isLoaded) {
-      return const Scaffold(
-        appBar: GuideBar(title: 'Balance'),
-        body: Center(child: KPlanLoader()),
+      return Scaffold(
+        appBar: GuideBar(title: l10n.guideAppBalanceTitle),
+        body: const Center(child: KPlanLoader()),
       );
     }
 
@@ -74,7 +79,7 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
     final percent = (GuidePay.commissionRate * 100).round();
 
     return Scaffold(
-      appBar: const GuideBar(title: 'Balance'),
+      appBar: GuideBar(title: l10n.guideAppBalanceTitle),
       body: ListView(
         padding: AppTheme.screenPadding.copyWith(top: 24, bottom: 32),
         children: [
@@ -83,7 +88,7 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Disponible para retirar',
+                  l10n.guideAppBalanceAvailable,
                   style: AppTextStyles.fieldLabel,
                 ),
                 const SizedBox(height: 2),
@@ -94,10 +99,11 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
                 const SizedBox(height: 4),
                 Text(
                   upcoming == 0
-                      ? 'Nada por cobrar por ahora'
-                      : 'Por cobrar ${Formatters.currency(viewModel.pending)} '
-                            'de $upcoming '
-                            '${upcoming == 1 ? 'viaje próximo' : 'viajes próximos'}',
+                      ? l10n.guideAppBalanceNothingPending
+                      : l10n.guideAppBalancePending(
+                          Formatters.currency(viewModel.pending),
+                          upcoming,
+                        ),
                   style: AppTextStyles.bodySmall,
                 ),
               ],
@@ -107,36 +113,34 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
           // Sin saldo no hay botón: deshabilitado se vería igual que activo.
           if (available > 0) ...[
             PrimaryButton(
-              label: 'Retirar',
+              label: l10n.guideAppWithdraw,
               icon: Icons.account_balance_outlined,
               isLoading: viewModel.isBusy,
               onPressed: _withdraw,
             ),
             const SizedBox(height: 6),
-            Text('A ${viewModel.bankAccount}', style: AppTextStyles.caption),
-          ] else
             Text(
-              'Cuando termines un viaje, lo que recibes aparece aquí para '
-              'retirarlo.',
-              style: AppTextStyles.bodySmall,
+              l10n.guideAppBalanceToAccount(viewModel.bankAccount),
+              style: AppTextStyles.caption,
             ),
+          ] else
+            Text(l10n.guideAppBalanceEmptyHint, style: AppTextStyles.bodySmall),
           const SizedBox(height: 16),
-          InlineNotice(
-            message:
-                'K’Plan descuenta el $percent% de cada viaje. Lo demás es tuyo.',
-          ),
+          InlineNotice(message: l10n.guideAppBalanceCommissionNote(percent)),
           const SizedBox(height: 28),
           Semantics(
             header: true,
-            child: Text('Movimientos', style: AppTextStyles.title),
+            child: Text(
+              l10n.guideAppBalanceMovements,
+              style: AppTextStyles.title,
+            ),
           ),
           const SizedBox(height: 4),
           if (movements.isEmpty)
-            const EmptyState(
+            EmptyState(
               compact: true,
-              title: 'Todavía no hay movimientos',
-              message:
-                  'Aquí verás lo que recibes por cada viaje y tus retiros.',
+              title: l10n.guideAppBalanceEmptyTitle,
+              message: l10n.guideAppBalanceEmptyMessage,
             )
           else
             for (final (index, movement) in movements.indexed) ...[
@@ -163,6 +167,7 @@ class _PayoutRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final trip = payout.trip;
     return _MovementRow(
       icon: Icons.south_west,
@@ -173,8 +178,10 @@ class _PayoutRow extends StatelessWidget {
           Formatters.compactDate(trip.date),
           ?payout.tourist?.shortName,
         ].join(' · '),
-        'Precio ${Formatters.currency(trip.agreedPrice)} · comisión '
-            '${Formatters.currency(trip.commission)}',
+        l10n.guideAppBalancePayoutBreakdown(
+          Formatters.currency(trip.agreedPrice),
+          Formatters.currency(trip.commission),
+        ),
       ],
       amount: '+ ${Formatters.currency(trip.earnings)}',
       amountColor: AppColors.accentSecondaryGreen,
@@ -191,14 +198,17 @@ class _WithdrawalRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final deposited = withdrawal.status == WithdrawalStatus.deposited;
+    final date = Formatters.compactDate(withdrawal.requestedAt);
     return _MovementRow(
       icon: Icons.north_east,
       iconColor: AppColors.primaryText,
-      title: 'Retiro a $bankAccount',
+      title: l10n.guideAppBalanceWithdrawalTo(bankAccount),
       lines: [
-        '${Formatters.compactDate(withdrawal.requestedAt)} · '
-            '${deposited ? 'Depositado' : 'En proceso'}',
+        deposited
+            ? l10n.guideAppBalanceWithdrawalDeposited(date)
+            : l10n.guideAppBalanceWithdrawalProcessing(date),
       ],
       amount: '− ${Formatters.currency(withdrawal.amount)}',
       amountColor: AppColors.primaryText,

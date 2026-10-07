@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../remote/api_client.dart';
@@ -118,7 +119,7 @@ class SecurityRepository {
       return Result.failure(reason ?? ApiClient.describeError(e), e);
     } catch (e, st) {
       log.e('$name: $e', error: e, stackTrace: st);
-      return Result.failure('Algo salió mal, intenta de nuevo', e);
+      return Result.failure(AppStrings.current.commonSomethingWentWrong, e);
     }
   }
 }

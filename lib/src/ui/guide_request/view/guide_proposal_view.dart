@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -55,8 +56,8 @@ class _GuideProposalViewState extends State<GuideProposalView> {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(
-            content: Text('Esta postulación ya no está disponible'),
+          SnackBar(
+            content: Text(context.l10n.guideRequestApplicationUnavailable),
           ),
         );
       return;
@@ -70,15 +71,14 @@ class _GuideProposalViewState extends State<GuideProposalView> {
       context.push(Routes.guideProfilePath(application.guide.id));
 
   Future<void> _cancel() async {
+    final l10n = context.l10n;
     final viewModel = context.read<GuideRequestViewModel>();
     final confirmed = await showConfirmDialog(
       context,
       icon: Icons.campaign_outlined,
-      title: '¿Retirar tu propuesta?',
-      message:
-          'Los guías ya no podrán postularse. Tu reserva del circuito sigue '
-          'agendada.',
-      confirmLabel: 'Retirar',
+      title: l10n.guideRequestCancelTitle,
+      message: l10n.guideRequestCancelMessage,
+      confirmLabel: l10n.guideRequestCancelConfirm,
       destructive: true,
     );
     if (confirmed) viewModel.cancel();
@@ -86,6 +86,7 @@ class _GuideProposalViewState extends State<GuideProposalView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideRequestViewModel>();
     final request = viewModel.request;
 
@@ -95,12 +96,12 @@ class _GuideProposalViewState extends State<GuideProposalView> {
         foregroundColor: AppColors.white,
         centerTitle: true,
         title: Text(
-          'Tu propuesta',
+          l10n.guideRequestTitle,
           style: AppTextStyles.title.copyWith(color: AppColors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
+          tooltip: l10n.commonBack,
           onPressed: () =>
               context.canPop() ? context.pop() : context.go(Routes.home),
         ),
@@ -116,7 +117,7 @@ class _GuideProposalViewState extends State<GuideProposalView> {
                 _TermsCard(request: request),
                 if (request.status == GuideRequestStatus.hired) ...[
                   const SizedBox(height: 24),
-                  Text('Tu equipo', style: AppTextStyles.title),
+                  Text(l10n.guideRequestTeamTitle, style: AppTextStyles.title),
                   const SizedBox(height: 10),
                   for (final application in request.hired) ...[
                     ApplicationCard(
@@ -128,7 +129,7 @@ class _GuideProposalViewState extends State<GuideProposalView> {
                     const SizedBox(height: 12),
                   ],
                   PrimaryButton(
-                    label: 'Ir al chat',
+                    label: l10n.guideRequestGoToChat,
                     icon: Icons.chat_bubble_outline,
                     onPressed: () => context.push(Routes.guideChat),
                   ),
@@ -146,13 +147,13 @@ class _GuideProposalViewState extends State<GuideProposalView> {
                   Center(
                     child: TextButton(
                       onPressed: _cancel,
-                      child: const Text('Retirar propuesta'),
+                      child: Text(l10n.guideRequestCancelAction),
                     ),
                   ),
                 ] else ...[
                   const SizedBox(height: 24),
                   PrimaryButton(
-                    label: 'Volver al inicio',
+                    label: l10n.commonBackToHome,
                     onPressed: () => context.go(Routes.home),
                   ),
                 ],
@@ -177,23 +178,39 @@ class _RoleSection extends StatelessWidget {
   final ValueChanged<GuideApplication> onHire;
   final ValueChanged<GuideApplication> onViewProfile;
 
+  /// "Postulaciones", "Guías" o "Traductores"; con cuántas van mientras el
+  /// puesto sigue libre.
+  String _title(AppLocalizations l10n, {required int count}) {
+    final showCount = request.hiredFor(role) == null;
+    if (request.roles.length == 1) {
+      return showCount
+          ? l10n.guideRequestApplicationsTitleCount(count)
+          : l10n.guideRequestApplicationsTitle;
+    }
+    return switch (role) {
+      ApplicationRole.guide =>
+        showCount
+            ? l10n.guideRequestGuidesTitleCount(count)
+            : l10n.guideRequestGuidesTitle,
+      ApplicationRole.translator =>
+        showCount
+            ? l10n.guideRequestTranslatorsTitleCount(count)
+            : l10n.guideRequestTranslatorsTitle,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final hired = request.hiredFor(role);
     final applications = request.applicationsFor(role);
     final budget = request.terms.budgetFor(role);
-    final title = request.roles.length == 1
-        ? 'Postulaciones'
-        : switch (role) {
-            ApplicationRole.guide => 'Guías',
-            ApplicationRole.translator => 'Traductores',
-          };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          hired == null ? '$title (${applications.length})' : title,
+          _title(l10n, count: applications.length),
           style: AppTextStyles.title,
         ),
         const SizedBox(height: 10),
@@ -231,11 +248,16 @@ class _WaitingForApplications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final language = request.terms.touristLanguage?.toLowerCase();
-    final who = switch (role) {
-      ApplicationRole.guide => 'guías',
+    final l10n = context.l10n;
+    final language = request.terms.touristLanguage;
+    final message = switch (role) {
+      ApplicationRole.guide => l10n.guideRequestWaitingGuides,
       ApplicationRole.translator =>
-        language == null ? 'traductores' : 'traductores de $language',
+        language == null
+            ? l10n.guideRequestWaitingTranslators
+            : l10n.guideRequestWaitingTranslatorsLanguage(
+                _languageInSentence(l10n, language),
+              ),
     };
 
     return Container(
@@ -257,17 +279,19 @@ class _WaitingForApplications extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              'Esperando postulaciones de $who. Te avisamos aquí apenas '
-              'alguien se postule.',
-              style: AppTextStyles.bodySmall,
-            ),
-          ),
+          Expanded(child: Text(message, style: AppTextStyles.bodySmall)),
         ],
       ),
     );
   }
+}
+
+/// El idioma del turista dentro de una frase: en español va en minúscula
+/// ("traductores de inglés"); en inglés los idiomas llevan mayúscula
+/// ("English translators").
+String _languageInSentence(AppLocalizations l10n, String language) {
+  final name = l10n.languageName(language);
+  return l10n.localeName.startsWith('es') ? name.toLowerCase() : name;
 }
 
 /// En qué va la propuesta: publicada (y cuánto le queda), resuelta o
@@ -280,20 +304,21 @@ class _StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (color, leading, title, subtitle) = switch (request.status) {
       GuideRequestStatus.open => (
         AppColors.primary30,
         const _PulsingDot(),
-        'Publicada · recibiendo postulaciones',
-        'Los guías ya pueden verla. Vence en '
-            '${Formatters.remaining(remaining)}.',
+        l10n.guideRequestStatusOpenTitle,
+        l10n.guideRequestStatusOpenSubtitle(Formatters.remaining(remaining)),
       ),
       GuideRequestStatus.hired => (
         AppColors.accentSecondaryGreen,
         const Icon(Icons.check_circle, color: AppColors.accentSecondaryGreen),
-        '¡Listo! Ya tienes quién te acompañe',
-        'Acordaste ${Formatters.currency(request.agreedPrice)} por el '
-            'servicio.',
+        l10n.guideRequestStatusHiredTitle,
+        l10n.guideRequestStatusHiredSubtitle(
+          Formatters.currency(request.agreedPrice),
+        ),
       ),
       GuideRequestStatus.expired => (
         AppColors.hintText,
@@ -301,14 +326,14 @@ class _StatusCard extends StatelessWidget {
           Icons.hourglass_disabled_outlined,
           color: AppColors.hintText,
         ),
-        'Tu propuesta venció',
-        'No contrataste a nadie a tiempo. Puedes publicar otra desde Agendar.',
+        l10n.guideRequestStatusExpiredTitle,
+        l10n.guideRequestStatusExpiredSubtitle,
       ),
       GuideRequestStatus.cancelled => (
         AppColors.hintText,
         const Icon(Icons.cancel_outlined, color: AppColors.hintText),
-        'Retiraste esta propuesta',
-        'Los guías ya no pueden postularse.',
+        l10n.guideRequestStatusCancelledTitle,
+        l10n.guideRequestStatusCancelledSubtitle,
       ),
     };
 
@@ -347,6 +372,7 @@ class _TermsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final terms = request.terms;
     final bothRoles = request.roles.length > 1;
 
@@ -360,7 +386,8 @@ class _TermsCard extends StatelessWidget {
         _TermLine(
           icon: Icons.calendar_month_outlined,
           text:
-              '${Formatters.shortDate(request.date)} · ${request.startTime} · '
+              '${Formatters.shortDate(request.date)} · '
+              '${Formatters.timeText(request.startTime)} · '
               '${Formatters.people(request.groupSize)}',
         ),
         _TermLine(
@@ -371,23 +398,26 @@ class _TermsCard extends StatelessWidget {
           _TermLine(
             icon: Icons.directions_car_outlined,
             text: switch (terms.transportOption) {
-              TransportOption.onFoot => 'Recorrido a pie',
-              TransportOption.touristProvides => 'Tú pones el transporte',
-              TransportOption.guideProvides => 'El guía pone el transporte',
+              TransportOption.onFoot => l10n.guideRequestTransportOnFoot,
+              TransportOption.touristProvides =>
+                l10n.guideRequestTransportTourist,
+              TransportOption.guideProvides => l10n.guideRequestTransportGuide,
             },
           ),
         if (terms.touristProvidesLodging)
-          const _TermLine(
+          _TermLine(
             icon: Icons.hotel_outlined,
-            text: 'Le das alojamiento al guía',
+            text: l10n.guideRequestLodgingProvided,
           ),
         _TermLine(
           icon: Icons.sell_outlined,
           text: bothRoles
-              ? 'Presupuesto: ${Formatters.currency(terms.budget)} (guía '
-                    '${Formatters.currency(terms.guideBudget)} + traductor '
-                    '${Formatters.currency(terms.translatorBudget)})'
-              : 'Presupuesto: ${Formatters.currency(terms.budget)}',
+              ? l10n.guideRequestBudgetBoth(
+                  Formatters.currency(terms.budget),
+                  Formatters.currency(terms.guideBudget),
+                  Formatters.currency(terms.translatorBudget),
+                )
+              : l10n.guideRequestBudget(Formatters.currency(terms.budget)),
         ),
       ],
     );
@@ -482,6 +512,7 @@ class _NoProposal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: AppTheme.screenPadding,
@@ -495,20 +526,20 @@ class _NoProposal extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'No tienes una propuesta activa',
+              l10n.guideRequestNoneTitle,
               textAlign: TextAlign.center,
               style: AppTextStyles.title,
             ),
             const SizedBox(height: 6),
             Text(
-              'Publica una al agendar un circuito, desde "Guía o traductor".',
+              l10n.guideRequestNoneSubtitle,
               textAlign: TextAlign.center,
               style: AppTextStyles.bodySmall,
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => context.go(Routes.home),
-              child: const Text('Volver al inicio'),
+              child: Text(l10n.commonBackToHome),
             ),
           ],
         ),

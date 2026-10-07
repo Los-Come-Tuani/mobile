@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -39,6 +40,7 @@ class GroupSlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final guide = session.guide;
     final isEnrolled = enrolledPeople > 0;
 
@@ -63,10 +65,13 @@ class GroupSlotCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(session.startTime, style: AppTextStyles.title),
+                    Text(
+                      Formatters.timeText(session.startTime),
+                      style: AppTextStyles.title,
+                    ),
                     if (endsAt != null)
                       Text(
-                        'Termina aprox. $endsAt',
+                        l10n.groupSlotsEndsAround(endsAt!),
                         style: AppTextStyles.caption,
                       ),
                   ],
@@ -74,9 +79,8 @@ class GroupSlotCard extends StatelessWidget {
               ),
               Text(
                 session.isFull
-                    ? 'Sin cupos'
-                    : 'Quedan ${session.spotsLeft} '
-                          '${session.spotsLeft == 1 ? 'cupo' : 'cupos'}',
+                    ? l10n.groupSlotsNoSpots
+                    : l10n.groupSlotsSpotsLeft(session.spotsLeft),
                 style: AppTextStyles.caption.copyWith(
                   color: session.isFull
                       ? AppColors.error
@@ -100,7 +104,7 @@ class GroupSlotCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${session.joinedCount} de ${session.capacity} personas inscritas',
+            l10n.groupSlotsJoined(session.joinedCount, session.capacity),
             style: AppTextStyles.caption,
           ),
           const SizedBox(height: 12),
@@ -119,7 +123,7 @@ class GroupSlotCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      guide?.name ?? 'Guía certificado',
+                      guide?.name ?? l10n.groupSlotsCertifiedGuide,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.cardTitle,
@@ -132,7 +136,7 @@ class GroupSlotCard extends StatelessWidget {
               if (onViewGuide != null)
                 TextButton(
                   onPressed: onViewGuide,
-                  child: const Text('Ver perfil'),
+                  child: Text(l10n.commonViewProfile),
                 ),
             ],
           ),
@@ -144,15 +148,15 @@ class GroupSlotCard extends StatelessWidget {
               if (guide != null)
                 OfferChip(
                   icon: Icons.translate,
-                  label: guide.languages.join(' · '),
+                  label: guide.languages.map(l10n.languageName).join(' · '),
                 ),
               OfferChip(
                 icon: session.transportIncluded
                     ? Icons.directions_car_outlined
                     : Icons.directions_walk,
                 label: session.transportIncluded
-                    ? 'Incluye transporte'
-                    : 'Sin transporte',
+                    ? l10n.groupSlotsTransportIncluded
+                    : l10n.groupSlotsNoTransport,
                 highlighted: session.transportIncluded,
               ),
             ],
@@ -178,8 +182,9 @@ class GroupSlotCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Inscrito con tu grupo · '
-                    '${Formatters.people(enrolledPeople)}',
+                    l10n.groupSlotsEnrolledWithGroup(
+                      Formatters.people(enrolledPeople),
+                    ),
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.accentSecondaryGreen,
                     ),
@@ -211,7 +216,7 @@ class GroupSlotCard extends StatelessWidget {
                           color: AppColors.buttonTextLight,
                         ),
                       )
-                    : Text(_enrollLabel),
+                    : Text(_enrollLabel(l10n)),
               ),
             ),
         ],
@@ -219,11 +224,11 @@ class GroupSlotCard extends StatelessWidget {
     );
   }
 
-  String get _enrollLabel {
-    if (session.isFull) return 'Lleno';
+  String _enrollLabel(AppLocalizations l10n) {
+    if (session.isFull) return l10n.groupSlotsFull;
     if (!session.fits(groupSize)) {
-      return 'Tu grupo no cabe (${Formatters.people(groupSize)})';
+      return l10n.groupSlotsGroupDoesNotFit(Formatters.people(groupSize));
     }
-    return 'Inscribirme · ${Formatters.people(groupSize)}';
+    return l10n.groupSlotsEnrollMe(Formatters.people(groupSize));
   }
 }

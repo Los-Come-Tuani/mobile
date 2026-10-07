@@ -44,6 +44,10 @@ abstract final class Routes {
   static const guideRenewal = '/guide-app/renewal';
   static const guideBalance = '/guide-app/balance';
 
+  /// El idioma de la app, visto desde el modo guía (que no tiene
+  /// Configuraciones).
+  static const guideLanguage = '/guide-app/language';
+
   /// Una propuesta vista por el guía: `/guide-app/proposal/:jobId`
   static const guideJob = '/guide-app/proposal/:$jobId';
 

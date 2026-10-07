@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/route_map_builder.dart';
 import '../../../data/models/route_map.dart';
 import '../../../data/models/trip_progress.dart';
@@ -72,7 +73,11 @@ class MapScene {
         ScenePin(
           id: startId,
           position: start,
-          pin: const MapIcon('pin/start', StartPin()),
+          // Lleva el idioma en el nombre: el pin dice "Inicio" o "Start".
+          pin: MapIcon(
+            'pin/start/${AppStrings.language.code}',
+            const StartPin(),
+          ),
           order: 0,
         ),
     ];

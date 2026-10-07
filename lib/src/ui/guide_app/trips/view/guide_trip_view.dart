@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -42,7 +43,7 @@ class _GuideTripViewState extends State<GuideTripView> {
     final viewModel = context.read<GuideTripViewModel>();
     final answer = await showRateTouristSheet(
       context,
-      touristName: tourist?.firstName ?? 'el turista',
+      touristName: tourist?.firstName ?? context.l10n.guideAppTheTourist,
       tripLabel: '${trip.circuitTitle} · ${Formatters.compactDate(trip.date)}',
     );
     if (answer == null || !mounted) return;
@@ -52,14 +53,15 @@ class _GuideTripViewState extends State<GuideTripView> {
       comment: answer.comment,
     );
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             ok
-                ? 'Calificación enviada. Gracias por ayudar a otros guías.'
-                : viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+                ? l10n.guideAppRateSent
+                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
           ),
         ),
       );
@@ -67,48 +69,49 @@ class _GuideTripViewState extends State<GuideTripView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideTripViewModel>();
     final trip = viewModel.trip;
 
     if (!viewModel.isLoaded || trip == null) {
       return Scaffold(
-        appBar: const GuideBar(title: 'Viaje'),
+        appBar: GuideBar(title: l10n.guideAppTripTitle),
         body: !viewModel.isLoaded
             ? const Center(child: KPlanLoader())
-            : const EmptyState(
-                title: 'No encontramos este viaje',
-                message: 'Revisa tus viajes desde la pestaña Viajes.',
+            : EmptyState(
+                title: l10n.guideAppTripNotFoundTitle,
+                message: l10n.guideAppTripNotFoundMessage,
               ),
       );
     }
 
     final tourist = viewModel.tourist;
-    final name = tourist?.firstName ?? 'el turista';
+    final name = tourist?.firstName ?? l10n.guideAppTheTourist;
     final chat = viewModel.hasChat
         ? () => context.push(Routes.guideThreadPath(trip.id))
         : null;
     final actions = [
       if (trip.canRateTourist) ...[
         PrimaryButton(
-          label: 'Calificar a $name',
+          label: l10n.guideAppRateTourist(name),
           icon: Icons.star_outline,
           isLoading: viewModel.isBusy,
           onPressed: () => _rate(trip, tourist),
         ),
         if (chat != null) ...[
           const SizedBox(height: 8),
-          SecondaryButton(label: 'Ver la conversación', onPressed: chat),
+          SecondaryButton(label: l10n.guideAppTripViewChat, onPressed: chat),
         ],
       ] else if (chat != null)
         PrimaryButton(
-          label: 'Escribir a $name',
+          label: l10n.guideAppTripMessageTourist(name),
           icon: Icons.chat_bubble_outline,
           onPressed: chat,
         ),
     ];
 
     return Scaffold(
-      appBar: const GuideBar(title: 'Viaje'),
+      appBar: GuideBar(title: l10n.guideAppTripTitle),
       bottomNavigationBar: actions.isEmpty
           ? null
           : _ActionBar(children: actions),
@@ -127,17 +130,19 @@ class _GuideTripViewState extends State<GuideTripView> {
           const SizedBox(height: 14),
           DetailLine(
             icon: Icons.calendar_month_outlined,
-            text: '${Formatters.weekdayDate(trip.date)} · ${trip.startTime}',
+            text:
+                '${Formatters.weekdayDate(trip.date)} · '
+                '${Formatters.timeText(trip.startTime)}',
           ),
           DetailLine(
             icon: Icons.location_on_outlined,
             text: trip.meetingPoint == null
-                ? '${trip.city} · Punto de encuentro por acordar en el chat'
+                ? l10n.guideAppTripMeetingPending(trip.city)
                 : '${trip.city} · ${trip.meetingPoint}',
           ),
           DetailLine(
             icon: Icons.schedule,
-            text: '${trip.terms.serviceHours} h de servicio',
+            text: l10n.guideAppServiceHours(trip.terms.serviceHours),
           ),
           DetailLine(
             icon: Icons.group_outlined,
@@ -154,22 +159,21 @@ class _GuideTripViewState extends State<GuideTripView> {
           const SizedBox(height: 24),
           Semantics(
             header: true,
-            child: Text('Pago', style: AppTextStyles.title),
+            child: Text(l10n.guideAppTripPayment, style: AppTextStyles.title),
           ),
           const SizedBox(height: 8),
           MoneyBreakdown(
             price: trip.agreedPrice,
-            earningsLabel: trip.isCompleted ? 'Recibiste' : 'Recibes',
+            earningsLabel: trip.isCompleted
+                ? l10n.guideAppEarningsLabelDone
+                : l10n.guideAppEarningsLabelUpcoming,
           ),
           if (!trip.isCompleted) ...[
             const SizedBox(height: 6),
-            Text(
-              'Pasa a tu balance cuando termine el viaje.',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.guideAppTripPaymentNote, style: AppTextStyles.caption),
           ],
           const SizedBox(height: 24),
-          Text('Turista', style: AppTextStyles.title),
+          Text(l10n.commonTourist, style: AppTextStyles.title),
           const SizedBox(height: 10),
           TouristTile(
             tourist: tourist,
@@ -177,10 +181,7 @@ class _GuideTripViewState extends State<GuideTripView> {
           ),
           if (trip.isCompleted && trip.touristRated) ...[
             const SizedBox(height: 12),
-            Text(
-              'Ya calificaste a $name por este viaje.',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.guideAppTripRated(name), style: AppTextStyles.caption),
           ],
         ],
       ),
@@ -237,7 +238,9 @@ class _StatusPill extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
         child: Text(
-          completed ? 'Terminado' : 'Próximo',
+          completed
+              ? context.l10n.guideAppTripStatusDone
+              : context.l10n.guideAppTripStatusUpcoming,
           style: AppTextStyles.caption.copyWith(
             color: color,
             fontWeight: FontWeight.w600,

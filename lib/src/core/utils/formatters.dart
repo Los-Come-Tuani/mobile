@@ -1,39 +1,79 @@
+import '../l10n/app_language.dart';
+import '../l10n/app_strings.dart';
+import 'time_parser.dart';
+
 /// Formatos de presentación (moneda, fechas, horas) en un solo lugar.
+///
+/// Todos leen el idioma de ahora ([AppStrings]) en el momento de llamarse, así
+/// que nunca guardes su resultado en un campo `static` o `const`.
 abstract final class Formatters {
-  static const List<String> _months = [
-    'ene',
-    'feb',
-    'mar',
-    'abr',
-    'may',
-    'jun',
-    'jul',
-    'ago',
-    'sep',
-    'oct',
-    'nov',
-    'dic',
-  ];
+  /// Los nombres del calendario de cada idioma. Son datos del calendario, no
+  /// textos de la interfaz: por eso viven aquí y no en los ARB.
+  static const Map<AppLanguage, List<String>> _monthNames = {
+    AppLanguage.es: [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ],
+    AppLanguage.en: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+  };
 
-  static const List<String> _weekdays = [
-    'Lunes',
-    'Martes',
-    'Miércoles',
-    'Jueves',
-    'Viernes',
-    'Sábado',
-    'Domingo',
-  ];
+  static const Map<AppLanguage, List<String>> _weekdayNames = {
+    AppLanguage.es: [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
+    ],
+    AppLanguage.en: [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ],
+  };
 
-  static const List<String> _shortWeekdays = [
-    'Lun',
-    'Mar',
-    'Mié',
-    'Jue',
-    'Vie',
-    'Sáb',
-    'Dom',
-  ];
+  static const Map<AppLanguage, List<String>> _shortWeekdayNames = {
+    AppLanguage.es: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+    AppLanguage.en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  };
+
+  static String _month(DateTime date) =>
+      _monthNames[AppStrings.language]![date.month - 1];
+
+  static String _weekday(DateTime date) =>
+      _weekdayNames[AppStrings.language]![date.weekday - 1];
+
+  static String _shortWeekday(DateTime date) =>
+      _shortWeekdayNames[AppStrings.language]![date.weekday - 1];
 
   /// `250` -> `C$ 250`
   static String currency(num value) => 'C\$ ${value.toStringAsFixed(0)}';
@@ -47,9 +87,9 @@ abstract final class Formatters {
   static String facts(Iterable<String> parts) =>
       parts.map(keepTogether).join(' · ');
 
-  /// `DateTime(2026, 10, 3)` -> `Sáb 3 oct`
-  static String compactDate(DateTime date) =>
-      '${_shortWeekdays[date.weekday - 1]} ${dayAndMonth(date)}';
+  /// `DateTime(2026, 10, 3)` -> `Sáb 3 oct` (en inglés, `Sat, Oct 3`).
+  static String compactDate(DateTime date) => AppStrings.current
+      .formatCompactDate(_shortWeekday(date), dayAndMonth(date));
 
   /// "Hoy", "Mañana", "Ayer" o, si no, `Sáb 3 oct`.
   static String relativeDay(DateTime date, {DateTime? now}) {
@@ -57,38 +97,41 @@ abstract final class Formatters {
     final days = DateTime(date.year, date.month, date.day)
         .difference(DateTime(reference.year, reference.month, reference.day))
         .inDays;
+    final l10n = AppStrings.current;
     return switch (days) {
-      0 => 'Hoy',
-      1 => 'Mañana',
-      -1 => 'Ayer',
+      0 => l10n.formatToday,
+      1 => l10n.formatTomorrow,
+      -1 => l10n.formatYesterday,
       _ => compactDate(date),
     };
   }
 
-  /// `hace 5 min`, `hace 2 h`, `hace 3 días`.
+  /// `hace 5 min`, `hace 2 h`, `hace 3 días` (en inglés, `5 min ago`).
   static String timeAgo(DateTime value, {DateTime? now}) {
     final elapsed = (now ?? DateTime.now()).difference(value);
-    if (elapsed.inMinutes < 1) return 'ahora';
-    if (elapsed.inHours < 1) return 'hace ${elapsed.inMinutes} min';
-    if (elapsed.inDays < 1) return 'hace ${elapsed.inHours} h';
-    return elapsed.inDays == 1 ? 'hace 1 día' : 'hace ${elapsed.inDays} días';
+    final l10n = AppStrings.current;
+    if (elapsed.inMinutes < 1) return l10n.formatNow;
+    if (elapsed.inHours < 1) return l10n.formatMinutesAgo(elapsed.inMinutes);
+    if (elapsed.inDays < 1) return l10n.formatHoursAgo(elapsed.inHours);
+    return l10n.formatDaysAgo(elapsed.inDays);
   }
 
-  /// `DateTime(2026, 9, 26)` -> `Sábado 26 sep`
+  /// `DateTime(2026, 9, 26)` -> `Sábado 26 sep` (en inglés, `Saturday, Sep 26`).
   static String weekdayDate(DateTime date) =>
-      '${_weekdays[date.weekday - 1]} ${dayAndMonth(date)}';
+      AppStrings.current.formatWeekdayDate(_weekday(date), dayAndMonth(date));
 
-  /// `DateTime(2026, 11, 16)` -> `16 nov 2026`
+  /// `DateTime(2026, 11, 16)` -> `16 nov 2026` (en inglés, `Nov 16, 2026`).
   static String shortDate(DateTime date) =>
-      '${date.day} ${_months[date.month - 1]} ${date.year}';
+      AppStrings.current.formatShortDate(date.day, _month(date), date.year);
 
-  /// `DateTime(2026, 11, 16)` -> `16 nov`
+  /// `DateTime(2026, 11, 16)` -> `16 nov` (en inglés, `Nov 16`).
   static String dayAndMonth(DateTime date) =>
-      '${date.day} ${_months[date.month - 1]}';
+      AppStrings.current.formatDayAndMonth(date.day, _month(date));
 
-  /// `TimeOfDay(8, 30)` -> `8:30 a.m.`
+  /// `TimeOfDay(8, 30)` -> `8:30 a.m.` (en inglés, `8:30 AM`).
   static String time(int hour, int minute) {
-    final suffix = hour < 12 ? 'a.m.' : 'p.m.';
+    final l10n = AppStrings.current;
+    final suffix = hour < 12 ? l10n.formatAm : l10n.formatPm;
     return '${_hourAndMinute(hour, minute)} $suffix';
   }
 
@@ -98,6 +141,17 @@ abstract final class Formatters {
   /// Minutos desde la medianoche: `900` -> `3:00 p.m.`
   static String minutesOfDay(int minutes) =>
       time(minutes ~/ 60 % 24, minutes % 60);
+
+  /// Una hora que llega como texto en los datos (`"3:00 p.m."`) mostrada en
+  /// el formato del idioma de ahora: `3:00 p.m.` o `3:00 PM`. Un texto que no
+  /// es una hora se devuelve igual.
+  ///
+  /// Úsalo solo para mostrar: el texto de los datos también sirve de clave,
+  /// y esa no se toca.
+  static String timeText(String raw) {
+    final minutes = TimeParser.minutesOfDay(raw);
+    return minutes == null ? raw : minutesOfDay(minutes);
+  }
 
   /// Franja horaria. Si las dos horas caen del mismo lado del mediodía, el
   /// sufijo va una sola vez: `8:30 – 9:00 a.m.`, pero
@@ -130,22 +184,23 @@ abstract final class Formatters {
 
   /// Tiempo restante: `23 h 05 min`, `45 min` o `menos de 1 min`.
   static String remaining(Duration value) {
-    if (value.inMinutes < 1) return 'menos de 1 min';
+    if (value.inMinutes < 1) return AppStrings.current.formatLessThanOneMinute;
     final minutes = value.inMinutes.remainder(60);
     if (value.inHours == 0) return '$minutes min';
     return '${value.inHours} h ${minutes.toString().padLeft(2, '0')} min';
   }
 
-  /// `1` -> `1 persona`, `4` -> `4 personas`.
-  static String people(int count) =>
-      '$count ${count == 1 ? 'persona' : 'personas'}';
+  /// `1` -> `1 persona`, `4` -> `4 personas` (en inglés, `1 person`,
+  /// `4 people`).
+  static String people(int count) => AppStrings.current.formatPeople(count);
 
-  /// `2` -> `adulto x 2`, con plural correcto.
+  /// `2` -> `adultos x 2`, con plural correcto (en inglés, `2 adults`).
   static String groupLabel({required int adults, required int children}) {
+    final l10n = AppStrings.current;
     final parts = <String>[
-      if (adults > 0) '${adults == 1 ? 'adulto' : 'adultos'} x $adults',
-      if (children > 0) '${children == 1 ? 'niño' : 'niños'} x $children',
+      if (adults > 0) l10n.formatAdults(adults),
+      if (children > 0) l10n.formatChildren(children),
     ];
-    return parts.isEmpty ? 'Sin personas' : parts.join(', ');
+    return parts.isEmpty ? l10n.formatNoPeople : parts.join(', ');
   }
 }

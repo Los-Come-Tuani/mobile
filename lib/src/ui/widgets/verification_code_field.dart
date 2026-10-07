@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -58,7 +59,7 @@ class _VerificationCodeFieldState extends State<VerificationCodeField> {
     return Stack(
       children: [
         Semantics(
-          label: 'Código de verificación',
+          label: context.l10n.sharedVerificationCode,
           child: Opacity(
             opacity: 0,
             child: TextField(

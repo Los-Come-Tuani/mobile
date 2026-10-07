@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -52,32 +53,41 @@ class _TouristProfileViewState extends State<TouristProfileView> {
       comment: answer.comment,
     );
     if (!mounted) return;
+    final l10n = context.l10n;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
             ok
-                ? 'Calificación enviada. Gracias por ayudar a otros guías.'
-                : viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo',
+                ? l10n.guideAppRateSent
+                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
           ),
         ),
       );
   }
 
+  /// El día dentro de una frase: en español va en minúsculas ("sáb 3 oct"); en
+  /// inglés los días y los meses siempre llevan mayúscula ("Sat, Oct 3").
+  String _dayInSentence(AppLocalizations l10n, DateTime date) {
+    final day = Formatters.compactDate(date);
+    return l10n.localeName == 'es' ? day.toLowerCase() : day;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<TouristProfileViewModel>();
     final tourist = viewModel.tourist;
 
     if (!viewModel.isLoaded || tourist == null) {
       return Scaffold(
-        appBar: const GuideBar(title: 'Turista'),
+        appBar: GuideBar(title: l10n.commonTourist),
         body: !viewModel.isLoaded
             ? const Center(child: KPlanLoader())
-            : const EmptyState(
-                title: 'No encontramos a este turista',
-                message: 'Puede que haya cerrado su cuenta.',
+            : EmptyState(
+                title: l10n.guideAppTouristNotFoundTitle,
+                message: l10n.guideAppTouristNotFoundMessage,
               ),
       );
     }
@@ -108,13 +118,14 @@ class _TouristProfileViewState extends State<TouristProfileView> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${tourist.country} · En K’Plan desde '
-                      '${tourist.memberSince}',
+                      l10n.guideAppTouristSince(
+                        tourist.country,
+                        tourist.memberSince,
+                      ),
                       style: AppTextStyles.caption,
                     ),
                     Text(
-                      '${tourist.tripsCount} '
-                      '${tourist.tripsCount == 1 ? 'viaje' : 'viajes'} con K’Plan',
+                      l10n.guideAppTouristTrips(tourist.tripsCount),
                       style: AppTextStyles.caption,
                     ),
                   ],
@@ -128,13 +139,19 @@ class _TouristProfileViewState extends State<TouristProfileView> {
             runSpacing: 6,
             children: [
               for (final language in tourist.languages)
-                OfferChip(icon: Icons.translate, label: language),
+                OfferChip(
+                  icon: Icons.translate,
+                  label: l10n.languageName(language),
+                ),
             ],
           ),
           const SizedBox(height: 28),
           Semantics(
             header: true,
-            child: Text('Calificaciones de guías', style: AppTextStyles.title),
+            child: Text(
+              l10n.guideAppTouristRatingsTitle,
+              style: AppTextStyles.title,
+            ),
           ),
           const SizedBox(height: 10),
           if (average != null) ...[
@@ -155,7 +172,7 @@ class _TouristProfileViewState extends State<TouristProfileView> {
                         showValue: false,
                       ),
                       Text(
-                        'de $count ${count == 1 ? 'guía' : 'guías'}',
+                        l10n.guideAppTouristRatingCount(count),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -166,41 +183,37 @@ class _TouristProfileViewState extends State<TouristProfileView> {
             const SizedBox(height: 12),
           ],
           InlineNotice(
-            message:
-                'Solo los guías de K’Plan ven estas calificaciones. '
-                '${tourist.firstName} no las ve.',
+            message: l10n.guideAppTouristRatingsNotice(tourist.firstName),
           ),
           const SizedBox(height: 16),
           if (trip != null) ...[
             PrimaryButton(
-              label: 'Calificar a ${tourist.firstName}',
+              label: l10n.guideAppRateTourist(tourist.firstName),
               icon: Icons.star_outline,
               isLoading: viewModel.isBusy,
               onPressed: () => _rate(tourist),
             ),
             const SizedBox(height: 6),
             Text(
-              'Por ${trip.circuitTitle} del '
-              '${Formatters.compactDate(trip.date).toLowerCase()}.',
+              l10n.guideAppTouristRatedFor(
+                trip.circuitTitle,
+                _dayInSentence(l10n, trip.date),
+              ),
               style: AppTextStyles.caption,
             ),
           ] else
             Text(
               viewModel.hasTravelledTogether
-                  ? 'Ya calificaste a ${tourist.firstName}. Si vuelven a '
-                        'viajar juntos, podrás calificarlo otra vez.'
-                  : 'Podrás calificar a ${tourist.firstName} cuando terminen '
-                        'un viaje juntos.',
+                  ? l10n.guideAppTouristRatedAlready(tourist.firstName)
+                  : l10n.guideAppTouristRateLater(tourist.firstName),
               style: AppTextStyles.caption,
             ),
           const SizedBox(height: 12),
           if (tourist.ratings.isEmpty)
             EmptyState(
               compact: true,
-              title: 'Todavía sin calificaciones',
-              message:
-                  'Cuando un guía termine un viaje con ${tourist.firstName}, '
-                  'su opinión aparecerá aquí.',
+              title: l10n.guideAppTouristNoRatingsTitle,
+              message: l10n.guideAppTouristNoRatingsMessage(tourist.firstName),
             )
           else
             for (final (index, rating) in tourist.ratings.indexed) ...[

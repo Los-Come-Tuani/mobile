@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../models/guide_chat_message.dart';
 import '../../models/guide_chat_thread.dart';
 import 'auth_repository.dart';
@@ -21,12 +22,16 @@ class GuideInboxRepository extends ChangeNotifier {
   /// Quién envía los mensajes del guía (los del turista van sin remitente).
   static const String guideSenderId = 'guide';
 
-  static const List<String> _autoReplies = [
-    '¡Perfecto, gracias!',
-    'Ahí estaremos. ¡Nos vemos!',
-    '¿Podemos empezar 15 minutos antes?',
-    'Genial, gracias por avisar.',
-  ];
+  /// Las frases con que contesta el turista, en el idioma de ahora.
+  List<String> get _autoReplies {
+    final l10n = AppStrings.current;
+    return [
+      l10n.repoInboxReplyThanks,
+      l10n.repoInboxReplySeeYou,
+      l10n.repoInboxReplyEarlier,
+      l10n.repoInboxReplyNoted,
+    ];
+  }
 
   final AuthRepository _authRepository;
   final Random _random;
@@ -68,6 +73,40 @@ class GuideInboxRepository extends ChangeNotifier {
       stored.putIfAbsent(thread.tripId, () => thread);
     }
     if (notify) notifyListeners();
+  }
+
+  /// Cambia el texto de los mensajes de ejemplo ([textsById], por id de
+  /// mensaje) cuando se vuelven a leer en otro idioma. Lo que se escribió en
+  /// esta sesión no está en [textsById] y queda como estaba.
+  void retext(Map<String, String> textsById) {
+    var changed = false;
+    for (final threads in _byAccount.values) {
+      for (final tripId in threads.keys.toList()) {
+        final thread = threads[tripId]!;
+        var threadChanged = false;
+        final messages = <GuideChatMessage>[];
+        for (final message in thread.messages) {
+          final text = textsById[message.id];
+          if (text == null || text == message.text) {
+            messages.add(message);
+            continue;
+          }
+          threadChanged = true;
+          messages.add(
+            GuideChatMessage(
+              id: message.id,
+              text: text,
+              senderId: message.senderId,
+              sentAt: message.sentAt,
+            ),
+          );
+        }
+        if (!threadChanged) continue;
+        threads[tripId] = thread.copyWith(messages: messages);
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
   }
 
   /// Abre la conversación de un viaje recién contratado con el saludo del
@@ -121,7 +160,8 @@ class GuideInboxRepository extends ChangeNotifier {
   }
 
   void _scheduleReply(String account, String tripId) {
-    final reply = _autoReplies[_random.nextInt(_autoReplies.length)];
+    final replies = _autoReplies;
+    final reply = replies[_random.nextInt(replies.length)];
     late final Timer timer;
     timer = Timer(Duration(seconds: 1 + _random.nextInt(2)), () {
       _replies.remove(timer);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -186,7 +187,7 @@ class _StopSheetState extends State<StopSheet> {
         ),
         IconButton(
           onPressed: widget.onClose,
-          tooltip: 'Cerrar',
+          tooltip: context.l10n.commonClose,
           color: AppColors.secondaryText,
           icon: const Icon(Icons.close),
         ),
@@ -195,19 +196,21 @@ class _StopSheetState extends State<StopSheet> {
   }
 
   String _overline(RouteMapPoint point) {
+    final l10n = context.l10n;
     final number = point.number;
-    if (!point.isStop) return 'Evento';
-    if (number == null) return 'Parada';
-    if (!widget.isTrip) return 'Parada $number de ${widget.total}';
+    if (!point.isStop) return l10n.routeMapOverlineEvent;
+    if (number == null) return l10n.routeMapOverlineStop;
+    if (!widget.isTrip) return l10n.routeMapStopOfTotal(number, widget.total);
     return switch (point.status) {
-      TripStopStatus.next => 'Siguiente parada',
-      TripStopStatus.done => 'Parada $number · Visitada',
-      TripStopStatus.skipped => 'Parada $number · Saltada',
-      TripStopStatus.pending => 'Parada $number de ${widget.total}',
+      TripStopStatus.next => l10n.routeMapNextStopOverline,
+      TripStopStatus.done => l10n.routeMapStopVisited(number),
+      TripStopStatus.skipped => l10n.routeMapStopSkipped(number),
+      TripStopStatus.pending => l10n.routeMapStopOfTotal(number, widget.total),
     };
   }
 
   List<Widget> _statusLines(RouteMapPoint point) {
+    final l10n = context.l10n;
     final checkedInAt = widget.progress?.checkedInAt;
     final skipReason = widget.progress?.skipReason;
     final arrival = point.arrival;
@@ -222,23 +225,25 @@ class _StopSheetState extends State<StopSheet> {
         _InfoLine(
           icon: Icons.check_circle,
           iconColor: AppColors.accentSecondaryGreen,
-          text: 'Llegaste a las ${Formatters.clock(checkedInAt)}',
+          text: l10n.sharedTripArrivedAt(Formatters.clock(checkedInAt)),
         ),
       if (widget.isTrip && point.status == TripStopStatus.skipped)
         _InfoLine(
           icon: Icons.not_interested,
           iconColor: AppColors.secondaryText,
           text: skipReason == null
-              ? 'La saltaste'
-              : 'La saltaste · ${skipReason.label}',
+              ? l10n.routeMapYouSkipped
+              : l10n.routeMapYouSkippedReason(skipReason.label),
         ),
       if (widget.isTrip && arrival != null && isAhead)
         _InfoLine(
           icon: Icons.schedule,
           text: point.status == TripStopStatus.next
-              ? 'Llegada ${Formatters.clock(arrival)} · '
-                    '${delayLabel(widget.delay).toLowerCase()}'
-              : 'Llegada ${Formatters.clock(arrival)}',
+              ? l10n.routeMapArrivalDelay(
+                  Formatters.clock(arrival),
+                  delayLabel(widget.delay).toLowerCase(),
+                )
+              : l10n.routeMapArrival(Formatters.clock(arrival)),
         ),
       if (leg != null && point.status != TripStopStatus.done)
         _InfoLine(
@@ -252,7 +257,7 @@ class _StopSheetState extends State<StopSheet> {
         _InfoLine(
           icon: Icons.sell_outlined,
           text: event.price == 0
-              ? 'Entrada libre'
+              ? l10n.routeMapFreeEntry
               : Formatters.currency(event.price),
         ),
       ],
@@ -260,6 +265,7 @@ class _StopSheetState extends State<StopSheet> {
   }
 
   List<Widget> _actions(RouteMapPoint point) {
+    final l10n = context.l10n;
     final next = widget.next;
     final onScanQr = widget.onScanQr;
     final onGoToNext = widget.onGoToNext;
@@ -278,13 +284,13 @@ class _StopSheetState extends State<StopSheet> {
                 style: _primaryStyle,
                 onPressed: onScanQr,
                 icon: const Icon(Icons.qr_code_scanner, size: 20),
-                label: const Text('Escanear código QR'),
+                label: Text(l10n.routeMapScanQr),
               ),
             ),
             if (widget.onShowDemoQr != null)
               IconButton(
                 onPressed: widget.onShowDemoQr,
-                tooltip: 'Ver código de prueba',
+                tooltip: l10n.routeMapDemoQrTooltip,
                 color: AppColors.secondaryText,
                 icon: const Icon(Icons.qr_code),
               ),
@@ -300,7 +306,7 @@ class _StopSheetState extends State<StopSheet> {
             onPressed: onGoToNext,
             icon: const Icon(Icons.arrow_forward, size: 20),
             label: Text(
-              'Ir a la siguiente: ${next.name}',
+              l10n.routeMapGoToNext(next.name),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -319,7 +325,7 @@ class _StopSheetState extends State<StopSheet> {
               ),
               onPressed: widget.onDirections,
               icon: const Icon(Icons.directions_outlined, size: 20),
-              label: const Text('Cómo llegar'),
+              label: Text(l10n.routeMapDirections),
             ),
           ),
           if (widget.onSkip != null) ...[
@@ -327,7 +333,7 @@ class _StopSheetState extends State<StopSheet> {
             TextButton.icon(
               onPressed: widget.onSkip,
               icon: const Icon(Icons.not_interested, size: 18),
-              label: const Text('Saltar'),
+              label: Text(l10n.sharedSkip),
             ),
           ],
         ],
@@ -336,6 +342,7 @@ class _StopSheetState extends State<StopSheet> {
   }
 
   List<Widget> _stopDetails(Stop stop) {
+    final l10n = context.l10n;
     final hours = stop.hours;
     return [
       if (stop.coverImage.isNotEmpty) ...[
@@ -358,12 +365,12 @@ class _StopSheetState extends State<StopSheet> {
       if (stop.duration.isNotEmpty)
         _InfoLine(
           icon: Icons.timer_outlined,
-          text: 'Visita sugerida: ${stop.duration}',
+          text: l10n.routeMapSuggestedVisit(stop.duration),
         ),
       if (hours != null)
         _InfoLine(
           icon: Icons.storefront_outlined,
-          text: 'Abierto de ${hours.label}',
+          text: l10n.routeMapOpenHours(hours.label),
         ),
       const SizedBox(height: 10),
       Text(stop.description, style: AppTextStyles.bodySmall),
@@ -401,10 +408,18 @@ class _StopSheetState extends State<StopSheet> {
   }
 }
 
-/// `A 350 m de ti · 5 min a pie`, o `Ya estás aquí` si está a pasos.
-String legFromUserLabel(ItineraryLeg leg) => leg.kind == LegKind.samePlace
-    ? 'Ya estás aquí'
-    : 'A ${Formatters.distance(leg.distanceKm)} de ti · ${leg.label}';
+/// `A 350 m de ti · 5 min a pie`, o `Ya estás aquí` si está a pasos (en
+/// inglés, `350 m from you · 5 min on foot` y `You're already here`). Se arma
+/// al llamarla, con el idioma de ahora.
+String legFromUserLabel(ItineraryLeg leg) {
+  final l10n = AppStrings.current;
+  return leg.kind == LegKind.samePlace
+      ? l10n.routeMapAlreadyHere
+      : l10n.routeMapDistanceFromYou(
+          Formatters.distance(leg.distanceKm),
+          leg.label,
+        );
+}
 
 /// El número de la parada en un círculo del color de su estado, como sus
 /// pines en el mapa.
@@ -528,7 +543,7 @@ class _TipCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Recomendaciones', style: AppTextStyles.infoLabel),
+                Text(context.l10n.routeMapTips, style: AppTextStyles.infoLabel),
                 const SizedBox(height: 2),
                 Text(tip, style: AppTextStyles.caption),
               ],
@@ -549,6 +564,7 @@ class _BadgeNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final color = isClaimed
         ? AppColors.accentSecondaryGreen
         : AppColors.primary30;
@@ -569,8 +585,8 @@ class _BadgeNote extends StatelessWidget {
           Expanded(
             child: Text(
               isClaimed
-                  ? 'Insignia de $category obtenida'
-                  : 'Escanea su código QR para ganar la insignia de $category',
+                  ? l10n.routeMapBadgeEarned(l10n.categoryName(category))
+                  : l10n.routeMapBadgeToEarn(l10n.categoryName(category)),
               style: AppTextStyles.bodySmall,
             ),
           ),

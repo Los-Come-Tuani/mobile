@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/tourist_profile.dart';
@@ -42,8 +43,21 @@ class TouristRatingLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final average = tourist?.averageRating;
-    final name = withName && tourist != null ? ' · ${tourist!.shortName}' : '';
+    final name = withName ? tourist?.shortName : null;
+
+    final String text;
+    if (average == null) {
+      text = name == null
+          ? l10n.guideAppRatingNone
+          : l10n.guideAppRatingNoneNamed(name);
+    } else {
+      final value = average.toStringAsFixed(1);
+      text = name == null
+          ? l10n.guideAppRatingAverage(value)
+          : l10n.guideAppRatingAverageNamed(value, name);
+    }
 
     return Row(
       children: [
@@ -55,9 +69,7 @@ class TouristRatingLine extends StatelessWidget {
         const SizedBox(width: 4),
         Flexible(
           child: Text(
-            average == null
-                ? 'Sin calificaciones de guías$name'
-                : '${average.toStringAsFixed(1)} de guías$name',
+            text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.caption,
@@ -77,11 +89,11 @@ class TouristTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final tourist = this.tourist;
     final details = tourist == null
         ? ''
-        : '${tourist.country} · ${tourist.tripsCount} '
-              '${tourist.tripsCount == 1 ? 'viaje' : 'viajes'} con K’Plan';
+        : l10n.guideAppTouristTileDetails(tourist.country, tourist.tripsCount);
 
     return MergeSemantics(
       child: Semantics(
@@ -106,7 +118,7 @@ class TouristTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          tourist?.name ?? 'Turista',
+                          tourist?.name ?? l10n.commonTourist,
                           style: AppTextStyles.cardTitle,
                         ),
                         if (details.isNotEmpty) ...[

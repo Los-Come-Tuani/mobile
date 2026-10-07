@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -45,6 +46,7 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final access = context.watch<GuideAccessRepository>();
     final profile = access.request;
     final self = access.self;
@@ -52,7 +54,7 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
     final email = context.select<AuthRepository, String?>(
       (auth) => auth.currentUser?.email,
     );
-    final name = profile?.fullName ?? 'Guía';
+    final name = profile?.fullName ?? l10n.commonGuide;
     final rating = work.rating;
     final renewing =
         access.application?.isRenewal == true &&
@@ -69,10 +71,10 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           if (access.isSuspended) ...[
             InlineNotice(
               tone: NoticeTone.error,
-              message:
-                  'Tu perfil está suspendido: se venció '
-                  '${self?.missing.map((item) => item.$2.toLowerCase()).join(', ') ?? 'un documento'}. '
-                  'Renuévalo para volver a aparecer para los turistas.',
+              message: l10n.guideAppProfileSuspended(
+                self?.missing.map((item) => item.$2.toLowerCase()).join(', ') ??
+                    l10n.guideAppProfileSuspendedADocument,
+              ),
             ),
             const SizedBox(height: 16),
           ],
@@ -123,10 +125,7 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           if (rating != null)
             RatingStars(rating: rating, reviewsCount: work.reviewsCount)
           else
-            Text(
-              'Todavía sin reseñas de turistas',
-              style: AppTextStyles.caption,
-            ),
+            Text(l10n.guideAppProfileNoReviews, style: AppTextStyles.caption),
           const SizedBox(height: 16),
           if (self != null)
             DetailLine(
@@ -136,7 +135,9 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           if (profile != null) ...[
             DetailLine(
               icon: Icons.translate,
-              text: 'Habla ${profile.languages.join(', ')}',
+              text: l10n.guideAppProfileSpeaks(
+                profile.languages.map(l10n.languageName).join(', '),
+              ),
             ),
             if (profile.experience.isNotEmpty)
               DetailLine(icon: Icons.work_outline, text: profile.experience),
@@ -148,27 +149,38 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           const SizedBox(height: 8),
           ActionRow(
             icon: Icons.edit_outlined,
-            title: 'Editar mi perfil',
-            subtitle: 'Foto, presentación, teléfono e idiomas',
+            title: l10n.guideAppProfileEdit,
+            subtitle: l10n.guideAppProfileEditHint,
             onTap: () => context.push(Routes.guideProfileEdit),
           ),
           ActionRow(
             icon: Icons.account_balance_wallet_outlined,
-            title: 'Balance',
+            title: l10n.guideAppBalanceTitle,
             subtitle: work.isLoaded
-                ? 'Disponible ${Formatters.currency(work.available)}'
-                : 'Lo que recibes por tus viajes',
+                ? l10n.guideAppProfileAvailable(
+                    Formatters.currency(work.available),
+                  )
+                : l10n.guideAppProfileBalanceHint,
             onTap: () => context.push(Routes.guideBalance),
+          ),
+          ActionRow(
+            icon: Icons.translate,
+            title: l10n.languageSettingsTitle,
+            subtitle: AppStrings.language.nativeName,
+            onTap: () => context.push(Routes.guideLanguage),
           ),
           if (self != null) ...[
             const SizedBox(height: 16),
-            Text('Mis documentos', style: AppTextStyles.sectionLabel),
+            Text(
+              l10n.guideAppProfileDocuments,
+              style: AppTextStyles.sectionLabel,
+            ),
             const SizedBox(height: 4),
             if (renewing)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
-                  'Tienes una renovación en revisión.',
+                  l10n.guideAppProfileRenewalInReview,
                   style: AppTextStyles.caption,
                 ),
               ),
@@ -177,7 +189,7 @@ class _GuideSelfProfileViewState extends State<GuideSelfProfileView> {
           ],
           const SizedBox(height: 24),
           SoftButton(
-            label: 'Cerrar sesión',
+            label: l10n.commonLogout,
             onPressed: () => showLogoutSheet(context),
           ),
         ],
@@ -199,13 +211,16 @@ class _DocumentRow extends StatelessWidget {
     final expired = document.status == DocumentStatus.expired;
     final soon =
         expires != null && expires.difference(DateTime.now()).inDays < 30;
+    final l10n = context.l10n;
     final subtitle = switch (document.status) {
-      DocumentStatus.expired => 'Vencido',
-      DocumentStatus.approved when expires == null => 'En vigor · no vence',
-      DocumentStatus.approved =>
-        'En vigor · vence el ${CredentialCard.formatDate(expires!)}',
-      DocumentStatus.rejected => 'Rechazado',
-      _ => 'En revisión',
+      DocumentStatus.expired => l10n.guideAppDocumentExpired,
+      DocumentStatus.approved when expires == null =>
+        l10n.guideAppDocumentValidNoExpiry,
+      DocumentStatus.approved => l10n.guideAppDocumentValidUntil(
+        CredentialCard.formatDate(expires!),
+      ),
+      DocumentStatus.rejected => l10n.guideAppDocumentRejected,
+      _ => l10n.guideAppDocumentInReview,
     };
     return ActionRow(
       icon: expired || soon ? Icons.error_outline : Icons.verified_outlined,

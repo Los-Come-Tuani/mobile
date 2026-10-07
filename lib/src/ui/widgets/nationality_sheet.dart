@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/models/nationality.dart';
@@ -71,6 +72,7 @@ class _NationalitySheetState extends State<_NationalitySheet> {
   @override
   Widget build(BuildContext context) {
     final matches = _matches;
+    final l10n = context.l10n;
 
     return SafeArea(
       child: Padding(
@@ -83,16 +85,19 @@ class _NationalitySheetState extends State<_NationalitySheet> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Text('Tu nacionalidad', style: AppTextStyles.title),
+              child: Text(
+                l10n.sharedNationalityTitle,
+                style: AppTextStyles.title,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(
                 autofocus: false,
                 onChanged: (value) => setState(() => _query = value),
-                decoration: const InputDecoration(
-                  hintText: 'Busca tu país',
-                  prefixIcon: Icon(Icons.search),
+                decoration: InputDecoration(
+                  hintText: l10n.sharedNationalitySearchHint,
+                  prefixIcon: const Icon(Icons.search),
                 ),
               ),
             ),
@@ -102,7 +107,7 @@ class _NationalitySheetState extends State<_NationalitySheet> {
                   ? Padding(
                       padding: const EdgeInsets.all(32),
                       child: Text(
-                        'No encontramos ese país',
+                        l10n.sharedNationalityNoResults,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall,
                       ),

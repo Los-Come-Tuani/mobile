@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
@@ -35,6 +36,7 @@ class ApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final guide = application.guide;
 
     return Container(
@@ -80,8 +82,8 @@ class ApplicationCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${roleLabel(guide.role)} · '
-                      '${guide.yearsExperience} años de experiencia',
+                      '${roleLabel(guide.role, l10n)} · '
+                      '${l10n.guideRequestYearsExperience(guide.yearsExperience)}',
                       style: AppTextStyles.caption,
                     ),
                   ],
@@ -103,7 +105,10 @@ class ApplicationCard extends StatelessWidget {
                 ),
               OfferChip(
                 icon: Icons.translate,
-                label: guide.languages.join(' · '),
+                label: [
+                  for (final language in guide.languages)
+                    l10n.languageName(language),
+                ].join(' · '),
               ),
               if (application.role == ApplicationRole.guide)
                 OfferChip(
@@ -111,8 +116,8 @@ class ApplicationCard extends StatelessWidget {
                       ? Icons.directions_car_outlined
                       : Icons.directions_walk,
                   label: application.offersTransport
-                      ? 'Pone transporte'
-                      : 'Sin transporte',
+                      ? l10n.guideRequestOffersTransport
+                      : l10n.guideRequestNoTransport,
                   highlighted: application.offersTransport,
                 ),
             ],
@@ -135,7 +140,7 @@ class ApplicationCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  'Contratado',
+                  l10n.guideRequestHired,
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.accentSecondaryGreen,
                   ),
@@ -143,7 +148,7 @@ class ApplicationCard extends StatelessWidget {
                 const Spacer(),
                 TextButton(
                   onPressed: onViewProfile,
-                  child: const Text('Ver perfil'),
+                  child: Text(l10n.commonViewProfile),
                 ),
               ],
             )
@@ -153,14 +158,14 @@ class ApplicationCard extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: onViewProfile,
-                    child: const Text('Ver perfil'),
+                    child: Text(l10n.commonViewProfile),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: onHire,
-                    child: const Text('Contratar'),
+                    child: Text(l10n.guideRequestHire),
                   ),
                 ),
               ],
@@ -171,12 +176,16 @@ class ApplicationCard extends StatelessWidget {
   }
 }
 
-/// "Guía", "Traductor" o "Guía y traductor".
-String roleLabel(GuideRole role) => switch (role) {
-  GuideRole.guide => 'Guía',
-  GuideRole.translator => 'Traductor',
-  GuideRole.both => 'Guía y traductor',
-};
+/// "Guía", "Traductor" o "Guía y traductor". Sin [l10n] usa el idioma de
+/// [AppStrings]; las vistas pasan el suyo para no mezclar idiomas.
+String roleLabel(GuideRole role, [AppLocalizations? l10n]) {
+  final strings = l10n ?? AppStrings.current;
+  return switch (role) {
+    GuideRole.guide => strings.commonGuide,
+    GuideRole.translator => strings.commonTranslator,
+    GuideRole.both => strings.guideRequestRoleBoth,
+  };
+}
 
 /// Precio que pide y cómo se compara con lo que ofreció el turista.
 class _PriceTag extends StatelessWidget {
@@ -187,15 +196,16 @@ class _PriceTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final difference = price - budget;
     final (label, color) = switch (difference) {
-      0 => ('Tu presupuesto', AppColors.accentSecondaryGreen),
+      0 => (l10n.guideRequestPriceYourBudget, AppColors.accentSecondaryGreen),
       > 0 => (
-        '${Formatters.currency(difference)} más',
+        l10n.guideRequestPriceMore(Formatters.currency(difference)),
         AppColors.secondaryText,
       ),
       _ => (
-        '${Formatters.currency(-difference)} menos',
+        l10n.guideRequestPriceLess(Formatters.currency(-difference)),
         AppColors.accentSecondaryGreen,
       ),
     };

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/validators.dart';
@@ -17,16 +18,19 @@ class PhoneField extends StatelessWidget {
     this.textInputAction,
   });
 
-  static const countryCodes = <({String code, String country})>[
-    (code: '+505', country: 'Nicaragua'),
-    (code: '+506', country: 'Costa Rica'),
-    (code: '+504', country: 'Honduras'),
-    (code: '+503', country: 'El Salvador'),
-    (code: '+502', country: 'Guatemala'),
-    (code: '+507', country: 'Panamá'),
-    (code: '+52', country: 'México'),
-    (code: '+1', country: 'Estados Unidos o Canadá'),
-    (code: '+34', country: 'España'),
+  /// Los países del menú, con su nombre en el idioma de [l10n].
+  static List<({String code, String country})> countryCodes(
+    AppLocalizations l10n,
+  ) => [
+    (code: '+505', country: l10n.guideAccessCountryNicaragua),
+    (code: '+506', country: l10n.guideAccessCountryCostaRica),
+    (code: '+504', country: l10n.guideAccessCountryHonduras),
+    (code: '+503', country: l10n.guideAccessCountryElSalvador),
+    (code: '+502', country: l10n.guideAccessCountryGuatemala),
+    (code: '+507', country: l10n.guideAccessCountryPanama),
+    (code: '+52', country: l10n.guideAccessCountryMexico),
+    (code: '+1', country: l10n.guideAccessCountryUnitedStatesOrCanada),
+    (code: '+34', country: l10n.guideAccessCountrySpain),
   ];
 
   final TextEditingController controller;
@@ -37,6 +41,7 @@ class PhoneField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return TextFormField(
       controller: controller,
       enabled: enabled,
@@ -50,11 +55,11 @@ class PhoneField extends StatelessWidget {
         prefixIconConstraints: const BoxConstraints(minHeight: 48),
         prefixIcon: PopupMenuButton<String>(
           enabled: enabled,
-          tooltip: 'Código de país',
+          tooltip: l10n.guideAccessCountryCodeTooltip,
           initialValue: countryCode,
           onSelected: onCountryCodeChanged,
           itemBuilder: (context) => [
-            for (final option in countryCodes)
+            for (final option in countryCodes(l10n))
               PopupMenuItem(
                 value: option.code,
                 child: Text('${option.country}  ${option.code}'),

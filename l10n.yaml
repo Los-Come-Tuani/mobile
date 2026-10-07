@@ -1,0 +1,9 @@
+# Textos de la app: español (plantilla y por defecto) e inglés.
+# Se regeneran con `flutter gen-l10n`; `flutter run` también lo hace solo.
+arb-dir: lib/l10n/arb
+template-arb-file: app_es.arb
+output-dir: lib/l10n
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: true
+format: true

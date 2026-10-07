@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
@@ -29,13 +30,14 @@ class JobRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final applied = job.status == GuideJobStatus.applied;
     final price = applied ? (job.offeredPrice ?? job.budget) : job.budget;
     final meta = Formatters.facts([
       if (showCity) job.city,
       Formatters.relativeDay(job.date),
-      job.startTime,
-      '${job.terms.serviceHours} h',
+      Formatters.timeText(job.startTime),
+      l10n.guideAppHoursShort(job.terms.serviceHours),
       Formatters.people(job.groupSize),
     ]);
 
@@ -73,12 +75,16 @@ class JobRow extends StatelessWidget {
                 children: [
                   Text(Formatters.currency(price), style: AppTextStyles.title),
                   Text(
-                    applied ? 'tu precio' : 'presupuesto',
+                    applied
+                        ? l10n.guideAppJobRowYourPrice
+                        : l10n.guideAppJobRowBudget,
                     style: AppTextStyles.caption,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Recibes ${Formatters.currency(GuidePay.earningsOf(price))}',
+                    l10n.guideAppYouReceive(
+                      Formatters.currency(GuidePay.earningsOf(price)),
+                    ),
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.accentSecondaryGreen,
                       fontWeight: FontWeight.w600,
@@ -112,7 +118,7 @@ class _AppliedPill extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: Text(
-          'Postulado',
+          context.l10n.guideAppJobApplied,
           style: AppTextStyles.caption.copyWith(
             color: AppColors.accentSecondaryBlue,
             fontWeight: FontWeight.w600,

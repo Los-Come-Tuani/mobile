@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../router/routes.dart';
@@ -19,27 +20,39 @@ class AppBottomNav extends StatelessWidget {
 
   final int currentIndex;
 
-  static const List<({IconData icon, String label, String route})> _items = [
-    (icon: Icons.home_outlined, label: 'Inicio', route: Routes.home),
-    (icon: Icons.explore_outlined, label: 'Mis viajes', route: Routes.myTrips),
+  static List<({IconData icon, String label, String route})> _items(
+    AppLocalizations l10n,
+  ) => [
+    (icon: Icons.home_outlined, label: l10n.commonHome, route: Routes.home),
+    (
+      icon: Icons.explore_outlined,
+      label: l10n.commonMyTrips,
+      route: Routes.myTrips,
+    ),
     (
       icon: Icons.confirmation_number_outlined,
-      label: 'Cupones',
+      label: l10n.commonCoupons,
       route: Routes.coupons,
     ),
-    (icon: Icons.person_outline, label: 'Perfil', route: Routes.profile),
+    (
+      icon: Icons.person_outline,
+      label: l10n.sharedNavProfile,
+      route: Routes.profile,
+    ),
   ];
 
   void _onTap(BuildContext context, int index) {
+    final route = _items(context.l10n)[index].route;
     // Desde una pantalla que cuelga de Perfil, tocar Perfil también regresa.
-    final isOnRoot =
-        GoRouterState.of(context).matchedLocation == _items[index].route;
+    final isOnRoot = GoRouterState.of(context).matchedLocation == route;
     if (index == currentIndex && isOnRoot) return;
-    context.go(_items[index].route);
+    context.go(route);
   }
 
   @override
   Widget build(BuildContext context) {
+    final items = _items(context.l10n);
+
     return DecoratedBox(
       decoration: const BoxDecoration(
         color: AppColors.white,
@@ -73,7 +86,7 @@ class AppBottomNav extends StatelessWidget {
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           onDestinationSelected: (index) => _onTap(context, index),
           destinations: [
-            for (final item in _items)
+            for (final item in items)
               NavigationDestination(
                 icon: Icon(item.icon),
                 selectedIcon: Icon(

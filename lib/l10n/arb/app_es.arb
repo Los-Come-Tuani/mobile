@@ -1,0 +1,3149 @@
+{
+  "@@locale": "es",
+  "assistantAiTag": "IA",
+  "assistantAllGood": "Así queda bien. ¿Lo guardamos?",
+  "assistantAppliedAdd": "Agregaste {stop}",
+  "@assistantAppliedAdd": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantAppliedLunch": "Almuerzas en {stop}",
+  "@assistantAppliedLunch": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantAppliedRemove": "Quitaste {stop}",
+  "@assistantAppliedRemove": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantAppliedReorder": "Cambiaste el orden: ahorras {saved}",
+  "@assistantAppliedReorder": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantAppliedStartLater": "Sales a las {time}",
+  "@assistantAppliedStartLater": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantAppliedVehicle": "Te mueves en vehículo",
+  "assistantApply": "Aplicar",
+  "assistantAskCity": "¿A qué ciudad vas?",
+  "assistantAskInterests": "¿Qué te interesa más? Puedes elegir varias cosas.",
+  "assistantAskPace": "¿Cómo quieres tu día?",
+  "assistantAskStartTime": "¿A qué hora quieres empezar?",
+  "assistantDefaultTitle": "Mi día en {city}",
+  "@assistantDefaultTitle": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantDismiss": "No, gracias",
+  "assistantIntroCircuit": "¡Hola! Soy el asistente de K'Plan. Voy a organizar \"{title}\" ({count, plural, =1{1 parada} other{{count} paradas}}) contando los traslados y los horarios de cada lugar.",
+  "@assistantIntroCircuit": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantIntroScratch": "¡Hola! Soy el asistente de K'Plan. Te armo un día con horarios reales, contando los traslados entre cada lugar.",
+  "assistantNoPreference": "Me da igual",
+  "assistantProposalCircuit": "Listo. Calculé cada traslado y la hora a la que llegas a tus {count, plural, =1{1 parada} other{{count} paradas}}.",
+  "@assistantProposalCircuit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantProposalEmpty": "No encontré paradas en {city} que quepan en tu día. Prueba con otro ritmo o una hora más temprano.",
+  "@assistantProposalEmpty": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantProposalScratch": "Listo. Te armé un día en {city} con {count, plural, =1{1 parada} other{{count} paradas}}, en el orden que menos traslado pide.",
+  "@assistantProposalScratch": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantProposalTitle": "Tu día · {mode} · ritmo {pace}",
+  "@assistantProposalTitle": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      }
+    }
+  },
+  "assistantSave": "Guardar itinerario",
+  "assistantSaved": "¡Listo! Guardamos tu itinerario",
+  "assistantSuggestionsIntro": "{count, plural, =1{Tengo 1 sugerencia para mejorarlo:} other{Tengo {count} sugerencias para mejorarlo:}}",
+  "@assistantSuggestionsIntro": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "assistantThinking": "Calculando traslados y horarios…",
+  "assistantTitle": "Asistente K'Plan",
+  "bookingAdults": "Adultos",
+  "bookingBadges": "Insignias",
+  "bookingBadgesSoon": "Insignias: próximamente",
+  "bookingBudgetLine": "Presupuesto: {summary}",
+  "@bookingBudgetLine": {
+    "placeholders": {
+      "summary": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingChildren": "Niños",
+  "bookingChildrenCount": "{count, plural, =1{1 niño} other{{count} niños}}",
+  "@bookingChildrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookingCircuitNotFound": "No encontramos este circuito",
+  "bookingConfirmed": "¡Listo! Tu circuito quedó agendado",
+  "bookingConfirmedWithProposal": "¡Listo! Tu circuito quedó agendado y tu propuesta ya está publicada para los guías",
+  "bookingDaySchedule": "Horario del día",
+  "bookingDetailsTitle": "Detalles de la reserva",
+  "bookingDurationEnds": "{duration} · termina aprox. a las {time}",
+  "@bookingDurationEnds": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingEstimatedDuration": "Duración estimada",
+  "bookingGoBack": "Volver",
+  "bookingGroup": "Grupo",
+  "bookingGuideOrTranslator": "Guía o traductor",
+  "bookingGuideRowAdd": "Agregar",
+  "bookingGuideSummary": "{need} · {hours}h",
+  "@bookingGuideSummary": {
+    "placeholders": {
+      "need": {
+        "type": "String"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "bookingIncludes": "Incluye",
+  "bookingMeetingPoint": "Punto de encuentro",
+  "bookingNeedBilingualSubtitle": "Te explica todo el recorrido en tu idioma.",
+  "bookingNeedBilingualTitle": "Guía que habla tu idioma",
+  "bookingNeedGuideTranslatorSubtitle": "Un guía local y alguien que te traduce en el momento.",
+  "bookingNeedGuideTranslatorTitle": "Guía local + traductor",
+  "bookingNeedLocalGuideSubtitle": "Te da el recorrido en español.",
+  "bookingNeedTranslatorOnlySubtitle": "Recorres por tu cuenta con alguien que te traduce.",
+  "bookingNeedTranslatorOnlyTitle": "Solo traductor",
+  "bookingNoGuideOrTranslator": "Sin guía ni traductor",
+  "bookingOwnCircuitNote": "Lo armaste tú, así que no tiene precio por persona: sólo pagas el guía o traductor que contrates.",
+  "bookingProposalBudget": "Presupuesto que ofreces",
+  "bookingProposalBudgetHint": "Cada guía lo acepta o propone su precio al postularse.",
+  "bookingProposalDuration": "Duración del servicio",
+  "bookingProposalFewerHours": "Menos horas",
+  "bookingProposalIntro": "Los guías verán tu propuesta y se postularán. Tú revisas sus perfiles y eliges a quién contratar.",
+  "bookingProposalItineraryLasts": "Tu itinerario dura {duration}.",
+  "@bookingProposalItineraryLasts": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingProposalLodgingHint": "Más de un día de recorrido: si le das alojamiento, el precio baja.",
+  "bookingProposalLodgingTitle": "¿Le darás alojamiento al guía?",
+  "bookingProposalMinHoursGuide": "Mínimo {hours} horas con guía.",
+  "@bookingProposalMinHoursGuide": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "bookingProposalMinHoursTranslator": "Mínimo {hours} horas sólo con traductor.",
+  "@bookingProposalMinHoursTranslator": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "bookingProposalMoreHours": "Más horas",
+  "bookingProposalNote": "Al agendar publicamos tu propuesta: los guías se postulan y tú eliges a quién contratar.",
+  "bookingProposalTitle": "Propuesta para guía o traductor",
+  "bookingProposalTransport": "Transporte",
+  "bookingProposalVehicleWarning": "Este recorrido se hace en vehículo: a pie hay tramos muy largos y el día no alcanza.",
+  "bookingProposalWhatYouNeed": "¿Qué necesitas?",
+  "bookingProposalYourLanguage": "Tu idioma",
+  "bookingRecommendations": "Recomendaciones",
+  "bookingRemove": "Quitar",
+  "bookingScheduleSummary": "Saliendo a las {start} · {mode} · termina aprox. a las {end}",
+  "@bookingScheduleSummary": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingServiceFee": "Servicio (20%)",
+  "bookingStartTime": "Hora inicial",
+  "bookingSubtotal": "Subtotal",
+  "bookingTitle": "Agendar",
+  "bookingTourInfoTitle": "Información del recorrido",
+  "bookingTourNotes": "Notas del recorrido",
+  "bookingTransportGuide": "Que lo ponga el guía",
+  "bookingTransportOnFoot": "A pie",
+  "bookingTransportTourist": "Yo pongo el transporte",
+  "categoryAdventure": "Aventura",
+  "categoryCity": "Ciudad",
+  "categoryCulture": "Cultura",
+  "categoryFair": "Feria",
+  "categoryFood": "Gastronomía",
+  "categoryHistory": "Historia",
+  "categoryNature": "Naturaleza",
+  "categoryTradition": "Tradición",
+  "circuitDetailAllReviewsSoon": "Todas las reseñas: próximamente",
+  "circuitDetailBadgesCount": "{count, plural, =1{1 insignia} other{{count} insignias}}",
+  "@circuitDetailBadgesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circuitDetailBook": "Agendar circuito",
+  "circuitDetailCommentsTitle": "Comentarios ({count})",
+  "@circuitDetailCommentsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circuitDetailDownloadSoon": "Descargar sin conexión: próximamente",
+  "circuitDetailDownloadTooltip": "Descargar sin conexión",
+  "circuitDetailLeavingAt": "Si sales a las…",
+  "circuitDetailOrderSaved": "Orden guardado: el itinerario se recalculó",
+  "circuitDetailPricePerAdult": "{price} p. adulta",
+  "@circuitDetailPricePerAdult": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "circuitDetailReorder": "Ordenar",
+  "circuitDetailSeeAll": "Ver todos",
+  "circuitDetailSeeTimes": "Ver horarios disponibles",
+  "circuitDetailSkipWhy": "¿Por qué saltas {stop}?",
+  "@circuitDetailSkipWhy": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "circuitDetailStartTrip": "Comenzar viaje",
+  "circuitDetailStopsCount": "{count, plural, =1{1 parada} other{{count} paradas}}",
+  "@circuitDetailStopsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circuitDetailStopsTitle": "Paradas del recorrido ({count})",
+  "@circuitDetailStopsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "circuitDetailTodayRoute": "Tu recorrido de hoy",
+  "circuitDetailTripEnded": "Viaje finalizado",
+  "circuitDetailTripStarted": "¡Viaje iniciado! Dirígete a {stop}",
+  "@circuitDetailTripStarted": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "commonAccept": "Aceptar",
+  "commonBack": "Regresar",
+  "commonBackToHome": "Volver al inicio",
+  "commonBirthDate": "Fecha de nacimiento",
+  "commonCancel": "Cancelar",
+  "commonChangePassword": "Cambiar contraseña",
+  "commonChooseCountry": "Elige tu país",
+  "commonClose": "Cerrar",
+  "commonContinue": "Continuar",
+  "commonCoupons": "Cupones",
+  "commonCreateAccount": "Crear cuenta",
+  "commonCreativeCircuits": "Circuitos creativos",
+  "commonDate": "Fecha",
+  "commonDone": "Listo",
+  "commonEmail": "Correo electrónico",
+  "commonFullName": "Nombre completo",
+  "commonGuide": "Guía",
+  "commonHome": "Inicio",
+  "commonLocalGuide": "Guía local",
+  "commonLogout": "Cerrar sesión",
+  "commonMyCircuits": "Mis circuitos",
+  "commonMyMedals": "Mis medallas",
+  "commonMyTrips": "Mis viajes",
+  "commonNationality": "Nacionalidad",
+  "commonNewPassword": "Contraseña nueva",
+  "commonNewPasswordHelper": "Usa al menos 8 caracteres, una mayúscula y un número.",
+  "commonNext": "Siguiente",
+  "commonNotifications": "Notificaciones",
+  "commonPassword": "Contraseña",
+  "commonPasswordsDontMatch": "Las contraseñas no coinciden",
+  "commonRepeatPassword": "Repite la contraseña",
+  "commonResendCode": "Reenviar código",
+  "commonRetry": "Reintentar",
+  "commonSave": "Guardar",
+  "commonSaved": "Guardados",
+  "commonSeeOnMap": "Ver en el mapa",
+  "commonSettings": "Configuraciones",
+  "commonSomethingWentWrong": "Algo salió mal, intenta de nuevo",
+  "commonTotal": "Total",
+  "commonTourist": "Turista",
+  "commonTranslator": "Traductor",
+  "commonViewProfile": "Ver perfil",
+  "couponsBalanceLabel": "{count, plural, other{insignias disponibles para canjear}}",
+  "@couponsBalanceLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsRedeemButton": "CANJEAR",
+  "couponsRedeemConfirm": "Canjear",
+  "couponsRedeemed": "¡Cupón canjeado! Muéstralo al reservar.",
+  "couponsRedeemedLabel": "Canjeado",
+  "couponsRedeemFailed": "No se pudo canjear el cupón",
+  "couponsRedeemMessage": "{cost, plural, =1{Se descontará 1 insignia de tu saldo.} other{Se descontarán {cost} insignias de tu saldo.}}",
+  "@couponsRedeemMessage": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsRedeemTitle": "¿Canjear \"{title}\"?",
+  "@couponsRedeemTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventDetailFreeEntry": "Entrada libre",
+  "forgotPasswordCodeMissing": "Escribe el código de 6 dígitos que te llegó al correo.",
+  "forgotPasswordCodeResent": "Si pasó un minuto desde el último, te enviamos otro código.",
+  "forgotPasswordCodeSentTo": "Si {email} tiene una cuenta, le enviamos un código de 6 dígitos. Vence en 15 minutos.",
+  "@forgotPasswordCodeSentTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "forgotPasswordCodeSubtitle": "Ingresa tu correo y te enviaremos un código de 6 dígitos.",
+  "forgotPasswordCodeTitle": "Escribe el código",
+  "forgotPasswordDemoNote": "Demostración: todavía no se envían correos; sirve cualquier código de 6 dígitos.",
+  "forgotPasswordSendCode": "Enviar código",
+  "forgotPasswordTitle": "¿Olvidaste tu contraseña?",
+  "forgotPasswordUpdated": "Contraseña actualizada. Entra con la nueva.",
+  "forgotPasswordUseAnotherEmail": "Usar otro correo",
+  "formatAdults": "{count, plural, =1{adulto x {count}} other{adultos x {count}}}",
+  "@formatAdults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "formatAm": "a.m.",
+  "formatChildren": "{count, plural, =1{niño x {count}} other{niños x {count}}}",
+  "@formatChildren": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "formatCompactDate": "{weekday} {dayAndMonth}",
+  "@formatCompactDate": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "dayAndMonth": {
+        "type": "String"
+      }
+    }
+  },
+  "formatDayAndMonth": "{day} {month}",
+  "@formatDayAndMonth": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "formatDaysAgo": "{days, plural, =1{hace 1 día} other{hace {days} días}}",
+  "@formatDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "formatHoursAgo": "hace {hours} h",
+  "@formatHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "formatLessThanOneMinute": "menos de 1 min",
+  "formatMinutesAgo": "hace {minutes} min",
+  "@formatMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "formatNoPeople": "Sin personas",
+  "formatNow": "ahora",
+  "formatPeople": "{count, plural, =1{{count} persona} other{{count} personas}}",
+  "@formatPeople": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "formatPm": "p.m.",
+  "formatShortDate": "{day} {month} {year}",
+  "@formatShortDate": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      },
+      "month": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "formatToday": "Hoy",
+  "formatTomorrow": "Mañana",
+  "formatWeekdayDate": "{weekday} {dayAndMonth}",
+  "@formatWeekdayDate": {
+    "placeholders": {
+      "weekday": {
+        "type": "String"
+      },
+      "dayAndMonth": {
+        "type": "String"
+      }
+    }
+  },
+  "formatYesterday": "Ayer",
+  "groupSlotsAdultsLine": "{count, plural, =1{1 adulto} other{{count} adultos}} × {price}",
+  "@groupSlotsAdultsLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsCertifiedGuide": "Guía certificado",
+  "groupSlotsChildrenLine": "{count, plural, =1{1 niño} other{{count} niños}} × {price}",
+  "@groupSlotsChildrenLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsConfirm": "Confirmar",
+  "groupSlotsDuration": "Duración: {duration}",
+  "@groupSlotsDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsEmpty": "Todavía no hay horarios publicados para este circuito. Vuelve a revisar pronto.",
+  "groupSlotsEndsAround": "Termina aprox. {time}",
+  "@groupSlotsEndsAround": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsEnrolled": "¡Listo! Tu grupo quedó inscrito el {date}, {time}",
+  "@groupSlotsEnrolled": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsEnrolledWithGroup": "Inscrito con tu grupo · {people}",
+  "@groupSlotsEnrolledWithGroup": {
+    "placeholders": {
+      "people": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsEnrollMe": "Inscribirme · {people}",
+  "@groupSlotsEnrollMe": {
+    "placeholders": {
+      "people": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsEnrollTitle": "Inscribirte en este horario",
+  "groupSlotsFull": "Lleno",
+  "groupSlotsGroupDoesNotFit": "Tu grupo no cabe ({people})",
+  "@groupSlotsGroupDoesNotFit": {
+    "placeholders": {
+      "people": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsGroupNote": "Es un grupo de hasta {capacity} personas: compartirás el recorrido con gente que no conoces.",
+  "@groupSlotsGroupNote": {
+    "placeholders": {
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSlotsJoined": "{joined} de {capacity} personas inscritas",
+  "@groupSlotsJoined": {
+    "placeholders": {
+      "joined": {
+        "type": "int"
+      },
+      "capacity": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSlotsMeetingPoint": "Punto de encuentro: {place}",
+  "@groupSlotsMeetingPoint": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsNoSpots": "Sin cupos",
+  "groupSlotsNoSpotsLeft": "Ya no quedan cupos suficientes en ese horario",
+  "groupSlotsNoTransport": "Sin transporte",
+  "groupSlotsPeople": "Personas",
+  "groupSlotsPrices": "{adult} por adulto · {child} por niño",
+  "@groupSlotsPrices": {
+    "placeholders": {
+      "adult": {
+        "type": "String"
+      },
+      "child": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsPublishedHint": "Cada guía fija la hora, el cupo y si pone transporte.",
+  "groupSlotsPublishedTitle": "Horarios publicados por guías",
+  "groupSlotsSessionWhen": "{date} · {time}",
+  "@groupSlotsSessionWhen": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsSessionWhenWithGuide": "{date} · {time} · con {guide}",
+  "@groupSlotsSessionWhenWithGuide": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "guide": {
+        "type": "String"
+      }
+    }
+  },
+  "groupSlotsSpotsLeft": "{count, plural, =1{Quedan 1 cupo} other{Quedan {count} cupos}}",
+  "@groupSlotsSpotsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSlotsTitle": "Horarios disponibles",
+  "groupSlotsTransportIncluded": "Incluye transporte",
+  "groupSlotsYourGroup": "Tu grupo",
+  "guideAccessAppBarSemantics": "K’Plan, guías",
+  "guideAccessAppBarTitle": "K’Plan  /  Guías",
+  "guideAccessAttachFile": "Adjuntar archivo",
+  "guideAccessBackToDocuments": "Volver y revisar documentos",
+  "guideAccessCityError": "Elige la ciudad donde trabajas",
+  "guideAccessCityHint": "Elige una ciudad",
+  "guideAccessCityLabel": "Ciudad",
+  "guideAccessCodeRejected": "El código no es válido o venció. Revísalo o pide uno nuevo.",
+  "guideAccessCodeResent": "Enviamos un nuevo código a {email}. Usa el más reciente.",
+  "@guideAccessCodeResent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessCodeSent": "Enviamos un código de 6 dígitos a {email}.",
+  "@guideAccessCodeSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessCodeTitle": "Ingresa el código de verificación",
+  "guideAccessConfirmPasswordHint": "Repite tu contraseña",
+  "guideAccessConfirmPasswordLabel": "Confirma tu contraseña",
+  "guideAccessConsentError": "Autoriza la revisión de tus documentos para enviar la solicitud.",
+  "guideAccessConsentLabel": "Autorizo al equipo de K’Plan a revisar mi información y documentación para evaluar esta solicitud.",
+  "guideAccessCountryCodeTooltip": "Código de país",
+  "guideAccessCountryCostaRica": "Costa Rica",
+  "guideAccessCountryElSalvador": "El Salvador",
+  "guideAccessCountryGuatemala": "Guatemala",
+  "guideAccessCountryHonduras": "Honduras",
+  "guideAccessCountryMexico": "México",
+  "guideAccessCountryNicaragua": "Nicaragua",
+  "guideAccessCountryPanama": "Panamá",
+  "guideAccessCountrySpain": "España",
+  "guideAccessCountryUnitedStatesOrCanada": "Estados Unidos o Canadá",
+  "guideAccessCoverageError": "Elige dónde trabajas",
+  "guideAccessCoverageLabel": "Dónde trabajas",
+  "guideAccessCoverageLocalSubtitle": "Por ejemplo, un guía local certificado en ella.",
+  "guideAccessCoverageLocalTitle": "En una ciudad",
+  "guideAccessCoverageNationalSubtitle": "Por ejemplo, un guía nacional del INTUR.",
+  "guideAccessCoverageNationalTitle": "En todo el país",
+  "guideAccessCoverageSummaryLocal": "Solo en {city}",
+  "@guideAccessCoverageSummaryLocal": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessCoverageSummaryNational": "Todo el territorio nicaragüense",
+  "guideAccessCreateAccountAndSend": "Crear cuenta y enviar",
+  "guideAccessDocumentAccepted": "Aceptado",
+  "guideAccessDocumentAlreadyExpired": "El documento ya venció: sube uno vigente",
+  "guideAccessDocumentAttached": "Adjunto · Pendiente de revisión",
+  "guideAccessDocumentAttachFile": "Adjunta el archivo",
+  "guideAccessDocumentCouldNotAccept": "no pudimos aceptarlo",
+  "guideAccessDocumentExpiresBeforeIssued": "El vencimiento tiene que ser posterior a la emisión",
+  "guideAccessDocumentExpiresOn": "Vence el",
+  "guideAccessDocumentExpiresOnOptional": "Vence el · Opcional",
+  "guideAccessDocumentExpiresRequired": "Elige la fecha de vencimiento",
+  "guideAccessDocumentIssuedFuture": "La fecha de emisión no puede ser futura",
+  "guideAccessDocumentIssuedOn": "Emitido el",
+  "guideAccessDocumentIssuedRequired": "Elige la fecha de emisión",
+  "guideAccessDocumentKept": "Pasa tal cual a la solicitud nueva",
+  "guideAccessDocumentKeptAccepted": "Aceptado: pasa tal cual a la solicitud nueva",
+  "guideAccessDocumentNoExpiry": "No vence",
+  "guideAccessDocumentNumber": "Número del documento",
+  "guideAccessDocumentNumberHint": "Como aparece en el documento",
+  "guideAccessDocumentNumberRequired": "Escribe el número del documento",
+  "guideAccessDocumentPending": "Por revisar",
+  "guideAccessDocumentRejected": "Rechazado: {reason}",
+  "@guideAccessDocumentRejected": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessDocumentRejectedByUs": "Lo rechazamos: {reason}",
+  "@guideAccessDocumentRejectedByUs": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessDocumentsCorrectSubtitle": "Sube otra vez lo que rechazamos. Lo que aceptamos pasa tal cual.",
+  "guideAccessDocumentsCorrectTitle": "Corrige tus documentos",
+  "guideAccessDocumentsSubtitle": "Adjunta una foto legible o un PDF de cada uno, con sus fechas. Solo el equipo de revisión los verá.",
+  "guideAccessDocumentsTitle": "Tus documentos",
+  "guideAccessDocumentUploadAgain": "súbelo de nuevo",
+  "guideAccessDocumentValid": "En vigor",
+  "guideAccessEmailHelper": "Usa uno que no tenga ya una cuenta de K’Plan.",
+  "guideAccessEmailHint": "tu@correo.com",
+  "guideAccessEmailLabel": "Correo",
+  "guideAccessExperienceHint": "Ej.: 3 años en recorridos de historia colonial",
+  "guideAccessExperienceLabel": "Preséntate a los turistas",
+  "guideAccessExperienceRequired": "Cuéntanos tu experiencia",
+  "guideAccessExperienceSubtitle": "Tu certificación define hasta dónde puedes acompañar a los viajeros.",
+  "guideAccessFileFormats": "PDF, JPG o PNG",
+  "guideAccessFilePickerFailed": "No pudimos abrir tus archivos. Intenta de nuevo.",
+  "guideAccessFileSizeProblem": "El archivo pesa más de 10 MB. Elige uno más liviano.",
+  "guideAccessFileTypeProblem": "Adjunta un archivo PDF, JPG o PNG.",
+  "guideAccessIdentitySubtitle": "Usa tus datos tal como aparecen en tu cédula. Con este correo se crea tu cuenta de guía o traductor.",
+  "guideAccessIdentityTitle": "Cuéntanos quién eres",
+  "guideAccessLanguagesError": "Elige al menos un idioma",
+  "guideAccessLanguagesLabel": "Idiomas",
+  "guideAccessNameHint": "Nombre y apellidos",
+  "guideAccessNameRequired": "Ingresa tu nombre completo",
+  "guideAccessPasswordHint": "Ingresa tu contraseña",
+  "guideAccessPasswordSubtitle": "Tu correo está verificado. Crea una contraseña: al enviar, subimos tus documentos y tu solicitud queda en revisión.",
+  "guideAccessPasswordTitle": "Protege tu cuenta",
+  "guideAccessPhoneLabel": "Teléfono de contacto",
+  "guideAccessProfileMissing": "Elige tu fecha de nacimiento y tu nacionalidad.",
+  "guideAccessProgressLabel": "POSTULACIÓN  ·  PASO {step} DE {total}",
+  "@guideAccessProgressLabel": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAccessProgressSemantics": "Postulación, paso {step} de {total}",
+  "@guideAccessProgressSemantics": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAccessRemoveFile": "Quitar {name}",
+  "@guideAccessRemoveFile": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessReviewAccount": "Tu cuenta",
+  "guideAccessReviewCorrectionTitle": "Revisa tu corrección",
+  "guideAccessReviewDocuments": "Documentos que envías · Por verificar",
+  "guideAccessReviewServices": "Lo que ofreces",
+  "guideAccessReviewSubtitle": "Confirma tu información antes de enviarla.",
+  "guideAccessReviewTitle": "Revisa tu postulación",
+  "guideAccessReviewVehicle": "Lleva turistas en su vehículo",
+  "guideAccessSendCorrection": "Enviar corrección",
+  "guideAccessSendRequest": "Enviar solicitud",
+  "guideAccessServiceGuide": "Guía de turismo",
+  "guideAccessServicesCorrectingSubtitle": "Revisa tus datos: puedes cambiarlos antes de volver a enviar.",
+  "guideAccessServicesError": "Elige al menos uno",
+  "guideAccessServicesLabel": "Ofreces",
+  "guideAccessServicesTitle": "Qué ofreces y dónde",
+  "guideAccessStartApply": "Postularme",
+  "guideAccessStartChecklistCredential": "Tu licencia del INTUR si eres guía, o tu certificado de idiomas si eres traductor",
+  "guideAccessStartChecklistEmail": "Un correo que no tenga ya una cuenta de K’Plan",
+  "guideAccessStartChecklistId": "Tu cédula y tu récord de policía",
+  "guideAccessStartChecklistLabel": "Ten a mano",
+  "guideAccessStartChecklistVehicle": "Tu licencia de conducir y el seguro si llevas turistas en tu vehículo",
+  "guideAccessStartContinueAsTourist": "Continuar como turista",
+  "guideAccessStartNotice": "El equipo de K’Plan revisará tu información antes de habilitar tu acceso.",
+  "guideAccessStartSignOutToApply": "Salir para postularme",
+  "guideAccessStartSubtitle": "Postúlate para ofrecer tus servicios como guía de turismo o como traductor.",
+  "guideAccessStartTitle": "Comparte tu territorio",
+  "guideAccessStartTouristNotice": "Tu cuenta de K’Plan es de turista. Para ofrecer tus servicios necesitas una cuenta aparte, con otro correo: sal de esta y postúlate.",
+  "guideAccessStatusApprovedSubtitle": "Tu solicitud fue aprobada: los turistas ya te encuentran en K’Plan.",
+  "guideAccessStatusApprovedTitle": "Acceso de guía habilitado",
+  "guideAccessStatusEnterAsGuide": "Entrar como guía",
+  "guideAccessStatusMissing": "Falta: {items}.",
+  "@guideAccessStatusMissing": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessStatusPendingNotice": "El acceso de guía estará disponible únicamente si tu solicitud es aprobada. Te avisamos por correo.",
+  "guideAccessStatusPendingSubtitle": "El equipo de K’Plan está revisando tus documentos.",
+  "guideAccessStatusPendingTitle": "Solicitud en revisión",
+  "guideAccessStatusReceivedSubtitle": "Tu solicitud llegó. El equipo la revisa por orden de llegada.",
+  "guideAccessStatusRejectedSubtitle": "Revisa lo que hay que corregir.",
+  "guideAccessStatusRejectedTitle": "No pudimos aprobar tu solicitud",
+  "guideAccessStatusRenewalApprovedSubtitle": "Tus documentos nuevos están en vigor.",
+  "guideAccessStatusRenewalApprovedTitle": "Renovación aprobada",
+  "guideAccessStatusRenewalPendingTitle": "Renovación en revisión",
+  "guideAccessStatusResubmit": "Corregir y volver a enviar",
+  "guideAccessStatusTeamNote": "Nota del equipo: {note}",
+  "@guideAccessStatusTeamNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAccessVehicleSubtitle": "Te pediremos tu licencia de conducir y el seguro del vehículo.",
+  "guideAccessVehicleTitle": "Llevo turistas en mi vehículo",
+  "guideAccessVerify": "Verificar",
+  "guideAppBalanceAvailable": "Disponible para retirar",
+  "guideAppBalanceCommissionNote": "K’Plan descuenta el {percent}% de cada viaje. Lo demás es tuyo.",
+  "@guideAppBalanceCommissionNote": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppBalanceEmptyHint": "Cuando termines un viaje, lo que recibes aparece aquí para retirarlo.",
+  "guideAppBalanceEmptyMessage": "Aquí verás lo que recibes por cada viaje y tus retiros.",
+  "guideAppBalanceEmptyTitle": "Todavía no hay movimientos",
+  "guideAppBalanceMovements": "Movimientos",
+  "guideAppBalanceNothingPending": "Nada por cobrar por ahora",
+  "guideAppBalancePayoutBreakdown": "Precio {price} · comisión {commission}",
+  "@guideAppBalancePayoutBreakdown": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "commission": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBalancePending": "Por cobrar {amount} de {count, plural, =1{1 viaje próximo} other{{count} viajes próximos}}",
+  "@guideAppBalancePending": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppBalanceTitle": "Balance",
+  "guideAppBalanceToAccount": "A {account}",
+  "@guideAppBalanceToAccount": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBalanceWithdrawalDeposited": "{date} · Depositado",
+  "@guideAppBalanceWithdrawalDeposited": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBalanceWithdrawalProcessing": "{date} · En proceso",
+  "@guideAppBalanceWithdrawalProcessing": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBalanceWithdrawalSent": "Retiro de {amount} en camino",
+  "@guideAppBalanceWithdrawalSent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBalanceWithdrawalTo": "Retiro a {account}",
+  "@guideAppBalanceWithdrawalTo": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppBarModeTag": "Guías",
+  "guideAppChatsEmptyMessage": "Cuando un turista te contrate, aquí coordinan el punto de encuentro.",
+  "guideAppChatsEmptyTitle": "Todavía no tienes conversaciones",
+  "guideAppChatsNoMessages": "Sin mensajes",
+  "guideAppChatsUnread": "{count} sin leer",
+  "@guideAppChatsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppChatsYou": "Tú: {text}",
+  "@guideAppChatsYou": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppDocumentExpired": "Vencido",
+  "guideAppDocumentInReview": "En revisión",
+  "guideAppDocumentRejected": "Rechazado",
+  "guideAppDocumentValidNoExpiry": "En vigor · no vence",
+  "guideAppDocumentValidUntil": "En vigor · vence el {date}",
+  "@guideAppDocumentValidUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppEarningsLabelDone": "Recibiste",
+  "guideAppEarningsLabelUpcoming": "Recibes",
+  "guideAppHomeATourist": "Un turista",
+  "guideAppHomeAvailable": "Disponible",
+  "guideAppHomeDefaultName": "guía",
+  "guideAppHomeEmptyLocal": "No hay propuestas nuevas en {city}",
+  "@guideAppHomeEmptyLocal": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppHomeEmptyMessage": "Cuando un turista publique una, aparecerá aquí.",
+  "guideAppHomeEmptyNational": "No hay propuestas nuevas por ahora",
+  "guideAppHomeGreeting": "Hola, {name}",
+  "@guideAppHomeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppHomeHiredNotice": "¡{who} te contrató para {circuit}! {day} · {time}",
+  "@guideAppHomeHiredNotice": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      },
+      "circuit": {
+        "type": "String"
+      },
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppHomeLoadingProposals": "Cargando propuestas",
+  "guideAppHomeNextTrip": "Próximo viaje",
+  "guideAppHomePending": "Por cobrar",
+  "guideAppHomeProposals": "Propuestas para ti",
+  "guideAppHomeProposalsLocal": "Solo ves propuestas de {city}, donde tienes tu certificación.",
+  "@guideAppHomeProposalsLocal": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppHomeProposalsNational": "De todo el país, en los idiomas que hablas.",
+  "guideAppHoursShort": "{hours} h",
+  "@guideAppHoursShort": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppJobApplicationSent": "Postulación enviada",
+  "guideAppJobApplicationTitle": "Tu postulación",
+  "guideAppJobApplied": "Postulado",
+  "guideAppJobAppliedNotice": "Te postulaste por {price}. {name} está decidiendo; te avisaremos en Inicio.",
+  "@guideAppJobAppliedNotice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobApply": "Postularme",
+  "guideAppJobHiredNotice": "¡{name} te contrató! Ya es uno de tus viajes.",
+  "@guideAppJobHiredNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobLodging": "El turista te da alojamiento",
+  "guideAppJobMessageHint": "Cuéntale por qué eres buena opción para este recorrido",
+  "guideAppJobMessageLabel": "Mensaje para {name}",
+  "@guideAppJobMessageLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobNotFoundMessage": "Puede que el turista la haya retirado.",
+  "guideAppJobNotFoundTitle": "No encontramos esta propuesta",
+  "guideAppJobPostedBy": "Quién la publicó",
+  "guideAppJobPriceHelper": "El turista ofrece {amount}. Puedes proponer otro precio.",
+  "@guideAppJobPriceHelper": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobPriceLabel": "Tu precio (C$)",
+  "guideAppJobPriceRequired": "Escribe tu precio en córdobas",
+  "guideAppJobPublished": "Publicada {timeAgo}",
+  "@guideAppJobPublished": {
+    "placeholders": {
+      "timeAgo": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobRowBudget": "presupuesto",
+  "guideAppJobRowYourPrice": "tu precio",
+  "guideAppJobTakenNotice": "{name} contrató a otro guía. Hay más propuestas en Inicio.",
+  "@guideAppJobTakenNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobTitle": "Propuesta",
+  "guideAppJobTouristBudget": "presupuesto del turista",
+  "guideAppJobWouldReceive": "Recibirías {amount} después del 20%.",
+  "@guideAppJobWouldReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppJobYouReceiveAfterFee": "Recibes {amount} después del 20% de K’Plan",
+  "@guideAppJobYouReceiveAfterFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppMoneyAgreedPrice": "Precio acordado",
+  "guideAppMoneyCommission": "Comisión K’Plan ({percent}%)",
+  "@guideAppMoneyCommission": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppNavChats": "Chats",
+  "guideAppNavChatsUnread": "Chats, {count} sin leer",
+  "@guideAppNavChatsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppNavProfile": "Perfil",
+  "guideAppNavTrips": "Viajes",
+  "guideAppProfileAvailable": "Disponible {amount}",
+  "@guideAppProfileAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppProfileBalanceHint": "Lo que recibes por tus viajes",
+  "guideAppProfileDocuments": "Mis documentos",
+  "guideAppProfileEdit": "Editar mi perfil",
+  "guideAppProfileEditHint": "Foto, presentación, teléfono e idiomas",
+  "guideAppProfileNoReviews": "Todavía sin reseñas de turistas",
+  "guideAppProfileRenewalInReview": "Tienes una renovación en revisión.",
+  "guideAppProfileSpeaks": "Habla {languages}",
+  "@guideAppProfileSpeaks": {
+    "placeholders": {
+      "languages": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppProfileSuspended": "Tu perfil está suspendido: se venció {documents}. Renuévalo para volver a aparecer para los turistas.",
+  "@guideAppProfileSuspended": {
+    "placeholders": {
+      "documents": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppProfileSuspendedADocument": "un documento",
+  "guideAppRateCommentHint": "Cuenta cómo fue: puntualidad, trato, si siguió las indicaciones…",
+  "guideAppRateMissingStars": "Elige cuántas estrellas le das",
+  "guideAppRateQuestion": "¿Cómo fue trabajar con {name}?",
+  "@guideAppRateQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppRateSent": "Calificación enviada. Gracias por ayudar a otros guías.",
+  "guideAppRateStars": "{count, plural, =1{1 estrella} other{{count} estrellas}}",
+  "@guideAppRateStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppRateSubmit": "Enviar calificación",
+  "guideAppRateTourist": "Calificar a {name}",
+  "@guideAppRateTourist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppRateVisibility": "Solo otros guías verán tu calificación.",
+  "guideAppRatingAverage": "{average} de guías",
+  "@guideAppRatingAverage": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppRatingAverageNamed": "{average} de guías · {name}",
+  "@guideAppRatingAverageNamed": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppRatingNone": "Sin calificaciones de guías",
+  "guideAppRatingNoneNamed": "Sin calificaciones de guías · {name}",
+  "@guideAppRatingNoneNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppSeeProposals": "Ver propuestas",
+  "guideAppServiceHours": "{hours} h de servicio",
+  "@guideAppServiceHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTheTourist": "el turista",
+  "guideAppTheTouristCapital": "El turista",
+  "guideAppThreadEmpty": "Escribe para acordar el punto de encuentro.",
+  "guideAppThreadHint": "Escribe un mensaje…",
+  "guideAppThreadSend": "Enviar",
+  "guideAppThreadTitle": "Conversación",
+  "guideAppTouristNoRatingsMessage": "Cuando un guía termine un viaje con {name}, su opinión aparecerá aquí.",
+  "@guideAppTouristNoRatingsMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTouristNoRatingsTitle": "Todavía sin calificaciones",
+  "guideAppTouristNotFoundMessage": "Puede que haya cerrado su cuenta.",
+  "guideAppTouristNotFoundTitle": "No encontramos a este turista",
+  "guideAppTouristRatedAlready": "Ya calificaste a {name}. Si vuelven a viajar juntos, podrás calificarlo otra vez.",
+  "@guideAppTouristRatedAlready": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTouristRatedFor": "Por {circuit} del {date}.",
+  "@guideAppTouristRatedFor": {
+    "placeholders": {
+      "circuit": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTouristRateLater": "Podrás calificar a {name} cuando terminen un viaje juntos.",
+  "@guideAppTouristRateLater": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTouristRatingCount": "de {count, plural, =1{1 guía} other{{count} guías}}",
+  "@guideAppTouristRatingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTouristRatingsNotice": "Solo los guías de K’Plan ven estas calificaciones. {name} no las ve.",
+  "@guideAppTouristRatingsNotice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTouristRatingsTitle": "Calificaciones de guías",
+  "guideAppTouristSince": "{country} · En K’Plan desde {year}",
+  "@guideAppTouristSince": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTouristTileDetails": "{country} · {count, plural, =1{1 viaje} other{{count} viajes}} con K’Plan",
+  "@guideAppTouristTileDetails": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTouristTrips": "{count, plural, =1{1 viaje con K’Plan} other{{count} viajes con K’Plan}}",
+  "@guideAppTouristTrips": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTransportGuide": "Tú pones el transporte",
+  "guideAppTransportOnFoot": "Recorrido a pie",
+  "guideAppTransportTourist": "El turista pone el transporte",
+  "guideAppTripMeetingPending": "{city} · Punto de encuentro por acordar en el chat",
+  "@guideAppTripMeetingPending": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTripMessageTourist": "Escribir a {name}",
+  "@guideAppTripMessageTourist": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTripNotFoundMessage": "Revisa tus viajes desde la pestaña Viajes.",
+  "guideAppTripNotFoundTitle": "No encontramos este viaje",
+  "guideAppTripPayment": "Pago",
+  "guideAppTripPaymentNote": "Pasa a tu balance cuando termine el viaje.",
+  "guideAppTripRate": "Calificar",
+  "guideAppTripRated": "Ya calificaste a {name} por este viaje.",
+  "@guideAppTripRated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppTripsEmptyDoneMessage": "Después de cada viaje podrás calificar al turista para ayudar a otros guías.",
+  "guideAppTripsEmptyDoneTitle": "Aquí verás los viajes que termines",
+  "guideAppTripsEmptyUpcomingMessage": "Postúlate a una propuesta desde Inicio; cuando un turista te contrate, el viaje aparece aquí.",
+  "guideAppTripsEmptyUpcomingTitle": "Todavía no tienes viajes próximos",
+  "guideAppTripsTabDone": "Realizados",
+  "guideAppTripsTabDoneToRate": "Realizados · {count} por calificar",
+  "@guideAppTripsTabDoneToRate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideAppTripsTabUpcoming": "Próximos",
+  "guideAppTripStatusDone": "Terminado",
+  "guideAppTripStatusUpcoming": "Próximo",
+  "guideAppTripTitle": "Viaje",
+  "guideAppTripViewChat": "Ver la conversación",
+  "guideAppViewTrip": "Ver viaje",
+  "guideAppWithdraw": "Retirar",
+  "guideAppWithdrawAmountLabel": "Monto (C$)",
+  "guideAppWithdrawAmountRequired": "Escribe cuánto quieres retirar",
+  "guideAppWithdrawAvailable": "Disponible: {amount}",
+  "@guideAppWithdrawAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppWithdrawNotice": "Te avisaremos aquí cuando llegue a tu cuenta.",
+  "guideAppWithdrawOverBalance": "Solo tienes {amount} disponibles",
+  "@guideAppWithdrawOverBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppWithdrawToAccount": "A tu cuenta",
+  "guideAppYouReceive": "Recibes {amount}",
+  "@guideAppYouReceive": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideAppYouReceived": "Recibiste {amount}",
+  "@guideAppYouReceived": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideChatAgreedPrice": "Precio acordado: {price} · Pago y reserva: a definir",
+  "@guideChatAgreedPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "guideChatEmpty": "Escribe para coordinar el punto de encuentro.",
+  "guideChatMessageHint": "Escribe un mensaje…",
+  "guideChatNamePair": "{first} y {second}",
+  "@guideChatNamePair": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "guideProfileAcceptsBudget": "Acepta tu presupuesto",
+  "guideProfileAppliedAsGuide": "Se postuló como guía a tu propuesta",
+  "guideProfileAppliedAsTranslator": "Se postuló como traductor a tu propuesta",
+  "guideProfileChat": "Chatear",
+  "guideProfileHasVehicle": "Tiene vehículo propio",
+  "guideProfileHiredAsGuide": "Contratado como guía",
+  "guideProfileHiredAsTranslator": "Contratado como traductor",
+  "guideProfileHireFor": "Contratar por {price}",
+  "@guideProfileHireFor": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "guideProfileLessThanBudget": "{amount} menos que tu presupuesto",
+  "@guideProfileLessThanBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideProfileMoreThanBudget": "{amount} más que tu presupuesto",
+  "@guideProfileMoreThanBudget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideProfileNoTransport": "No pone transporte",
+  "guideProfileNoVehicle": "Sin vehículo propio",
+  "guideProfileOffersTransport": "Pone transporte para tu grupo",
+  "guideProfilePaymentPending": "Pago y reserva: a definir",
+  "guideProfileReviewsCount": "Reseñas ({count})",
+  "@guideProfileReviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideProfileTitle": "Perfil del guía",
+  "guideRequestApplicationsTitle": "Postulaciones",
+  "guideRequestApplicationsTitleCount": "Postulaciones ({count})",
+  "@guideRequestApplicationsTitleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideRequestApplicationUnavailable": "Esta postulación ya no está disponible",
+  "guideRequestBudget": "Presupuesto: {total}",
+  "@guideRequestBudget": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestBudgetBoth": "Presupuesto: {total} (guía {guide} + traductor {translator})",
+  "@guideRequestBudgetBoth": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "guide": {
+        "type": "String"
+      },
+      "translator": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestCancelAction": "Retirar propuesta",
+  "guideRequestCancelConfirm": "Retirar",
+  "guideRequestCancelMessage": "Los guías ya no podrán postularse. Tu reserva del circuito sigue agendada.",
+  "guideRequestCancelTitle": "¿Retirar tu propuesta?",
+  "guideRequestGoToChat": "Ir al chat",
+  "guideRequestGuidesTitle": "Guías",
+  "guideRequestGuidesTitleCount": "Guías ({count})",
+  "@guideRequestGuidesTitleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideRequestHire": "Contratar",
+  "guideRequestHired": "Contratado",
+  "guideRequestHireMessageGuide": "Será tu guía por {price}. Las demás postulaciones para este puesto quedan descartadas.",
+  "@guideRequestHireMessageGuide": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestHireMessageTranslator": "Será tu traductor por {price}. Las demás postulaciones para este puesto quedan descartadas.",
+  "@guideRequestHireMessageTranslator": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestHireNextGuide": "¡Listo! Ahora elige a tu guía.",
+  "guideRequestHireNextTranslator": "¡Listo! Ahora elige a tu traductor.",
+  "guideRequestHireTitle": "¿Contratar a {name}?",
+  "@guideRequestHireTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestLodgingProvided": "Le das alojamiento al guía",
+  "guideRequestNoneSubtitle": "Publica una al agendar un circuito, desde \"Guía o traductor\".",
+  "guideRequestNoneTitle": "No tienes una propuesta activa",
+  "guideRequestNoTransport": "Sin transporte",
+  "guideRequestOffersTransport": "Pone transporte",
+  "guideRequestPriceLess": "{amount} menos",
+  "@guideRequestPriceLess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestPriceMore": "{amount} más",
+  "@guideRequestPriceMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestPriceYourBudget": "Tu presupuesto",
+  "guideRequestRoleBoth": "Guía y traductor",
+  "guideRequestStatusCancelledSubtitle": "Los guías ya no pueden postularse.",
+  "guideRequestStatusCancelledTitle": "Retiraste esta propuesta",
+  "guideRequestStatusExpiredSubtitle": "No contrataste a nadie a tiempo. Puedes publicar otra desde Agendar.",
+  "guideRequestStatusExpiredTitle": "Tu propuesta venció",
+  "guideRequestStatusHiredSubtitle": "Acordaste {price} por el servicio.",
+  "@guideRequestStatusHiredSubtitle": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestStatusHiredTitle": "¡Listo! Ya tienes quién te acompañe",
+  "guideRequestStatusOpenSubtitle": "Los guías ya pueden verla. Vence en {remaining}.",
+  "@guideRequestStatusOpenSubtitle": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestStatusOpenTitle": "Publicada · recibiendo postulaciones",
+  "guideRequestTeamTitle": "Tu equipo",
+  "guideRequestTitle": "Tu propuesta",
+  "guideRequestTranslatorsTitle": "Traductores",
+  "guideRequestTranslatorsTitleCount": "Traductores ({count})",
+  "@guideRequestTranslatorsTitleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideRequestTransportGuide": "El guía pone el transporte",
+  "guideRequestTransportOnFoot": "Recorrido a pie",
+  "guideRequestTransportTourist": "Tú pones el transporte",
+  "guideRequestWaitingGuides": "Esperando postulaciones de guías. Te avisamos aquí apenas alguien se postule.",
+  "guideRequestWaitingTranslators": "Esperando postulaciones de traductores. Te avisamos aquí apenas alguien se postule.",
+  "guideRequestWaitingTranslatorsLanguage": "Esperando postulaciones de traductores de {language}. Te avisamos aquí apenas alguien se postule.",
+  "@guideRequestWaitingTranslatorsLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "guideRequestYearsExperience": "{years, plural, =1{1 año de experiencia} other{{years} años de experiencia}}",
+  "@guideRequestYearsExperience": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "homeActiveTripAllVisited": "Ya pasaste por todas las paradas · toca para finalizar",
+  "homeActiveTripNext": "Siguiente: {stop} · {time} · {delay}",
+  "@homeActiveTripNext": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "homeActiveTripTitle": "Viaje en curso: {title}",
+  "@homeActiveTripTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "homeActiveTripViewMap": "Ver mapa",
+  "homeCircuitBonus": "{count, plural, =1{+1 insignia extra y medalla} other{+{count} insignias extra y medalla}}",
+  "@homeCircuitBonus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeCircuitStops": "{count, plural, =1{1 parada} other{{count} paradas}}",
+  "@homeCircuitStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeDrawerBecomeGuide": "Ser guía en K’Plan",
+  "homeDrawerComingSoon": "{label}: próximamente",
+  "@homeDrawerComingSoon": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "homeDrawerGuideMode": "Modo guía",
+  "homeDrawerTranslatorMode": "Modo traductor",
+  "homeEmptySearchMessage": "Prueba con otra palabra o revisa cómo está escrita.",
+  "homeEmptySearchTitle": "No encontramos nada con esa búsqueda",
+  "homeEmptyStopsMessage": "Prueba con otra categoría o con otra búsqueda.",
+  "homeEmptyStopsTitle": "No hay paradas que coincidan",
+  "homeGuideRequestApplicationsHint": "Toca para revisarlas y elegir",
+  "homeGuideRequestApplicationsTitle": "{count, plural, =1{1 postulación para {circuit}} other{{count} postulaciones para {circuit}}}",
+  "@homeGuideRequestApplicationsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "circuit": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGuideRequestHiredHint": "Toca para chatear",
+  "homeGuideRequestHiredTitle": "Contrataste a {names} para {circuit}",
+  "@homeGuideRequestHiredTitle": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "circuit": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGuideRequestNamesJoin": "{first} y {second}",
+  "@homeGuideRequestNamesJoin": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "homeGuideRequestPublishedHint": "Esperando que los guías se postulen",
+  "homeGuideRequestPublishedTitle": "Tu propuesta para {circuit} está publicada",
+  "@homeGuideRequestPublishedTitle": {
+    "placeholders": {
+      "circuit": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRewardsAvailable": "{count, plural, =1{Tienes 1 insignia para canjear} other{Tienes {count} insignias para canjear}}",
+  "@homeRewardsAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeRewardsEarn": "Gana insignias visitando paradas",
+  "homeRewardsHint": "Cámbialas por cupones y descuentos",
+  "homeSearchHint": "¿Qué quieres descubrir?",
+  "homeSectionCircuits": "Circuitos completos",
+  "homeSectionEvents": "Eventos Próximos",
+  "homeSectionStops": "Paradas destacadas",
+  "homeStopCount": "{count, plural, =1{1 parada} other{{count} paradas}}",
+  "@homeStopCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTabCircuits": "Circuitos",
+  "homeTabEvents": "Eventos",
+  "homeTabForYou": "Para ti",
+  "homeTabStops": "Paradas",
+  "homeTitle": "Descubre tu próximo plan",
+  "homeTopBarMenu": "Menú",
+  "homeUpcomingTripHint": "Toca para ver los detalles del circuito",
+  "homeUpcomingTripTitle": "Tu viaje a {circuit} es el {date}",
+  "@homeUpcomingTripTitle": {
+    "placeholders": {
+      "circuit": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "languageChoiceNote": "Podrás cambiarlo después en Configuraciones.",
+  "languageChoiceTitle": "Elige tu idioma",
+  "languageNameEnglish": "Inglés",
+  "languageNameFrench": "Francés",
+  "languageNameGerman": "Alemán",
+  "languageNameItalian": "Italiano",
+  "languageNamePortuguese": "Portugués",
+  "languageNameSpanish": "Español",
+  "languagePlaceNamesNote": "Los nombres de lugares conservan su idioma original.",
+  "languageSettingsHeading": "Idioma de la aplicación",
+  "languageSettingsTitle": "Idioma",
+  "loginApplyAsGuide": "Postularme",
+  "loginApplyAsGuideButton": "Postularme como guía",
+  "loginContinueWithGoogle": "Continuar con Google",
+  "loginForgotPassword": "¿Olvidaste tu contraseña?",
+  "loginGoogleProfileFailed": "No pudimos completar tu perfil, intenta de nuevo",
+  "loginGoogleProfileSubtitle": "Google no nos da estos datos y los necesitamos para crear tu cuenta. Debes ser mayor de 18 años.",
+  "loginGoogleProfileTitle": "Completa tu perfil",
+  "loginGuideAccountHint": "Entra con la cuenta con la que te postulaste como guía o traductor.",
+  "loginGuideNotYet": "¿Todavía no eres guía en K’Plan?",
+  "loginMissingAccountGuide": "¿Quieres registrarte como guía?",
+  "loginMissingAccountTitle": "No hemos encontrado esta cuenta",
+  "loginMissingAccountTourist": "¿Quieres registrarte como turista?",
+  "loginNoAccount": "¿No tienes cuenta?",
+  "loginSubmit": "Iniciar sesión",
+  "loginTwoFactorCodeHint": "Código",
+  "loginTwoFactorCodeRequired": "Escribe el código de 6 dígitos o uno de recuperación",
+  "loginTwoFactorSubtitle": "Escribe el código de 6 dígitos de tu app de autenticación. Si perdiste el celular, usa uno de tus códigos de recuperación.",
+  "loginTwoFactorTitle": "Verifica que eres tú",
+  "loginTwoFactorVerify": "Verificar",
+  "medalsBalanceAvailable": "{count, plural, =1{1 disponible} other{{count} disponibles}}",
+  "@medalsBalanceAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "medalsBalanceEarned": "{count, plural, =1{1 insignia} other{{count} insignias}}",
+  "@medalsBalanceEarned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "medalsBalanceNote": "Ganaste {earned} en total: eso es lo que cuenta para tus medallas, y no baja aunque gastes insignias. Tienes {available} para canjear en Cupones.",
+  "@medalsBalanceNote": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      }
+    }
+  },
+  "medalsBalanceNoteSpent": "Ganaste {earned} en total: eso es lo que cuenta para tus medallas, y no baja aunque gastes insignias. Tienes {available} para canjear en Cupones ({spent, plural, =1{1 ya gastada} other{{spent} ya gastadas}}).",
+  "@medalsBalanceNoteSpent": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      },
+      "available": {
+        "type": "String"
+      },
+      "spent": {
+        "type": "int"
+      }
+    }
+  },
+  "medalsByCategory": "Medallas por categoría",
+  "medalsByCategoryNote": "Se ganan insignias visitando paradas que las otorgan.",
+  "medalsCityEarned": "Medalla ganada",
+  "medalsCityLocked": "Completa un circuito creativo de {city}",
+  "@medalsCityLocked": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "medalsCreativeCities": "Medallas de ciudades creativas",
+  "medalsCreativeCitiesNote": "Se ganan al completar un circuito creativo de esa ciudad.",
+  "medalsMaxLevel": "¡Nivel máximo alcanzado!",
+  "medalsOverall": "Medalla general: {tier}",
+  "@medalsOverall": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "medalsTierMax": "{tier} · nivel máximo",
+  "@medalsTierMax": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "medalsTierToNext": "{tier} · {count, plural, =1{falta 1 para subir} other{faltan {count} para subir}}",
+  "@medalsTierToNext": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "medalsToNextOverall": "{count, plural, =1{Te falta 1 insignia para la siguiente medalla} other{Te faltan {count} insignias para la siguiente medalla}}",
+  "@medalsToNextOverall": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "modelDropReasonClosed": "Estaba cerrado",
+  "modelDropReasonNoTime": "Falta de tiempo",
+  "modelDropReasonNotInterested": "No me interesó",
+  "modelDropReasonOther": "Otro motivo",
+  "modelDropReasonTooExpensive": "Muy caro",
+  "modelDropReasonTooFar": "Muy lejos o sin transporte",
+  "modelDropReasonWeather": "Por el clima",
+  "modelGuideCoverageLocalCity": "Guía local · {city}",
+  "@modelGuideCoverageLocalCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "modelGuideCoverageNational": "Guía nacional",
+  "modelLegFixed": "{duration} de traslado",
+  "@modelLegFixed": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "modelLegNoTransfer": "Sin traslado",
+  "modelLegSamePlace": "A pasos",
+  "modelLegVehicle": "{duration} en vehículo",
+  "@modelLegVehicle": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "modelLegWalking": "{duration} a pie",
+  "@modelLegWalking": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "modelNeedBilingualGuide": "Guía que habla {language}",
+  "@modelNeedBilingualGuide": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "modelNeedBilingualGuideShort": "Guía bilingüe",
+  "modelNeedGuideAndTranslatorShort": "Guía + traductor",
+  "modelNeedLocalGuideAndTranslator": "Guía local + traductor de {language}",
+  "@modelNeedLocalGuideAndTranslator": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "modelNeedTranslatorOnly": "Traductor de {language}",
+  "@modelNeedTranslatorOnly": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "modelNeedTranslatorOnlyShort": "Solo traductor",
+  "modelNeedYourLanguage": "tu idioma",
+  "modelPaceBalanced": "Equilibrado",
+  "modelPaceIntense": "Intenso",
+  "modelPaceRelaxed": "Relajado",
+  "modelTravelModeVehicle": "En vehículo",
+  "modelTravelModeWalking": "A pie",
+  "myCircuitAiMessage": "Te pregunta cómo quieres tu día, calcula los traslados y te sugiere qué quitar o agregar.",
+  "myCircuitAiTitle": "Organizar con IA",
+  "myCircuitArrivalAt": "Hora de llegada a {stop}",
+  "@myCircuitArrivalAt": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitDepartureTime": "Hora de salida",
+  "myCircuitEmpty": "Este circuito todavía no tiene paradas",
+  "myCircuitEmptyMessage": "En cualquier parada, toca \"Añadir a un circuito\" y elige este.",
+  "myCircuitExploreStops": "Explorar paradas",
+  "myCircuitFixedTime": "Hora fija",
+  "myCircuitFixedTimeRemove": "Quitar",
+  "myCircuitMissedFixedTime": "Querías llegar a las {time}",
+  "@myCircuitMissedFixedTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitProposalNote": "Como lo armaste tú, puedes publicar una propuesta para que guías o traductores se postulen.",
+  "myCircuitRemoved": "{stop} se quitó del circuito",
+  "@myCircuitRemoved": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitRemoveTooltip": "Quitar del circuito",
+  "myCircuitRemoveWhy": "¿Por qué quitas {stop}?",
+  "@myCircuitRemoveWhy": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitReorderHint": "Toca la hora de una parada para cambiarla y arrástrala para cambiar el orden.",
+  "myCircuitSchedule": "Agendar circuito",
+  "myCircuitSkipWhy": "¿Por qué saltas {stop}?",
+  "@myCircuitSkipWhy": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitStartTrip": "Comenzar viaje",
+  "myCircuitStopsHeader": "Paradas del recorrido",
+  "myCircuitTimeHint": "Toca la hora de una parada para cambiarla.",
+  "myCircuitTodayRoute": "Tu recorrido de hoy",
+  "myCircuitTransport": "Transporte",
+  "myCircuitTravelQuestion": "¿Cómo te vas a mover?",
+  "myCircuitTripEnded": "Viaje finalizado",
+  "myCircuitTripStarted": "¡Viaje iniciado! Dirígete a {stop}",
+  "@myCircuitTripStarted": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myCircuitUndo": "Deshacer",
+  "myCircuitYourDay": "Tu día",
+  "myTripsAiSubtitle": "Te organiza el día con horarios y traslados",
+  "myTripsAiTitle": "Arma tu viaje con IA",
+  "myTripsAllVisited": "Ya pasaste por todas las paradas",
+  "myTripsAllVisitedHint": "Entra al detalle para finalizar el recorrido",
+  "myTripsArrival": "Llegada {time} · {delay}",
+  "@myTripsArrival": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsBookingConfirmed": "Reserva confirmada · {people}",
+  "@myTripsBookingConfirmed": {
+    "placeholders": {
+      "people": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsBookingDeparture": "Salida {time}",
+  "@myTripsBookingDeparture": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsCircuitsEmpty": "Todavía no armaste ninguno. Los que crees aparecen aquí para editarlos, reservarlos o salir a recorrerlos.",
+  "myTripsContactGuide": "Contactar a mi guía",
+  "myTripsContactTranslator": "Contactar a mi traductora",
+  "myTripsCreateSubtitle": "Elige tú las paradas y el orden",
+  "myTripsCreateTitle": "Crear un circuito desde cero",
+  "myTripsDeleteConfirm": "Eliminar",
+  "myTripsDeleteMessage": "Se borrarán sus paradas guardadas. No se puede deshacer.",
+  "myTripsDeleteTitle": "¿Eliminar \"{title}\"?",
+  "@myTripsDeleteTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsDeleteTooltip": "Eliminar {title}",
+  "@myTripsDeleteTooltip": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsExploreCircuits": "Explorar circuitos",
+  "myTripsGuideRoleLanguages": "{role} · {languages}",
+  "@myTripsGuideRoleLanguages": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      },
+      "languages": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsHeadline": "El próximo destino te espera",
+  "myTripsNextStop": "Siguiente: {stop}",
+  "@myTripsNextStop": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "myTripsOngoingEmptyMessage": "Cuando empieces un circuito, aquí verás tu próxima parada, la hora de llegada y el mapa.",
+  "myTripsOngoingEmptyTitle": "Ningún recorrido en curso",
+  "myTripsOpenMap": "Abrir el mapa",
+  "myTripsPlanAnother": "Planificar otro viaje",
+  "myTripsProgress": "{total, plural, =1{{visited} de 1 parada} other{{visited} de {total} paradas}}",
+  "@myTripsProgress": {
+    "placeholders": {
+      "visited": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "myTripsProgressSemantics": "{total, plural, =1{Llevas {visited} de 1 parada} other{Llevas {visited} de {total} paradas}}",
+  "@myTripsProgressSemantics": {
+    "placeholders": {
+      "visited": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "myTripsSeeDetails": "Ver detalle del recorrido",
+  "myTripsSeeUpcoming": "Ver mis próximos viajes",
+  "myTripsTabOngoing": "En curso",
+  "myTripsTabUpcoming": "Próximos",
+  "myTripsUpcomingEmptyMessage": "Elige un circuito y organiza tu primera salida. Aquí encontrarás los detalles de cada viaje.",
+  "myTripsUpcomingEmptyOrAi": "O arma tu viaje con IA",
+  "myTripsUpcomingEmptyTitle": "Tu historia está por empezar",
+  "myTripsYourCircuits": "Tus circuitos",
+  "myTripsYourCircuitsCount": "Tus circuitos · {count}",
+  "@myTripsYourCircuitsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "myTripsYourGuide": "Tu guía",
+  "myTripsYourTranslator": "Tu traductora",
+  "profileCouponsSubtitle": "Beneficios de negocios locales",
+  "profileGuestName": "Invitado",
+  "profileMedalsSubtitle": "Recuerdos de tus recorridos",
+  "profileMyCoupons": "Mis cupones",
+  "profileNotificationsSubtitle": "Avisos de tus viajes y reservas",
+  "profilePersonalData": "Datos personales",
+  "profilePersonalDataSubtitle": "Nombre y datos de contacto",
+  "profileSavedSubtitle": "Circuitos, lugares y eventos que marcaste",
+  "profileSettingsSubtitle": "Cuenta, idioma y privacidad",
+  "profileStatBadges": "Insignias",
+  "profileTitle": "Mi perfil",
+  "registerAdultOnly": "Debes ser mayor de {age} años para crear una cuenta",
+  "@registerAdultOnly": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "registerBirthDatePartDay": "Día",
+  "registerBirthDatePartMonth": "Mes",
+  "registerBirthDatePartYear": "Año",
+  "registerBirthDateSubtitle": "Tu fecha de nacimiento será privada, y nos ayudará a ofrecerte una mejor experiencia",
+  "registerBirthDateTitle": "¿Cuándo naciste?",
+  "registerCodeSent": "Enviamos un código de 6 dígitos al correo {email}",
+  "@registerCodeSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "registerCodeTitle": "Ingrese el código de verificación",
+  "registerEmailSubtitle": "Lo usaremos para verificar tu cuenta. Tu información se mantendrá privada.",
+  "registerEmailTitle": "Ingrese su correo electrónico",
+  "registerLoginAction": "Inicia sesión",
+  "registerLoginLink": "¿Ya tienes cuenta? {action}",
+  "@registerLoginLink": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "registerNameLabel": "Nombre",
+  "registerNameRequired": "Ingresa tu nombre",
+  "registerNameTitle": "¿Cómo te llamas?",
+  "registerNationalityLabel": "País",
+  "registerNationalitySubtitle": "Tu nacionalidad es privada: nos ayuda a recomendarte mejor y a cumplir con la ley.",
+  "registerNationalityTitle": "¿De dónde eres?",
+  "registerPasswordRuleLength": "8 caracteres",
+  "registerPasswordRuleMet": "{rule}: cumplido",
+  "@registerPasswordRuleMet": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      }
+    }
+  },
+  "registerPasswordRuleNumber": "Un número",
+  "registerPasswordRulePending": "{rule}: pendiente",
+  "@registerPasswordRulePending": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      }
+    }
+  },
+  "registerPasswordRuleUpper": "Una mayúscula",
+  "registerPasswordSubtitle": "Usa al menos 8 caracteres, una mayúscula y un número.",
+  "registerPasswordTitle": "Cree una contraseña",
+  "registerUsernameLabel": "Nombre de usuario",
+  "registerUsernameSubtitle": "Este nombre será visible dentro de K’Plan",
+  "registerUsernameTitle": "Cree un nombre de usuario",
+  "repoAccessDemoExperienceLocal": "6 años en Granada: historia colonial y gastronomía.",
+  "repoAccessDemoExperienceNational": "9 años con recorridos de arquitectura colonial y leyendas.",
+  "repoAccessSignInFirst": "Inicia sesión primero",
+  "repoApplicantDefaultMessage": "¡Me encantaría acompañarte en este recorrido!",
+  "repoApplicantHasVehicle": "Tengo vehículo propio para tu grupo.",
+  "repoApplicantStrengths": "Mi fuerte: {specialties}.",
+  "@repoApplicantStrengths": {
+    "placeholders": {
+      "specialties": {
+        "type": "String"
+      }
+    }
+  },
+  "repoApplicantTourInLanguage": "Puedo dar todo el recorrido en {language}.",
+  "@repoApplicantTourInLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "repoApplicantTranslatorMessage": "Traduzco en tiempo real durante todo el recorrido.",
+  "repoApplicantTranslatorMessageToLanguage": "Traduzco en tiempo real del español al {language} durante todo el recorrido.",
+  "@repoApplicantTranslatorMessageToLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "repoAuthAccountCreated": "Tu cuenta quedó creada. Inicia sesión para entrar.",
+  "repoAuthAccountNotFound": "No hemos encontrado esta cuenta",
+  "repoAuthGoogleFailed": "No pudimos entrar con Google, intenta de nuevo",
+  "repoAuthInvalidCode": "El código no es válido",
+  "repoAuthMissingData": "Faltan datos para crear la cuenta",
+  "repoAuthWrongCredentials": "Correo o contraseña incorrectos",
+  "repoChatReplyMeetingPoint": "Perfecto, nos vemos en el punto de encuentro. ¡Puntual!",
+  "repoChatReplyQuestions": "Cualquier duda antes del recorrido, escríbeme por aquí.",
+  "repoChatReplyWelcome": "¡Hola! Con gusto te acompaño en el recorrido.",
+  "repoInboxReplyEarlier": "¿Podemos empezar 15 minutos antes?",
+  "repoInboxReplyNoted": "Genial, gracias por avisar.",
+  "repoInboxReplySeeYou": "Ahí estaremos. ¡Nos vemos!",
+  "repoInboxReplyThanks": "¡Perfecto, gracias!",
+  "repoInlineLanguageEnglish": "inglés",
+  "repoInlineLanguageFrench": "francés",
+  "repoInlineLanguageGerman": "alemán",
+  "repoInlineLanguageItalian": "italiano",
+  "repoInlineLanguagePortuguese": "portugués",
+  "repoInlineLanguageSpanish": "español",
+  "repoNetworkCommunicationError": "Ocurrió un error de comunicación con el servidor",
+  "repoNetworkConnectionTimeout": "Tiempo de conexión agotado",
+  "repoNetworkNoConnection": "No hay conexión a internet",
+  "repoNetworkRetryIn": "{message} Puedes reintentar en {wait}.",
+  "@repoNetworkRetryIn": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "wait": {
+        "type": "String"
+      }
+    }
+  },
+  "repoNetworkServerTimeout": "El servidor tardó demasiado en responder",
+  "repoNetworkSessionExpired": "Sesión expirada, vuelve a iniciar sesión",
+  "repoNetworkTooManyAttempts": "Demasiados intentos, espera un momento e intenta de nuevo",
+  "repoNetworkWaitMinutes": "{count, plural, =1{1 minuto} other{{count} minutos}}",
+  "@repoNetworkWaitMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repoNetworkWaitSeconds": "{count, plural, =1{1 segundo} other{{count} segundos}}",
+  "@repoNetworkWaitSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repoNotificationBookingChanges": "Cambios en mis reservas",
+  "repoNotificationNewsAndBenefits": "Beneficios y novedades",
+  "repoNotificationSavedEvents": "Eventos guardados",
+  "repoNotificationTripReminders": "Recordatorios de viajes",
+  "repoSpecialtiesPair": "{first} y {second}",
+  "@repoSpecialtiesPair": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      }
+    }
+  },
+  "repoTouristNotFound": "No encontramos a este turista",
+  "repoTouristRateOnce": "Solo puedes calificar una vez, después de terminar el viaje",
+  "repoTouristRateStars": "Elige de 1 a 5 estrellas",
+  "repoTouristRatingToday": "hoy",
+  "repoWorkAmountExceedsAvailable": "Solo tienes {amount} disponibles",
+  "@repoWorkAmountExceedsAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "repoWorkAmountInvalid": "Escribe un monto mayor a cero",
+  "repoWorkGuideFallbackName": "Guía de K’Plan",
+  "repoWorkHireGreeting": "¡Hola! Te contraté para {circuitTitle}. ¿Dónde nos vemos?",
+  "@repoWorkHireGreeting": {
+    "placeholders": {
+      "circuitTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "repoWorkJobNotFound": "No encontramos esta propuesta",
+  "repoWorkJobNotOpen": "Ya no puedes postularte a esta propuesta",
+  "repoWorkPriceInvalid": "Escribe un precio mayor a cero",
+  "repoWorkSampleBankAccount": "Cuenta de ejemplo •••• 0000",
+  "repoWorkWithdrawLoginRequired": "Inicia sesión como guía para retirar",
+  "routeMapAllowLocationInSettings": "Permite la ubicación en los ajustes para verte en el mapa",
+  "routeMapAlreadyHere": "Ya estás aquí",
+  "routeMapArrival": "Llegada {time}",
+  "@routeMapArrival": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapArrivalDelay": "Llegada {time} · {delay}",
+  "@routeMapArrivalDelay": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapBadgeEarned": "Insignia de {category} obtenida",
+  "@routeMapBadgeEarned": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapBadgeToEarn": "Escanea su código QR para ganar la insignia de {category}",
+  "@routeMapBadgeToEarn": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapCenterPlace": "Centrar el lugar",
+  "routeMapDemoQrTooltip": "Ver código de prueba",
+  "routeMapDirections": "Cómo llegar",
+  "routeMapDistanceFromYou": "A {distance} de ti · {label}",
+  "@routeMapDistanceFromYou": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapEndTrip": "Finalizar viaje",
+  "routeMapFreeEntry": "Entrada libre",
+  "routeMapGoToNext": "Ir a la siguiente: {name}",
+  "@routeMapGoToNext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapLocationHint": "Activa tu ubicación para verte en el mapa",
+  "routeMapLocationOffInSettings": "Apagaste la ubicación en Configuraciones",
+  "routeMapMyCircuit": "Mi circuito",
+  "routeMapMyLocation": "Mi ubicación",
+  "routeMapNextStop": "Siguiente: {name}",
+  "@routeMapNextStop": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapNextStopOverline": "Siguiente parada",
+  "routeMapNoLocation": "Sin tu ubicación, el mapa no puede mostrarte",
+  "routeMapNoStops": "Este circuito todavía no tiene paradas",
+  "routeMapOpenHours": "Abierto de {hours}",
+  "@routeMapOpenHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapOverlineEvent": "Evento",
+  "routeMapOverlineStop": "Parada",
+  "routeMapScanQr": "Escanear código QR",
+  "routeMapSearchingLocation": "Buscando tu ubicación…",
+  "routeMapSettingsAction": "Ajustes",
+  "routeMapShowWholeRoute": "Ver todo el recorrido",
+  "routeMapStopCount": "{count, plural, =1{1 parada} other{{count} paradas}}",
+  "@routeMapStopCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "routeMapStopOfTotal": "Parada {number} de {total}",
+  "@routeMapStopOfTotal": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "routeMapStopSkipped": "Parada {number} · Saltada",
+  "@routeMapStopSkipped": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "routeMapStopVisited": "Parada {number} · Visitada",
+  "@routeMapStopVisited": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "routeMapSuggestedVisit": "Visita sugerida: {duration}",
+  "@routeMapSuggestedVisit": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapTapStopHint": "Toca una parada para ver su información",
+  "routeMapTips": "Recomendaciones",
+  "routeMapTripComplete": "¡Recorrido completo!",
+  "routeMapTripEnded": "Viaje finalizado",
+  "routeMapTurnOn": "Activar",
+  "routeMapTurnOnPhoneLocation": "Enciende la ubicación del teléfono para verte en el mapa",
+  "routeMapVisitConfirmed": "¡Visita a {name} confirmada!",
+  "@routeMapVisitConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapWhySkip": "¿Por qué saltas {name}?",
+  "@routeMapWhySkip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "routeMapYouSkipped": "La saltaste",
+  "routeMapYouSkippedReason": "La saltaste · {reason}",
+  "@routeMapYouSkippedReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "savedEmpty": "Todavía no guardaste nada",
+  "savedEmptyMessage": "Toca el marcador de un circuito, una parada o un evento y lo encontrarás aquí.",
+  "savedHeadline": "Tus próximos descubrimientos",
+  "savedSectionPlaces": "Lugares",
+  "settingsAccountAddName": "Agrega tu nombre",
+  "settingsAccountChangePasswordSubtitle": "Con tu contraseña actual",
+  "settingsAccountLoginEmail": "Correo de acceso",
+  "settingsAccountNameRequired": "Escribe tu nombre",
+  "settingsAccountNameTitle": "Tu nombre",
+  "settingsAccountPersonalData": "Datos personales",
+  "settingsAccountTitle": "Cuenta",
+  "settingsAccountTwoFactorOff": "Pide un código extra al entrar",
+  "settingsAccountTwoFactorOn": "Activa",
+  "settingsAccountTwoFactorTitle": "Verificación en dos pasos",
+  "settingsBookingHelpBody": "En Mis viajes ves la fecha, la hora de salida, las personas y, si lo contrataste, tu guía. Antes de cancelar, revisa las condiciones del servicio en el detalle del circuito.",
+  "settingsBookingHelpHeading": "Encuentra los detalles de tu viaje",
+  "settingsBookingHelpTitle": "Ayuda con mi reserva",
+  "settingsBookingHelpViewTrips": "Ver mis viajes",
+  "settingsChangePassword": "Cambiar contraseña",
+  "settingsContactSupport": "Contactar soporte",
+  "settingsDataUsageBody": "La ubicación sirve para mostrarte en el mapa durante un recorrido; puedes apagarla en Privacidad. Tu correo y tu nombre se usan para gestionar tu cuenta y tus reservas.",
+  "settingsDataUsageHeading": "Tú decides qué compartir",
+  "settingsDataUsageRightsBody": "Puedes pedir una copia de tus datos o que los borremos escribiéndole al equipo de soporte.",
+  "settingsDataUsageRightsTitle": "Tus derechos",
+  "settingsDataUsageTitle": "Uso de tus datos",
+  "settingsDataUsageWriteSupport": "Escribir a soporte",
+  "settingsHelpBookingSubtitle": "Confirmaciones y cancelaciones",
+  "settingsHelpBookingTitle": "Mi reserva",
+  "settingsHelpContactSubtitle": "Cuéntanos qué ocurrió",
+  "settingsHelpHeading": "¿En qué podemos ayudarte?",
+  "settingsHelpPrivacySubtitle": "Controles de tus datos",
+  "settingsHelpPrivacyTitle": "Privacidad",
+  "settingsHelpTitle": "Ayuda y soporte",
+  "settingsHomeAccount": "Cuenta",
+  "settingsHomeAccountSubtitle": "Datos y acceso",
+  "settingsHomeHelp": "Ayuda y soporte",
+  "settingsHomeHelpSubtitle": "Preguntas y contacto",
+  "settingsHomeNotificationsOff": "Todos los avisos apagados",
+  "settingsHomeNotificationsOn": "Viajes, reservas y eventos",
+  "settingsHomePrivacy": "Privacidad y seguridad",
+  "settingsHomePrivacySubtitle": "Ubicación y datos personales",
+  "settingsLogoutNote": "Tus guardados y viajes siguen asociados a tu cuenta.",
+  "settingsLogoutTitle": "¿Cerrar tu sesión?",
+  "settingsNotificationsHeading": "Mantente al tanto",
+  "settingsNotificationsPermissionNote": "El permiso para mostrar notificaciones se cambia desde la configuración del teléfono.",
+  "settingsPasswordChangeCurrent": "Contraseña actual",
+  "settingsPasswordChangeCurrentRequired": "Escribe tu contraseña actual",
+  "settingsPasswordChangedDemoNote": "Demostración: no hay un servidor que la guarde.",
+  "settingsPasswordChangedLogInAgain": "Contraseña actualizada. Vuelve a entrar.",
+  "settingsPasswordChangedMessage": "Tu contraseña nueva ya sirve.",
+  "settingsPasswordChangedTitle": "Contraseña actualizada",
+  "settingsPasswordChangeIntro": "Por seguridad, al cambiarla cerraremos tu sesión en todos tus dispositivos y tendrás que volver a entrar.",
+  "settingsPasswordChangeRepeat": "Repite la contraseña nueva",
+  "settingsPasswordResetBackToAccount": "Volver a Cuenta",
+  "settingsPrivacyAccountSecurity": "Seguridad de la cuenta",
+  "settingsPrivacyDataUsageSubtitle": "Información y controles",
+  "settingsPrivacyPersonalize": "Personalizar recomendaciones",
+  "settingsPrivacyPersonalizeDescription": "Según los circuitos que guardas y recorres",
+  "settingsPrivacyShowBadges": "Mostrar insignias en mi perfil",
+  "settingsPrivacyTitle": "Privacidad y seguridad",
+  "settingsPrivacyUseLocation": "Usar ubicación al explorar",
+  "settingsPrivacyUseLocationDescription": "Para verte en el mapa durante un recorrido",
+  "settingsSupportBackToHelp": "Volver a Ayuda",
+  "settingsSupportDemoNote": "Demostración: por ahora el mensaje no sale de tu teléfono.",
+  "settingsSupportMessage": "Mensaje",
+  "settingsSupportMessageHint": "Qué pasó, en qué circuito y cuándo",
+  "settingsSupportMessageRequired": "Escribe tu mensaje",
+  "settingsSupportReplyTo": "Te responderemos a {email}.",
+  "@settingsSupportReplyTo": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSupportSend": "Enviar consulta",
+  "settingsSupportSentMessage": "El equipo de soporte te responderá a {email}.",
+  "@settingsSupportSentMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSupportSentPanelTitle": "Tu consulta está lista",
+  "settingsSupportSentTitle": "Consulta enviada",
+  "settingsSupportSubject": "Asunto",
+  "settingsSupportSubjectHint": "Ej. Consulta sobre mi reserva",
+  "settingsSupportSubjectRequired": "Cuéntanos de qué se trata",
+  "sharedAddToCircuit": "Añadir a un circuito",
+  "sharedAlwaysUseOption": "Usar siempre esta opción",
+  "sharedBadgeEarnedSubtitle": "{category} · ¡Sigue así!",
+  "@sharedBadgeEarnedSubtitle": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedBadgeEarnedTitle": "+1 insignia",
+  "sharedChangeArrivalTime": "Cambiar hora de llegada, {time}",
+  "@sharedChangeArrivalTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedCloseHint": "cerrar",
+  "sharedContinueTrip": "Seguir el viaje",
+  "sharedCreativeBannerBody": "Lo creó la {organizer}. Se hace en grupo: te inscribes en un horario publicado por un guía certificado.",
+  "@sharedCreativeBannerBody": {
+    "placeholders": {
+      "organizer": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedCreativeBannerBodyNoOrganizer": "Lo creó una alcaldía. Se hace en grupo: te inscribes en un horario publicado por un guía certificado.",
+  "sharedCreativeBannerTitle": "Circuito creativo oficial",
+  "sharedCreativeCircuitBadge": "Circuito creativo",
+  "sharedCreativeCityMedal": "Medalla de {city}",
+  "@sharedCreativeCityMedal": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedCreativeExtraBadges": "{count, plural, =1{+1 insignia extra} other{+{count} insignias extra}}",
+  "@sharedCreativeExtraBadges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedDirectionsWithTitle": "Cómo llegar con...",
+  "sharedDragToReorder": "Arrastrar para cambiar el orden",
+  "sharedDropWhyWeAsk": "Nos ayuda a mejorar los circuitos y a que cada lugar sepa qué pasó.",
+  "sharedEndTrip": "Finalizar",
+  "sharedFilterAll": "Todas",
+  "sharedHidePassword": "Ocultar contraseña",
+  "sharedHiredCoordinate": "Coordina el punto de encuentro por el chat.",
+  "sharedHiredGoToChat": "Ir al chat",
+  "sharedHiredName": "¡Contrataste a {name}!",
+  "@sharedHiredName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedHiredTeamReady": "¡Tu equipo está listo!",
+  "sharedItineraryEnds": "Termina aprox. {time}",
+  "@sharedItineraryEnds": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedItineraryFreeTime": "{travel} · {duration} libres",
+  "@sharedItineraryFreeTime": {
+    "placeholders": {
+      "travel": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedItineraryTravelTime": "{duration} de traslados",
+  "@sharedItineraryTravelTime": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedItineraryWarningsTitle": "Para tener en cuenta",
+  "sharedMapStart": "Inicio",
+  "sharedNationalityNoResults": "No encontramos ese país",
+  "sharedNationalitySearchHint": "Busca tu país",
+  "sharedNationalityTitle": "Tu nacionalidad",
+  "sharedNavProfile": "Perfil",
+  "sharedNewCircuitCreate": "Crear",
+  "sharedNewCircuitEmpty": "Ponle un nombre a tu circuito",
+  "sharedNewCircuitHint": "Ej. Fin de semana en el sur",
+  "sharedNewCircuitTitle": "Nuevo circuito",
+  "sharedOpenAppFailed": "No se pudo abrir {app}",
+  "@sharedOpenAppFailed": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedOpenWithTitle": "Abrir circuito con...",
+  "sharedRemoveFromSaved": "Quitar de guardados",
+  "sharedReorderHint": "Arrastra cada parada a su lugar. Los horarios del itinerario se recalculan solos.",
+  "sharedReorderSave": "Guardar orden",
+  "sharedReorderTitle": "Ordenar paradas",
+  "sharedReviewsCount": "{count, plural, =1{(1 reseña)} other{({count} reseñas)}}",
+  "@sharedReviewsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedSearchByVoice": "Buscar por voz",
+  "sharedShowPassword": "Mostrar contraseña",
+  "sharedSkip": "Saltar",
+  "sharedStopBadge": "Insignia",
+  "sharedTimePickerHour": "Hora",
+  "sharedTimePickerMinutes": "Minutos",
+  "sharedTripAllStopsDone": "Ya pasaste por todas las paradas. Toca Finalizar para cerrar el viaje.",
+  "sharedTripArrivedAt": "Llegaste a las {time}",
+  "@sharedTripArrivedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedTripConflictBody": "Estás recorriendo {title}. Sólo se puede seguir un circuito a la vez: finalízalo para comenzar este.",
+  "@sharedTripConflictBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedTripConflictEndAndStart": "Finalizar ese y comenzar este",
+  "sharedTripConflictGoToActive": "Ir al viaje en curso",
+  "sharedTripConflictTitle": "Ya tienes un viaje en curso",
+  "sharedTripDelayed": "Vas {duration} atrasado",
+  "@sharedTripDelayed": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedTripEndSubtitle": "¿Por qué no fuiste? Es opcional. Nos ayuda a mejorar los circuitos y a que cada lugar sepa qué pasó.",
+  "sharedTripEndTitle": "{count, plural, =1{Te quedó 1 parada sin visitar} other{Te quedaron {count} paradas sin visitar}}",
+  "@sharedTripEndTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedTripInProgress": "Viaje en curso · {checked}/{total} paradas confirmadas",
+  "@sharedTripInProgress": {
+    "placeholders": {
+      "checked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sharedTripNextDelay": "Siguiente · {delay}",
+  "@sharedTripNextDelay": {
+    "placeholders": {
+      "delay": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedTripNextStop": "Siguiente: {name} · {time}",
+  "@sharedTripNextStop": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedTripOnTime": "Vas a tiempo",
+  "sharedTripSkippedReason": "Saltada · {reason}",
+  "@sharedTripSkippedReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "sharedVerificationCode": "Código de verificación",
+  "stopDetailAddedToCircuit": "Añadida a este circuito",
+  "stopDetailAddToCircuit": "Añadir a un circuito",
+  "stopDetailBadgeAwarded": "Esta parada otorga una insignia de {category}",
+  "@stopDetailBadgeAwarded": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "stopDetailBadgeEarned": "Insignia de {category} obtenida",
+  "@stopDetailBadgeEarned": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "stopDetailCircuitCreated": "Circuito \"{title}\" creado",
+  "@stopDetailCircuitCreated": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "stopDetailConfirmed": "¡Parada confirmada!",
+  "stopDetailMoreOptions": "Más opciones",
+  "stopDetailNewCircuit": "Crear circuito nuevo",
+  "stopDetailNewCircuitHint": "Y añadir esta parada ahí",
+  "stopDetailNoCircuits": "Todavía no tienes circuitos",
+  "stopDetailOpenHours": "Abierto de {hours}",
+  "@stopDetailOpenHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "stopDetailQrAim": "Apunta la cámara al código QR de la parada",
+  "stopDetailQrDemoHint": "Escanéalo desde el detalle de esta parada para reclamar su insignia.",
+  "stopDetailQrDemoTitle": "Código QR (demo)",
+  "stopDetailQrWrongStop": "Ese código no es de esta parada",
+  "stopDetailSavedIn": "Guardado en",
+  "stopDetailScanQr": "Escanear código QR",
+  "stopDetailShowDemoQr": "Ver código de prueba",
+  "utilAdvisorAddTitle": "Agregar {stop}",
+  "@utilAdvisorAddTitle": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorExtraInterestMessage": "Te sobra {slack} en el día. Como te interesa {category}, agrega {stop}: {duration} de visita, {leg}.",
+  "@utilAdvisorExtraInterestMessage": {
+    "placeholders": {
+      "slack": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "stop": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      },
+      "leg": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorExtraMessage": "Te sobra {slack} en el día. Agrega {stop}: {duration} de visita, {leg}.",
+  "@utilAdvisorExtraMessage": {
+    "placeholders": {
+      "slack": {
+        "type": "String"
+      },
+      "stop": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      },
+      "leg": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorFirstStopNote": "es la primera parada",
+  "utilAdvisorLunchMessage": "Tu día pasa por el mediodía y no tiene parada para comer. En {stop} llegarías a las {arrival} ({leg}).",
+  "@utilAdvisorLunchMessage": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "arrival": {
+        "type": "String"
+      },
+      "leg": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorLunchTitle": "Almorzar en {stop}",
+  "@utilAdvisorLunchTitle": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorRemoveClosedMessage": "{stop} cierra a las {closes} y no alcanzarías a visitarla: saldrías a las {departure}",
+  "@utilAdvisorRemoveClosedMessage": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "closes": {
+        "type": "String"
+      },
+      "departure": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorRemoveEndsLateMessage": "Terminarías a las {lateEnd}, ya de noche. Si quitas {stop}, terminas a las {end}",
+  "@utilAdvisorRemoveEndsLateMessage": {
+    "placeholders": {
+      "lateEnd": {
+        "type": "String"
+      },
+      "stop": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorRemoveTitle": "Quitar {stop}",
+  "@utilAdvisorRemoveTitle": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorRemoveTooLongMessage": "Tu día duraría {duration} y con ritmo {pace} conviene no pasar de {maxDuration}. Si quitas {stop}, terminas a las {end}",
+  "@utilAdvisorRemoveTooLongMessage": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "pace": {
+        "type": "String"
+      },
+      "maxDuration": {
+        "type": "String"
+      },
+      "stop": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorReorderMessage": "Si cambias el orden de las paradas ahorras {saved} de traslado.",
+  "@utilAdvisorReorderMessage": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorReorderTitle": "Cambiar el orden",
+  "utilAdvisorStartLaterMessage": "Llegarías a {stop} a las {arrival} y abre a las {opens} Si sales a las {startTime}, llegas con todo abierto.",
+  "@utilAdvisorStartLaterMessage": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "arrival": {
+        "type": "String"
+      },
+      "opens": {
+        "type": "String"
+      },
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorStartLaterTitle": "Salir a las {startTime}",
+  "@utilAdvisorStartLaterTitle": {
+    "placeholders": {
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorToStartNote": "para empezar",
+  "utilAdvisorVehicleMessage": "{count, plural, =1{Hay un tramo} other{Hay {count} tramos}} de más de {km} km a pie. En vehículo ahorras {saved} y los cortos los sigues caminando.",
+  "@utilAdvisorVehicleMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "km": {
+        "type": "String"
+      },
+      "saved": {
+        "type": "String"
+      }
+    }
+  },
+  "utilAdvisorVehicleTitle": "Moverte en vehículo",
+  "utilMedalBronze": "Bronce",
+  "utilMedalGold": "Oro",
+  "utilMedalNone": "Sin medalla",
+  "utilMedalSilver": "Plata",
+  "utilPlannerArrivesAfterClosing": "Llegarías a {stop} a las {arrival}, cuando ya cerró (cierra a las {closes}).",
+  "@utilPlannerArrivesAfterClosing": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "arrival": {
+        "type": "String"
+      },
+      "closes": {
+        "type": "String"
+      }
+    }
+  },
+  "utilPlannerArrivesBeforeOpening": "Llegarías a {stop} a las {arrival} y abre a las {opens}",
+  "@utilPlannerArrivesBeforeOpening": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "arrival": {
+        "type": "String"
+      },
+      "opens": {
+        "type": "String"
+      }
+    }
+  },
+  "utilPlannerEndsLate": "Terminarías a las {end}, ya de noche.",
+  "@utilPlannerEndsLate": {
+    "placeholders": {
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "utilPlannerLeavesAfterClosing": "{stop} cierra a las {closes} y saldrías a las {departure}",
+  "@utilPlannerLeavesAfterClosing": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "closes": {
+        "type": "String"
+      },
+      "departure": {
+        "type": "String"
+      }
+    }
+  },
+  "utilPlannerLongWalk": "De {origin} a {destination} son {distance} a pie ({duration}). Si prefieres, haz ese tramo en taxi o en vehículo.",
+  "@utilPlannerLongWalk": {
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "utilPlannerMissedTime": "No alcanzas a llegar a {stop} a las {fixed}: llegarías a las {arrival}.",
+  "@utilPlannerMissedTime": {
+    "placeholders": {
+      "stop": {
+        "type": "String"
+      },
+      "fixed": {
+        "type": "String"
+      },
+      "arrival": {
+        "type": "String"
+      }
+    }
+  },
+  "validatorEmailInvalid": "El correo no es válido",
+  "validatorEmailRequired": "Ingresa tu correo electrónico",
+  "validatorNewPasswordRules": "Usa al menos 8 caracteres, una mayúscula y un número",
+  "validatorPasswordMinLength": "Mínimo {count} caracteres",
+  "@validatorPasswordMinLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "validatorPasswordRequired": "Ingresa tu contraseña",
+  "validatorPhoneInvalid": "El teléfono no es válido",
+  "validatorPhoneRequired": "Ingresa un teléfono de contacto",
+  "validatorUsernameInvalid": "De 3 a 20 letras, números, puntos o guiones bajos",
+  "validatorUsernameRequired": "Ingresa un nombre de usuario",
+  "welcomeGuideSubtitle": "Accede o postula tus servicios",
+  "welcomeSubtitle": "Elige cómo quieres continuar.",
+  "welcomeTitle": "Bienvenido",
+  "welcomeTouristSubtitle": "Explora y organiza tus viajes"
+}

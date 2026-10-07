@@ -1,3 +1,4 @@
+import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/age.dart' as age;
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
@@ -178,8 +179,11 @@ class GuideApplicationViewModel extends BaseViewModel {
 
   /// "Guía local · Granada" o "Todo el territorio nicaragüense".
   String get coverageSummary => switch (_coverage) {
-    GuideCoverage.national => 'Todo el territorio nicaragüense',
-    GuideCoverage.local => 'Solo en ${_catalogs?.cityName(_cityId) ?? ''}',
+    GuideCoverage.national =>
+      AppStrings.current.guideAccessCoverageSummaryNational,
+    GuideCoverage.local => AppStrings.current.guideAccessCoverageSummaryLocal(
+      _catalogs?.cityName(_cityId) ?? '',
+    ),
     null => '',
   };
 
@@ -311,20 +315,23 @@ class GuideApplicationViewModel extends BaseViewModel {
   static String? _problemOf(CredentialType type, DocumentForm form) {
     final today = DateTime.now();
     final day = DateTime(today.year, today.month, today.day);
-    if (form.file == null) return 'Adjunta el archivo';
-    if (form.number.trim().isEmpty) return 'Escribe el número del documento';
+    final l10n = AppStrings.current;
+    if (form.file == null) return l10n.guideAccessDocumentAttachFile;
+    if (form.number.trim().isEmpty) {
+      return l10n.guideAccessDocumentNumberRequired;
+    }
     final issued = form.issuedOn;
-    if (issued == null) return 'Elige la fecha de emisión';
-    if (issued.isAfter(day)) return 'La fecha de emisión no puede ser futura';
+    if (issued == null) return l10n.guideAccessDocumentIssuedRequired;
+    if (issued.isAfter(day)) return l10n.guideAccessDocumentIssuedFuture;
     final expires = form.expiresOn;
     if (type.requiresExpiry && expires == null) {
-      return 'Elige la fecha de vencimiento';
+      return l10n.guideAccessDocumentExpiresRequired;
     }
     if (expires != null && !expires.isAfter(issued)) {
-      return 'El vencimiento tiene que ser posterior a la emisión';
+      return l10n.guideAccessDocumentExpiresBeforeIssued;
     }
     if (expires != null && !expires.isAfter(day)) {
-      return 'El documento ya venció: sube uno vigente';
+      return l10n.guideAccessDocumentAlreadyExpired;
     }
     return null;
   }
@@ -385,10 +392,10 @@ class GuideApplicationViewModel extends BaseViewModel {
     final dot = name.lastIndexOf('.');
     final extension = dot < 0 ? '' : name.substring(dot + 1).toLowerCase();
     if (!allowedExtensions.contains(extension)) {
-      return 'Adjunta un archivo PDF, JPG o PNG.';
+      return AppStrings.current.guideAccessFileTypeProblem;
     }
     if (sizeBytes != null && sizeBytes > maxFileBytes) {
-      return 'El archivo pesa más de 10 MB. Elige uno más liviano.';
+      return AppStrings.current.guideAccessFileSizeProblem;
     }
     return null;
   }

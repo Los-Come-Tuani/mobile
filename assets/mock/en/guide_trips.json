@@ -1,0 +1,199 @@
+[
+  {
+    "guideEmail": "guia@kplan.com",
+    "rating": 4.6,
+    "reviewsCount": 41,
+    "bankAccount": "BANPRO •••• 4821",
+    "withdrawals": [{ "id": "w-esteban-1", "amount": 1200, "daysAgo": 12 }],
+    "trips": [
+      {
+        "id": "trip-esteban-carlos",
+        "touristId": "tourist-carlos",
+        "circuitId": "granada-historias-sabores",
+        "circuitTitle": "Historic Granada",
+        "city": "Granada",
+        "daysFromNow": 1,
+        "startTime": "8:30 a.m.",
+        "groupSize": 4,
+        "need": "localGuide",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 1400,
+        "status": "upcoming",
+        "meetingPoint": "Catedral de Granada, main entrance",
+        "messages": [
+          {
+            "fromTourist": true,
+            "text": "Hi, Esteban! There are 4 of us, with two kids. Shall we meet at the Cathedral?",
+            "minutesAgo": 95
+          },
+          {
+            "fromTourist": false,
+            "text": "Hi, Carlos! Yes, at the main entrance at 8:30.",
+            "minutesAgo": 80
+          },
+          {
+            "fromTourist": true,
+            "text": "Perfect, we'll be there.",
+            "minutesAgo": 20,
+            "unread": true
+          }
+        ]
+      },
+      {
+        "id": "trip-esteban-werner",
+        "touristId": "tourist-werner",
+        "circuitId": "leon-colonial",
+        "circuitTitle": "Colonial León",
+        "city": "León",
+        "daysFromNow": 5,
+        "startTime": "8:00 a.m.",
+        "groupSize": 2,
+        "need": "bilingualGuide",
+        "touristLanguage": "Inglés",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 1000,
+        "status": "upcoming",
+        "meetingPoint": "Parque Central de León",
+        "messages": [
+          {
+            "fromTourist": true,
+            "text": "Hi Esteban! We land on Friday night. Is 8 a.m. fine for you?",
+            "minutesAgo": 300,
+            "unread": true
+          }
+        ]
+      },
+      {
+        "id": "trip-esteban-sophie",
+        "touristId": "tourist-sophie",
+        "circuitId": "granada-historias-sabores",
+        "circuitTitle": "Historic Granada",
+        "city": "Granada",
+        "daysFromNow": -6,
+        "startTime": "9:00 a.m.",
+        "groupSize": 2,
+        "need": "bilingualGuide",
+        "touristLanguage": "Francés",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 1000,
+        "status": "completed",
+        "meetingPoint": "Parque Central de Granada",
+        "touristRated": false,
+        "messages": [
+          {
+            "fromTourist": true,
+            "text": "Merci, Esteban! We loved the tour.",
+            "minutesAgo": 8500
+          }
+        ]
+      },
+      {
+        "id": "trip-esteban-emily",
+        "touristId": "tourist-emily",
+        "circuitId": "masaya-artesanias-volcan",
+        "circuitTitle": "Artisan Masaya",
+        "city": "Masaya",
+        "daysFromNow": -15,
+        "startTime": "3:00 p.m.",
+        "groupSize": 3,
+        "need": "bilingualGuide",
+        "touristLanguage": "Inglés",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 1100,
+        "status": "completed",
+        "meetingPoint": "Masaya Crafts Market",
+        "touristRated": true
+      },
+      {
+        "id": "trip-esteban-julia",
+        "touristId": "tourist-julia",
+        "circuitId": "esteli-murales-tabaco",
+        "circuitTitle": "Creative Estelí",
+        "city": "Estelí",
+        "daysFromNow": -24,
+        "startTime": "8:00 a.m.",
+        "groupSize": 2,
+        "need": "localGuide",
+        "serviceHours": 6,
+        "transport": "onFoot",
+        "agreedPrice": 840,
+        "status": "completed",
+        "meetingPoint": "Catedral de Estelí",
+        "touristRated": true
+      }
+    ]
+  },
+  {
+    "guideEmail": "guia.granada@kplan.com",
+    "rating": 4.8,
+    "reviewsCount": 63,
+    "bankAccount": "LAFISE •••• 1307",
+    "withdrawals": [{ "id": "w-marlene-1", "amount": 800, "daysAgo": 8 }],
+    "trips": [
+      {
+        "id": "trip-marlene-marco",
+        "touristId": "tourist-marco",
+        "circuitId": "granada-historias-sabores",
+        "circuitTitle": "Historic Granada",
+        "city": "Granada",
+        "daysFromNow": 2,
+        "startTime": "9:00 a.m.",
+        "groupSize": 2,
+        "need": "localGuide",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 700,
+        "status": "upcoming",
+        "meetingPoint": "Parque Central de Granada, across from the Cathedral",
+        "messages": [
+          {
+            "fromTourist": true,
+            "text": "Hi, Marlene! Anything you'd recommend bringing for the heat?",
+            "minutesAgo": 45,
+            "unread": true
+          }
+        ]
+      },
+      {
+        "id": "trip-marlene-daniel",
+        "touristId": "tourist-daniel",
+        "circuitId": "",
+        "circuitTitle": "Natural Granada",
+        "city": "Granada",
+        "daysFromNow": -3,
+        "startTime": "7:00 a.m.",
+        "groupSize": 3,
+        "need": "bilingualGuide",
+        "touristLanguage": "Inglés",
+        "serviceHours": 6,
+        "transport": "onFoot",
+        "agreedPrice": 1200,
+        "status": "completed",
+        "meetingPoint": "Granada pier",
+        "touristRated": false
+      },
+      {
+        "id": "trip-marlene-emily",
+        "touristId": "tourist-emily",
+        "circuitId": "granada-historias-sabores",
+        "circuitTitle": "Historic Granada",
+        "city": "Granada",
+        "daysFromNow": -20,
+        "startTime": "8:30 a.m.",
+        "groupSize": 4,
+        "need": "bilingualGuide",
+        "touristLanguage": "Inglés",
+        "serviceHours": 5,
+        "transport": "onFoot",
+        "agreedPrice": 1000,
+        "status": "completed",
+        "meetingPoint": "Catedral de Granada",
+        "touristRated": true
+      }
+    ]
+  }
+]

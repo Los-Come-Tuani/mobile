@@ -7,14 +7,15 @@ import 'itinerary.dart';
 class CircuitCollection {
   CircuitCollection({
     required this.id,
-    required this.title,
+    required String title,
     required this.image,
     required this.isUserCreated,
     required List<String> stopIds,
     String startTime = defaultStartTime,
     TravelMode travelMode = TravelMode.walking,
     ItineraryPace pace = ItineraryPace.balanced,
-  }) : _stopIds = List<String>.of(stopIds),
+  }) : _title = title,
+       _stopIds = List<String>.of(stopIds),
        _startTime = startTime,
        _travelMode = travelMode,
        _pace = pace;
@@ -23,8 +24,18 @@ class CircuitCollection {
   static const String defaultStartTime = '9:00 a.m.';
 
   final String id;
-  final String title;
+  String _title;
   final String image;
+
+  String get title => _title;
+
+  /// Uso interno del repositorio: el título del catálogo en otro idioma.
+  /// `false` si ya era ese.
+  bool retitle(String value) {
+    if (_title == value) return false;
+    _title = value;
+    return true;
+  }
 
   /// `true` si lo creó el usuario desde la hoja "Añadir a un circuito".
   final bool isUserCreated;

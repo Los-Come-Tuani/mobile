@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -36,6 +37,7 @@ class _GuideChatsViewState extends State<GuideChatsView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final viewModel = context.watch<GuideChatsViewModel>();
     final threads = viewModel.threads;
 
@@ -49,12 +51,10 @@ class _GuideChatsViewState extends State<GuideChatsView> {
           : threads.isEmpty
           ? ListView(
               padding: AppTheme.screenPadding,
-              children: const [
+              children: [
                 EmptyState(
-                  title: 'Todavía no tienes conversaciones',
-                  message:
-                      'Cuando un turista te contrate, aquí coordinan el punto '
-                      'de encuentro.',
+                  title: l10n.guideAppChatsEmptyTitle,
+                  message: l10n.guideAppChatsEmptyMessage,
                 ),
               ],
             )
@@ -93,6 +93,7 @@ class _ThreadRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final last = thread.lastMessage;
     final hasUnread = thread.unread > 0;
     final trip = this.trip;
@@ -100,7 +101,7 @@ class _ThreadRow extends StatelessWidget {
     return MergeSemantics(
       child: Semantics(
         button: true,
-        label: hasUnread ? '${thread.unread} sin leer' : null,
+        label: hasUnread ? l10n.guideAppChatsUnread(thread.unread) : null,
         child: InkWell(
           onTap: onTap,
           child: Padding(
@@ -117,7 +118,7 @@ class _ThreadRow extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              tourist?.name ?? 'Turista',
+                              tourist?.name ?? l10n.commonTourist,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.cardTitle,
@@ -144,9 +145,10 @@ class _ThreadRow extends StatelessWidget {
                           Expanded(
                             child: Text(
                               last == null
-                                  ? 'Sin mensajes'
-                                  : '${last.isFromTourist ? '' : 'Tú: '}'
-                                        '${last.text}',
+                                  ? l10n.guideAppChatsNoMessages
+                                  : last.isFromTourist
+                                  ? last.text
+                                  : l10n.guideAppChatsYou(last.text),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.bodySmall.copyWith(
