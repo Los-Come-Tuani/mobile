@@ -15,7 +15,6 @@ GuideAccessRequest _guide({
   String? city,
   List<String> languages = const ['Español'],
 }) {
-  final document = GuideDocument(name: 'doc.pdf', uri: Uri.parse('demo:doc'));
   return GuideAccessRequest(
     fullName: 'Guía de prueba',
     phone: '+505 8888 0000',
@@ -24,8 +23,6 @@ GuideAccessRequest _guide({
     certifiedCity: city,
     languages: languages,
     experience: '3 años',
-    identityDocument: document,
-    inturCredential: document,
   );
 }
 

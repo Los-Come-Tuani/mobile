@@ -1,3 +1,5 @@
+import 'provider.dart';
+
 /// Usuario autenticado, con la forma que entrega el API (`GET /auth/profile/`).
 class User {
   const User({
@@ -11,6 +13,7 @@ class User {
     this.nationality = '',
     this.twoFactorEnabled = false,
     this.role,
+    this.provider,
   });
 
   final String id;
@@ -43,6 +46,10 @@ class User {
   /// Puede entrar a la app del guía: ofrece sus servicios como guía o como traductor.
   bool get providesServices => isGuide || isTranslator;
 
+  /// Su perfil de guía o traductor: en revisión, activo o suspendido. Nulo para quien no
+  /// es prestador (una cuenta, un papel: un turista no lo tiene).
+  final ProviderRef? provider;
+
   factory User.fromApi(Map<String, dynamic> json) {
     final twoFactor = json['two_factor'];
     return User(
@@ -56,6 +63,7 @@ class User {
       nationality: '${json['nationality'] ?? ''}',
       twoFactorEnabled: twoFactor is Map && twoFactor['enabled'] == true,
       role: json['role'] as String?,
+      provider: ProviderRef.fromApi(json['provider']),
     );
   }
 
@@ -70,6 +78,7 @@ class User {
     String? nationality,
     bool? twoFactorEnabled,
     String? role,
+    ProviderRef? provider,
   }) {
     return User(
       id: id ?? this.id,
@@ -82,6 +91,7 @@ class User {
       nationality: nationality ?? this.nationality,
       twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
       role: role ?? this.role,
+      provider: provider ?? this.provider,
     );
   }
 }

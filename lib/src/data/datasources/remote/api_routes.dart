@@ -30,6 +30,21 @@ abstract final class ApiRoutes {
   static const twoFactorRecovery = '/auth/two-factor-recovery/';
   static const twoFactorDisable = '/auth/two-factor-disable/';
 
+  // Archivos: una URL firmada para subir directo al almacenamiento
+  static const upload = '/upload/';
+
+  // Catálogos (públicos)
+  static const cities = '/catalog/city/';
+  static const languages = '/catalog/language/';
+  static const credentialTypes = '/catalog/credential-type/';
+
+  // Guías y traductores (F5, `docs/prestadores.md` del repo del API)
+  static const providerApplication = '/provider-application/';
+  static const providerApplicationMine = '/provider-application/mine/';
+  static const providerResubmit = '/provider-application/mine/resubmit/';
+  static const providerRenewal = '/provider-application/mine/renewal/';
+  static const providerProfile = '/provider-profile/mine/';
+
   /// En estas rutas un 401 es la respuesta de la acción (credenciales o código malos),
   /// no una sesión vencida: renovar la sesión solo escondería el error.
   static const Set<String> own401 = {

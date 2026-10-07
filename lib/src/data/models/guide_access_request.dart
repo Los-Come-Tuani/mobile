@@ -2,51 +2,23 @@ import 'guide_coverage.dart';
 
 export 'guide_coverage.dart';
 
-/// En qué va el acceso de guía de una cuenta. La misma cuenta sirve para
-/// entrar como turista o como guía; el rol de guía se habilita cuando el
-/// equipo de K'Plan aprueba su solicitud.
+/// En qué va el acceso de guía de una cuenta. Una cuenta ejerce un solo papel: la de
+/// un guía o traductor se crea al postularse y, mientras la revisan, solo ve su estado.
 enum GuideAccessStatus { none, pending, approved }
 
-/// Los pasos de la revisión de una solicitud, en el orden en que pasan.
-enum GuideReviewStep { submitted, documents, experience, decision }
-
-/// En qué va la revisión de una solicitud: cuándo terminó cada paso.
-class GuideReview {
-  const GuideReview({required this.finished});
-
-  /// Cuándo terminó cada paso, en el orden de [GuideReviewStep]. Los que no
-  /// están todavía no terminan.
-  final List<DateTime> finished;
-
-  /// El paso que se está revisando; `null` si ya terminaron todos.
-  GuideReviewStep? get current =>
-      finished.length < GuideReviewStep.values.length
-      ? GuideReviewStep.values[finished.length]
-      : null;
-
-  /// Cuándo terminó [step]; `null` si todavía no.
-  DateTime? finishedAt(GuideReviewStep step) =>
-      step.index < finished.length ? finished[step.index] : null;
-
-  /// La misma revisión con el paso actual terminado en [at].
-  GuideReview finishCurrent(DateTime at) =>
-      GuideReview(finished: [...finished, at]);
-}
-
-/// Un archivo adjunto a la solicitud: el documento de identidad, la
-/// credencial INTUR o una certificación.
+/// Un archivo elegido en el teléfono: el documento de identidad, la licencia, una foto.
 class GuideDocument {
   const GuideDocument({required this.name, required this.uri});
 
   /// Nombre con extensión, tal como lo verá el equipo de revisión.
   final String name;
 
-  /// Dónde está en el teléfono, para subirlo cuando exista el endpoint.
+  /// Dónde está en el teléfono, para subirlo.
   final Uri uri;
 }
 
-/// Lo que alguien envía para que el equipo de K'Plan habilite su rol de
-/// guía.
+/// El perfil del guía con que trabaja la app del guía: cómo se llama, dónde guía y qué
+/// habla. Sale de la postulación (o del perfil que entrega el API).
 class GuideAccessRequest {
   const GuideAccessRequest({
     required this.fullName,
@@ -56,9 +28,6 @@ class GuideAccessRequest {
     this.certifiedCity,
     required this.languages,
     required this.experience,
-    required this.identityDocument,
-    required this.inturCredential,
-    this.certificates = const [],
   }) : assert(
          (coverage == GuideCoverage.local) == (certifiedCity != null),
          'Sólo un guía local tiene ciudad de certificación',
@@ -78,11 +47,6 @@ class GuideAccessRequest {
   final String? certifiedCity;
   final List<String> languages;
 
-  /// En sus palabras: cuántos años y qué tipo de recorridos.
+  /// En sus palabras: lo que verá el turista.
   final String experience;
-  final GuideDocument identityDocument;
-  final GuideDocument inturCredential;
-
-  /// Formación adicional; es opcional.
-  final List<GuideDocument> certificates;
 }

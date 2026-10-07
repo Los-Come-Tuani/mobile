@@ -22,6 +22,7 @@ import '../data/datasources/repository/tour_repository.dart';
 import '../data/datasources/repository/tourist_repository.dart';
 import '../data/datasources/repository/visit_log_repository.dart';
 import '../data/models/guide_access_request.dart';
+import '../data/models/provider.dart';
 import '../data/models/user_role.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
@@ -49,7 +50,11 @@ import '../ui/guide_app/home/view/guide_home_view.dart';
 import '../ui/guide_app/home/viewmodels/guide_home_viewmodel.dart';
 import '../ui/guide_app/job/view/guide_job_view.dart';
 import '../ui/guide_app/job/viewmodels/guide_job_viewmodel.dart';
+import '../ui/guide_app/profile/view/guide_profile_edit_view.dart';
+import '../ui/guide_app/profile/view/guide_renewal_view.dart';
 import '../ui/guide_app/profile/view/guide_self_profile_view.dart';
+import '../ui/guide_app/profile/viewmodels/guide_profile_edit_viewmodel.dart';
+import '../ui/guide_app/profile/viewmodels/guide_renewal_viewmodel.dart';
 import '../ui/guide_app/tourist/view/tourist_profile_view.dart';
 import '../ui/guide_app/tourist/viewmodels/tourist_profile_viewmodel.dart';
 import '../ui/guide_app/trips/view/guide_trip_view.dart';
@@ -127,10 +132,18 @@ GoRouter createRouter(AuthRepository authRepository) {
         return location == Routes.guideStatus ? null : Routes.guideStatus;
       }
       if (authRepository.isLoggedIn && isPublic) {
-        return location == Routes.guideLogin ? Routes.guideAccess : Routes.home;
+        // Una cuenta, un papel: la de un guía entra a la app del guía por cualquier login.
+        return location == Routes.guideLogin || guideAccess.isApproved
+            ? Routes.guideAccess
+            : Routes.home;
       }
       if (Routes.isGuideApp(location) && !guideAccess.isApproved) {
         return Routes.guideAccess;
+      }
+      // Los flujos de entrada terminan en el inicio del turista; la cuenta de un guía
+      // no tiene inicio de turista.
+      if (location == Routes.home && guideAccess.isApproved) {
+        return Routes.guideHome;
       }
       return null;
     },
@@ -238,6 +251,11 @@ GoRouter createRouter(AuthRepository authRepository) {
               create: (context) => GuideApplicationViewModel(
                 context.read<AuthRepository>(),
                 context.read<GuideAccessRepository>(),
+                // Desde el estado de una solicitud rechazada: corregirla.
+                correcting: switch (state.extra) {
+                  final ProviderApplication application => application,
+                  _ => null,
+                },
               ),
               child: const GuideApplicationView(),
             ),
@@ -289,6 +307,27 @@ GoRouter createRouter(AuthRepository authRepository) {
       GoRoute(
         path: Routes.guideSelfProfile,
         builder: (context, state) => const GuideSelfProfileView(),
+      ),
+      GoRoute(
+        path: Routes.guideProfileEdit,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideProfileEditViewModel>(
+              create: (context) => GuideProfileEditViewModel(
+                context.read<GuideAccessRepository>(),
+              ),
+              child: const GuideProfileEditView(),
+            ),
+      ),
+      GoRoute(
+        path: Routes.guideRenewal,
+        builder: (context, state) =>
+            ChangeNotifierProvider<GuideRenewalViewModel>(
+              create: (context) => GuideRenewalViewModel(
+                context.read<GuideAccessRepository>(),
+                typeCode: state.extra is String ? state.extra! as String : null,
+              ),
+              child: const GuideRenewalView(),
+            ),
       ),
       GoRoute(
         path: Routes.guideBalance,

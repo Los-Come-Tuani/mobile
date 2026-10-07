@@ -1,6 +1,6 @@
 # Memoria de trabajo: app y la hoja de ruta del API
 
-Actualizada el 2026-10-06. Traspaso para el siguiente agente. La memoria general (estado de
+Actualizada el 2026-10-07. Traspaso para el siguiente agente. La memoria general (estado de
 todas las tareas, API, F2 a F8, avisos y cómo correr el API en esta máquina) está en
 `C:\development\kplan\api\.cursor\memory\hoja-de-ruta.md`: léela primero.
 
@@ -49,6 +49,37 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     contraseña.
   - `flutter analyze` solo reporta dos avisos de `onReorder` que ya estaban; `flutter test` pasa
     completo.
+- **Hecho: F5 en la app** (guías y traductores, 2026-10-07; contrato en `api/docs/prestadores.md`):
+  - **Una cuenta, un papel.** La de un guía o traductor se crea al postularse desde la app; un
+    turista que quiere ser guía usa otro correo ("Salir para postularme" en la pantalla de
+    inicio). Mientras la revisan, el router solo la deja en `/guide-access/status`; ya aprobada
+    (`active` o `suspended`) cualquier login y el `/home` del turista la mandan a `/guide-app`.
+    En el perfil del guía ya no hay "Entrar como turista".
+  - `models/provider.dart`: lo que manda y recibe el API (`ProviderRef` de la sesión, que
+    `User.provider` lee; `ProviderApplication`, `ProviderSelf`, `ProviderDocument` con su
+    revisión, `CredentialType.requiredFor`, los borradores `ProviderApplicationDraft` y
+    `DocumentDraft`). `remote/provider_api.dart`: catálogos, `upload` (pide la URL a
+    `POST /upload/` y sube con un PUT y los encabezados firmados, con un `Dio` aparte sin
+    `Bearer`), postularse, `mine`, reenvío, renovación y perfil. En pruebas se cambian
+    `ProviderApi.storage` y `ProviderApi.readFile`, y `ProviderApi.reset()` en `tearDown`.
+  - `GuideAccessRepository`: el estado sale de `User.provider` (o del rol, para una cuenta que el
+    equipo habilitó antes de F5); `apply` crea la cuenta y abre la sesión con
+    `AuthRepository.openSessionFrom`; `refresh` (la pantalla de estado lo llama al abrir y cada
+    30 s) vuelve a pedir la sesión si el equipo resolvió. En modo demo todo se simula: dos guías
+    aprobados (`guia@kplan.com`, `guia.granada@kplan.com`) y una postulación nueva se aprueba
+    sola a los 60 s.
+  - Postulación (`GuideApplicationViewModel`): identidad, servicios (guía, traductor o ambos;
+    idiomas; zona; si lleva turistas en su vehículo), documentos con número y fechas (los que
+    pide el catálogo según lo elegido), revisión, código del correo y contraseña. Con
+    `correcting:` (desde el estado de una solicitud rechazada) arranca en servicios con lo que ya
+    mandó y solo pide subir otra vez lo rechazado. El nivel de idioma se simplificó: español
+    nativo, los demás avanzado.
+  - App del guía: "Editar mi perfil" (`/guide-app/profile/edit`: foto, presentación, teléfono,
+    idiomas) y "Mis documentos" con renovación por documento (`/guide-app/renewal`, `extra` es
+    el código del tipo); un guía suspendido ve el aviso y sigue entrando para renovar.
+  - Pruebas: `guide_access_test.dart`, `guide_access_roles_test.dart` (con `FakeApi`) y
+    `test/integration/provider_contract_test.dart` contra el API real (postulación con subida
+    firmada; pasó con el S3 local de pruebas, ver la memoria del API, sección 10).
 - No se probó en un dispositivo o emulador: la pantalla se verificó con pruebas y analizador.
 
 ## Qué falta
@@ -64,16 +95,12 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
 3. **Roles en la app (hecho, 2026-10-06)**: `mobile` solo admite turista, guía y traductor (y
    cuentas sin rol); una cuenta del equipo o de un negocio recibe `401` como una contraseña mala.
-   `User` lee `role` de la sesión (`isGuide`, `isTranslator`, `providesServices`). Con el API real,
-   `GuideAccessRepository.status` sale del rol: guía o traductor -> aprobado (entra al "Modo guía",
-   que en el menú dice "Modo traductor" a una traductora), cualquier otro -> sin acceso. La
-   postulación desde la app **no existe con el API** (`canApplyInApp` falso): la pantalla de
-   inicio de la postulación lo explica y no ofrece "Postularme", y `submit` falla en lugar de
-   aprobarse sola a los 60 s como en la demo. El rol de guía o traductor hoy solo se da a mano
-   (no hay ruta del API para eso); llega con la fase de guías y traductores (F5), que es cuando
-   la postulación tendrá su endpoint y la revisión del equipo en el portal. Pruebas:
-   `test/guide_access_roles_test.dart`. El API manda un solo rol, el de más rango: una cuenta que
-   es guía y traductora llega como `guia`.
+   `User` lee `role` de la sesión (`isGuide`, `isTranslator`, `providesServices`) y, desde F5,
+   `provider` (estado y servicios del perfil de prestador): de ahí sale el acceso a la app del
+   guía (ver F5 arriba). El API manda un solo rol, el de más rango: una cuenta que es guía y
+   traductora llega como `guia`; los servicios completos vienen en `provider.services`.
+   Falta: el turista no ve todavía a los guías aprobados (el perfil público del guía y la
+   contratación siguen simulados; llegan con la fase que los conecte).
 4. **Datos del dominio** (circuitos, lugares, reservas, guías...): siguen simulados. Cada fase
    (F3 en adelante) reemplaza su repositorio por llamadas al API; la app no consume nada de eso
    todavía. El mejor checklist es `portal/src/data/api/endpoints.ts`.

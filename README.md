@@ -47,7 +47,13 @@ Con el API configurado, la identidad va contra el API real (`/auth/mobile/*`, ve
   Cinco intentos fallidos bloquean el acceso quince minutos (la app dice cuánto esperar).
 - **Crear cuenta**: correo -> código de 6 dígitos que llega al correo -> contraseña (8+, una
   mayúscula y un número) -> fecha de nacimiento (mayor de 18) -> nacionalidad -> nombre -> usuario.
-  La postulación de guías pide la fecha y la nacionalidad en su primer paso si todavía no hay cuenta.
+- **Guías y traductores**: una cuenta ejerce un solo papel. La de un guía o traductor se crea al
+  postularse ("Comparte tu territorio"): datos, servicios, idiomas y zona, documentos (se suben
+  directo al almacenamiento con una URL firmada) y, al final, el código del correo y la
+  contraseña. Mientras el equipo la revisa, la cuenta solo ve el estado de su solicitud; si le
+  piden correcciones, reenvía solo lo rechazado. Ya aprobada entra a la app del guía, edita su
+  perfil público y renueva un documento por vencer sin dejar de trabajar. Contrato:
+  `docs/prestadores.md` del repo del API.
 - **Recuperar la contraseña**: código al correo y contraseña nueva. **Cambiarla** desde la cuenta
   cierra todas las sesiones.
 - **Verificación en dos pasos**: en Configuraciones -> Cuenta (QR, clave, códigos de recuperación
@@ -68,7 +74,9 @@ KPLAN_API_URL=http://localhost:8080 KPLAN_MAIL_LOG=<archivo con la salida del AP
 ```
 
 Crea una cuenta de turista nueva y recorre el registro con código, la renovación de la sesión y el
-2FA completo con códigos reales. Sin esas variables, las pruebas se saltan.
+2FA completo con códigos reales. `provider_contract_test.dart` crea además una cuenta de guía con
+sus documentos: necesita el almacenamiento configurado en el API (`STORAGE_*`). Sin esas variables,
+las pruebas se saltan.
 
 ## Calidad
 

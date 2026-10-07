@@ -3,102 +3,116 @@ import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../data/models/guide_access_request.dart';
+import '../../../data/models/provider.dart';
 import '../../core/base_viewmodel.dart';
 
-/// Los pasos de la postulación, en el orden en que se muestran. Los dos
-/// últimos sólo aparecen si no hay sesión: ahí se verifica el correo de
-/// contacto y se crea la cuenta a cuyo nombre se envía la solicitud.
+/// Los pasos de la postulación, en el orden en que se muestran. Los dos últimos solo
+/// aparecen al postularse: ahí se verifica el correo y se crea la cuenta.
 enum GuideApplicationStep {
   identity,
-  experience,
+  services,
   documents,
-  training,
   review,
   code,
   password,
 }
 
-/// La postulación de guía por pasos: cada pantalla guarda su parte y la
-/// solicitud se envía al final, con todo junto.
+/// Lo que se llena de un documento: el archivo, el folio y sus fechas.
+class DocumentForm {
+  GuideDocument? file;
+  String number = '';
+  DateTime? issuedOn;
+  DateTime? expiresOn;
+}
+
+/// La postulación de un guía o traductor por pasos: cada pantalla guarda su parte y se
+/// envía al final, con todo junto.
+///
+/// Al postularse se crea la cuenta (una cuenta, un papel): se pide el correo, se verifica
+/// con un código y se elige la contraseña. Al corregir ([correcting]) la cuenta ya existe:
+/// se cambian los datos y se sube otra vez solo lo que el equipo rechazó.
 class GuideApplicationViewModel extends BaseViewModel {
-  GuideApplicationViewModel(this._authRepository, this._guideAccessRepository) {
-    final user = _authRepository.currentUser;
-    _fullName = user?.name ?? '';
-    _contactEmail = user?.email ?? '';
+  GuideApplicationViewModel(
+    this._authRepository,
+    this._guideAccessRepository, {
+    ProviderApplication? correcting,
+  }) : _correcting = correcting {
+    final previous = correcting;
+    if (previous != null) {
+      _step = GuideApplicationStep.services;
+      _fillFrom(previous);
+    }
+    _loadCatalogs();
   }
-
-  /// Los pasos que cuentan en la barra de progreso ("PASO 2 DE 5").
-  static const formStepCount = 5;
-
-  /// Dónde se puede certificar un guía local.
-  static const cities = [
-    'Granada',
-    'León',
-    'Masaya',
-    'Rivas',
-    'Ometepe',
-    'Matagalpa',
-    'Estelí',
-  ];
-
-  static const languageOptions = [
-    'Español',
-    'Inglés',
-    'Francés',
-    'Alemán',
-    'Italiano',
-    'Portugués',
-  ];
 
   static const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
   static const maxFileBytes = 10 * 1024 * 1024;
-  static const maxCertificates = 5;
 
   final AuthRepository _authRepository;
   final GuideAccessRepository _guideAccessRepository;
+  final ProviderApplication? _correcting;
+
+  /// Corrige una solicitud rechazada en lugar de postularse.
+  bool get isCorrecting => _correcting != null;
 
   GuideApplicationStep _step = GuideApplicationStep.identity;
   GuideApplicationStep get step => _step;
 
-  bool get isFirstStep => _step == GuideApplicationStep.identity;
+  bool get isFirstStep => isCorrecting
+      ? _step == GuideApplicationStep.services
+      : _step == GuideApplicationStep.identity;
+
+  /// Los pasos que cuentan en la barra de progreso ("PASO 2 DE 4").
+  int get formStepCount => isCorrecting ? 3 : 4;
 
   /// De 1 a [formStepCount] en el formulario; `null` en la verificación.
-  int? get formStepNumber =>
-      _step.index < formStepCount ? _step.index + 1 : null;
+  int? get formStepNumber {
+    if (_step.index > GuideApplicationStep.review.index) return null;
+    return isCorrecting ? _step.index : _step.index + 1;
+  }
 
-  /// Sin sesión, la cuenta se crea al final con el correo de contacto.
-  bool get needsAccount => !_authRepository.isLoggedIn;
+  // ── Catálogos ─────────────────────────────────────────────────────────────
 
-  // ── Identidad ─────────────────────────────────────────────────────────────
+  ProviderCatalogs? _catalogs;
+  ProviderCatalogs? get catalogs => _catalogs;
+  String? _catalogError;
+  String? get catalogError => _catalogError;
+
+  Future<void> _loadCatalogs() async {
+    switch (await _guideAccessRepository.catalogs()) {
+      case Ok(:final value):
+        _catalogs = value;
+        _catalogError = null;
+      case Failure(:final message):
+        _catalogError = message;
+    }
+    safeNotify();
+  }
+
+  Future<void> retryCatalogs() => _loadCatalogs();
+
+  // ── Identidad y cuenta ────────────────────────────────────────────────────
+
   String _fullName = '';
   String get fullName => _fullName;
-
-  String _countryCode = '+505';
-  String get countryCode => _countryCode;
-
-  String _phoneNumber = '';
-
-  /// Como se muestra en la revisión: "+505 8888 0000".
-  String get phone => '$_countryCode $_phoneNumber';
 
   String _contactEmail = '';
   String get contactEmail => _contactEmail;
 
-  // Sólo sin sesión: la cuenta que se crea al final los pide (mayor de 18 años).
   DateTime? _birthDate;
   DateTime? get birthDate => _birthDate;
 
   String? _nationality;
   String? get nationality => _nationality;
 
-  /// El formulario pide fecha de nacimiento y nacionalidad: la cuenta nueva las necesita
-  /// con el API real. Con sesión (o en la demo) no hacen falta.
-  bool get asksAccountProfile =>
-      needsAccount && _authRepository.registrationNeedsProfile;
+  /// La cuenta nueva necesita fecha de nacimiento y nacionalidad con el API real.
+  bool get asksAccountProfile => _authRepository.registrationNeedsProfile;
 
-  /// Si ya eligió fecha de nacimiento y nacionalidad, o no hace falta.
   bool get hasAccountProfile =>
       !asksAccountProfile || (_birthDate != null && _nationality != null);
+
+  /// `false` si la fecha elegida es de una persona menor de edad.
+  bool get isAdult => _birthDate == null || age.isAdult(_birthDate!);
 
   void setBirthDate(DateTime date) {
     _birthDate = date;
@@ -110,81 +124,261 @@ class GuideApplicationViewModel extends BaseViewModel {
     safeNotify();
   }
 
-  /// `false` si la fecha elegida es de una persona menor de edad.
-  bool get isAdult => _birthDate == null || age.isAdult(_birthDate!);
+  void submitIdentity({
+    required String fullName,
+    required String contactEmail,
+  }) {
+    _fullName = fullName.trim();
+    _contactEmail = contactEmail.trim();
+    _goTo(GuideApplicationStep.services);
+  }
 
-  /// El código del correo, ya comprobado: el API lo vuelve a pedir al crear la cuenta.
-  String _verifiedCode = '';
+  // ── Qué ofrece y dónde ────────────────────────────────────────────────────
 
-  // ── Experiencia ───────────────────────────────────────────────────────────
+  final Set<String> _services = {};
+
+  /// En el orden en que se muestran: guía antes que traductor.
+  List<String> get services => [
+    for (final code in const [
+      ProviderServices.guide,
+      ProviderServices.translator,
+    ])
+      if (_services.contains(code)) code,
+  ];
+
+  bool _showServicesError = false;
+  bool get showServicesError => _showServicesError;
+
+  void toggleService(String code) {
+    if (!_services.remove(code)) _services.add(code);
+    if (_services.isNotEmpty) _showServicesError = false;
+    safeNotify();
+  }
+
   GuideCoverage? _coverage;
   GuideCoverage? get coverage => _coverage;
 
   bool _showCoverageError = false;
   bool get showCoverageError => _showCoverageError;
 
-  String? _certifiedCity;
-  String? get certifiedCity => _certifiedCity;
+  /// La ciudad donde opera un guía local; nula es todo el país.
+  String? _cityId;
+  String? get cityId => _cityId;
 
-  /// Como se muestra en la revisión: "Guía local · Granada".
+  void setCoverage(GuideCoverage coverage) {
+    _coverage = coverage;
+    _showCoverageError = false;
+    safeNotify();
+  }
+
+  void setCity(String? id) {
+    _cityId = id;
+    safeNotify();
+  }
+
+  /// "Guía local · Granada" o "Todo el territorio nicaragüense".
   String get coverageSummary => switch (_coverage) {
-    GuideCoverage.national => 'Guía nacional · Todo el territorio nicaragüense',
-    GuideCoverage.local => 'Guía local · ${_certifiedCity ?? ''}',
+    GuideCoverage.national => 'Todo el territorio nicaragüense',
+    GuideCoverage.local => 'Solo en ${_catalogs?.cityName(_cityId) ?? ''}',
     null => '',
   };
 
-  final Set<String> _languages = {'Español'};
+  /// Los idiomas, por código, con su nivel.
+  final Map<String, String> _languages = {'es': 'native'};
 
-  /// En el orden de [languageOptions], no en el que se tocaron.
   List<String> get selectedLanguages => [
-    for (final language in languageOptions)
-      if (_languages.contains(language)) language,
+    for (final language in _catalogs?.languages ?? const <CatalogOption>[])
+      if (_languages.containsKey(language.code)) language.code,
   ];
+
+  String languageName(String code) => _catalogs?.languageName(code) ?? code;
 
   bool _showLanguageError = false;
   bool get showLanguageError => _showLanguageError;
 
-  String _experience = '';
-  String get experience => _experience;
+  void toggleLanguage(String code) {
+    if (_languages.remove(code) == null) {
+      _languages[code] = code == 'es' ? 'native' : 'advanced';
+    }
+    if (_languages.isNotEmpty) _showLanguageError = false;
+    safeNotify();
+  }
+
+  String _countryCode = '+505';
+  String get countryCode => _countryCode;
+
+  String _phoneNumber = '';
+  String get phoneNumber => _phoneNumber;
+
+  /// Como se muestra en la revisión: "+505 8888 0000".
+  String get phone => '$_countryCode $_phoneNumber';
+
+  void setCountryCode(String code) {
+    _countryCode = code;
+    safeNotify();
+  }
+
+  String _presentation = '';
+  String get presentation => _presentation;
+
+  bool _carriesTourists = false;
+  bool get carriesTourists => _carriesTourists;
+
+  void setCarriesTourists(bool value) {
+    _carriesTourists = value;
+    safeNotify();
+  }
+
+  /// Marca lo que falta elegir; `true` si está todo. La ciudad de un guía local la
+  /// valida el formulario.
+  bool checkChoices() {
+    _showServicesError = _services.isEmpty;
+    _showCoverageError = _coverage == null;
+    _showLanguageError = _languages.isEmpty;
+    safeNotify();
+    return !_showServicesError && !_showCoverageError && !_showLanguageError;
+  }
+
+  void submitServices({
+    required String phoneNumber,
+    required String presentation,
+  }) {
+    if (!checkChoices()) return;
+    if (_coverage == GuideCoverage.local && _cityId == null) return;
+    _phoneNumber = phoneNumber.trim().replaceAll(RegExp(r'\s+'), ' ');
+    _presentation = presentation.trim();
+    _goTo(GuideApplicationStep.documents);
+  }
+
+  ProviderProfileData get _profile => ProviderProfileData(
+    services: services,
+    cityId: _coverage == GuideCoverage.local ? _cityId : null,
+    phone: phone,
+    presentation: _presentation,
+    carriesTourists: _carriesTourists,
+    languages: [
+      for (final code in selectedLanguages)
+        ProviderLanguage(code: code, level: _languages[code]!),
+    ],
+  );
 
   // ── Documentos ────────────────────────────────────────────────────────────
-  GuideDocument? _identityDocument;
-  GuideDocument? get identityDocument => _identityDocument;
 
-  GuideDocument? _inturCredential;
-  GuideDocument? get inturCredential => _inturCredential;
+  /// Los documentos que se le piden por lo que ofrece y si lleva turistas.
+  List<CredentialType> get requiredTypes => CredentialType.requiredFor(
+    _catalogs?.credentialTypes ?? const [],
+    services: services,
+    carriesTourists: _carriesTourists,
+  );
 
-  bool get hasRequiredDocuments =>
-      _identityDocument != null && _inturCredential != null;
+  final Map<String, DocumentForm> _documents = {};
 
-  bool _triedWithoutDocuments = false;
+  DocumentForm documentFor(String typeCode) =>
+      _documents.putIfAbsent(typeCode, DocumentForm.new);
 
-  /// Después de intentar seguir sin algún documento, mientras siga faltando.
-  bool get showMissingDocuments =>
-      _triedWithoutDocuments && !hasRequiredDocuments;
+  /// Al corregir: lo que el equipo ya aceptó (o no revisó) y pasa tal cual.
+  final Map<String, ProviderDocument> _kept = {};
 
-  // ── Formación ─────────────────────────────────────────────────────────────
-  final List<GuideDocument> _certificates = [];
-  List<GuideDocument> get certificates => List.unmodifiable(_certificates);
+  ProviderDocument? keptFor(String typeCode) => _kept[typeCode];
 
-  bool get canAddCertificate => _certificates.length < maxCertificates;
+  /// Al corregir: lo que el equipo rechazó, con su motivo.
+  ProviderDocument? rejectedFor(String typeCode) {
+    for (final document
+        in _correcting?.documents ?? const <ProviderDocument>[]) {
+      if (document.typeCode == typeCode && document.isRejected) return document;
+    }
+    return null;
+  }
 
-  // ── Revisión y verificación ───────────────────────────────────────────────
-  bool _consent = false;
-  bool get consent => _consent;
+  /// Los tipos que hay que llenar en esta pantalla: lo que no pasa tal cual.
+  List<CredentialType> get typesToUpload => [
+    for (final type in requiredTypes)
+      if (!_kept.containsKey(type.code)) type,
+  ];
 
-  bool _showConsentError = false;
-  bool get showConsentError => _showConsentError;
+  bool _triedDocuments = false;
 
-  bool _codeResent = false;
-  bool get codeResent => _codeResent;
+  /// Después de intentar seguir: el problema de cada documento, o `null` si está bien.
+  String? documentProblem(String typeCode) {
+    if (!_triedDocuments) return null;
+    final type = requiredTypes
+        .where((item) => item.code == typeCode)
+        .firstOrNull;
+    if (type == null) return null;
+    return _problemOf(type, documentFor(typeCode));
+  }
 
-  bool _codeRejected = false;
-  bool get codeRejected => _codeRejected;
+  static String? _problemOf(CredentialType type, DocumentForm form) {
+    final today = DateTime.now();
+    final day = DateTime(today.year, today.month, today.day);
+    if (form.file == null) return 'Adjunta el archivo';
+    if (form.number.trim().isEmpty) return 'Escribe el número del documento';
+    final issued = form.issuedOn;
+    if (issued == null) return 'Elige la fecha de emisión';
+    if (issued.isAfter(day)) return 'La fecha de emisión no puede ser futura';
+    final expires = form.expiresOn;
+    if (type.requiresExpiry && expires == null) {
+      return 'Elige la fecha de vencimiento';
+    }
+    if (expires != null && !expires.isAfter(issued)) {
+      return 'El vencimiento tiene que ser posterior a la emisión';
+    }
+    if (expires != null && !expires.isAfter(day)) {
+      return 'El documento ya venció: sube uno vigente';
+    }
+    return null;
+  }
 
-  /// La cuenta se creó en esta postulación. Se recuerda para reintentar el
-  /// envío si falló después de crearla.
-  bool _createdAccount = false;
+  void attachDocument(String typeCode, GuideDocument file) {
+    documentFor(typeCode).file = file;
+    safeNotify();
+  }
+
+  void removeDocument(String typeCode) {
+    documentFor(typeCode).file = null;
+    safeNotify();
+  }
+
+  void setDocumentNumber(String typeCode, String number) {
+    documentFor(typeCode).number = number;
+  }
+
+  void setIssuedOn(String typeCode, DateTime date) {
+    documentFor(typeCode).issuedOn = date;
+    safeNotify();
+  }
+
+  void setExpiresOn(String typeCode, DateTime date) {
+    documentFor(typeCode).expiresOn = date;
+    safeNotify();
+  }
+
+  bool get hasValidDocuments => typesToUpload.every(
+    (type) => _problemOf(type, documentFor(type.code)) == null,
+  );
+
+  void submitDocuments() {
+    _triedDocuments = true;
+    if (!hasValidDocuments) {
+      safeNotify();
+      return;
+    }
+    _goTo(GuideApplicationStep.review);
+  }
+
+  /// "Volver y revisar documentos", desde la revisión.
+  void reviewDocuments() => _goTo(GuideApplicationStep.documents);
+
+  List<DocumentDraft> get _drafts => [
+    for (final type in typesToUpload)
+      DocumentDraft(
+        typeCode: type.code,
+        number: documentFor(type.code).number,
+        issuedOn: documentFor(type.code).issuedOn!,
+        expiresOn: documentFor(type.code).expiresOn,
+        file: documentFor(type.code).file!,
+      ),
+  ];
 
   /// Por qué no se puede adjuntar un archivo, o `null` si se puede.
   static String? fileProblem({required String name, int? sizeBytes}) {
@@ -198,6 +392,28 @@ class GuideApplicationViewModel extends BaseViewModel {
     }
     return null;
   }
+
+  // ── Revisión y envío ──────────────────────────────────────────────────────
+
+  bool _consent = false;
+  bool get consent => _consent;
+
+  bool _showConsentError = false;
+  bool get showConsentError => _showConsentError;
+
+  void setConsent(bool value) {
+    _consent = value;
+    if (value) _showConsentError = false;
+    safeNotify();
+  }
+
+  bool _codeResent = false;
+  bool get codeResent => _codeResent;
+
+  bool _codeRejected = false;
+  bool get codeRejected => _codeRejected;
+
+  String _verifiedCode = '';
 
   /// Vuelve al paso anterior; `false` si ya estaba en el primero.
   bool back() {
@@ -213,109 +429,8 @@ class GuideApplicationViewModel extends BaseViewModel {
     safeNotify();
   }
 
-  void setCountryCode(String code) {
-    _countryCode = code;
-    safeNotify();
-  }
-
-  void submitIdentity({
-    required String fullName,
-    required String phoneNumber,
-    required String contactEmail,
-  }) {
-    _fullName = fullName.trim();
-    _phoneNumber = phoneNumber.trim().replaceAll(RegExp(r'\s+'), ' ');
-    _contactEmail = contactEmail.trim();
-    _goTo(GuideApplicationStep.experience);
-  }
-
-  void setCoverage(GuideCoverage coverage) {
-    _coverage = coverage;
-    _showCoverageError = false;
-    safeNotify();
-  }
-
-  void setCertifiedCity(String? city) {
-    _certifiedCity = city;
-    safeNotify();
-  }
-
-  void toggleLanguage(String language) {
-    if (!_languages.remove(language)) _languages.add(language);
-    if (_languages.isNotEmpty) _showLanguageError = false;
-    safeNotify();
-  }
-
-  /// Marca lo que falta elegir (tipo de guía e idiomas); `true` si está todo.
-  /// La ciudad de un guía local la valida el formulario.
-  bool checkChoices() {
-    _showCoverageError = _coverage == null;
-    _showLanguageError = _languages.isEmpty;
-    safeNotify();
-    return !_showCoverageError && !_showLanguageError;
-  }
-
-  void submitExperience({required String experience}) {
-    if (!checkChoices()) return;
-    if (_coverage == GuideCoverage.local && _certifiedCity == null) return;
-    _experience = experience.trim();
-    _goTo(GuideApplicationStep.documents);
-  }
-
-  void attachIdentityDocument(GuideDocument document) {
-    _identityDocument = document;
-    safeNotify();
-  }
-
-  void removeIdentityDocument() {
-    _identityDocument = null;
-    safeNotify();
-  }
-
-  void attachInturCredential(GuideDocument document) {
-    _inturCredential = document;
-    safeNotify();
-  }
-
-  void removeInturCredential() {
-    _inturCredential = null;
-    safeNotify();
-  }
-
-  void submitDocuments() {
-    if (!hasRequiredDocuments) {
-      _triedWithoutDocuments = true;
-      safeNotify();
-      return;
-    }
-    _goTo(GuideApplicationStep.training);
-  }
-
-  void addCertificate(GuideDocument document) {
-    if (!canAddCertificate) return;
-    _certificates.add(document);
-    safeNotify();
-  }
-
-  void removeCertificate(GuideDocument document) {
-    _certificates.remove(document);
-    safeNotify();
-  }
-
-  void submitTraining() => _goTo(GuideApplicationStep.review);
-
-  /// "Volver y revisar documentos", desde la revisión.
-  void reviewDocuments() => _goTo(GuideApplicationStep.documents);
-
-  void setConsent(bool value) {
-    _consent = value;
-    if (value) _showConsentError = false;
-    safeNotify();
-  }
-
-  /// Envía la solicitud; `true` si quedó en revisión. Sin sesión todavía no
-  /// la envía: primero manda un código al correo de contacto y pasa a
-  /// verificarlo.
+  /// Envía la corrección; al postularse, primero manda el código al correo y pasa a
+  /// verificarlo. `true` si la solicitud quedó enviada.
   Future<bool> sendApplication() async {
     if (isBusy) return false;
     if (!_consent) {
@@ -323,8 +438,9 @@ class GuideApplicationViewModel extends BaseViewModel {
       safeNotify();
       return false;
     }
-    if (!needsAccount) return _submit();
-
+    if (isCorrecting) {
+      return _run(() => _guideAccessRepository.resubmit(_profile, _drafts));
+    }
     if (await _sendCode()) {
       _codeResent = false;
       _codeRejected = false;
@@ -365,33 +481,22 @@ class GuideApplicationViewModel extends BaseViewModel {
     }
   }
 
-  /// Crea la cuenta con el correo ya verificado y envía la solicitud a su
-  /// nombre; `true` si quedó en revisión.
-  Future<bool> createAccount(String password) async {
-    if (isBusy) return false;
-
-    // Si un intento anterior creó la cuenta pero no alcanzó a enviar la
-    // solicitud, sólo falta enviarla.
-    if (needsAccount) {
-      clearError();
-      setBusy(true);
-      final result = await _authRepository.register(
-        name: _fullName,
+  /// Crea la cuenta con el correo ya verificado y envía la solicitud a su nombre, todo de
+  /// una vez; `true` si quedó en revisión.
+  Future<bool> createAccount(String password) => _run(
+    () => _guideAccessRepository.apply(
+      ProviderApplicationDraft(
+        fullName: _fullName,
         email: _contactEmail,
-        password: password,
         code: _verifiedCode,
+        password: password,
         birthDate: _birthDate,
         nationality: _nationality,
-      );
-      setBusy(false);
-      if (result case Failure(:final message)) {
-        setError(message);
-        return false;
-      }
-      _createdAccount = true;
-    }
-    return _submit();
-  }
+        profile: _profile,
+        documents: _drafts,
+      ),
+    ),
+  );
 
   Future<bool> _sendCode() async {
     clearError();
@@ -408,32 +513,48 @@ class GuideApplicationViewModel extends BaseViewModel {
     }
   }
 
-  Future<bool> _submit() async {
+  Future<bool> _run(Future<Result<void>> Function() action) async {
+    if (isBusy) return false;
     clearError();
     setBusy(true);
-    final result = await _guideAccessRepository.submit(
-      GuideAccessRequest(
-        fullName: _fullName,
-        phone: phone,
-        contactEmail: _contactEmail,
-        coverage: _coverage!,
-        certifiedCity: _coverage == GuideCoverage.local ? _certifiedCity : null,
-        languages: selectedLanguages,
-        experience: _experience,
-        identityDocument: _identityDocument!,
-        inturCredential: _inturCredential!,
-        certificates: List.of(_certificates),
-      ),
-      signedUpAsGuide: _createdAccount,
-    );
+    final result = await action();
     setBusy(false);
-
     switch (result) {
       case Ok():
         return true;
       case Failure(:final message):
         setError(message);
         return false;
+    }
+  }
+
+  // ── Corregir ──────────────────────────────────────────────────────────────
+
+  void _fillFrom(ProviderApplication application) {
+    final profile = application.profile;
+    _services.addAll(profile.services);
+    _coverage = profile.cityId == null
+        ? GuideCoverage.national
+        : GuideCoverage.local;
+    _cityId = profile.cityId;
+    _languages
+      ..clear()
+      ..addAll({
+        for (final language in profile.languages) language.code: language.level,
+      });
+    final match = RegExp(r'^(\+\d{1,4})\s+(.*)$').firstMatch(profile.phone);
+    if (match != null) {
+      _countryCode = match.group(1)!;
+      _phoneNumber = match.group(2)!;
+    } else {
+      _phoneNumber = profile.phone;
+    }
+    _presentation = profile.presentation;
+    _carriesTourists = profile.carriesTourists;
+    for (final document in application.documents) {
+      if (!document.isRejected && document.status != DocumentStatus.expired) {
+        _kept[document.typeCode] = document;
+      }
     }
   }
 }

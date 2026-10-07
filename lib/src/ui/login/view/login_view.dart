@@ -19,8 +19,8 @@ import '../viewmodels/google_profile_viewmodel.dart';
 import '../viewmodels/login_viewmodel.dart';
 import '../viewmodels/two_factor_login_viewmodel.dart';
 
-/// Inicio de sesión de turistas y de guías: es la misma cuenta, sólo cambia
-/// a dónde lleva al entrar y qué se ofrece a quien todavía no tiene acceso.
+/// Inicio de sesión de turistas y de guías: la misma pantalla, solo cambia a dónde
+/// lleva al entrar y qué se ofrece a quien todavía no tiene cuenta.
 class LoginView extends StatefulWidget {
   const LoginView({super.key, this.role = UserRole.tourist});
 
@@ -184,8 +184,8 @@ class _LoginViewState extends State<LoginView> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: Text(
-                                      'Si ya tienes cuenta de turista, usa el '
-                                      'mismo correo y contraseña.',
+                                      'Entra con la cuenta con la que te '
+                                      'postulaste como guía o traductor.',
                                       style: AppTextStyles.bodySmall,
                                     ),
                                   ),

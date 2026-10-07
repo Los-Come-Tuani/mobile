@@ -1,3 +1,3 @@
-/// Cómo entra alguien a K'Plan. Es la misma cuenta para los dos: el rol de
-/// guía se habilita cuando se aprueba su solicitud.
+/// Por cuál puerta entra alguien a K'Plan. Una cuenta ejerce un solo papel: la de un
+/// guía o traductor se crea al postularse y es otra que la de turista.
 enum UserRole { tourist, guide }

@@ -36,6 +36,12 @@ abstract final class Routes {
   static const guideTrips = '/guide-app/trips';
   static const guideChats = '/guide-app/chats';
   static const guideSelfProfile = '/guide-app/profile';
+
+  /// Cambiar la foto, la presentación, el teléfono o los idiomas del perfil.
+  static const guideProfileEdit = '/guide-app/profile/edit';
+
+  /// Renovar un documento; `extra` es el código del tipo que se renueva.
+  static const guideRenewal = '/guide-app/renewal';
   static const guideBalance = '/guide-app/balance';
 
   /// Una propuesta vista por el guía: `/guide-app/proposal/:jobId`

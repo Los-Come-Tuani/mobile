@@ -6,9 +6,11 @@ import 'package:k_plan_mobile/src/core/utils/result.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_access_repository.dart';
 import 'package:k_plan_mobile/src/data/models/guide_access_request.dart';
+import 'package:k_plan_mobile/src/data/models/provider.dart';
 import 'package:k_plan_mobile/src/data/models/user_role.dart';
 import 'package:k_plan_mobile/src/router/router.dart';
 import 'package:k_plan_mobile/src/router/routes.dart';
+import 'package:k_plan_mobile/src/ui/guide_access/view/guide_start_view.dart';
 import 'package:k_plan_mobile/src/ui/guide_access/view/guide_status_view.dart';
 import 'package:k_plan_mobile/src/ui/guide_access/viewmodels/guide_application_viewmodel.dart';
 import 'package:k_plan_mobile/src/ui/login/view/login_view.dart';
@@ -25,20 +27,40 @@ typedef _TestApp = ({
 GuideDocument _file(String name) =>
     GuideDocument(name: name, uri: Uri.file('/tmp/$name'));
 
-GuideAccessRequest _request() => GuideAccessRequest(
-  fullName: 'Mariana López',
-  phone: '+505 8888 0000',
-  contactEmail: 'mariana@example.com',
-  coverage: GuideCoverage.local,
-  certifiedCity: 'Granada',
-  languages: const ['Español'],
-  experience: '3 años en recorridos culturales',
-  identityDocument: _file('identidad.pdf'),
-  inturCredential: _file('credencial-intur.pdf'),
+final _issued = DateTime.now().subtract(const Duration(days: 400));
+final _expires = DateTime.now().add(const Duration(days: 900));
+
+DocumentDraft _document(String type, {bool expires = true}) => DocumentDraft(
+  typeCode: type,
+  number: '$type-1',
+  issuedOn: _issued,
+  expiresOn: expires ? _expires : null,
+  file: _file('$type.jpg'),
 );
 
-/// Espera [future] adelantando el reloj de la prueba lo suficiente para las
-/// demoras simuladas de los repositorios (ninguna llega a dos segundos).
+/// Una guía local de Granada que se postula con lo que se le pide.
+ProviderApplicationDraft _draft({String email = 'mariana@example.com'}) =>
+    ProviderApplicationDraft(
+      fullName: 'Mariana López',
+      email: email,
+      code: '123456',
+      password: 'Secreta123',
+      profile: const ProviderProfileData(
+        services: [ProviderServices.guide],
+        cityId: 'city-granada',
+        phone: '+505 8888 0000',
+        presentation: '3 años en recorridos culturales',
+        languages: [ProviderLanguage(code: 'es', level: 'native')],
+      ),
+      documents: [
+        _document('cedula'),
+        _document('record_policia', expires: false),
+        _document('licencia_intur'),
+      ],
+    );
+
+/// Espera [future] adelantando el reloj de la prueba lo suficiente para las demoras
+/// simuladas de los repositorios (ninguna llega a dos segundos).
 Future<T> _settle<T>(WidgetTester tester, Future<T> future) async {
   await tester.pump(const Duration(seconds: 3));
   return future;
@@ -56,34 +78,60 @@ Future<void> _submitLogin(WidgetTester tester, String email) async {
   await tester.pumpAndSettle();
 }
 
+/// Un viewmodel de postulación con los catálogos ya cargados.
+Future<GuideApplicationViewModel> _viewModel({
+  AuthRepository? auth,
+  GuideAccessRepository? access,
+  ProviderApplication? correcting,
+}) async {
+  final authRepository = auth ?? AuthRepository();
+  final viewModel = GuideApplicationViewModel(
+    authRepository,
+    access ?? GuideAccessRepository(authRepository),
+    correcting: correcting,
+  );
+  await Future<void>.delayed(Duration.zero);
+  return viewModel;
+}
+
 /// Llena la postulación de una guía local de Granada hasta la revisión.
 void _fillUntilReview(GuideApplicationViewModel viewModel) {
   viewModel.submitIdentity(
     fullName: 'Mariana López',
-    phoneNumber: '8888  0000',
     contactEmail: 'mariana@example.com',
   );
+  viewModel.toggleService(ProviderServices.guide);
   viewModel.setCoverage(GuideCoverage.local);
-  viewModel.setCertifiedCity('Granada');
-  viewModel.toggleLanguage('Inglés');
-  viewModel.submitExperience(experience: '3 años en recorridos culturales');
-  viewModel.attachIdentityDocument(_file('identidad.pdf'));
-  viewModel.attachInturCredential(_file('credencial-intur.pdf'));
+  viewModel.setCity('city-granada');
+  viewModel.toggleLanguage('en');
+  viewModel.submitServices(
+    phoneNumber: '8888  0000',
+    presentation: '3 años en recorridos culturales',
+  );
+  for (final type in viewModel.typesToUpload) {
+    viewModel.attachDocument(type.code, _file('${type.code}.jpg'));
+    viewModel.setDocumentNumber(type.code, '${type.code}-1');
+    viewModel.setIssuedOn(type.code, _issued);
+    if (type.requiresExpiry) viewModel.setExpiresOn(type.code, _expires);
+  }
   viewModel.submitDocuments();
-  viewModel.submitTraining();
 }
+
+ProviderDocument _sent(String type, {bool? accepted}) => ProviderDocument(
+  id: 'd-$type',
+  typeCode: type,
+  typeLabel: type,
+  number: '1',
+  issuedOn: _issued,
+  status: accepted == false ? DocumentStatus.rejected : DocumentStatus.uploaded,
+  review: accepted == null
+      ? null
+      : DocumentReview(accepted: accepted, reason: 'El documento no se lee'),
+);
 
 void main() {
   group('GuideAccessRepository', () {
-    test('sin sesión no se puede enviar una solicitud', () async {
-      final repository = GuideAccessRepository(AuthRepository());
-      addTearDown(repository.dispose);
-
-      expect(await repository.submit(_request()), isA<Failure<void>>());
-      expect(repository.status, GuideAccessStatus.none);
-    });
-
-    testWidgets('la solicitud queda en revisión y se aprueba al terminar', (
+    testWidgets('postularse crea la cuenta, queda en revisión y se aprueba', (
       tester,
     ) async {
       final auth = AuthRepository();
@@ -91,54 +139,35 @@ void main() {
         auth,
         reviewTime: const Duration(minutes: 1),
       );
-      await _login(tester, auth, 'Mariana@Example.com');
 
-      expect(await _settle(tester, repository.submit(_request())), isA<Ok>());
+      expect(await _settle(tester, repository.apply(_draft())), isA<Ok>());
+
+      // una cuenta, un papel: la cuenta se creó al postularse y solo ve su estado
+      expect(auth.currentUser?.email, 'mariana@example.com');
       expect(repository.status, GuideAccessStatus.pending);
-      expect(repository.request?.contactEmail, 'mariana@example.com');
-
-      await tester.pump(const Duration(minutes: 1));
-      expect(repository.status, GuideAccessStatus.approved);
-      repository.dispose();
-    });
-
-    testWidgets('la revisión avanza paso a paso hasta aprobarse', (
-      tester,
-    ) async {
-      final auth = AuthRepository();
-      final repository = GuideAccessRepository(
-        auth,
-        reviewTime: const Duration(minutes: 1),
-      );
-      await _login(tester, auth, 'mariana@example.com');
-      await _settle(tester, repository.submit(_request()));
-
-      final review = repository.review!;
-      expect(review.finishedAt(GuideReviewStep.submitted), isNotNull);
-      expect(review.current, GuideReviewStep.documents);
+      expect(repository.isLimitedToStatus, isTrue);
+      expect(repository.application?.status, ApplicationStatus.submitted);
+      expect(repository.application?.documents, hasLength(3));
 
       await tester.pump(const Duration(seconds: 24));
-      expect(repository.review?.current, GuideReviewStep.experience);
+      expect(repository.application?.status, ApplicationStatus.inReview);
 
-      await tester.pump(const Duration(seconds: 24));
-      expect(repository.review?.current, GuideReviewStep.decision);
-      expect(repository.status, GuideAccessStatus.pending);
-
-      await tester.pump(const Duration(seconds: 12));
+      await tester.pump(const Duration(seconds: 36));
       expect(repository.status, GuideAccessStatus.approved);
-      expect(repository.review?.current, isNull);
+      expect(repository.isLimitedToStatus, isFalse);
+      expect(repository.request?.certifiedCity, 'Granada');
+      expect(repository.request?.coverage, GuideCoverage.local);
       repository.dispose();
     });
 
     testWidgets('cada cuenta tiene su propio acceso de guía', (tester) async {
       final auth = AuthRepository();
       final repository = GuideAccessRepository(auth);
-      await _login(tester, auth, 'mariana@example.com');
-      await _settle(tester, repository.submit(_request()));
+      await _settle(tester, repository.apply(_draft()));
 
       await auth.logout();
-      await _login(tester, auth, 'otra@example.com');
-      expect(repository.status, GuideAccessStatus.none);
+      await _login(tester, auth, 'guia@kplan.com');
+      expect(repository.status, GuideAccessStatus.approved);
 
       await auth.logout();
       await _login(tester, auth, 'mariana@example.com');
@@ -146,144 +175,182 @@ void main() {
       repository.dispose();
     });
 
-    testWidgets('quien se registró al postularse sólo ve su estado hasta que '
-        'la aprueban', (tester) async {
+    testWidgets('una renovación queda en revisión sin dejar de trabajar', (
+      tester,
+    ) async {
+      final auth = AuthRepository();
+      final repository = GuideAccessRepository(
+        auth,
+        reviewTime: const Duration(seconds: 10),
+      );
+      await _login(tester, auth, 'guia@kplan.com');
+
+      final renewal = repository.renew([_document('licencia_intur')]);
+      expect(await _settle(tester, renewal), isA<Ok>());
+
+      expect(repository.application?.isRenewal, isTrue);
+      expect(repository.application?.status.isOpen, isTrue);
+      // el guía sigue trabajando mientras se revisa
+      expect(repository.isApproved, isTrue);
+
+      await tester.pump(const Duration(seconds: 10));
+      expect(repository.application?.status, ApplicationStatus.approved);
+      repository.dispose();
+    });
+
+    testWidgets('el perfil público se edita sin revisión', (tester) async {
       final auth = AuthRepository();
       final repository = GuideAccessRepository(auth);
-      await _settle(
-        tester,
-        auth.register(
-          name: 'Nueva Guía',
-          email: 'nueva@example.com',
-          password: 'secreta123',
-        ),
-      );
-      await _settle(
-        tester,
-        repository.submit(_request(), signedUpAsGuide: true),
-      );
-      expect(repository.isLimitedToStatus, isTrue);
+      await _login(tester, auth, 'guia.granada@kplan.com');
 
-      await auth.logout();
-      await _login(tester, auth, 'mariana@example.com');
-      await _settle(tester, repository.submit(_request()));
-      expect(repository.isLimitedToStatus, isFalse);
+      await repository.updateProfile(
+        presentation: 'Leyendas de Granada.',
+        languages: const [ProviderLanguage(code: 'fr', level: 'advanced')],
+      );
 
-      await auth.logout();
-      await _login(tester, auth, 'nueva@example.com');
-      await tester.pump(const Duration(minutes: 1));
-      expect(repository.status, GuideAccessStatus.approved);
-      expect(repository.isLimitedToStatus, isFalse);
+      expect(repository.request?.experience, 'Leyendas de Granada.');
+      expect(repository.request?.languages, ['Francés']);
+      expect(repository.self?.presentation, 'Leyendas de Granada.');
       repository.dispose();
     });
   });
 
   group('GuideApplicationViewModel', () {
-    test('no pasa de los documentos sin los dos archivos', () {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
-      );
-      viewModel.submitIdentity(
-        fullName: 'Mariana López',
-        phoneNumber: '8888 0000',
-        contactEmail: 'mariana@example.com',
-      );
-      viewModel.setCoverage(GuideCoverage.national);
-      viewModel.submitExperience(experience: '3 años');
-      expect(viewModel.step, GuideApplicationStep.documents);
+    test(
+      'los documentos dependen de lo que ofrece y de si lleva turistas',
+      () async {
+        final viewModel = await _viewModel();
 
-      viewModel.attachIdentityDocument(_file('identidad.pdf'));
-      viewModel.submitDocuments();
-      expect(viewModel.step, GuideApplicationStep.documents);
-      expect(viewModel.showMissingDocuments, isTrue);
+        viewModel.toggleService(ProviderServices.guide);
+        expect(viewModel.requiredTypes.map((type) => type.code), [
+          'cedula',
+          'record_policia',
+          'licencia_intur',
+        ]);
 
-      viewModel.attachInturCredential(_file('credencial-intur.pdf'));
-      viewModel.submitDocuments();
-      expect(viewModel.step, GuideApplicationStep.training);
-      expect(viewModel.showMissingDocuments, isFalse);
-    });
+        viewModel.toggleService(ProviderServices.guide);
+        viewModel.toggleService(ProviderServices.translator);
+        viewModel.setCarriesTourists(true);
+        expect(viewModel.requiredTypes.map((type) => type.code), [
+          'cedula',
+          'record_policia',
+          'certificado_idioma',
+          'licencia_conducir',
+          'seguro_vehiculo',
+        ]);
+      },
+    );
 
-    test('sin idiomas no pasa de la experiencia', () {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
-      );
-      viewModel.submitIdentity(
-        fullName: 'Mariana López',
-        phoneNumber: '8888 0000',
-        contactEmail: 'mariana@example.com',
-      );
-      viewModel.setCoverage(GuideCoverage.national);
-      viewModel.toggleLanguage('Español');
-      viewModel.submitExperience(experience: '3 años');
+    test(
+      'no pasa de lo que ofrece sin servicio, sin dónde o sin idioma',
+      () async {
+        final viewModel = await _viewModel();
+        viewModel.submitIdentity(
+          fullName: 'Ana Ruiz',
+          contactEmail: 'ana@example.com',
+        );
+        viewModel.toggleLanguage('es');
+        viewModel.submitServices(
+          phoneNumber: '8888 0000',
+          presentation: '5 años',
+        );
 
-      expect(viewModel.step, GuideApplicationStep.experience);
-      expect(viewModel.showLanguageError, isTrue);
-    });
+        expect(viewModel.step, GuideApplicationStep.services);
+        expect(viewModel.showServicesError, isTrue);
+        expect(viewModel.showCoverageError, isTrue);
+        expect(viewModel.showLanguageError, isTrue);
 
-    test('sin elegir si es nacional o local no pasa de la experiencia', () {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
-      );
-      viewModel.submitIdentity(
-        fullName: 'Ana Ruiz',
-        phoneNumber: '8888 0000',
-        contactEmail: 'ana@example.com',
-      );
-      viewModel.submitExperience(experience: '5 años');
+        viewModel.toggleService(ProviderServices.translator);
+        viewModel.setCoverage(GuideCoverage.national);
+        viewModel.toggleLanguage('en');
+        viewModel.submitServices(
+          phoneNumber: '8888 0000',
+          presentation: '5 años',
+        );
+        expect(viewModel.step, GuideApplicationStep.documents);
+      },
+    );
 
-      expect(viewModel.step, GuideApplicationStep.experience);
-      expect(viewModel.showCoverageError, isTrue);
-
-      viewModel.setCoverage(GuideCoverage.national);
-      expect(viewModel.showCoverageError, isFalse);
-    });
-
-    test('un guía local no pasa sin la ciudad donde está certificado', () {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
-      );
+    test('quien trabaja en una ciudad no pasa sin elegirla', () async {
+      final viewModel = await _viewModel();
       viewModel.submitIdentity(
         fullName: 'Ana Ruiz',
-        phoneNumber: '8888 0000',
         contactEmail: 'ana@example.com',
       );
+      viewModel.toggleService(ProviderServices.guide);
       viewModel.setCoverage(GuideCoverage.local);
-      viewModel.submitExperience(experience: '5 años');
-      expect(viewModel.step, GuideApplicationStep.experience);
+      viewModel.submitServices(
+        phoneNumber: '8888 0000',
+        presentation: '5 años',
+      );
+      expect(viewModel.step, GuideApplicationStep.services);
 
-      viewModel.setCertifiedCity('León');
-      viewModel.submitExperience(experience: '5 años');
+      viewModel.setCity('city-leon');
+      viewModel.submitServices(
+        phoneNumber: '8888 0000',
+        presentation: '5 años',
+      );
       expect(viewModel.step, GuideApplicationStep.documents);
+      expect(viewModel.coverageSummary, 'Solo en León');
     });
 
-    test('la revisión resume el tipo de guía, los idiomas y el teléfono', () {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
+    test('cada documento necesita archivo, número y fechas vigentes', () async {
+      final viewModel = await _viewModel();
+      viewModel.submitIdentity(
+        fullName: 'Ana Ruiz',
+        contactEmail: 'ana@example.com',
       );
-      _fillUntilReview(viewModel);
-
-      expect(viewModel.step, GuideApplicationStep.review);
-      expect(viewModel.coverageSummary, 'Guía local · Granada');
-      expect(viewModel.selectedLanguages, ['Español', 'Inglés']);
-      expect(viewModel.phone, '+505 8888 0000');
-
+      viewModel.toggleService(ProviderServices.guide);
       viewModel.setCoverage(GuideCoverage.national);
-      expect(
-        viewModel.coverageSummary,
-        'Guía nacional · Todo el territorio nicaragüense',
+      viewModel.submitServices(
+        phoneNumber: '8888 0000',
+        presentation: '5 años',
       );
+
+      viewModel.submitDocuments();
+      expect(viewModel.step, GuideApplicationStep.documents);
+      expect(viewModel.documentProblem('cedula'), 'Adjunta el archivo');
+
+      viewModel.attachDocument('cedula', _file('cedula.jpg'));
+      viewModel.setDocumentNumber('cedula', '001-010190-0001A');
+      viewModel.setIssuedOn('cedula', _issued);
+      expect(
+        viewModel.documentProblem('cedula'),
+        'Elige la fecha de vencimiento',
+      );
+
+      viewModel.setExpiresOn(
+        'cedula',
+        _issued.subtract(const Duration(days: 1)),
+      );
+      expect(viewModel.documentProblem('cedula'), contains('El vencimiento'));
+      viewModel.setExpiresOn(
+        'cedula',
+        DateTime.now().subtract(const Duration(days: 1)),
+      );
+      expect(viewModel.documentProblem('cedula'), contains('ya venció'));
+
+      viewModel.setExpiresOn('cedula', _expires);
+      expect(viewModel.documentProblem('cedula'), isNull);
+      // el récord de policía no vence
+      expect(viewModel.documentProblem('record_policia'), 'Adjunta el archivo');
     });
+
+    test(
+      'la revisión resume lo que ofrece, los idiomas y el teléfono',
+      () async {
+        final viewModel = await _viewModel();
+        _fillUntilReview(viewModel);
+
+        expect(viewModel.step, GuideApplicationStep.review);
+        expect(viewModel.coverageSummary, 'Solo en Granada');
+        expect(viewModel.selectedLanguages, ['es', 'en']);
+        expect(viewModel.phone, '+505 8888 0000');
+      },
+    );
 
     test('sin autorizar la revisión no se envía', () async {
-      final viewModel = GuideApplicationViewModel(
-        AuthRepository(),
-        GuideAccessRepository(AuthRepository()),
-      );
+      final viewModel = await _viewModel();
       _fillUntilReview(viewModel);
 
       expect(await viewModel.sendApplication(), isFalse);
@@ -309,12 +376,15 @@ void main() {
       );
     });
 
-    testWidgets('sin sesión verifica el correo, crea la cuenta y envía', (
+    testWidgets('verifica el correo, crea la cuenta y envía todo junto', (
       tester,
     ) async {
       final auth = AuthRepository();
       final guideAccess = GuideAccessRepository(auth);
-      final viewModel = GuideApplicationViewModel(auth, guideAccess);
+      final viewModel = await _settle(
+        tester,
+        _viewModel(auth: auth, access: guideAccess),
+      );
       _fillUntilReview(viewModel);
       viewModel.setConsent(true);
 
@@ -328,57 +398,58 @@ void main() {
       expect(viewModel.step, GuideApplicationStep.password);
 
       expect(
-        await _settle(tester, viewModel.createAccount('secreta123')),
+        await _settle(tester, viewModel.createAccount('Secreta123')),
         isTrue,
       );
       expect(auth.currentUser?.email, 'mariana@example.com');
       expect(auth.currentUser?.name, 'Mariana López');
       expect(guideAccess.status, GuideAccessStatus.pending);
-      expect(guideAccess.isLimitedToStatus, isTrue);
+      expect(guideAccess.application?.profile.cityId, 'city-granada');
+      expect(guideAccess.application?.documents, hasLength(3));
       guideAccess.dispose();
     });
 
-    testWidgets('con sesión la envía sin pedir código', (tester) async {
-      final auth = AuthRepository();
-      final guideAccess = GuideAccessRepository(auth);
-      await _login(tester, auth, 'mariana@example.com');
+    test('al corregir solo pide lo rechazado y trae lo demás', () async {
+      final viewModel = await _viewModel(
+        correcting: ProviderApplication(
+          id: 'req-1',
+          status: ApplicationStatus.rejected,
+          providerStatus: ProviderStatus.unaccredited,
+          profile: const ProviderProfileData(
+            services: [ProviderServices.guide],
+            cityId: 'city-leon',
+            phone: '+505 8831 4476',
+            presentation: 'Leyendas.',
+            languages: [ProviderLanguage(code: 'en', level: 'advanced')],
+          ),
+          documents: [
+            _sent('cedula', accepted: true),
+            _sent('record_policia'),
+            _sent('licencia_intur', accepted: false),
+          ],
+        ),
+      );
 
-      final viewModel = GuideApplicationViewModel(auth, guideAccess);
-      expect(viewModel.contactEmail, 'mariana@example.com');
-      _fillUntilReview(viewModel);
-      viewModel.setConsent(true);
-
-      expect(await _settle(tester, viewModel.sendApplication()), isTrue);
-      expect(viewModel.step, GuideApplicationStep.review);
-      expect(guideAccess.status, GuideAccessStatus.pending);
-      expect(guideAccess.isLimitedToStatus, isFalse);
-      expect(guideAccess.request?.coverage, GuideCoverage.local);
-      expect(guideAccess.request?.certifiedCity, 'Granada');
-      guideAccess.dispose();
-    });
-
-    testWidgets('un guía nacional se envía sin ciudad aunque eligiera una', (
-      tester,
-    ) async {
-      final auth = AuthRepository();
-      final guideAccess = GuideAccessRepository(auth);
-      await _login(tester, auth, 'mariana@example.com');
-
-      final viewModel = GuideApplicationViewModel(auth, guideAccess);
-      _fillUntilReview(viewModel);
-      viewModel.setCoverage(GuideCoverage.national);
-      viewModel.setConsent(true);
-
-      expect(await _settle(tester, viewModel.sendApplication()), isTrue);
-      expect(guideAccess.request?.coverage, GuideCoverage.national);
-      expect(guideAccess.request?.certifiedCity, isNull);
-      guideAccess.dispose();
+      expect(viewModel.isCorrecting, isTrue);
+      expect(viewModel.step, GuideApplicationStep.services);
+      expect(viewModel.services, [ProviderServices.guide]);
+      expect(viewModel.cityId, 'city-leon');
+      expect(viewModel.countryCode, '+505');
+      expect(viewModel.phoneNumber, '8831 4476');
+      expect(viewModel.typesToUpload.map((type) => type.code), [
+        'licencia_intur',
+      ]);
+      expect(viewModel.keptFor('cedula'), isNotNull);
+      expect(
+        viewModel.rejectedFor('licencia_intur')?.review?.reason,
+        isNotNull,
+      );
     });
   });
 
   group('Navegación', () {
-    /// La app con el router real y sólo los repositorios que usan las
-    /// pantallas de acceso: si algo manda al inicio, falla por proveedores.
+    /// La app con el router real y sólo los repositorios que usan las pantallas de
+    /// acceso: si algo manda al inicio, falla por proveedores.
     Future<_TestApp> pumpApp(WidgetTester tester) async {
       final auth = AuthRepository();
       final guideAccess = GuideAccessRepository(auth);
@@ -402,71 +473,31 @@ void main() {
       return (router: router, auth: auth, guideAccess: guideAccess);
     }
 
-    testWidgets('crear la cuenta dentro de la postulación no saca de ella', (
-      tester,
-    ) async {
-      final app = await pumpApp(tester);
-      app.router.go(Routes.guideStart);
-      await tester.pumpAndSettle();
-      app.router.push(Routes.guideApplication);
-      await tester.pumpAndSettle();
-
-      await _settle(
-        tester,
-        app.auth.register(
-          name: 'Mariana López',
-          email: 'mariana@example.com',
-          password: 'secreta123',
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Cuéntanos quién eres'), findsOneWidget);
-      app.guideAccess.dispose();
-    });
-
     testWidgets('el login de guía lleva a la postulación', (tester) async {
       final app = await pumpApp(tester);
       app.router.push(Routes.guideLogin);
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.byType(TextFormField).at(0),
-        'mariana@example.com',
-      );
-      await tester.enterText(find.byType(TextFormField).at(1), 'secreta1');
-      await tester.tap(find.text('INICIAR SESIÓN'));
-      await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await _submitLogin(tester, 'mariana@example.com');
 
       expect(find.text('Comparte tu territorio'), findsOneWidget);
+      // una cuenta de turista no se vuelve de guía: hace falta otra
+      expect(find.text('SALIR PARA POSTULARME'), findsOneWidget);
       app.guideAccess.dispose();
     });
 
-    testWidgets('quien se registró al postularse sólo ve su solicitud', (
-      tester,
-    ) async {
+    testWidgets('quien se postuló sólo ve su solicitud', (tester) async {
       final app = await pumpApp(tester);
       app.router.go(Routes.guideStart);
       await tester.pumpAndSettle();
       await _settle(
         tester,
-        app.auth.register(
-          name: 'Nueva Guía',
-          email: 'nueva@example.com',
-          password: 'secreta123',
-        ),
-      );
-      await _settle(
-        tester,
-        app.guideAccess.submit(_request(), signedUpAsGuide: true),
+        app.guideAccess.apply(_draft(email: 'nueva@example.com')),
       );
       app.router.go(Routes.guideStatus);
       await tester.pumpAndSettle();
 
       expect(find.text('Solicitud en revisión'), findsOneWidget);
-      expect(find.byTooltip('Regresar'), findsNothing);
-      expect(find.text('VOLVER AL INICIO'), findsNothing);
 
       for (final location in [Routes.home, Routes.guideHome]) {
         app.router.go(location);
@@ -511,9 +542,25 @@ void main() {
     testWidgets('el login de guía ofrece postularse', (tester) async {
       await tester.pumpWidget(loginApp(UserRole.guide));
 
-      expect(find.textContaining('mismo correo y contraseña'), findsOneWidget);
       expect(find.text('POSTULARME COMO GUÍA'), findsOneWidget);
       expect(find.text('CREAR CUENTA'), findsNothing);
+    });
+
+    testWidgets('sin sesión, el inicio de la postulación ofrece postularse', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<AuthRepository>.value(
+          value: AuthRepository(),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: const GuideStartView(),
+          ),
+        ),
+      );
+
+      expect(find.text('POSTULARME'), findsOneWidget);
+      expect(find.textContaining('récord de policía'), findsOneWidget);
     });
 
     testWidgets('un correo desconocido ofrece registrarse como turista', (
@@ -563,46 +610,6 @@ void main() {
       expect(find.text('Registro de turista'), findsOneWidget);
     });
 
-    testWidgets('un correo desconocido ofrece postularse como guía', (
-      tester,
-    ) async {
-      final router = GoRouter(
-        initialLocation: Routes.guideLogin,
-        routes: [
-          GoRoute(
-            path: Routes.guideLogin,
-            builder: (context, state) => ChangeNotifierProvider<LoginViewModel>(
-              create: (_) => LoginViewModel(AuthRepository()),
-              child: const LoginView(role: UserRole.guide),
-            ),
-          ),
-          GoRoute(
-            path: Routes.guideStart,
-            builder: (context, state) =>
-                const Scaffold(body: Text('Postulación de guía')),
-          ),
-        ],
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(
-        MaterialApp.router(theme: AppTheme.light, routerConfig: router),
-      );
-      await tester.pumpAndSettle();
-      await _submitLogin(tester, 'nadie@kplan.com');
-
-      expect(find.text('¿Quieres registrarte como guía?'), findsOneWidget);
-      expect(find.text('Cancelar'), findsOneWidget);
-      await tester.tap(
-        find.descendant(
-          of: find.byType(AppDialog),
-          matching: find.text('Postularme'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Postulación de guía'), findsOneWidget);
-    });
-
     testWidgets('el estado cambia solo cuando se aprueba la solicitud', (
       tester,
     ) async {
@@ -611,33 +618,36 @@ void main() {
         auth,
         reviewTime: const Duration(seconds: 30),
       );
-      await _login(tester, auth, 'mariana@example.com');
-      await _settle(tester, guideAccess.submit(_request()));
+      await _settle(tester, guideAccess.apply(_draft()));
 
       await tester.pumpWidget(
-        ChangeNotifierProvider<GuideAccessRepository>.value(
-          value: guideAccess,
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthRepository>.value(value: auth),
+            ChangeNotifierProvider<GuideAccessRepository>.value(
+              value: guideAccess,
+            ),
+          ],
           child: MaterialApp(
             theme: AppTheme.light,
             home: const GuideStatusView(),
           ),
         ),
       );
+      await tester.pump();
       expect(find.text('Solicitud en revisión'), findsOneWidget);
-      expect(find.text('Revisión de documentos'), findsOneWidget);
-      expect(find.textContaining('mariana@example.com'), findsOneWidget);
-      expect(find.text('VOLVER AL INICIO'), findsOneWidget);
-      expect(find.textContaining('Listo'), findsOneWidget);
-      expect(find.text('Revisando ahora'), findsOneWidget);
+      expect(find.text('Licencia o carné del INTUR'), findsOneWidget);
+      expect(find.text('Por revisar'), findsNWidgets(3));
 
-      // Al 40 % de la revisión quedan revisados los documentos.
       await tester.pump(const Duration(seconds: 12));
-      expect(find.textContaining('Listo'), findsNWidgets(2));
-      expect(find.text('Revisando ahora'), findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(find.text('En revisión'), findsNWidgets(3));
 
       await tester.pump(const Duration(seconds: 18));
       await tester.pumpAndSettle();
       expect(find.text('Acceso de guía habilitado'), findsOneWidget);
+      expect(find.text('ENTRAR COMO GUÍA'), findsOneWidget);
+      guideAccess.dispose();
     });
   });
 }

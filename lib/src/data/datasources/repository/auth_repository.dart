@@ -240,6 +240,10 @@ class AuthRepository extends ChangeNotifier {
     }
   }
 
+  /// Abre la sesión que devolvió otra ruta (la postulación de un guía crea la cuenta y la
+  /// deja dentro, con los tokens en el cuerpo, como el inicio de sesión).
+  Future<User> openSessionFrom(Map<String, dynamic> body) => _openSession(body);
+
   // ── Perfil y contraseña ───────────────────────────────────────────────────
 
   /// Cambia el nombre visible del usuario (primer nombre y apellidos).

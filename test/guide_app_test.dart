@@ -7,6 +7,7 @@ import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.da
 import 'package:k_plan_mobile/src/data/datasources/repository/guide_access_repository.dart';
 import 'package:k_plan_mobile/src/data/models/guide_access_request.dart';
 import 'package:k_plan_mobile/src/data/models/guide_job.dart';
+import 'package:k_plan_mobile/src/data/models/provider.dart';
 import 'package:k_plan_mobile/src/router/routes.dart';
 import 'package:k_plan_mobile/src/ui/guide_app/home/viewmodels/guide_home_viewmodel.dart';
 import 'package:k_plan_mobile/src/ui/guide_app/job/viewmodels/guide_job_viewmodel.dart';
@@ -15,19 +16,34 @@ import 'package:provider/provider.dart';
 
 import 'guide_app_harness.dart';
 
-/// Una guía local recién postulada, sin viajes ni dinero todavía.
-GuideAccessRequest _newGuide({required String city}) {
+/// Una guía local de Juigalpa que se postula: su cuenta se crea al enviar, sin viajes ni
+/// dinero todavía.
+ProviderApplicationDraft _newGuide() {
   final document = GuideDocument(name: 'doc.pdf', uri: Uri.parse('demo:doc'));
-  return GuideAccessRequest(
+  DocumentDraft draft(String type) => DocumentDraft(
+    typeCode: type,
+    number: '1',
+    issuedOn: DateTime.now().subtract(const Duration(days: 300)),
+    expiresOn: DateTime.now().add(const Duration(days: 300)),
+    file: document,
+  );
+  return ProviderApplicationDraft(
     fullName: 'Rosa Téllez',
-    phone: '+505 8888 0000',
-    contactEmail: 'rosa@example.com',
-    coverage: GuideCoverage.local,
-    certifiedCity: city,
-    languages: const ['Español'],
-    experience: '2 años',
-    identityDocument: document,
-    inturCredential: document,
+    email: 'rosa@example.com',
+    code: '123456',
+    password: 'Secreta123',
+    profile: const ProviderProfileData(
+      services: [ProviderServices.guide],
+      cityId: 'city-juigalpa',
+      phone: '+505 8888 0000',
+      presentation: '2 años',
+      languages: [ProviderLanguage(code: 'es', level: 'native')],
+    ),
+    documents: [
+      draft('cedula'),
+      draft('record_policia'),
+      draft('licencia_intur'),
+    ],
   );
 }
 
@@ -104,11 +120,13 @@ void main() {
       tester,
     ) async {
       final repos = GuideAppRepos();
-      await repos.loginAs(tester, 'rosa@example.com');
-      await repos.settle(
-        tester,
-        repos.guideAccess.submit(_newGuide(city: 'Juigalpa')),
-      );
+      await repos.settle(tester, repos.guideAccess.apply(_newGuide()));
+      final loading = Future.wait([
+        repos.work.ensureLoaded(),
+        repos.tourists.ensureLoaded(),
+      ]);
+      await tester.pump(const Duration(seconds: 2));
+      await loading;
       await tester.pump(GuideAppRepos.reviewTime);
       expect(repos.guideAccess.isApproved, isTrue);
 
@@ -331,23 +349,22 @@ void main() {
       expect(find.text('Comparte tu territorio'), findsOneWidget);
     });
 
-    testWidgets('se cambia de guía a turista y de vuelta', (tester) async {
-      await _openApp(tester);
-      await _logIn(tester, role: 'Guía', email: 'guia@kplan.com');
+    testWidgets(
+      'la cuenta de un guía entra a la app del guía por cualquier login',
+      (tester) async {
+        await _openApp(tester);
+        // una cuenta, un papel: aunque entre por el login de turistas
+        await _logIn(tester, role: 'Turista', email: 'guia@kplan.com');
 
-      await tester.tap(find.text('Perfil'));
-      await tester.pumpAndSettle();
-      await _tapVisible(tester, find.text('Entrar como turista'));
-      expect(_location(tester), Routes.home);
-      expect(find.text('Descubre tu próximo plan'), findsOneWidget);
+        expect(_location(tester), Routes.guideHome);
+        expect(find.text('Hola, Esteban'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Menú'));
-      await tester.pumpAndSettle();
-      await _tapVisible(tester, find.text('Modo guía'));
-
-      expect(_location(tester), Routes.guideHome);
-      expect(find.text('Hola, Esteban'), findsOneWidget);
-    });
+        await tester.tap(find.text('Perfil'));
+        await tester.pumpAndSettle();
+        expect(find.text('Entrar como turista'), findsNothing);
+        expect(find.text('Mis documentos'), findsOneWidget);
+      },
+    );
   });
 
   group('Pantallas', () {
@@ -459,10 +476,9 @@ void main() {
       tester,
     ) async {
       await _openApp(tester);
-      await _logIn(tester, role: 'Turista', email: 'rosa@example.com');
       final submit = _context(
         tester,
-      ).read<GuideAccessRepository>().submit(_newGuide(city: 'Juigalpa'));
+      ).read<GuideAccessRepository>().apply(_newGuide());
       await tester.pump(const Duration(seconds: 2));
       await submit;
       await tester.pump(const Duration(minutes: 1));
