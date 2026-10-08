@@ -1,112 +1,435 @@
-# K'Plan · App móvil
+<div align="center">
 
-App Flutter de K'Plan para **turistas**, **guías** y **traductores** (ver `PRODUCT.md`). Los negocios,
-alcaldías y el equipo de K'Plan usan el portal web.
+# `kplan-mobile`
 
-## Requisitos
+### Aplicación móvil de K'Plan para turistas, guías y traductores
 
-- Flutter estable (Dart `^3.11.1`). Verifica con `flutter doctor`.
+[![Flutter][flutter-badge]][flutter-docs]
+[![Dart][dart-badge]][dart-docs]
+[![Material 3][material-badge]][material-docs]
+<br/>
+[![go_router][router-badge]][router-docs]
+[![provider][provider-badge]][provider-docs]
+[![Dio][dio-badge]][dio-docs]
 
-## Ejecutar
+</div>
+
+## Descripción
+
+Cliente móvil de K'Plan para descubrir y recorrer las Ciudades Creativas de
+Nicaragua. La aplicación permite a turistas planificar circuitos, reservar
+servicios y obtener recompensas. También incluye una experiencia separada para
+guías y traductores, desde su postulación hasta la gestión de viajes y retiros.
+
+El proyecto está desarrollado con Flutter y Material 3 para Android e iOS. Se
+puede ejecutar en dos modalidades:
+
+- **Modo demo:** no requiere backend. Usa catálogos incluidos en
+  `assets/mock/` y mantiene la sesión en memoria.
+- **Modo conectado:** consume el API de K'Plan y persiste la sesión en el
+  almacén seguro del dispositivo.
+
+Los negocios, instituciones, alcaldías y el equipo de K'Plan utilizan el portal
+web; esta aplicación está limitada a turistas, guías y traductores.
+
+## Alcance funcional
+
+### Turistas
+
+- Registro con código de correo, inicio de sesión, recuperación y cambio de
+  contraseña.
+- Inicio de sesión con Google y verificación en dos pasos (TOTP y códigos de
+  recuperación).
+- Catálogo de circuitos, lugares, eventos, guías y traductores.
+- Mapas interactivos, ubicación del dispositivo y lectura de códigos QR.
+- Creación y edición de circuitos propios, horarios fijos y asistente de
+  itinerarios.
+- Salidas grupales, convocatorias, reservas, cancelaciones, chat y reseñas.
+- Insignias, saldo, campañas de recompensa, canje y billetera de cupones.
+- Bandeja de avisos, preferencias y reportes de contenido o personas.
+- Interfaz disponible en español e inglés.
+
+### Guías y traductores
+
+- Postulación con identidad, servicios, idiomas, cobertura y documentos.
+- Subida directa de archivos mediante URL firmada por el API.
+- Consulta del estado de revisión, corrección de documentos y renovación.
+- Perfil público editable.
+- Gestión de salidas, convocatorias, postulaciones, reservas y chats.
+- Consulta de saldo, cuenta de retiro y solicitudes de retiro.
+
+## Tecnologías principales
+
+- **Flutter / Dart:** interfaz multiplataforma.
+- **Material 3:** sistema visual y componentes.
+- **go_router:** navegación declarativa y protección de rutas por sesión y rol.
+- **provider:** inyección de dependencias y estado con MVVM.
+- **Dio:** cliente HTTP, interceptores y manejo centralizado de sesión.
+- **MapLibre GL + OpenFreeMap:** mapas vectoriales sin clave privada.
+- **flutter_secure_storage:** tokens en Android Keystore e iOS Keychain.
+- **google_sign_in:** autenticación móvil con Google.
+- **mobile_scanner / qr_flutter:** lectura y presentación de códigos QR.
+- **geolocator:** ubicación mientras se muestra un recorrido.
+- **gen-l10n / intl:** internacionalización en español e inglés.
+
+Las versiones exactas están fijadas en `pubspec.yaml` y `pubspec.lock`.
+
+## Arquitectura
+
+La aplicación usa MVVM con repositorios y una separación por responsabilidades:
+
+```text
+Vista
+  -> ViewModel (estado y acciones de la pantalla)
+    -> Repositorio (reglas y selección demo/API)
+      -> Fuente local o cliente HTTP
+        -> API de K'Plan
+```
+
+- Las vistas no realizan peticiones de red directamente.
+- Los ViewModels extienden `BaseViewModel` y exponen carga y errores.
+- Los repositorios devuelven `Result<T>` (`Ok` o `Failure`) en los flujos de
+  datos.
+- `ApiClient` es el cliente HTTP central y añade la sesión a cada petición.
+- Cada pantalla crea su ViewModel desde el router; su ciclo de vida termina al
+  abandonar la ruta.
+- Los repositorios ligados a una cuenta observan `AuthRepository` y limpian su
+  estado cuando cambia la sesión.
+- Las rutas y sus guards están centralizados en `lib/src/router/`.
+
+### Inicio de la aplicación
+
+`lib/main.dart` prepara la aplicación en este orden:
+
+1. Valida que un build release no use un API por HTTP.
+2. Recupera el idioma antes del primer cuadro.
+3. Configura el almacenamiento seguro cuando existe un API.
+4. Intenta restaurar la sesión guardada.
+5. Registra repositorios globales con `MultiProvider`.
+6. Inicia `MaterialApp.router` con localización y guards de navegación.
+
+### Origen de los datos
+
+Los repositorios conservan la misma interfaz en ambos modos y eligen su fuente
+mediante `ApiClient.isConfigured`:
+
+| Área | Con `API_BASE_URL` | Sin `API_BASE_URL` |
+| --- | --- | --- |
+| Cuenta, sesión, 2FA y Google | API real | Simulación en memoria |
+| Circuitos, lugares, eventos e itinerarios | API real | JSON de `assets/mock/` |
+| Guías, salidas, convocatorias, reservas, chat y reseñas | API real | JSON y estado en memoria |
+| Insignias, cupones, avisos, reportes y retiros | API real | JSON y estado en memoria |
+
+Incluso en modo conectado permanecen locales los lugares destacados, los
+guardados, el viaje en curso, la bitácora de visitas, las medallas por ciudad,
+el chat de la propuesta demo y soporte. Las notificaciones push tampoco están
+activas todavía; la bandeja de avisos sí consume el API.
+
+## Ejecución local
+
+### Requisitos
+
+1. [Git][git].
+2. [Flutter][flutter-install] `3.41.0` o superior.
+   - El proyecto requiere Dart `>=3.11.1 <4.0.0`.
+3. Android Studio con Android SDK y un emulador, o un dispositivo Android.
+4. Para iOS: macOS, Xcode, CocoaPods y un simulador o dispositivo.
+5. Java 17 para la compilación de Android.
+
+Compruebe la instalación:
 
 ```bash
+flutter doctor -v
+flutter devices
+```
+
+### Clonar e instalar
+
+```bash
+git clone https://github.com/Los-Come-Tuani/mobile.git kplan-mobile
+cd kplan-mobile
 flutter pub get
-flutter run                                              # modo demo: datos simulados, sin API
-flutter run --dart-define-from-file=env/dev.json         # contra el API local
 ```
 
-Sin `API_BASE_URL` la app corre en **modo demo**: los repositorios devuelven datos de
-`assets/mock/` y la sesión vive en memoria. Con la URL del API configurada, el inicio de sesión
-y el registro hablan con el API real.
-
-### Entornos
-
-La URL del API se fija al compilar con `--dart-define-from-file`; no está en el código. Las
-plantillas viven en `env/*.example.json` y los archivos reales (`env/dev.json`, `env/staging.json`,
-`env/prod.json`) no se versionan. Ver [`env/README.md`](env/README.md) para saber a qué dirección
-apuntar según corras en el emulador de Android, el simulador de iOS o un teléfono físico.
-
-- **Desarrollo**: HTTP en claro permitido solo en builds debug.
-- **Staging y producción**: URLs pendientes. Un build release **rechaza** una URL que no sea `https`.
-- Lo que se compila dentro de la app se puede extraer del APK/IPA: solo valores públicos, nunca
-  claves de servidor.
-
-## Cuenta y sesión
-
-Con el API configurado, la identidad va contra el API real (`/auth/mobile/*`, ver
-`docs/autenticacion.md` del repo del API):
-
-- **Tokens**: `access` (3 horas) y `refresh` (1 día, de un solo uso) se guardan en el almacén
-  seguro del dispositivo (Keychain en iOS, Keystore en Android) con `flutter_secure_storage`,
-  nunca en `shared_preferences`. Los pone el `ApiClient` en cada petición; ante un `401` renueva la
-  sesión **una sola vez** aunque fallen varias peticiones a la vez y reintenta. Si el API rechaza la
-  renovación, la sesión termina y el router vuelve a la bienvenida. Al abrir la app se recupera la
-  sesión guardada.
-- **Entrar**: correo y contraseña. Si la cuenta tiene verificación en dos pasos, llega el reto y la
-  pantalla "Verifica que eres tú" pide el código de la app de autenticación o uno de recuperación.
-  Cinco intentos fallidos bloquean el acceso quince minutos (la app dice cuánto esperar).
-- **Crear cuenta**: correo -> código de 6 dígitos que llega al correo -> contraseña (8+, una
-  mayúscula y un número) -> fecha de nacimiento (mayor de 18) -> nacionalidad -> nombre -> usuario.
-- **Guías y traductores**: una cuenta ejerce un solo papel. La de un guía o traductor se crea al
-  postularse ("Comparte tu territorio"): datos, servicios, idiomas y zona, documentos (se suben
-  directo al almacenamiento con una URL firmada) y, al final, el código del correo y la
-  contraseña. Mientras el equipo la revisa, la cuenta solo ve el estado de su solicitud; si le
-  piden correcciones, reenvía solo lo rechazado. Ya aprobada entra a la app del guía, edita su
-  perfil público y renueva un documento por vencer sin dejar de trabajar. Contrato:
-  `docs/prestadores.md` del repo del API.
-- **Recuperar la contraseña**: código al correo y contraseña nueva. **Cambiarla** desde la cuenta
-  cierra todas las sesiones.
-- **Verificación en dos pasos**: en Configuraciones -> Cuenta (QR, clave, códigos de recuperación
-  que se muestran una sola vez, regenerarlos y desactivar).
-- **Google**: el botón "Continuar con Google" solo aparece con `GOOGLE_SERVER_CLIENT_ID`. La primera
-  vez pide fecha de nacimiento y nacionalidad. Configuración paso a paso en `docs/google.md` del
-  repo del API.
-- Los registros de red redactan contraseñas, tokens y códigos (`lib/src/core/utils/redact.dart`).
-
-Sin API (modo demo) todo esto se simula con cuentas de ejemplo y no se guarda nada en disco.
-
-## Catálogo y "Mi circuito"
-
-Con el API configurado, los circuitos y los lugares salen del API (`/circuit/` y `/stop/`, ver
-`docs/territorio.md` del repo del API) y los circuitos que arma el turista se guardan en su cuenta
-como itinerarios (`/itinerary/`): los que crea y, en cuanto le cambia las paradas, uno del
-catálogo. Los cambios se ven al momento y se suben detrás; si el API falla, la app lo avisa y lo
-que el turista ve no se pierde. Los lugares destacados, los eventos, los cupones y los horarios de
-grupo de los circuitos creativos siguen siendo de ejemplo.
-
-### Probar contra el API de verdad
-
-Con el API local corriendo y el correo en consola (`DEBUG=True`):
+### Ejecutar en modo demo
 
 ```bash
-KPLAN_API_URL=http://localhost:8080 KPLAN_MAIL_LOG=<archivo con la salida del API> flutter test test/integration
+flutter run
 ```
 
-Crea una cuenta de turista nueva y recorre el registro con código, la renovación de la sesión y el
-2FA completo con códigos reales. `provider_contract_test.dart` crea además una cuenta de guía con
-sus documentos: necesita el almacenamiento configurado en el API (`STORAGE_*`). Sin esas variables,
-las pruebas se saltan.
+No se necesita API ni archivo de entorno. La identidad y parte del dominio se
+simulan localmente.
 
-`tour_contract_test.dart` lee el catálogo (con `seedcontent` cargado en el API) y recorre "Mi
-circuito" con un turista que ya existe; borra lo que crea:
+### Ejecutar con el API
+
+Copie la plantilla de desarrollo:
 
 ```bash
-KPLAN_API_URL=http://localhost:8080 KPLAN_TOURIST_PASSWORD=<la del turista local> flutter test test/integration/tour_contract_test.dart
+cp env/dev.example.json env/dev.json
+flutter run --dart-define-from-file=env/dev.json
 ```
 
-## Calidad
+En PowerShell:
+
+```powershell
+Copy-Item env/dev.example.json env/dev.json
+flutter run --dart-define-from-file=env/dev.json
+```
+
+Los archivos `env/dev.json`, `env/staging.json` y `env/prod.json` están
+ignorados por Git. Solo se versionan sus plantillas `*.example.json`.
+
+## Configuración por entorno
+
+Los valores se incorporan al compilar mediante
+`--dart-define-from-file`. No son variables de entorno leídas en tiempo de
+ejecución.
+
+| Variable | Uso |
+| --- | --- |
+| `API_BASE_URL` | URL base sin `/` final. Vacía o ausente activa el modo demo. |
+| `GOOGLE_SERVER_CLIENT_ID` | Client ID público de tipo Web que también valida el API. Vacío oculta el botón de Google. |
+| `GOOGLE_IOS_CLIENT_ID` | Client ID público de tipo iOS. En Android puede quedar vacío. |
+
+Todo valor compilado en un APK o IPA puede extraerse. Estos archivos solo deben
+contener datos públicos: nunca secretos del servidor, tokens, contraseñas,
+cuentas de servicio o llaves de firma.
+
+### Dirección del API local
+
+El API de desarrollo utiliza el puerto `8080`:
+
+| Destino de la app | `API_BASE_URL` |
+| --- | --- |
+| Emulador Android | `http://10.0.2.2:8080` |
+| Simulador iOS | `http://localhost:8080` |
+| Android conectado por USB | Ejecutar `adb reverse tcp:8080 tcp:8080` y usar `http://localhost:8080` |
+| Dispositivo por Wi-Fi | `http://<IP_DEL_EQUIPO>:8080` y exponer el API en la red local |
+
+HTTP se admite únicamente para desarrollo. Si `API_BASE_URL` no usa `https`,
+un build release se detiene al iniciar. La explicación completa está en
+[`env/README.md`](env/README.md).
+
+## Sesión y comunicación con el API
+
+- Los tokens de acceso y renovación se guardan con
+  `flutter_secure_storage`, nunca en `shared_preferences`.
+- Cada petición autenticada incluye `Authorization: Bearer`.
+- Ante un `401`, el cliente renueva la sesión una sola vez aunque varias
+  peticiones fallen al mismo tiempo, y después reintenta la petición original.
+- Si el API rechaza la renovación, los tokens se eliminan y el router vuelve al
+  acceso. Un fallo de conectividad no elimina una sesión válida.
+- Los errores del API con `detail`, `field_errors` y `Retry-After` se convierten
+  en mensajes y errores de campo para la interfaz.
+- Los logs de red solo existen en debug, nunca incluyen cabeceras y pasan los
+  cuerpos por `redactSensitive`.
+
+Los contratos completos se mantienen en el repositorio del API, especialmente
+en `docs/autenticacion.md`, `docs/prestadores.md`, `docs/territorio.md`,
+`docs/agenda-y-recompensas.md`, `docs/servicios.md`, `docs/finanzas.md` y
+`docs/avisos.md`.
+
+## Internacionalización
+
+Los textos fuente están en:
+
+```text
+lib/l10n/arb/app_es.arb
+lib/l10n/arb/app_en.arb
+```
+
+Después de modificar un ARB:
+
+```bash
+flutter gen-l10n
+```
+
+Los archivos generados en `lib/l10n/app_localizations*.dart` forman parte del
+repositorio. El idioma seleccionado se guarda en `shared_preferences`; no se
+almacena ahí ningún dato sensible.
+
+## Mapas, cámara y ubicación
+
+- En Android e iOS, `KPlanMap` utiliza MapLibre nativo con tiles y glifos de
+  OpenFreeMap.
+- En pruebas y plataformas de escritorio se utiliza un mapa de respaldo
+  dibujado con widgets, lo que permite probar los marcadores sin un motor
+  nativo.
+- La cámara se solicita al escanear el QR de una visita.
+- La ubicación se solicita mientras una pantalla de mapa necesita mostrar al
+  turista o acreditar una visita.
+
+Los permisos se declaran en `android/app/src/main/AndroidManifest.xml` y
+`ios/Runner/Info.plist`.
+
+## Pruebas y calidad
+
+### Análisis y pruebas automatizadas
+
+Antes de entregar cambios:
 
 ```bash
 flutter analyze
 flutter test
 ```
 
-## Estructura
+La suite incluye pruebas unitarias, de repositorios, ViewModels y widgets. Las
+pruebas de contrato ubicadas en `test/integration/` se saltan automáticamente
+si no reciben la configuración de un API real.
+
+Última verificación del entregable: `flutter analyze` sin incidencias y
+`flutter test` con 411 pruebas aprobadas y 9 pruebas de integración omitidas por
+no haberse proporcionado sus variables.
+
+### Pruebas de contrato con el API
+
+Para identidad, 2FA y postulación de prestadores, ejecute el API con correo de
+desarrollo visible en un archivo de log. La postulación también necesita el
+almacenamiento S3 compatible configurado en el API:
+
+```bash
+KPLAN_API_URL=http://localhost:8080 \
+KPLAN_MAIL_LOG=/ruta/api.out.log \
+flutter test test/integration
+```
+
+En PowerShell:
+
+```powershell
+$env:KPLAN_API_URL = 'http://localhost:8080'
+$env:KPLAN_MAIL_LOG = 'C:\ruta\api.out.log'
+flutter test test/integration
+```
+
+El catálogo, los itinerarios y los servicios usan una cuenta turista local:
+
+```powershell
+$env:KPLAN_API_URL = 'http://localhost:8080'
+$env:KPLAN_TOURIST_EMAIL = 'turista@example.com' # opcional
+$env:KPLAN_TOURIST_PASSWORD = '<contraseña-local>'
+flutter test test/integration/tour_contract_test.dart
+flutter test test/integration/services_contract_test.dart
+```
+
+Para cubrir también las operaciones del prestador en
+`services_contract_test.dart`, defina `KPLAN_GUIDE_EMAIL` y
+`KPLAN_GUIDE_PASSWORD` con una cuenta aprobada. Las pruebas eliminan los
+itinerarios que crean.
+
+## Compilación
+
+### Android
+
+APK de prueba:
+
+```bash
+flutter build apk --release --dart-define-from-file=env/prod.json
+```
+
+Android App Bundle para Play Store:
+
+```bash
+flutter build appbundle --release --dart-define-from-file=env/prod.json
+```
+
+La firma de publicación se configura en `android/key.properties`, un archivo
+ignorado por Git. Sin él, Gradle firma el release con la llave de debug y emite
+una advertencia; ese artefacto no debe publicarse. Consulte
+[`env/README.md`](env/README.md) para el formato.
+
+### iOS
+
+En macOS:
+
+```bash
+flutter build ipa --release --dart-define-from-file=env/prod.json
+```
+
+La firma, los perfiles y las capacidades se administran desde
+`ios/Runner.xcworkspace` en Xcode.
+
+La aplicación usa el identificador `dev.kplan.app` en Android e iOS. No debe
+cambiarse sin actualizar también la firma, los Client ID de Google y la
+configuración de las tiendas.
+
+## Estructura del proyecto
 
 ```text
-lib/src/
-  core/      tema, constantes y utilidades (logger, resultados, validadores, itinerarios, mapas)
-  data/      modelos y repositorios; datasources/remote es el cliente HTTP único (ApiClient)
-  router/    rutas y guards (go_router)
-  ui/        una carpeta por función: view, viewmodels y widgets
+.
+├── android/                 proyecto y configuración nativa de Android
+├── ios/                     proyecto y configuración nativa de iOS
+├── assets/
+│   ├── animation/           animaciones Lottie
+│   ├── images/              identidad visual e ilustraciones
+│   └── mock/                catálogos demo en español e inglés
+├── env/                     plantillas públicas de configuración
+├── lib/
+│   ├── l10n/                ARB y localizaciones generadas
+│   ├── main.dart            arranque e inyección global
+│   └── src/
+│       ├── core/            tema, l10n, validación y utilidades
+│       ├── data/
+│       │   ├── datasources/
+│       │   │   ├── local/   sesión y datos demo
+│       │   │   ├── remote/  cliente y adaptadores del API
+│       │   │   └── repository/
+│       │   └── models/
+│       ├── router/          rutas y guards
+│       └── ui/              vistas, ViewModels y widgets por función
+└── test/
+    ├── integration/         contratos contra un API real
+    └── support/             API falso, muestras y utilidades
 ```
+
+## Seguridad
+
+- No se versionan archivos de entorno reales, certificados, keystores,
+  configuraciones de Firebase, cuentas de servicio ni secretos.
+- Los tokens viven en Android Keystore o iOS Keychain.
+- Android desactiva el respaldo de los datos de la aplicación.
+- Producción exige HTTPS.
+- Los logs redactan tokens, contraseñas, códigos y otros campos sensibles.
+- Las subidas de documentos se hacen directamente al almacenamiento con un
+  `PUT` firmado; la aplicación no conoce credenciales del bucket.
+
+## Estado de publicación y limitaciones conocidas
+
+- Los flujos principales están conectados al API, pero los lugares destacados,
+  el viaje en curso, la bitácora de visitas y las medallas por ciudad todavía
+  conservan estado local o datos demo.
+- El chat consulta periódicamente al API; todavía no utiliza WebSocket.
+- Los avisos se muestran en la bandeja. El push requiere crear el proyecto de
+  Firebase e implementar `PushService` con `firebase_messaging`.
+- Falta configurar el Client ID de Google para iOS y su esquema de URL.
+- Si la app se publica en iOS junto con Google, debe incorporarse «Iniciar
+  sesión con Apple».
+- Staging y producción necesitan URLs reales, firma de publicación y
+  configuración de tiendas.
+- Antes de publicar debe completarse una ronda de validación en dispositivos
+  Android e iOS reales.
+
+## Solución de problemas
+
+- **El emulador Android no llega a `localhost`:** utilice `10.0.2.2`.
+- **El botón de Google no aparece:** defina `GOOGLE_SERVER_CLIENT_ID` y vuelva a
+  compilar; los `dart-define` no cambian en caliente.
+- **El release falla al iniciar:** compruebe que `API_BASE_URL` use `https`.
+- **Las pruebas de integración aparecen como omitidas:** defina las variables
+  `KPLAN_*` requeridas y asegúrese de que el API esté disponible.
+- **Una foto deja de cargar durante una sesión larga:** las URLs de archivos
+  entregadas por el API son temporales; vuelva a abrir o refrescar la pantalla.
+
+[dart-badge]: https://img.shields.io/badge/Dart-white?style=for-the-badge&color=0175C2&logo=dart&logoColor=white
+[dart-docs]: https://dart.dev/
+[dio-badge]: https://img.shields.io/badge/Dio-white?style=for-the-badge&color=5A29E4
+[dio-docs]: https://pub.dev/packages/dio
+[flutter-badge]: https://img.shields.io/badge/Flutter-white?style=for-the-badge&color=02569B&logo=flutter&logoColor=white
+[flutter-docs]: https://docs.flutter.dev/
+[flutter-install]: https://docs.flutter.dev/get-started/install
+[git]: https://git-scm.com/install/
+[material-badge]: https://img.shields.io/badge/Material_3-white?style=for-the-badge&color=6750A4&logo=materialdesign&logoColor=white
+[material-docs]: https://m3.material.io/
+[provider-badge]: https://img.shields.io/badge/provider-white?style=for-the-badge&color=02569B
+[provider-docs]: https://pub.dev/packages/provider
+[router-badge]: https://img.shields.io/badge/go__router-white?style=for-the-badge&color=02569B
+[router-docs]: https://pub.dev/packages/go_router
