@@ -9,15 +9,17 @@ import '../../models/event_item.dart';
 import '../../models/place.dart';
 import '../../models/stop.dart';
 import '../local/mock_datasource.dart';
+import '../remote/api_call.dart';
 import '../remote/api_client.dart';
+import '../remote/api_routes.dart';
 import '../remote/tour_api.dart';
 
 /// Contenido turístico: circuitos, lugares y eventos.
 ///
-/// Con `ApiClient.isConfigured`, los circuitos y los lugares salen del API ([TourApi]);
-/// sin él, de [MockDatasource]. Los lugares destacados, los eventos y los cupones
-/// todavía no existen en el API: siguen saliendo de los JSON de ejemplo en los dos
-/// modos.
+/// Con `ApiClient.isConfigured`, los circuitos, los lugares y la agenda salen del
+/// API ([TourApi], `GET /event/`); sin él, de [MockDatasource]. Los lugares
+/// destacados todavía no existen en el API: siguen saliendo de los JSON de ejemplo
+/// en los dos modos.
 class TourRepository {
   TourRepository({MockDatasource? datasource, DateTime Function()? now})
     : _datasource = datasource ?? MockDatasource(),
@@ -125,7 +127,16 @@ class TourRepository {
     });
   }
 
+  /// Con el API, la agenda de `GET /event/`: lo próximo, lo que está en curso
+  /// y lo cancelado que no terminó.
   Future<Result<List<EventItem>>> getUpcomingEvents() async {
+    if (ApiClient.isConfigured) {
+      return _call('getUpcomingEvents', () async {
+        final rows = await ApiRows.pages(ApiRoutes.events);
+        return [for (final row in rows) EventItem.fromApi(row)]
+          ..sort((a, b) => a.date.compareTo(b.date));
+      });
+    }
     return _guard('getUpcomingEvents', () async {
       final rows = await _datasource.readList('events.json');
       final events = rows.map(EventItem.fromJson).toList()
@@ -135,6 +146,12 @@ class TourRepository {
   }
 
   Future<Result<EventItem>> getEventById(String id) async {
+    if (ApiClient.isConfigured) {
+      return _call(
+        'getEventById',
+        () async => EventItem.fromApi(await ApiRows.one(ApiRoutes.event(id))),
+      );
+    }
     return _guard('getEventById', () async {
       final rows = await _datasource.readList('events.json');
       final row = rows.firstWhere(

@@ -1286,11 +1286,29 @@ abstract class AppLocalizations {
   /// **'¿Canjear \"{title}\"?'**
   String couponsRedeemTitle(String title);
 
+  /// No description provided for @eventDetailCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento se canceló.'**
+  String get eventDetailCancelled;
+
+  /// No description provided for @eventDetailCancelledBecause.
+  ///
+  /// In es, this message translates to:
+  /// **'Este evento se canceló: {reason}'**
+  String eventDetailCancelledBecause(String reason);
+
   /// No description provided for @eventDetailFreeEntry.
   ///
   /// In es, this message translates to:
   /// **'Entrada libre'**
   String get eventDetailFreeEntry;
+
+  /// No description provided for @eventDetailOrganizer.
+  ///
+  /// In es, this message translates to:
+  /// **'Organiza: {name}'**
+  String eventDetailOrganizer(String name);
 
   /// No description provided for @forgotPasswordCodeMissing.
   ///

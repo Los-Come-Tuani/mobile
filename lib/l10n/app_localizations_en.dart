@@ -752,7 +752,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get eventDetailCancelled => 'This event was cancelled.';
+
+  @override
+  String eventDetailCancelledBecause(String reason) {
+    return 'This event was cancelled: $reason';
+  }
+
+  @override
   String get eventDetailFreeEntry => 'Free entry';
+
+  @override
+  String eventDetailOrganizer(String name) {
+    return 'Organized by $name';
+  }
 
   @override
   String get forgotPasswordCodeMissing =>

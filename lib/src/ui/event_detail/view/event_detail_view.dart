@@ -14,6 +14,7 @@ import '../../widgets/category_chip.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
+import '../../widgets/inline_notice.dart';
 import '../../widgets/item_options_sheet.dart';
 import '../../widgets/kplan_loader.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
@@ -130,10 +131,30 @@ class _EventContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(event.title, style: AppTextStyles.headline),
+              if (event.cancelled) ...[
+                const SizedBox(height: 10),
+                InlineNotice(
+                  tone: NoticeTone.error,
+                  message: event.cancellationReason.isEmpty
+                      ? l10n.eventDetailCancelled
+                      : l10n.eventDetailCancelledBecause(
+                          event.cancellationReason,
+                        ),
+                ),
+              ],
+              if (event.organizer.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  l10n.eventDetailOrganizer(event.organizer),
+                  style: AppTextStyles.caption,
+                ),
+              ],
               const SizedBox(height: 10),
               IconLabel(
                 icon: Icons.calendar_month_outlined,
-                label: Formatters.shortDate(event.date),
+                label: event.fromApi
+                    ? event.dateLabel
+                    : Formatters.shortDate(event.date),
                 iconColor: AppColors.primary30,
                 color: AppColors.primaryText,
                 iconSize: 16,

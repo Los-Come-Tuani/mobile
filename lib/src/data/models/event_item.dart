@@ -1,3 +1,7 @@
+import '../../core/utils/api_json.dart';
+import '../../core/utils/formatters.dart';
+import '../../core/utils/time_parser.dart';
+
 /// Evento próximo del home, con los datos de su pantalla de detalle.
 class EventItem {
   const EventItem({
@@ -14,7 +18,58 @@ class EventItem {
     this.price = 0,
     this.latitude = 0,
     this.longitude = 0,
+    this.cancelled = false,
+    this.cancellationReason = '',
+    this.organizer = '',
+    this.fromApi = false,
   });
+
+  /// Un evento de `GET /event/` o `GET /event/{id}/` (`docs/agenda-y-recompensas.md`).
+  /// La categoría llega con su nombre en español ("Música"), como las del
+  /// catálogo de ejemplo.
+  factory EventItem.fromApi(Map<String, dynamic> json) {
+    final start = ApiJson.day(json['start_date']);
+    final end = ApiJson.date(json['end_date']) ?? start;
+    final city = ApiJson.str(ApiJson.map(json['city'])['name']);
+    final venue = ApiJson.str(json['venue']);
+    final images = [
+      for (final image in ApiJson.rows(json['images']))
+        if (ApiJson.imageUrl(image).isNotEmpty) ApiJson.imageUrl(image),
+    ];
+    final startMinutes = TimeParser.minutesOf24h(
+      ApiJson.str(json['start_time']),
+    );
+    final sameDay =
+        end.year == start.year &&
+        end.month == start.month &&
+        end.day == start.day;
+    return EventItem(
+      id: ApiJson.str(json['id']),
+      title: ApiJson.str(json['name']),
+      location: [venue, city].where((part) => part.isNotEmpty).join(', '),
+      date: startMinutes == null
+          ? start
+          : start.add(Duration(minutes: startMinutes)),
+      dateLabel: Formatters.facts([
+        sameDay
+            ? Formatters.dayAndMonth(start)
+            : '${Formatters.dayAndMonth(start)} - ${Formatters.dayAndMonth(end)}',
+        if (startMinutes != null) Formatters.minutesOfDay(startMinutes),
+      ]),
+      image: images.firstOrNull ?? '',
+      images: images,
+      category: ApiJson.str(ApiJson.map(json['category'])['label']),
+      address: ApiJson.str(json['address']),
+      description: ApiJson.str(json['description']),
+      price: ApiJson.decimal(json['entry_price']) ?? 0,
+      latitude: ApiJson.decimal(json['latitude']) ?? 0,
+      longitude: ApiJson.decimal(json['longitude']) ?? 0,
+      cancelled: json['status'] == 'cancelled',
+      cancellationReason: ApiJson.str(json['cancellation_reason']),
+      organizer: ApiJson.str(ApiJson.map(json['organizer'])['name']),
+      fromApi: true,
+    );
+  }
 
   final String id;
   final String title;
@@ -33,6 +88,17 @@ class EventItem {
   final num price;
   final double latitude;
   final double longitude;
+
+  /// Con el API: un evento cancelado sigue en la agenda, señalado.
+  final bool cancelled;
+  final String cancellationReason;
+
+  /// Con el API: la institución o alcaldía que lo organiza (vacío en uno de
+  /// K'Plan).
+  final String organizer;
+
+  /// Llegó del API: [dateLabel] ya trae los días y la hora.
+  final bool fromApi;
 
   /// La tarjeta sólo trae una imagen; el detalle usa la galería si vino más.
   List<String> get galleryImages => images.isEmpty ? [image] : images;

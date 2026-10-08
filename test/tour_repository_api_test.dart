@@ -320,7 +320,86 @@ void main() {
 
     expect(_ok(await repository.getCoupons()), isNotEmpty);
     expect(_ok(await repository.getFeaturedPlaces()), isNotEmpty);
-    expect(_ok(await repository.getUpcomingEvents()), isNotEmpty);
     expect(api.requests, isEmpty);
   });
+
+  test(
+    'la agenda sale de GET /event/, ordenada y con lo cancelado señalado',
+    () async {
+      Map<String, dynamic> event(
+        String id,
+        String start, {
+        String end = '',
+        String status = 'scheduled',
+      }) => {
+        'id': id,
+        'name': 'Noche de marimba $id',
+        'description': 'Música en vivo',
+        'category': {'code': 'musica', 'label': 'Música'},
+        'city': {'id': 'city-leon', 'code': 'leon', 'name': 'León'},
+        'venue': 'Teatro Municipal',
+        'address': 'Frente al parque',
+        'latitude': 12.43,
+        'longitude': -86.87,
+        'start_date': start,
+        'end_date': end.isEmpty ? start : end,
+        'start_time': '18:00',
+        'end_time': '22:00',
+        'entry_price': 100,
+        'featured': false,
+        'status': status,
+        'cancellation_reason': status == 'cancelled' ? 'Lluvia' : '',
+        'organizer': {
+          'kind': 'institution',
+          'id': 'org-1',
+          'name': 'Teatro de León',
+        },
+        'point_id': null,
+        'images': [
+          {'key': 'event-photo/1.jpg', 'url': 'https://cdn.test/1.jpg'},
+        ],
+        'cloned_from_id': null,
+        'created_at': '2026-10-01T00:00:00Z',
+      };
+      final api = FakeApi((request) {
+        if (request.path == '/event/e1/') {
+          return FakeResponse(200, event('e1', '2026-10-10'));
+        }
+        return FakeResponse(200, {
+          'next': false,
+          'previous': false,
+          'elements': 2,
+          'pages': 1,
+          'current': 1,
+          'results': [
+            event('e2', '2026-10-20', status: 'cancelled'),
+            event('e1', '2026-10-10', end: '2026-10-11'),
+          ],
+        });
+      })..connect();
+      final repository = TourRepository();
+
+      final events = _ok(await repository.getUpcomingEvents());
+
+      expect(api.requests.first.path, '/event/');
+      expect(events.map((e) => e.id), ['e1', 'e2']);
+      final first = events.first;
+      expect(first.title, 'Noche de marimba e1');
+      expect(first.location, 'Teatro Municipal, León');
+      expect(first.category, 'Música');
+      expect(first.price, 100);
+      expect(first.image, 'https://cdn.test/1.jpg');
+      expect(first.date, DateTime(2026, 10, 10, 18));
+      expect(
+      first.dateLabel.replaceAll('\u00A0', ' '),
+      '10 oct - 11 oct · 6:00 p.m.',
+    );
+      expect(first.organizer, 'Teatro de León');
+      expect(events.last.cancelled, isTrue);
+      expect(events.last.cancellationReason, 'Lluvia');
+
+      final detail = _ok(await repository.getEventById('e1'));
+      expect(detail.latitude, 12.43);
+    },
+  );
 }

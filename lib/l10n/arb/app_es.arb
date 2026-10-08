@@ -470,7 +470,24 @@
       }
     }
   },
+  "eventDetailCancelled": "Este evento se canceló.",
+  "eventDetailCancelledBecause": "Este evento se canceló: {reason}",
+  "@eventDetailCancelledBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "eventDetailFreeEntry": "Entrada libre",
+  "eventDetailOrganizer": "Organiza: {name}",
+  "@eventDetailOrganizer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "forgotPasswordCodeMissing": "Escribe el código de 6 dígitos que te llegó al correo.",
   "forgotPasswordCodeResent": "Si pasó un minuto desde el último, te enviamos otro código.",
   "forgotPasswordCodeSentTo": "Si {email} tiene una cuenta, le enviamos un código de 6 dígitos. Vence en 15 minutos.",
