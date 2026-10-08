@@ -87,8 +87,45 @@ enum BidStatus {
   }
 }
 
-/// Una postulación del guía (`GET /application/mine/`). El API no trae los
-/// datos de la convocatoria: solo su id.
+/// La convocatoria de una postulación, en corto (`request` de la postulación).
+class BidRequest {
+  const BidRequest({
+    required this.itineraryTitle,
+    required this.stops,
+    required this.city,
+    required this.date,
+    required this.startTime,
+    required this.adults,
+    required this.children,
+  });
+
+  final String itineraryTitle;
+  final int stops;
+  final String city;
+  final DateTime date;
+  final String startTime;
+  final int adults;
+  final int children;
+
+  int get groupSize => adults + children;
+
+  static BidRequest? fromApi(Object? value) {
+    final json = ApiJson.map(value);
+    if (json.isEmpty) return null;
+    final itinerary = ApiJson.map(json['itinerary']);
+    return BidRequest(
+      itineraryTitle: ApiJson.str(itinerary['title']),
+      stops: ApiJson.integer(itinerary['stops']),
+      city: ApiJson.str(ApiJson.map(json['city'])['name']),
+      date: ApiJson.day(json['date']),
+      startTime: _appTime(json['start_time']),
+      adults: ApiJson.integer(json['adults']),
+      children: ApiJson.integer(json['children']),
+    );
+  }
+}
+
+/// Una postulación del guía (`GET /application/mine/`).
 class GuideBid {
   const GuideBid({
     required this.id,
@@ -97,6 +134,7 @@ class GuideBid {
     required this.message,
     required this.status,
     required this.createdAt,
+    this.request,
   });
 
   final String id;
@@ -106,6 +144,9 @@ class GuideBid {
   final BidStatus status;
   final DateTime createdAt;
 
+  /// La convocatoria a la que se postuló.
+  final BidRequest? request;
+
   factory GuideBid.fromApi(Map<String, dynamic> json) => GuideBid(
     id: ApiJson.str(json['id']),
     requestId: ApiJson.str(json['request_id']),
@@ -113,6 +154,7 @@ class GuideBid {
     message: ApiJson.str(json['message']),
     status: BidStatus.fromApi(json['status']),
     createdAt: ApiJson.date(json['created_at']) ?? DateTime.now(),
+    request: BidRequest.fromApi(json['request']),
   );
 }
 

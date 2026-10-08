@@ -18,6 +18,7 @@ Map<String, dynamic> apiGuideCard({
   int reviewsCount = 12,
 }) => {
   'id': id,
+  'user_id': 'user-$id',
   'name': name,
   'photo': {'key': 'photos/$id.jpg', 'url': 'https://s3.test/$id.jpg'},
   'presentation': 'Guía de León desde hace años.',
@@ -69,6 +70,7 @@ Map<String, dynamic> apiGuideDetail({String id = 'guide-1'}) => {
   ...apiGuideCard(id: id, city: apiCity()),
   'reviews': [
     {
+      'id': 'review-1',
       'rating': 5,
       'comment': 'Muy buen recorrido.',
       'author': 'Ana',
@@ -131,6 +133,14 @@ Map<String, dynamic> apiApplication({
 }) => {
   'id': id,
   'request_id': requestId,
+  'request': {
+    'itinerary': {'id': 'itinerary-1', 'title': 'Mi día en León', 'stops': 3},
+    'city': apiCity(),
+    'date': '2026-10-25',
+    'start_time': '09:00',
+    'adults': 2,
+    'children': 1,
+  },
   'guide': apiGuideCard(carriesTourists: true),
   'fee': fee,
   'message': 'Conozco bien esa ruta.',

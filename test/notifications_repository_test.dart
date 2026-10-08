@@ -50,20 +50,21 @@ void main() {
 
   test('la bandeja, el contador de no leídos y marcar leído', () async {
     final api = FakeApi((request) {
+      if (request.path == '/notification/unread/') {
+        return const FakeResponse(200, {'count': 3});
+      }
       if (request.path == '/notification/') {
-        return request.query['unread'] == true
-            ? FakeResponse(200, _page([_notification()], total: 3))
-            : FakeResponse(
-                200,
-                _page([
-                  _notification(),
-                  _notification(
-                    id: 'n2',
-                    kind: 'resena',
-                    data: {'booking_id': 'booking-1', 'review_id': 'review-1'},
-                  ),
-                ]),
-              );
+        return FakeResponse(
+          200,
+          _page([
+            _notification(),
+            _notification(
+              id: 'n2',
+              kind: 'resena',
+              data: {'booking_id': 'booking-1', 'review_id': 'review-1'},
+            ),
+          ]),
+        );
       }
       if (request.path == '/notification/n1/read/') {
         return FakeResponse(200, _notification(read: true));
@@ -78,8 +79,8 @@ void main() {
     expect(repository.items, hasLength(2));
     expect(repository.items.last.reviewId, 'review-1');
     expect(repository.unreadCount, 3);
-    final unread = api.requests.lastWhere((r) => r.query['unread'] == true);
-    expect(unread.query['page_size'], 1);
+    expect(api.calls('/notification/unread/'), greaterThan(0));
+    expect(api.requests.where((r) => r.query['unread'] == true), isEmpty);
 
     await repository.markRead(repository.items.first);
     expect(repository.items.first.read, isTrue);

@@ -36,10 +36,6 @@ class GuideDeskViewModel extends BaseViewModel {
 
   List<GuideBid> get bids => _desk.bids;
 
-  /// La convocatoria de [bid], si sigue abierta (el API no la manda con la
-  /// postulación).
-  OpenRequest? requestOf(GuideBid bid) => _desk.openRequest(bid.requestId);
-
   List<CircuitGroupSession> get departures => _desk.departures;
 
   /// Sus reservas como guía: las que siguen en pie, de la más próxima, y

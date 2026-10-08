@@ -72,6 +72,13 @@ void main() {
       expect(request.maxFee, 1000);
       expect(desk.bids.map((b) => b.id), ['new', 'old']);
       expect(desk.bids.first.status, BidStatus.sent);
+      final bidRequest = desk.bids.first.request!;
+      expect(bidRequest.itineraryTitle, 'Mi día en León');
+      expect(bidRequest.city, 'León');
+      expect(bidRequest.date, DateTime(2026, 10, 25));
+      expect(bidRequest.startTime, '9:00 a.m.');
+      expect(bidRequest.groupSize, 3);
+      expect(bidRequest.stops, 3);
     },
   );
 

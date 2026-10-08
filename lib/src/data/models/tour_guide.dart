@@ -71,8 +71,8 @@ class TourGuide {
   /// perfil del guía).
   final List<CircuitGroupSession> departures;
 
-  /// El id de su cuenta, para reportarlo. [id] es el de su perfil de
-  /// prestador: el API todavía no manda `user_id`, así que hoy es `null`.
+  /// El id de su cuenta (`user_id`), para reportarlo. [id] es el de su
+  /// perfil de prestador. `null` en el modo demo.
   final String? userId;
 
   /// Si puede guiar un recorrido en [city].

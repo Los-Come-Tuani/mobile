@@ -166,17 +166,22 @@ class _GuideDeskHomeViewState extends _DeskTabState<GuideDeskHomeView> {
         else
           for (final bid in bids) ...[
             DeskCard(
-              title:
-                  viewModel.requestOf(bid)?.itineraryTitle ??
-                  l10n.guideDeskBidTitle,
+              title: bid.request?.itineraryTitle ?? l10n.guideDeskBidTitle,
               trailing: Text(Formatters.currency(bid.fee)),
               lines: [
                 Formatters.facts([
                   bid.status.label,
-                  if (viewModel.requestOf(bid) case final request?)
-                    '${Formatters.weekdayDate(request.date)} '
-                        '${Formatters.timeText(request.startTime)}',
+                  if (bid.request case final request?) ...[
+                    Formatters.weekdayDate(request.date),
+                    Formatters.timeText(request.startTime),
+                  ],
                 ]),
+                if (bid.request case final request?)
+                  Formatters.facts([
+                    request.city,
+                    Formatters.people(request.groupSize),
+                    l10n.guideDeskStops(request.stops),
+                  ]),
                 bid.message,
               ],
               actions: [

@@ -5,11 +5,10 @@
 //
 // Lee lo público sin sesión y, con el turista local (`KPLAN_TOURIST_EMAIL`, por defecto
 // `turista@example.com`), lo de su cuenta; no crea reservas ni convocatorias. Lo del
-// guía (salidas, convocatorias abiertas, saldo) solo se comprueba con un guía aprobado:
-// no hay uno sembrado. Para crearlo, postúlate desde la app (o con
-// `test/integration/provider_contract_test.dart`) y apruébalo desde el portal con una
-// cuenta del equipo; luego corre esta prueba con KPLAN_GUIDE_EMAIL y
-// KPLAN_GUIDE_PASSWORD. Sin KPLAN_API_URL todo se salta.
+// guía (salidas, convocatorias abiertas, saldo) se comprueba con un guía aprobado
+// (KPLAN_GUIDE_EMAIL y KPLAN_GUIDE_PASSWORD; en local, `guia.leon@example.com`, de
+// León; otra ciudad con KPLAN_GUIDE_CITY): publica una salida, la ve y la cancela al
+// final. Sin KPLAN_API_URL todo se salta.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +17,7 @@ import 'package:k_plan_mobile/src/data/datasources/local/session_store.dart';
 import 'package:k_plan_mobile/src/data/datasources/remote/api_call.dart';
 import 'package:k_plan_mobile/src/data/datasources/remote/api_client.dart';
 import 'package:k_plan_mobile/src/data/datasources/remote/google_sign_in_service.dart';
+import 'package:k_plan_mobile/src/data/datasources/remote/notifications_api.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/auth_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/badges_repository.dart';
 import 'package:k_plan_mobile/src/data/datasources/repository/booking_chat_repository.dart';
@@ -90,10 +90,16 @@ void main() {
     for (final guide in guides) {
       expect(guide.id, isNotEmpty);
       expect(guide.name, isNotEmpty);
+      // La cuenta, para reportarlo.
+      expect(guide.userId, isNotEmpty, reason: guide.id);
     }
     if (guides.isNotEmpty) {
       final detail = _ok(await GuideRepository().getGuideById(guides.first.id));
       expect(detail.id, guides.first.id);
+      expect(detail.userId, guides.first.userId);
+      for (final review in detail.reviews) {
+        expect(review.id, isNotEmpty);
+      }
     }
 
     final circuits = _ok(await TourRepository().getCircuits());
@@ -160,6 +166,10 @@ void main() {
       final notifications = NotificationsRepository(auth: auth);
       _ok(await notifications.load());
       await notifications.refreshUnread();
+      final unread = _ok(
+        await apiCall('unreadCount', NotificationsApi.unreadCount),
+      );
+      expect(notifications.unreadCount, unread);
       final preferences = _ok(await notifications.loadPreferences());
       expect(preferences, isNotEmpty);
       notifications.dispose();
@@ -184,6 +194,9 @@ void main() {
       final desk = GuideDeskRepository(auth: auth);
 
       _ok(await desk.loadWork());
+      for (final bid in desk.bids) {
+        expect(bid.request?.itineraryTitle, isNotEmpty, reason: bid.id);
+      }
       _ok(await desk.loadFinance());
       expect(desk.balance, isNotNull);
 
@@ -191,6 +204,42 @@ void main() {
       for (final booking in _ok(await bookings.refresh())) {
         expect(booking.asGuide, isTrue);
       }
+
+      // Publica una salida en un circuito de su ciudad, la ve y la cancela
+      // para no dejar basura. La fecha cambia en cada corrida para no chocar
+      // con una salida anterior a la misma hora.
+      final circuits = _ok(await TourRepository().getCircuits());
+      final circuit = circuits.firstWhere(
+        (c) => c.city == (env['KPLAN_GUIDE_CITY'] ?? 'León'),
+      );
+      final now = DateTime.now();
+      final date = DateTime(now.year, now.month, now.day + 20 + now.second);
+      final published = _ok(
+        await desk.publishDeparture(
+          circuitId: circuit.id,
+          date: date,
+          startTime: '6:${(now.minute % 50 + 10)} a.m.',
+          capacity: 4,
+          transportIncluded: false,
+          note: 'Prueba de contrato de la app: se cancela sola.',
+        ),
+      );
+      try {
+        expect(published.circuitId, circuit.id);
+        expect(published.date, date);
+        expect(desk.departures.map((d) => d.id), contains(published.id));
+        _ok(await desk.loadWork());
+        expect(desk.departures.map((d) => d.id), contains(published.id));
+        final public = _ok(
+          await GroupSessionRepository(
+            GuideRepository(),
+          ).getSessionsForCircuit(circuit.id),
+        );
+        expect(public.map((d) => d.id), contains(published.id));
+      } finally {
+        _ok(await desk.cancelDeparture(published.id, 'Prueba de contrato.'));
+      }
+      expect(desk.departures.map((d) => d.id), isNot(contains(published.id)));
     },
     skip: skipGuide,
   );

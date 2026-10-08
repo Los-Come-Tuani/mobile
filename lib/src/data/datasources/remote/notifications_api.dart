@@ -26,9 +26,10 @@ abstract final class NotificationsApi {
     );
   }
 
-  /// Cuántos no se han leído (`elements` de `?unread=true`).
-  static Future<int> unreadCount() async =>
-      (await page(pageSize: 1, unread: true)).total;
+  /// Cuántos no se han leído, para el punto de la campana.
+  static Future<int> unreadCount() async => ApiJson.integer(
+    (await ApiRows.one(ApiRoutes.notificationsUnread))['count'],
+  );
 
   static Future<AppNotification> markRead(String id) async =>
       AppNotification.fromApi(

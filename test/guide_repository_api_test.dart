@@ -81,6 +81,9 @@ void main() {
     final result = await GuideRepository().getGuideById('guide-1');
 
     final guide = (result as Ok<TourGuide>).value;
+    expect(guide.id, 'guide-1');
+    expect(guide.userId, 'user-guide-1');
+    expect(guide.reviews.single.id, 'review-1');
     expect(guide.reviews.single.author, 'Ana');
     expect(guide.reviews.single.text, 'Muy buen recorrido.');
     expect(guide.reviews.single.rating, 5);

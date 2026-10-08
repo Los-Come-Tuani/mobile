@@ -40,14 +40,6 @@ class GuideDeskRepository extends ChangeNotifier {
   /// Sus retiros, del más nuevo.
   List<Payout> get payouts => _payouts;
 
-  /// La convocatoria abierta [requestId], si sigue en la lista.
-  OpenRequest? openRequest(String requestId) {
-    for (final request in _openRequests) {
-      if (request.id == requestId) return request;
-    }
-    return null;
-  }
-
   /// Salidas, convocatorias abiertas y postulaciones, a la vez.
   Future<Result<void>> loadWork() async {
     final results = await Future.wait([

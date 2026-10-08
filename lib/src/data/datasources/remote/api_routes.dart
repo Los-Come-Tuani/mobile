@@ -99,6 +99,7 @@ abstract final class ApiRoutes {
   static const notifications = '/notification/';
   static String notificationRead(String id) => '/notification/$id/read/';
   static const notificationsReadAll = '/notification/read-all/';
+  static const notificationsUnread = '/notification/unread/';
   static const notificationPreferences = '/notification-preference/';
   static const deviceToken = '/device-token/';
   static const deviceTokenRemove = '/device-token/remove/';
