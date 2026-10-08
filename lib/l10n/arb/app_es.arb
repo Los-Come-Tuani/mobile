@@ -2335,6 +2335,50 @@
       }
     }
   },
+  "repoTourBadgesNote": "{count, plural, =0{Este recorrido no tiene insignias coleccionables} =1{Este recorrido contiene 1 insignia coleccionable} other{Este recorrido contiene un total de {count} insignias coleccionables}}",
+  "@repoTourBadgesNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repoTourBadgesNoteBonus": "Este recorrido contiene un total de {count} insignias coleccionables, más {extra} insignias extra al completarlo",
+  "@repoTourBadgesNoteBonus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "extra": {
+        "type": "int"
+      }
+    }
+  },
+  "repoTourBadgesNoteCreative": "Este recorrido contiene un total de {count} insignias coleccionables, más {extra} insignias extra de \"Circuitos creativos\" y una medalla de {city} al completarlo",
+  "@repoTourBadgesNoteCreative": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "extra": {
+        "type": "int"
+      },
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "repoTourDifficultyEasy": "Fácil",
+  "repoTourDifficultyModerate": "Moderado",
+  "repoTourDurationAbout": "{hours} h aprox.",
+  "@repoTourDurationAbout": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "repoTourDurationDay": "1 día",
   "repoTouristNotFound": "No encontramos a este turista",
   "repoTouristRateOnce": "Solo puedes calificar una vez, después de terminar el viaje",
   "repoTouristRateStars": "Elige de 1 a 5 estrellas",

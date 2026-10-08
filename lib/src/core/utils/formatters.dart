@@ -142,6 +142,19 @@ abstract final class Formatters {
   static String minutesOfDay(int minutes) =>
       time(minutes ~/ 60 % 24, minutes % 60);
 
+  /// Una hora como la guardan los datos de la app, igual en todos los idiomas:
+  /// `510` -> `8:30 a.m.`. Es lo que lee [TimeParser.minutesOfDay].
+  static String dataTime(int minutes) {
+    final hour = minutes ~/ 60 % 24;
+    return '${_hourAndMinute(hour, minutes % 60)} ${hour < 12 ? 'a.m.' : 'p.m.'}';
+  }
+
+  /// Una hora como la recibe el API: `510` -> `08:30`.
+  static String time24h(int minutes) {
+    final hour = (minutes ~/ 60 % 24).toString().padLeft(2, '0');
+    return '$hour:${(minutes % 60).toString().padLeft(2, '0')}';
+  }
+
   /// Una hora que llega como texto en los datos (`"3:00 p.m."`) mostrada en
   /// el formato del idioma de ahora: `3:00 p.m.` o `3:00 PM`. Un texto que no
   /// es una hora se devuelve igual.

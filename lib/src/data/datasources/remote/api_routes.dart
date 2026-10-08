@@ -45,6 +45,14 @@ abstract final class ApiRoutes {
   static const providerRenewal = '/provider-application/mine/renewal/';
   static const providerProfile = '/provider-profile/mine/';
 
+  // Lugares, circuitos e itinerarios (F4, `docs/territorio.md` del repo del API)
+  static const circuits = '/circuit/';
+  static String circuit(String id) => '/circuit/$id/';
+  static const stops = '/stop/';
+  static String stop(String id) => '/stop/$id/';
+  static const itineraries = '/itinerary/';
+  static String itinerary(String id) => '/itinerary/$id/';
+
   /// En estas rutas un 401 es la respuesta de la acción (credenciales o código malos),
   /// no una sesión vencida: renovar la sesión solo escondería el error.
   static const Set<String> own401 = {

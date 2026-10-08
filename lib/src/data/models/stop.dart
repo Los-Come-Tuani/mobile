@@ -80,6 +80,59 @@ class Stop {
       ),
     );
   }
+
+  /// Un lugar como lo entrega el API (`GET /stop/`, o el `point` de una parada de
+  /// circuito).
+  factory Stop.fromApi(Map<String, dynamic> json) {
+    final pillar = json['pillar'] as Map<String, dynamic>? ?? const {};
+    final city = json['city'] as Map<String, dynamic>? ?? const {};
+    final visit = (json['visit_minutes'] as num?)?.toInt();
+    final opens = TimeParser.minutesOf24h(json['opens_at'] as String?);
+    final closes = TimeParser.minutesOf24h(json['closes_at'] as String?);
+
+    return Stop(
+      id: '${json['id']}',
+      name: json['name'] as String? ?? '',
+      category: categoryOfPillar(
+        pillar['code'] as String?,
+        pillar['label'] as String? ?? '',
+      ),
+      city: city['name'] as String? ?? '',
+      address: json['address'] as String? ?? '',
+      duration: visit == null
+          ? ''
+          : Formatters.duration(Duration(minutes: visit)),
+      rating: (json['rating'] as num? ?? 0).toDouble(),
+      reviewsCount: (json['reviews_count'] as num? ?? 0).toInt(),
+      hasBadge: json['has_badge'] as bool? ?? false,
+      description: json['description'] as String? ?? '',
+      tip: json['tip'] as String? ?? '',
+      images: imageUrls(json['images']),
+      latitude: (json['latitude'] as num? ?? 0).toDouble(),
+      longitude: (json['longitude'] as num? ?? 0).toDouble(),
+      hours: opens == null || closes == null
+          ? null
+          : OpeningHours(opensAt: opens, closesAt: closes),
+    );
+  }
+
+  /// La categoría de la app para un pilar del API. Va en español aunque la app
+  /// esté en otro idioma: con ella se reparten las insignias y se eligen los
+  /// íconos (`ContentLabels` la traduce al mostrarla).
+  static String categoryOfPillar(String? code, String label) => switch (code) {
+    'historia' => 'Historia',
+    'cultura' => 'Cultura',
+    'gastronomia' => 'Gastronomía',
+    'naturaleza' => 'Naturaleza',
+    'aventura' => 'Aventura',
+    _ => label,
+  };
+
+  /// Las `url` de `images: [{key, url}]`; la primera es la portada.
+  static List<String> imageUrls(Object? images) => [
+    for (final image in images as List<dynamic>? ?? const [])
+      if (image is Map && image['url'] is String) image['url'] as String,
+  ];
 }
 
 /// Horario de un sitio, en minutos desde la medianoche.

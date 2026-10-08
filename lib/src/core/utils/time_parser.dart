@@ -1,9 +1,10 @@
 /// Lee las horas y duraciones que llegan como texto en los JSON
-/// ("3:00 p.m.", "1 h 30 min").
+/// ("3:00 p.m.", "1 h 30 min") y las horas del API ("15:00").
 abstract final class TimeParser {
   static final RegExp _clock = RegExp(
     r'^(\d{1,2}):(\d{2})\s*([ap])\.?\s*m\.?$',
   );
+  static final RegExp _clock24 = RegExp(r'^(\d{1,2}):(\d{2})(?::\d{2})?$');
   static final RegExp _hours = RegExp(r'(\d+)\s*h');
   static final RegExp _minutes = RegExp(r'(\d+)\s*min');
 
@@ -14,6 +15,17 @@ abstract final class TimeParser {
     if (match == null) return null;
     final hour = int.parse(match[1]!) % 12 + (match[3] == 'p' ? 12 : 0);
     return hour * 60 + int.parse(match[2]!);
+  }
+
+  /// Una hora de 24 h como la manda el API: `"14:30"` -> `870`. `null` si no
+  /// lo es.
+  static int? minutesOf24h(String? time) {
+    final match = _clock24.firstMatch(time?.trim() ?? '');
+    if (match == null) return null;
+    final hour = int.parse(match[1]!);
+    final minute = int.parse(match[2]!);
+    if (hour > 23 || minute > 59) return null;
+    return hour * 60 + minute;
   }
 
   /// `"1 h 30 min"` -> 90 minutos; también `"45 min"` o `"2 h"`.

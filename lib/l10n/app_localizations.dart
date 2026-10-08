@@ -5005,6 +5005,48 @@ abstract class AppLocalizations {
   /// **'{first} y {second}'**
   String repoSpecialtiesPair(String first, String second);
 
+  /// No description provided for @repoTourBadgesNote.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =0{Este recorrido no tiene insignias coleccionables} =1{Este recorrido contiene 1 insignia coleccionable} other{Este recorrido contiene un total de {count} insignias coleccionables}}'**
+  String repoTourBadgesNote(int count);
+
+  /// No description provided for @repoTourBadgesNoteBonus.
+  ///
+  /// In es, this message translates to:
+  /// **'Este recorrido contiene un total de {count} insignias coleccionables, más {extra} insignias extra al completarlo'**
+  String repoTourBadgesNoteBonus(int count, int extra);
+
+  /// No description provided for @repoTourBadgesNoteCreative.
+  ///
+  /// In es, this message translates to:
+  /// **'Este recorrido contiene un total de {count} insignias coleccionables, más {extra} insignias extra de \"Circuitos creativos\" y una medalla de {city} al completarlo'**
+  String repoTourBadgesNoteCreative(int count, int extra, String city);
+
+  /// No description provided for @repoTourDifficultyEasy.
+  ///
+  /// In es, this message translates to:
+  /// **'Fácil'**
+  String get repoTourDifficultyEasy;
+
+  /// No description provided for @repoTourDifficultyModerate.
+  ///
+  /// In es, this message translates to:
+  /// **'Moderado'**
+  String get repoTourDifficultyModerate;
+
+  /// No description provided for @repoTourDurationAbout.
+  ///
+  /// In es, this message translates to:
+  /// **'{hours} h aprox.'**
+  String repoTourDurationAbout(int hours);
+
+  /// No description provided for @repoTourDurationDay.
+  ///
+  /// In es, this message translates to:
+  /// **'1 día'**
+  String get repoTourDurationDay;
+
   /// No description provided for @repoTouristNotFound.
   ///
   /// In es, this message translates to:

@@ -1,4 +1,11 @@
+import 'dart:math' as math;
+
+import '../../core/l10n/l10n.dart';
+import '../../core/utils/formatters.dart';
+import '../../core/utils/itinerary_planner.dart';
+import '../../core/utils/time_parser.dart';
 import 'itinerary.dart';
+import 'stop.dart';
 
 /// Un circuito turístico completo, con todo lo que necesita la pantalla de
 /// detalle y la de reserva.
@@ -138,6 +145,123 @@ class Circuit {
       isCreativeCircuit: json['isCreativeCircuit'] as bool? ?? false,
       organizer: json['organizer'] as String? ?? '',
     );
+  }
+
+  /// Un circuito como lo entrega el API.
+  ///
+  /// La lista (`GET /circuit/`) no trae las paradas, solo `stop_ids`: con [stops]
+  /// (los lugares por id) la duración suma los traslados que calcula la app, como en
+  /// el detalle; sin ellos queda la del API, que solo cuenta los traslados fijos. El
+  /// detalle (`GET /circuit/{id}/`) trae cada parada con su lugar completo.
+  factory Circuit.fromApi(
+    Map<String, dynamic> json, {
+    Map<String, Stop> stops = const {},
+  }) {
+    final detail = [
+      for (final stop in json['stops'] as List<dynamic>? ?? const [])
+        if (stop is Map<String, dynamic> &&
+            stop['point'] is Map<String, dynamic>)
+          stop,
+    ];
+    String pointId(Map<String, dynamic> stop) => '${stop['point']['id']}';
+
+    final places = {
+      ...stops,
+      for (final stop in detail)
+        pointId(stop): Stop.fromApi(stop['point'] as Map<String, dynamic>),
+    };
+    final stopIds = detail.isEmpty
+        ? _stringList(json['stop_ids'])
+        : [for (final stop in detail) pointId(stop)];
+    final legMinutes = {
+      for (final stop in detail)
+        if (stop['leg_minutes'] is num)
+          pointId(stop): (stop['leg_minutes'] as num).toInt(),
+    };
+    final travelMode = TravelMode.fromJson(json['travel_mode']);
+    final route = [for (final id in stopIds) ?places[id]];
+    final minutes = route.isNotEmpty && route.length == stopIds.length
+        ? ItineraryPlanner.plan(
+            stops: route,
+            start: DateTime(2000),
+            mode: travelMode,
+            legMinutes: legMinutes,
+          ).totalDuration.inMinutes
+        : (json['duration_minutes'] as num? ?? 0).toInt();
+
+    final l10n = AppStrings.current;
+    final city = json['city'] as Map<String, dynamic>? ?? const {};
+    final cityName = city['name'] as String? ?? '';
+    final municipality = json['municipality'] as Map<String, dynamic>?;
+    final isCreative = json['kind'] == 'creative';
+    // `badges` del API ya suma las extra; en la app son solo las de las paradas.
+    final bonus = (json['bonus_badges'] as num? ?? 0).toInt();
+    final badges = math.max(0, (json['badges'] as num? ?? 0).toInt() - bonus);
+    final title = json['title'] as String? ?? '';
+    final shortTitle = json['short_title'] as String? ?? '';
+
+    return Circuit(
+      id: '${json['id']}',
+      title: title,
+      shortTitle: shortTitle.isEmpty ? title : shortTitle,
+      subtitle: json['subtitle'] as String? ?? '',
+      // En español, como en los JSON: es clave de lógica y `ContentLabels` la
+      // traduce al mostrarla.
+      category: switch (json['category']) {
+        'city' => 'Ciudad',
+        'nature' => 'Naturaleza',
+        'culture' => 'Cultura',
+        final Object? other => '${other ?? ''}',
+      },
+      city: cityName,
+      rating: (json['rating'] as num? ?? 0).toDouble(),
+      reviewsCount: (json['reviews_count'] as num? ?? 0).toInt(),
+      stopIds: stopIds,
+      travelMode: travelMode,
+      legMinutes: legMinutes,
+      duration: Formatters.duration(Duration(minutes: minutes)),
+      durationShort: _durationShort(minutes),
+      badges: badges,
+      difficulty: switch (json['difficulty']) {
+        'easy' => l10n.repoTourDifficultyEasy,
+        'moderate' => l10n.repoTourDifficultyModerate,
+        final Object? other => '${other ?? ''}',
+      },
+      priceAdult: json['price_adult'] as num? ?? 0,
+      priceChild: json['price_child'] as num? ?? 0,
+      description: json['description'] as String? ?? '',
+      images: Stop.imageUrls(json['images']),
+      recommendations: json['recommendations'] as String? ?? '',
+      meetingPoint: json['meeting_point'] as String? ?? '',
+      includes: json['includes'] as String? ?? '',
+      badgesNote: bonus == 0
+          ? l10n.repoTourBadgesNote(badges)
+          : isCreative
+          ? l10n.repoTourBadgesNoteCreative(badges, bonus, cityName)
+          : l10n.repoTourBadgesNoteBonus(badges, bonus),
+      notes: json['notes'] as String? ?? '',
+      startTimes: [
+        for (final time in json['start_times'] as List<dynamic>? ?? const [])
+          if (TimeParser.minutesOf24h('$time') case final minutes?)
+            Formatters.dataTime(minutes),
+      ],
+      latitude: (json['meeting_latitude'] as num? ?? 0).toDouble(),
+      longitude: (json['meeting_longitude'] as num? ?? 0).toDouble(),
+      // Las reseñas llegan con F7.
+      comments: const [],
+      isCreativeCircuit: isCreative,
+      organizer: municipality?['name'] as String? ?? '',
+    );
+  }
+
+  /// `4 h aprox.` o `1 día`, para las tarjetas del inicio.
+  static String _durationShort(int minutes) {
+    final l10n = AppStrings.current;
+    if (minutes > 8 * 60) return l10n.repoTourDurationDay;
+    final hours = (minutes / 60).round();
+    return hours == 0
+        ? Formatters.duration(Duration(minutes: minutes))
+        : l10n.repoTourDurationAbout(hours);
   }
 
   static List<String> _stringList(Object? value) =>

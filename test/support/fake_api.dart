@@ -13,12 +13,16 @@ class SentRequest {
     required this.path,
     required this.headers,
     required this.data,
+    this.query = const {},
   });
 
   final String method;
   final String path;
   final Map<String, dynamic> headers;
   final Object? data;
+
+  /// Los parámetros de la URL (`?page=2&page_size=100`).
+  final Map<String, dynamic> query;
 
   /// El cuerpo JSON como mapa (las peticiones de la app siempre mandan mapas).
   Map<String, dynamic> get body => (data as Map).cast<String, dynamic>();
@@ -58,6 +62,7 @@ class FakeApi implements HttpClientAdapter {
       path: options.path,
       headers: Map.of(options.headers),
       data: options.data,
+      query: Map.of(options.queryParameters),
     );
     requests.add(request);
 

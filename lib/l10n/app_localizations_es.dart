@@ -3212,6 +3212,43 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String repoTourBadgesNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Este recorrido contiene un total de $count insignias coleccionables',
+      one: 'Este recorrido contiene 1 insignia coleccionable',
+      zero: 'Este recorrido no tiene insignias coleccionables',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repoTourBadgesNoteBonus(int count, int extra) {
+    return 'Este recorrido contiene un total de $count insignias coleccionables, más $extra insignias extra al completarlo';
+  }
+
+  @override
+  String repoTourBadgesNoteCreative(int count, int extra, String city) {
+    return 'Este recorrido contiene un total de $count insignias coleccionables, más $extra insignias extra de \"Circuitos creativos\" y una medalla de $city al completarlo';
+  }
+
+  @override
+  String get repoTourDifficultyEasy => 'Fácil';
+
+  @override
+  String get repoTourDifficultyModerate => 'Moderado';
+
+  @override
+  String repoTourDurationAbout(int hours) {
+    return '$hours h aprox.';
+  }
+
+  @override
+  String get repoTourDurationDay => '1 día';
+
+  @override
   String get repoTouristNotFound => 'No encontramos a este turista';
 
   @override
