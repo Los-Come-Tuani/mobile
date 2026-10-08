@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/datasources/remote/reports_api.dart';
 import '../../../data/models/booking.dart';
 import '../../../router/routes.dart';
 import '../../guide_app/widgets/rate_tourist_sheet.dart';
@@ -16,6 +17,7 @@ import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/remote_image.dart';
+import '../../widgets/report_sheet.dart';
 import '../viewmodels/booking_detail_viewmodel.dart';
 import '../widgets/payment_card.dart';
 
@@ -245,6 +247,18 @@ class _BookingDetailViewState extends State<BookingDetailView> {
             Formatters.clock(deadline),
           ),
         ),
+      // El turista llega con el id de su cuenta; el guía, con el de su perfil
+      // de prestador, que el reporte no acepta.
+      if (booking.asGuide && booking.touristId.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        Center(
+          child: ReportButton(
+            target: ReportTarget.user,
+            targetId: booking.touristId,
+            label: l10n.reportTourist,
+          ),
+        ),
+      ],
     ];
   }
 }

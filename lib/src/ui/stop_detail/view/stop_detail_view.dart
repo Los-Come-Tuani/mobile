@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/remote/api_client.dart';
+import '../../../data/datasources/remote/reports_api.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
@@ -21,6 +22,7 @@ import '../../widgets/item_options_sheet.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
+import '../../widgets/report_sheet.dart';
 import '../viewmodels/stop_detail_viewmodel.dart';
 import '../widgets/add_to_circuit_sheet.dart';
 import 'qr_generator_view.dart';
@@ -255,6 +257,16 @@ class _StopContent extends StatelessWidget {
                     for (final collection in circuitsWithStop)
                       _CircuitChip(collection: collection),
                   ],
+                ),
+              ],
+              if (ApiClient.isConfigured) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: ReportButton(
+                    target: ReportTarget.place,
+                    targetId: stop.id,
+                    label: l10n.reportPlace,
+                  ),
                 ),
               ],
             ],

@@ -5929,6 +5929,84 @@ abstract class AppLocalizations {
   /// **'Recordatorios de viajes'**
   String get repoNotificationTripReminders;
 
+  /// No description provided for @reportChooseReason.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un motivo'**
+  String get reportChooseReason;
+
+  /// No description provided for @reportEvent.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar este evento'**
+  String get reportEvent;
+
+  /// No description provided for @reportGuide.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar a este guía'**
+  String get reportGuide;
+
+  /// No description provided for @reportHint.
+  ///
+  /// In es, this message translates to:
+  /// **'El equipo de K\'Plan lo revisará. Nadie más sabrá que lo reportaste.'**
+  String get reportHint;
+
+  /// No description provided for @reportNoteHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos más (opcional)'**
+  String get reportNoteHint;
+
+  /// No description provided for @reportNoteRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Con este motivo, cuéntanos qué pasó'**
+  String get reportNoteRequired;
+
+  /// No description provided for @reportNoteRequiredHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntanos qué pasó'**
+  String get reportNoteRequiredHint;
+
+  /// No description provided for @reportPlace.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar este lugar'**
+  String get reportPlace;
+
+  /// No description provided for @reportReview.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar esta reseña'**
+  String get reportReview;
+
+  /// No description provided for @reportSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar reporte'**
+  String get reportSend;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Gracias: el equipo revisará tu reporte.'**
+  String get reportSent;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar'**
+  String get reportTitle;
+
+  /// No description provided for @reportTourist.
+  ///
+  /// In es, this message translates to:
+  /// **'Reportar al turista'**
+  String get reportTourist;
+
   /// No description provided for @repoSpecialtiesPair.
   ///
   /// In es, this message translates to:

@@ -24,6 +24,7 @@ import 'src/data/datasources/repository/guide_work_repository.dart';
 import 'src/data/datasources/repository/language_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
 import 'src/data/datasources/repository/notifications_repository.dart';
+import 'src/data/datasources/repository/reports_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/security_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
@@ -171,6 +172,8 @@ class _KPlanAppState extends State<KPlanApp> {
             bookings: context.read<BookingsRepository>(),
           ),
         ),
+        // Con el API: reportar personas, reseñas, lugares y eventos.
+        Provider<ReportsRepository>(create: (_) => ReportsRepository()),
         // Con el API: el chat de cada reserva (turista y guía).
         Provider<BookingChatRepository>(create: (_) => BookingChatRepository()),
         // Chat simulado con quienes se contrató en la propuesta activa.

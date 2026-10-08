@@ -7,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/datasources/remote/api_client.dart';
+import '../../../data/datasources/remote/reports_api.dart';
 import '../../../data/models/circuit_group_session.dart';
 import '../../../data/models/guide_application.dart';
 import '../../../data/models/tour_guide.dart';
@@ -21,6 +23,7 @@ import '../../widgets/offer_chip.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/rating_stars.dart';
 import '../../widgets/remote_image.dart';
+import '../../widgets/report_sheet.dart';
 import '../viewmodels/guide_profile_viewmodel.dart';
 import '../widgets/guide_review_tile.dart';
 
@@ -166,6 +169,17 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                   ),
                   for (final review in guide.reviews)
                     GuideReviewTile(review: review),
+                ],
+                // Para reportar a una persona el API pide el id de su cuenta.
+                if (ApiClient.isConfigured && guide.userId != null) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: ReportButton(
+                      target: ReportTarget.user,
+                      targetId: guide.userId!,
+                      label: l10n.reportGuide,
+                    ),
+                  ),
                 ],
               ],
             ),

@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/datasources/remote/reports_api.dart';
 import '../../../data/models/event_item.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
@@ -17,6 +18,7 @@ import '../../widgets/image_gallery.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/item_options_sheet.dart';
 import '../../widgets/kplan_loader.dart';
+import '../../widgets/report_sheet.dart';
 import '../viewmodels/event_detail_viewmodel.dart';
 
 /// Detalle de un evento próximo.
@@ -186,6 +188,16 @@ class _EventContent extends StatelessWidget {
               if (event.description.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Text(event.description, style: AppTextStyles.bodySmall),
+              ],
+              if (event.fromApi) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: ReportButton(
+                    target: ReportTarget.event,
+                    targetId: event.id,
+                    label: l10n.reportEvent,
+                  ),
+                ),
               ],
             ],
           ),

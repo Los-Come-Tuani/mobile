@@ -3741,6 +3741,46 @@ class AppLocalizationsEs extends AppLocalizations {
   String get repoNotificationTripReminders => 'Recordatorios de viajes';
 
   @override
+  String get reportChooseReason => 'Elige un motivo';
+
+  @override
+  String get reportEvent => 'Reportar este evento';
+
+  @override
+  String get reportGuide => 'Reportar a este guía';
+
+  @override
+  String get reportHint =>
+      'El equipo de K\'Plan lo revisará. Nadie más sabrá que lo reportaste.';
+
+  @override
+  String get reportNoteHint => 'Cuéntanos más (opcional)';
+
+  @override
+  String get reportNoteRequired => 'Con este motivo, cuéntanos qué pasó';
+
+  @override
+  String get reportNoteRequiredHint => 'Cuéntanos qué pasó';
+
+  @override
+  String get reportPlace => 'Reportar este lugar';
+
+  @override
+  String get reportReview => 'Reportar esta reseña';
+
+  @override
+  String get reportSend => 'Enviar reporte';
+
+  @override
+  String get reportSent => 'Gracias: el equipo revisará tu reporte.';
+
+  @override
+  String get reportTitle => 'Reportar';
+
+  @override
+  String get reportTourist => 'Reportar al turista';
+
+  @override
   String repoSpecialtiesPair(String first, String second) {
     return '$first y $second';
   }
