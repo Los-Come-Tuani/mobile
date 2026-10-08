@@ -44,8 +44,10 @@ hacia `localhost` y la red local). Un build release **rechaza** una URL que no s
 | `staging.example.json` | `staging`      | `https://develop-api.kplan.dev` |
 | `prod.example.json`    | `main`         | `https://api.kplan.dev`         |
 
-Copia el que toque a `staging.json` o `prod.json` (ignorados), completa los Client ID y
-compila con ese archivo:
+Un build release **sin** archivo (`flutter build apk --release`) usa
+`https://develop-api.kplan.dev`, así que el APK publicado nunca queda en modo demo. Para
+incluir los Client ID de Google, copia el que toque a `staging.json` o `prod.json`
+(ignorados), complétalos y compila con ese archivo:
 
 ```bash
 flutter build apk --release --dart-define-from-file=env/staging.json

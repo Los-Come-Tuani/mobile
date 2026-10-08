@@ -12,6 +12,11 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 
 - **Hecho: F0** (`.gitignore`, gitleaks, URL por entorno con `--dart-define-from-file`, https
   obligatorio en release, logs redactados).
+- **Ramas y API (2026-10-08, decisión del usuario).** `main` es producción y `staging` sale
+  de `feat/hoja-de-ruta-api`. Un build release sin `API_BASE_URL` usa
+  `ApiClient.releaseBaseUrl` = `https://develop-api.kplan.dev` (nunca queda en demo);
+  `env/staging.example.json` apunta al mismo API y `env/prod.example.json` a
+  `https://api.kplan.dev` para cuando haya producción. En debug, sin URL, sigue el demo.
 - **Hecho: `f1-app-link`** (identidad contra el API real; con `API_BASE_URL` vacío la app sigue
   en modo demo, como antes):
   - `lib/src/data/datasources/local/session_store.dart`: `SessionStore` con `SecureSessionStore`

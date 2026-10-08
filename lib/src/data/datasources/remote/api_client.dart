@@ -14,10 +14,9 @@ import 'api_routes.dart';
 /// Mientras [baseUrl] esté vacío la app corre en modo offline/demo y los
 /// repositorios devuelven datos simulados (ver [isConfigured]).
 ///
-/// La URL no vive en el código: se fija al compilar con
-/// `--dart-define-from-file=env/<entorno>.json` (ver `env/README.md`). Así el mismo
-/// código apunta al API local en desarrollo y a la URL de producción en release, y
-/// ninguna URL real se versiona.
+/// La URL se fija al compilar con `--dart-define-from-file=env/<entorno>.json` (ver
+/// `env/README.md`). Un build release que no la trae usa [releaseBaseUrl], para que un
+/// APK publicado nunca quede en modo demo; en debug, sin URL, la app corre en demo.
 ///
 /// **Sesión.** Los tokens viven en el [sessionStore] (almacén seguro del dispositivo);
 /// aquí solo se guarda una copia en memoria del de acceso. Cada petición lleva
@@ -28,10 +27,18 @@ import 'api_routes.dart';
 class ApiClient {
   ApiClient._();
 
-  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  /// El API de un build release sin `API_BASE_URL`: el de desarrollo publicado (rama
+  /// `develop-a` del API) mientras no haya producción.
+  static const String releaseBaseUrl = 'https://develop-api.kplan.dev';
+
+  static const String _envBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: kReleaseMode ? releaseBaseUrl : '',
+  );
   static String? _baseUrlForTests;
 
-  /// URL base del API, sin "/" al final. Viene de `API_BASE_URL`; vacía = demo.
+  /// URL base del API, sin "/" al final. Viene de `API_BASE_URL` (en release, sin ella,
+  /// [releaseBaseUrl]); vacía = demo.
   static String get baseUrl => _normalize(_baseUrlForTests ?? _envBaseUrl);
 
   /// `false` mientras no se configure [baseUrl]: permite trabajar la UI sin backend.

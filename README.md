@@ -187,7 +187,7 @@ ejecución.
 
 | Variable | Uso |
 | --- | --- |
-| `API_BASE_URL` | URL base sin `/` final. Vacía o ausente activa el modo demo. |
+| `API_BASE_URL` | URL base sin `/` final. En debug, vacía o ausente activa el modo demo; en release, ausente usa `https://develop-api.kplan.dev`. |
 | `GOOGLE_SERVER_CLIENT_ID` | Client ID público de tipo Web que también valida el API. Vacío oculta el botón de Google. |
 | `GOOGLE_IOS_CLIENT_ID` | Client ID público de tipo iOS. En Android puede quedar vacío. |
 
@@ -320,15 +320,19 @@ itinerarios que crean.
 
 ### Android
 
-APK de prueba:
+Un release sin archivo de entorno habla con `https://develop-api.kplan.dev`, el
+API de desarrollo publicado:
 
 ```bash
-flutter build apk --release --dart-define-from-file=env/prod.json
+flutter build apk --release
 ```
 
-Android App Bundle para Play Store:
+Con los Client ID de Google, compile con `env/staging.json` (copia de
+`staging.example.json`, que apunta al mismo API). `env/prod.json` queda para
+cuando exista producción (`https://api.kplan.dev`):
 
 ```bash
+flutter build apk --release --dart-define-from-file=env/staging.json
 flutter build appbundle --release --dart-define-from-file=env/prod.json
 ```
 
@@ -403,8 +407,8 @@ configuración de las tiendas.
 - Falta configurar el Client ID de Google para iOS y su esquema de URL.
 - Si la app se publica en iOS junto con Google, debe incorporarse «Iniciar
   sesión con Apple».
-- Staging y producción necesitan URLs reales, firma de publicación y
-  configuración de tiendas.
+- Publicar en tiendas necesita la firma de publicación y la configuración de
+  cada tienda. Hoy el release habla con `develop-api.kplan.dev`.
 - Antes de publicar debe completarse una ronda de validación en dispositivos
   Android e iOS reales.
 
