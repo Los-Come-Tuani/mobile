@@ -165,6 +165,29 @@ class BookingsRepository extends ChangeNotifier {
   Future<Result<Booking>> finish(String id) =>
       _apply('finishBooking', () => ServicesApi.finishBooking(id));
 
+  /// Deja la reseña de [id] (1 a 5 estrellas) y vuelve a traer la reserva,
+  /// que queda `reviewed`.
+  Future<Result<Booking>> review(
+    String id, {
+    required int rating,
+    String comment = '',
+  }) async {
+    final sent = await apiCall(
+      'reviewBooking',
+      () => ServicesApi.reviewBooking(id, rating: rating, comment: comment),
+    );
+    if (sent case Failure(:final message, :final error)) {
+      return Result.failure(message, error);
+    }
+    return fetch(id);
+  }
+
+  /// Pide que el equipo revise una reseña que recibió quien pregunta.
+  Future<Result<void>> disputeReview(String reviewId, String reason) => apiCall(
+    'disputeReview',
+    () => ServicesApi.disputeReview(reviewId, reason),
+  );
+
   /// Guarda una reserva que llegó por otro camino (aceptar una postulación).
   void remember(Booking booking) {
     _upsert(booking);

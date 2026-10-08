@@ -410,6 +410,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your request is live: guides will apply with their price and you choose.';
 
   @override
+  String get bookingReviewCommentHint =>
+      'Tell how the tour went: punctuality, manners, what you learned';
+
+  @override
+  String get bookingReviewDone => 'You already left your review. Thank you!';
+
+  @override
+  String bookingReviewQuestion(String name) {
+    return 'How was your tour with $name?';
+  }
+
+  @override
+  String get bookingReviewSent => 'Review published. Thank you!';
+
+  @override
+  String get bookingReviewVisibility =>
+      'Your review shows up right away on the guide\'s profile.';
+
+  @override
   String bookingScheduleSummary(String start, String mode, String end) {
     return 'Leaving at $start · $mode · ends around $end';
   }
@@ -3443,6 +3462,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repoWorkWithdrawLoginRequired => 'Log in as a guide to withdraw';
+
+  @override
+  String get reviewDisputeHint => 'Explain why the team should review it';
+
+  @override
+  String get reviewDisputeSend => 'Ask for review';
+
+  @override
+  String get reviewDisputeSent => 'We asked the team to review it.';
+
+  @override
+  String get reviewDisputeTitle => 'Dispute the review';
+
+  @override
+  String get reviewDisputeTooShort => 'Write at least 10 characters';
 
   @override
   String get routeMapAllowLocationInSettings =>

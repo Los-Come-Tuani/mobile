@@ -12,6 +12,40 @@ Future<({int stars, String comment})?> showRateTouristSheet(
   BuildContext context, {
   required String touristName,
   required String tripLabel,
+}) => _showRateSheet(
+  context,
+  touristName: touristName,
+  tripLabel: tripLabel,
+  texts: null,
+);
+
+/// Lo mismo para el turista que califica al guía [guideName] al terminar el
+/// recorrido: su reseña se publica en el perfil del guía.
+Future<({int stars, String comment})?> showRateGuideSheet(
+  BuildContext context, {
+  required String guideName,
+  required String tripLabel,
+}) {
+  final l10n = context.l10n;
+  return _showRateSheet(
+    context,
+    touristName: guideName,
+    tripLabel: tripLabel,
+    texts: (
+      question: l10n.bookingReviewQuestion(guideName),
+      commentHint: l10n.bookingReviewCommentHint,
+      visibility: l10n.bookingReviewVisibility,
+    ),
+  );
+}
+
+typedef _RateTexts = ({String question, String commentHint, String visibility});
+
+Future<({int stars, String comment})?> _showRateSheet(
+  BuildContext context, {
+  required String touristName,
+  required String tripLabel,
+  required _RateTexts? texts,
 }) {
   return showModalBottomSheet<({int stars, String comment})>(
     context: context,
@@ -20,16 +54,26 @@ Future<({int stars, String comment})?> showRateTouristSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
-    builder: (context) =>
-        _RateTouristSheet(touristName: touristName, tripLabel: tripLabel),
+    builder: (context) => _RateTouristSheet(
+      touristName: touristName,
+      tripLabel: tripLabel,
+      texts: texts,
+    ),
   );
 }
 
 class _RateTouristSheet extends StatefulWidget {
-  const _RateTouristSheet({required this.touristName, required this.tripLabel});
+  const _RateTouristSheet({
+    required this.touristName,
+    required this.tripLabel,
+    required this.texts,
+  });
 
   final String touristName;
   final String tripLabel;
+
+  /// `null`: los textos del guía que califica a un turista.
+  final _RateTexts? texts;
 
   @override
   State<_RateTouristSheet> createState() => _RateTouristSheetState();
@@ -90,7 +134,8 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                     Text(widget.tripLabel, style: AppTextStyles.caption),
                     const SizedBox(height: 16),
                     Text(
-                      l10n.guideAppRateQuestion(widget.touristName),
+                      widget.texts?.question ??
+                          l10n.guideAppRateQuestion(widget.touristName),
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.primaryText,
                       ),
@@ -126,7 +171,9 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                       ),
                     const SizedBox(height: 12),
                     AppTextField(
-                      hint: l10n.guideAppRateCommentHint,
+                      hint:
+                          widget.texts?.commentHint ??
+                          l10n.guideAppRateCommentHint,
                       controller: _comment,
                       keyboardType: TextInputType.multiline,
                       textInputAction: TextInputAction.newline,
@@ -136,7 +183,7 @@ class _RateTouristSheetState extends State<_RateTouristSheet> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      l10n.guideAppRateVisibility,
+                      widget.texts?.visibility ?? l10n.guideAppRateVisibility,
                       style: AppTextStyles.caption,
                     ),
                     const SizedBox(height: 20),

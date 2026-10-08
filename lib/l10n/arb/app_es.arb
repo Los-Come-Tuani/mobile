@@ -284,6 +284,18 @@
   "bookingRecommendations": "Recomendaciones",
   "bookingRemove": "Quitar",
   "bookingRequestPublished": "Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.",
+  "bookingReviewCommentHint": "Cuenta cómo fue el recorrido: puntualidad, trato, lo que aprendiste",
+  "bookingReviewDone": "Ya dejaste tu reseña. ¡Gracias!",
+  "bookingReviewQuestion": "¿Cómo te fue con {name}?",
+  "@bookingReviewQuestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingReviewSent": "Reseña publicada. ¡Gracias!",
+  "bookingReviewVisibility": "Tu reseña se publica al instante en el perfil del guía.",
   "bookingScheduleSummary": "Saliendo a las {start} · {mode} · termina aprox. a las {end}",
   "@bookingScheduleSummary": {
     "placeholders": {
@@ -2511,6 +2523,11 @@
   "repoWorkPriceInvalid": "Escribe un precio mayor a cero",
   "repoWorkSampleBankAccount": "Cuenta de ejemplo •••• 0000",
   "repoWorkWithdrawLoginRequired": "Inicia sesión como guía para retirar",
+  "reviewDisputeHint": "Explica por qué el equipo debería revisarla",
+  "reviewDisputeSend": "Pedir revisión",
+  "reviewDisputeSent": "Le pedimos al equipo que revise la reseña.",
+  "reviewDisputeTitle": "Impugnar la reseña",
+  "reviewDisputeTooShort": "Escribe al menos 10 caracteres",
   "routeMapAllowLocationInSettings": "Permite la ubicación en los ajustes para verte en el mapa",
   "routeMapAlreadyHere": "Ya estás aquí",
   "routeMapArrival": "Llegada {time}",

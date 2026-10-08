@@ -9,10 +9,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/booking.dart';
 import '../../../router/routes.dart';
+import '../../guide_app/widgets/rate_tourist_sheet.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
+import '../../widgets/primary_button.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/booking_detail_viewmodel.dart';
 import '../widgets/payment_card.dart';
@@ -74,6 +76,32 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     final error = await _viewModel.cancel(reason: reason);
     if (!mounted) return;
     _show(error ?? l10n.bookingDetailCancelled);
+  }
+
+  Future<void> _review(Booking booking) async {
+    final tripLabel = Formatters.facts([
+      booking.circuitTitle,
+      Formatters.shortDate(booking.date),
+    ]);
+    final sheet = booking.asGuide
+        ? showRateTouristSheet(
+            context,
+            touristName: booking.touristName,
+            tripLabel: tripLabel,
+          )
+        : showRateGuideSheet(
+            context,
+            guideName: booking.guideName,
+            tripLabel: tripLabel,
+          );
+    final rating = await sheet;
+    if (rating == null || !mounted) return;
+    final error = await _viewModel.review(
+      stars: rating.stars,
+      comment: rating.comment,
+    );
+    if (!mounted) return;
+    _show(error ?? context.l10n.bookingReviewSent);
   }
 
   @override
@@ -145,6 +173,17 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     final l10n = context.l10n;
     final deadline = booking.cancelDeadline;
     return [
+      if (booking.canReview) ...[
+        PrimaryButton(
+          label: l10n.guideAppRateTourist(booking.counterpartName),
+          icon: Icons.star_outline,
+          onPressed: viewModel.isWorking ? null : () => _review(booking),
+        ),
+        const SizedBox(height: 12),
+      ] else if (booking.status.isFinished && booking.reviewed) ...[
+        InlineNotice(tone: NoticeTone.success, message: l10n.bookingReviewDone),
+        const SizedBox(height: 12),
+      ],
       if (booking.isCancelled)
         InlineNotice(
           tone: NoticeTone.error,

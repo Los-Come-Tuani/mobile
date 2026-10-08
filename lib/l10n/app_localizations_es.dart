@@ -409,6 +409,25 @@ class AppLocalizationsEs extends AppLocalizations {
       'Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.';
 
   @override
+  String get bookingReviewCommentHint =>
+      'Cuenta cómo fue el recorrido: puntualidad, trato, lo que aprendiste';
+
+  @override
+  String get bookingReviewDone => 'Ya dejaste tu reseña. ¡Gracias!';
+
+  @override
+  String bookingReviewQuestion(String name) {
+    return '¿Cómo te fue con $name?';
+  }
+
+  @override
+  String get bookingReviewSent => 'Reseña publicada. ¡Gracias!';
+
+  @override
+  String get bookingReviewVisibility =>
+      'Tu reseña se publica al instante en el perfil del guía.';
+
+  @override
   String bookingScheduleSummary(String start, String mode, String end) {
     return 'Saliendo a las $start · $mode · termina aprox. a las $end';
   }
@@ -3464,6 +3483,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get repoWorkWithdrawLoginRequired =>
       'Inicia sesión como guía para retirar';
+
+  @override
+  String get reviewDisputeHint => 'Explica por qué el equipo debería revisarla';
+
+  @override
+  String get reviewDisputeSend => 'Pedir revisión';
+
+  @override
+  String get reviewDisputeSent => 'Le pedimos al equipo que revise la reseña.';
+
+  @override
+  String get reviewDisputeTitle => 'Impugnar la reseña';
+
+  @override
+  String get reviewDisputeTooShort => 'Escribe al menos 10 caracteres';
 
   @override
   String get routeMapAllowLocationInSettings =>

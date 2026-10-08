@@ -46,6 +46,10 @@ class BookingDetailViewModel extends BaseViewModel {
   Future<String?> cancel({String reason = ''}) =>
       _run(() => _bookings.cancel(bookingId, reason: reason));
 
+  /// La reseña de quien pregunta, cuando el recorrido terminó.
+  Future<String?> review({required int stars, String comment = ''}) =>
+      _run(() => _bookings.review(bookingId, rating: stars, comment: comment));
+
   Future<String?> _run(Future<Result<Object?>> Function() action) async {
     if (_isWorking) return null;
     _isWorking = true;

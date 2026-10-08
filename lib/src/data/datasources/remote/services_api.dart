@@ -152,6 +152,29 @@ abstract final class ServicesApi {
     await ApiRows.post(ApiRoutes.bookingMessagesRead(bookingId));
   }
 
+  // ── Reseñas ───────────────────────────────────────────────────────────────
+
+  /// La reseña de quien pregunta cuando el recorrido terminó (`409` antes o si
+  /// ya la dejó). Devuelve el id de la reseña.
+  static Future<String> reviewBooking(
+    String bookingId, {
+    required int rating,
+    String comment = '',
+  }) async {
+    final body = await ApiRows.post(ApiRoutes.bookingReview(bookingId), {
+      'rating': rating.clamp(1, 5),
+      if (comment.trim().isNotEmpty) 'comment': _clip(comment.trim(), 1000),
+    });
+    return '${body['id'] ?? ''}';
+  }
+
+  /// El reseñado pide que el equipo revise la reseña (10 a 1000 caracteres).
+  static Future<void> disputeReview(String reviewId, String reason) async {
+    await ApiRows.post(ApiRoutes.reviewDispute(reviewId), {
+      'reason': _clip(reason.trim(), 1000),
+    });
+  }
+
   // ── Piezas ────────────────────────────────────────────────────────────────
 
   /// `2026-10-10`.

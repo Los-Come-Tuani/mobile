@@ -710,6 +710,36 @@ abstract class AppLocalizations {
   /// **'Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.'**
   String get bookingRequestPublished;
 
+  /// No description provided for @bookingReviewCommentHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta cómo fue el recorrido: puntualidad, trato, lo que aprendiste'**
+  String get bookingReviewCommentHint;
+
+  /// No description provided for @bookingReviewDone.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya dejaste tu reseña. ¡Gracias!'**
+  String get bookingReviewDone;
+
+  /// No description provided for @bookingReviewQuestion.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cómo te fue con {name}?'**
+  String bookingReviewQuestion(String name);
+
+  /// No description provided for @bookingReviewSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Reseña publicada. ¡Gracias!'**
+  String get bookingReviewSent;
+
+  /// No description provided for @bookingReviewVisibility.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu reseña se publica al instante en el perfil del guía.'**
+  String get bookingReviewVisibility;
+
   /// No description provided for @bookingScheduleSummary.
   ///
   /// In es, this message translates to:
@@ -5424,6 +5454,36 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Inicia sesión como guía para retirar'**
   String get repoWorkWithdrawLoginRequired;
+
+  /// No description provided for @reviewDisputeHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Explica por qué el equipo debería revisarla'**
+  String get reviewDisputeHint;
+
+  /// No description provided for @reviewDisputeSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir revisión'**
+  String get reviewDisputeSend;
+
+  /// No description provided for @reviewDisputeSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Le pedimos al equipo que revise la reseña.'**
+  String get reviewDisputeSent;
+
+  /// No description provided for @reviewDisputeTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Impugnar la reseña'**
+  String get reviewDisputeTitle;
+
+  /// No description provided for @reviewDisputeTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe al menos 10 caracteres'**
+  String get reviewDisputeTooShort;
 
   /// No description provided for @routeMapAllowLocationInSettings.
   ///
