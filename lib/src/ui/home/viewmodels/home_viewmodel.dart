@@ -186,6 +186,7 @@ class HomeViewModel extends BaseViewModel {
     // Con el API, el aviso de "próximo viaje" sale de las reservas de la
     // cuenta; llega cuando llegue.
     unawaited(_bookingsRepository.refresh());
+    unawaited(_guideRequestRepository.loadMine());
 
     // Se lanzan las cuatro lecturas en paralelo y luego se recogen.
     final circuitsFuture = _tourRepository.getCircuits();

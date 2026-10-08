@@ -163,7 +163,9 @@ class _HomeViewState extends State<HomeView> {
           _GuideRequestBanner(
             request: viewModel.activeGuideRequest!,
             onTap: () => context.push(
-              viewModel.activeGuideRequest!.status == GuideRequestStatus.hired
+              viewModel.activeGuideRequest!.status ==
+                          GuideRequestStatus.hired &&
+                      !viewModel.activeGuideRequest!.isRemote
                   ? Routes.guideChat
                   : Routes.guideProposal,
             ),

@@ -81,11 +81,11 @@ void main() {
 
     final applications = viewModel.applicationsFor(ApplicationRole.guide);
     expect(viewModel.canHire(applications.first), isTrue);
-    expect(viewModel.hire(applications.first), isTrue);
+    expect(await viewModel.hire(applications.first), isTrue);
 
     expect(viewModel.status, GuideRequestStatus.hired);
     expect(viewModel.canHire(applications.last), isFalse);
-    expect(viewModel.hire(applications.last), isFalse);
+    expect(await viewModel.hire(applications.last), isFalse);
     viewModel.dispose();
     repository.dispose();
   });

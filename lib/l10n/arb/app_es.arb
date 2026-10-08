@@ -225,6 +225,7 @@
     }
   },
   "bookingIncludes": "Incluye",
+  "bookingItineraryNotSaved": "Tu circuito todavía no se guardó en tu cuenta. Revisa tu conexión e intenta de nuevo.",
   "bookingMeetingPoint": "Punto de encuentro",
   "bookingNeedBilingualSubtitle": "Te explica todo el recorrido en tu idioma.",
   "bookingNeedBilingualTitle": "Guía que habla tu idioma",
@@ -275,6 +276,7 @@
   "bookingProposalYourLanguage": "Tu idioma",
   "bookingRecommendations": "Recomendaciones",
   "bookingRemove": "Quitar",
+  "bookingRequestPublished": "Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.",
   "bookingScheduleSummary": "Saliendo a las {start} · {mode} · termina aprox. a las {end}",
   "@bookingScheduleSummary": {
     "placeholders": {
@@ -1619,6 +1621,7 @@
     }
   },
   "guideRequestLodgingProvided": "Le das alojamiento al guía",
+  "guideRequestNoMaxFee": "Sin tope de precio: cada guía propone el suyo",
   "guideRequestNoneSubtitle": "Publica una al agendar un circuito, desde \"Guía o traductor\".",
   "guideRequestNoneTitle": "No tienes una propuesta activa",
   "guideRequestNoTransport": "Sin transporte",

@@ -373,6 +373,16 @@ class CircuitCollectionsRepository extends ChangeNotifier {
     }
   }
 
+  /// El itinerario de la cuenta donde se guarda la colección [id], esperando a
+  /// que termine lo que se esté subiendo de ella. `null` si no se guarda en la
+  /// cuenta (un circuito del catálogo sin cambios) o si no se pudo guardar.
+  Future<String?> savedItineraryId(String id) async {
+    final collection = findById(id);
+    if (collection == null) return null;
+    await _queues[collection];
+    return collection.itineraryId;
+  }
+
   /// Espera a que termine lo que se está subiendo o cargando de la cuenta.
   @visibleForTesting
   Future<void> settle() async {

@@ -3,6 +3,7 @@ import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/start_times.dart';
 import '../../../core/utils/time_parser.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/datasources/repository/guide_chat_repository.dart';
@@ -129,8 +130,13 @@ class BookingViewModel extends BaseViewModel {
       : (_circuit?.startTimes ?? const []);
 
   /// Un circuito propio no tiene precio por persona: sólo se paga el guía o
-  /// traductor que se contrate.
-  bool get hasPricePerPerson => !isUserCircuit;
+  /// traductor que se contrate. Con el API, aquí solo llegan itinerarios
+  /// propios (un circuito oficial se reserva en una salida).
+  bool get hasPricePerPerson => !isUserCircuit && !ApiClient.isConfigured;
+
+  /// Con el API se agenda publicando una convocatoria: sin guía ni traductor
+  /// no hay nada que publicar.
+  bool get needsGuideRequest => ApiClient.isConfigured;
 
   DateTime get firstSelectableDate =>
       DateTime.now().add(const Duration(days: minDaysAhead));
@@ -153,13 +159,18 @@ class BookingViewModel extends BaseViewModel {
     return l10n.bookingGuideSummary(terms.needLabel, terms.serviceHours);
   }
 
-  num get adultsTotal => (_circuit?.priceAdult ?? 0) * _adults;
-  num get childrenTotal => (_circuit?.priceChild ?? 0) * _children;
+  num get adultsTotal =>
+      hasPricePerPerson ? (_circuit?.priceAdult ?? 0) * _adults : 0;
+  num get childrenTotal =>
+      hasPricePerPerson ? (_circuit?.priceChild ?? 0) * _children : 0;
 
   /// Presupuesto publicado; el precio final depende de a quién se contrate.
   num get guidePrice => _guideTerms?.budget ?? 0;
   num get subtotal => adultsTotal + childrenTotal + guidePrice;
-  num get serviceFee => subtotal * serviceRate;
+
+  /// Con el API no se suma: la comisión de K'Plan sale de lo que recibe el
+  /// guía.
+  num get serviceFee => ApiClient.isConfigured ? 0 : subtotal * serviceRate;
   num get total => subtotal + serviceFee;
 
   /// Dónde es el recorrido. Un circuito propio no tiene ciudad, pero todas
@@ -167,9 +178,13 @@ class BookingViewModel extends BaseViewModel {
   String get _city =>
       _circuit?.city ?? (_stops.isEmpty ? '' : _stops.first.city);
 
-  /// No se puede agendar sin personas ni sin horario.
+  /// No se puede agendar sin personas ni sin horario (con el API, tampoco
+  /// sin pedir guía o traductor). El API pide al menos un adulto.
   bool get canConfirm =>
-      isLoaded && (_adults + _children) > 0 && _startTime.isNotEmpty;
+      isLoaded &&
+      (_adults + _children) > 0 &&
+      _startTime.isNotEmpty &&
+      (!needsGuideRequest || (_guideTerms != null && _adults > 0));
 
   Future<void> load() async {
     setBusy(true);
@@ -251,13 +266,17 @@ class BookingViewModel extends BaseViewModel {
   /// pidió guía o traductor, publica la propuesta de trabajo con la fecha,
   /// hora y tamaño del grupo para que los guías se postulen.
   ///
-  /// TODO: enviar a `ApiRoutes` cuando exista el endpoint de reservas;
-  /// por ahora sólo simula el guardado remoto.
+  /// Con el API no nace una reserva: se publica la convocatoria
+  /// (`POST /service-request/`) para el itinerario de la cuenta, y la reserva
+  /// llega cuando el turista elige una postulación.
   Future<bool> confirm() async {
     if (!canConfirm || _isSaving) return false;
 
     _isSaving = true;
+    clearError();
     safeNotify();
+
+    if (ApiClient.isConfigured) return _publishRequest();
 
     await Future<void>.delayed(const Duration(milliseconds: 700));
 
@@ -299,5 +318,30 @@ class BookingViewModel extends BaseViewModel {
     _isSaving = false;
     safeNotify();
     return true;
+  }
+
+  Future<bool> _publishRequest() async {
+    final terms = _guideTerms!;
+    final itineraryId = await _collectionsRepository.savedItineraryId(
+      circuitId,
+    );
+    if (itineraryId == null) {
+      setError(AppStrings.current.bookingItineraryNotSaved);
+      _isSaving = false;
+      safeNotify();
+      return false;
+    }
+    final result = await _guideRequestRepository.publishRemote(
+      itineraryId: itineraryId,
+      date: _date,
+      startTime: _startTime,
+      adults: _adults,
+      children: _children,
+      terms: terms,
+    );
+    if (result case Failure(:final message)) setError(message);
+    _isSaving = false;
+    safeNotify();
+    return result.isOk;
   }
 }

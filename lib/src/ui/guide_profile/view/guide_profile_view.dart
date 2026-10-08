@@ -49,12 +49,17 @@ class _GuideProfileViewState extends State<GuideProfileView> {
     if (application == null) return;
     if (!await confirmHire(context, application) || !mounted) return;
 
-    if (!viewModel.hire()) {
+    final hired = await viewModel.hire();
+    if (!mounted) return;
+    if (!hired) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(context.l10n.guideRequestApplicationUnavailable),
+            content: Text(
+              viewModel.hireError ??
+                  context.l10n.guideRequestApplicationUnavailable,
+            ),
           ),
         );
       return;
@@ -62,7 +67,11 @@ class _GuideProfileViewState extends State<GuideProfileView> {
 
     final request = viewModel.request;
     if (request == null) return;
-    final teamComplete = await showHireOutcome(context, request);
+    final teamComplete = await showHireOutcome(
+      context,
+      request,
+      bookingId: viewModel.hiredBookingId,
+    );
     // Si falta el otro puesto, se vuelve a las postulaciones para elegirlo.
     if (!teamComplete && mounted && context.canPop()) context.pop();
   }
@@ -117,7 +126,13 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                     PrimaryButton(
                       label: l10n.guideProfileChat,
                       icon: Icons.chat_bubble_outline,
-                      onPressed: () => context.push(Routes.guideChat),
+                      onPressed: () => context.push(
+                        viewModel.hiredBookingId == null
+                            ? Routes.guideChat
+                            : Routes.bookingDetailPath(
+                                viewModel.hiredBookingId!,
+                              ),
+                      ),
                     )
                   else if (viewModel.canHire)
                     PrimaryButton(

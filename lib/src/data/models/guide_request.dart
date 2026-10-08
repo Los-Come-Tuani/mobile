@@ -1,5 +1,9 @@
 import '../../core/l10n/l10n.dart';
+import '../../core/utils/api_json.dart';
+import '../../core/utils/formatters.dart';
+import '../../core/utils/time_parser.dart';
 import 'guide_application.dart';
+import 'tour_guide.dart';
 
 /// Estado de una propuesta de trabajo para guía y/o traductor.
 enum GuideRequestStatus {
@@ -116,6 +120,23 @@ class GuideRequestTerms {
     ApplicationRole.translator => translatorBudget,
   };
 
+  /// Lo que leen los guías en una convocatoria del API (`note`): qué se
+  /// pide, por cuántas horas y quién pone el transporte.
+  String get apiNote {
+    final l10n = AppStrings.current;
+    return [
+      '$needLabel · $serviceHours h',
+      if (need.needsGuide)
+        switch (transportOption) {
+          TransportOption.onFoot => l10n.guideRequestTransportOnFoot,
+          TransportOption.touristProvides => l10n.guideRequestTransportTourist,
+          TransportOption.guideProvides => l10n.guideRequestTransportGuide,
+        },
+      if (touristProvidesLodging && isMultiDay)
+        l10n.guideRequestLodgingProvided,
+    ].join('. ');
+  }
+
   /// Para espacios angostos, sin el idioma: "Guía + traductor".
   String get shortNeedLabel {
     final l10n = AppStrings.current;
@@ -178,7 +199,90 @@ class GuideRequest {
     this.applications = const [],
     this.hiredGuide,
     this.hiredTranslator,
+    this.isRemote = false,
+    this.maxFee,
+    this.note = '',
+    this.adults = 0,
+    this.children = 0,
+    this.knowsTerms = true,
   });
+
+  /// Una convocatoria de `GET /service-request/` (`docs/servicios.md`). El API
+  /// guarda una sola persona por convocatoria, `max_fee` y una nota; las
+  /// condiciones completas ([terms]) solo las conoce el teléfono que la
+  /// publicó: sin ellas, se muestra la nota.
+  factory GuideRequest.fromApi(
+    Map<String, dynamic> json, {
+    GuideRequestTerms? terms,
+    DateTime Function()? now,
+  }) {
+    final itinerary = ApiJson.map(json['itinerary']);
+    final minutes = TimeParser.minutesOf24h(ApiJson.str(json['start_time']));
+    final date = ApiJson.day(json['date']);
+    final startTime = minutes == null
+        ? ApiJson.str(json['start_time'])
+        : Formatters.dataTime(minutes);
+    final publishedAt =
+        ApiJson.date(json['created_at']) ?? (now ?? DateTime.now)();
+    final knownTerms =
+        terms ??
+        const GuideRequestTerms(need: GuideNeed.localGuide, serviceHours: 0);
+    final role = knownTerms.need == GuideNeed.translatorOnly
+        ? ApplicationRole.translator
+        : ApplicationRole.guide;
+    final status = switch (json['status']) {
+      'awarded' => GuideRequestStatus.hired,
+      'cancelled' => GuideRequestStatus.cancelled,
+      'expired' => GuideRequestStatus.expired,
+      _ => GuideRequestStatus.open,
+    };
+
+    GuideApplication? hired;
+    final applications = <GuideApplication>[];
+    for (final row in ApiJson.rows(json['applications'])) {
+      final state = row['status'];
+      if (state != 'sent' && state != 'accepted') continue;
+      final application = GuideApplication(
+        id: ApiJson.str(row['id']),
+        guide: TourGuide.fromApi(ApiJson.map(row['guide'])),
+        role: role,
+        proposedPrice: ApiJson.integer(row['fee']),
+        message: ApiJson.str(row['message']),
+        appliedAt: ApiJson.date(row['created_at']) ?? publishedAt,
+      );
+      applications.add(application);
+      if (state == 'accepted') hired = application;
+    }
+
+    final adults = ApiJson.integer(json['adults']);
+    final children = ApiJson.integer(json['children']);
+    // Vence sola cuando llega su fecha.
+    final closesAt = TimeParser.at(date, startTime);
+    return GuideRequest(
+      id: ApiJson.str(json['id']),
+      circuitId: ApiJson.str(itinerary['id']),
+      circuitTitle: ApiJson.str(itinerary['title']),
+      city: ApiJson.str(ApiJson.map(json['city'])['name']),
+      date: date,
+      startTime: startTime,
+      groupSize: adults + children,
+      adults: adults,
+      children: children,
+      terms: knownTerms,
+      knowsTerms: terms != null,
+      publishedAt: publishedAt,
+      openFor: closesAt.isAfter(publishedAt)
+          ? closesAt.difference(publishedAt)
+          : Duration.zero,
+      status: status,
+      applications: applications,
+      hiredGuide: role == ApplicationRole.guide ? hired : null,
+      hiredTranslator: role == ApplicationRole.translator ? hired : null,
+      isRemote: true,
+      maxFee: ApiJson.integerOrNull(json['max_fee']),
+      note: ApiJson.str(json['note']),
+    );
+  }
 
   final String id;
   final String circuitId;
@@ -205,15 +309,40 @@ class GuideRequest {
   final GuideApplication? hiredGuide;
   final GuideApplication? hiredTranslator;
 
+  /// Vino del API: [id] es el de la convocatoria y [circuitId] el del
+  /// itinerario.
+  final bool isRemote;
+
+  /// Con el API: nadie se postula por más de esto.
+  final int? maxFee;
+
+  /// Con el API: lo que el turista escribió para los guías.
+  final String note;
+  final int adults;
+  final int children;
+
+  /// `false` si llegó del API sin las condiciones que armó el teléfono.
+  final bool knowsTerms;
+
   DateTime get expiresAt => publishedAt.add(openFor);
 
   bool get isOpen => status == GuideRequestStatus.open;
 
-  /// Puestos pedidos, guía primero.
-  List<ApplicationRole> get roles => [
-    if (terms.need.needsGuide) ApplicationRole.guide,
-    if (terms.need.needsTranslator) ApplicationRole.translator,
-  ];
+  /// Lo que se ofrece por [role]: con el API, el tope de la convocatoria.
+  num budgetFor(ApplicationRole role) => maxFee ?? terms.budgetFor(role);
+
+  /// Puestos pedidos, guía primero. Una convocatoria del API pide una sola
+  /// persona.
+  List<ApplicationRole> get roles => isRemote
+      ? [
+          terms.need == GuideNeed.translatorOnly
+              ? ApplicationRole.translator
+              : ApplicationRole.guide,
+        ]
+      : [
+          if (terms.need.needsGuide) ApplicationRole.guide,
+          if (terms.need.needsTranslator) ApplicationRole.translator,
+        ];
 
   List<GuideApplication> applicationsFor(ApplicationRole role) =>
       applications.where((a) => a.role == role).toList(growable: false);
@@ -272,6 +401,12 @@ class GuideRequest {
       applications: applications ?? this.applications,
       hiredGuide: hiredGuide ?? this.hiredGuide,
       hiredTranslator: hiredTranslator ?? this.hiredTranslator,
+      isRemote: isRemote,
+      maxFee: maxFee,
+      note: note,
+      adults: adults,
+      children: children,
+      knowsTerms: knowsTerms,
     );
   }
 }

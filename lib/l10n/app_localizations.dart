@@ -482,6 +482,12 @@ abstract class AppLocalizations {
   /// **'Incluye'**
   String get bookingIncludes;
 
+  /// No description provided for @bookingItineraryNotSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu circuito todavía no se guardó en tu cuenta. Revisa tu conexión e intenta de nuevo.'**
+  String get bookingItineraryNotSaved;
+
   /// No description provided for @bookingMeetingPoint.
   ///
   /// In es, this message translates to:
@@ -655,6 +661,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Quitar'**
   String get bookingRemove;
+
+  /// No description provided for @bookingRequestPublished.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.'**
+  String get bookingRequestPublished;
 
   /// No description provided for @bookingScheduleSummary.
   ///
@@ -3438,6 +3450,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Le das alojamiento al guía'**
   String get guideRequestLodgingProvided;
+
+  /// No description provided for @guideRequestNoMaxFee.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin tope de precio: cada guía propone el suyo'**
+  String get guideRequestNoMaxFee;
 
   /// No description provided for @guideRequestNoneSubtitle.
   ///

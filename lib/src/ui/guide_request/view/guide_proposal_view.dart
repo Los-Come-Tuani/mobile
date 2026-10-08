@@ -40,6 +40,9 @@ class _GuideProposalViewState extends State<GuideProposalView> {
     _tick = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) setState(() {});
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<GuideRequestViewModel>().startPolling();
+    });
   }
 
   @override
@@ -52,19 +55,30 @@ class _GuideProposalViewState extends State<GuideProposalView> {
     final viewModel = context.read<GuideRequestViewModel>();
     if (!await confirmHire(context, application) || !mounted) return;
 
-    if (!viewModel.hire(application)) {
+    final hired = await viewModel.hire(application);
+    if (!mounted) return;
+    if (!hired) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(context.l10n.guideRequestApplicationUnavailable),
+            content: Text(
+              viewModel.lastError ??
+                  context.l10n.guideRequestApplicationUnavailable,
+            ),
           ),
         );
       return;
     }
 
     final request = viewModel.request;
-    if (request != null) await showHireOutcome(context, request);
+    if (request != null) {
+      await showHireOutcome(
+        context,
+        request,
+        bookingId: viewModel.hiredBookingId,
+      );
+    }
   }
 
   void _openProfile(GuideApplication application) =>
@@ -81,7 +95,12 @@ class _GuideProposalViewState extends State<GuideProposalView> {
       confirmLabel: l10n.guideRequestCancelConfirm,
       destructive: true,
     );
-    if (confirmed) viewModel.cancel();
+    if (!confirmed) return;
+    await viewModel.cancel();
+    if (!mounted || viewModel.errorMessage == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(viewModel.errorMessage!)));
   }
 
   @override
@@ -122,17 +141,32 @@ class _GuideProposalViewState extends State<GuideProposalView> {
                   for (final application in request.hired) ...[
                     ApplicationCard(
                       application: application,
-                      budget: request.terms.budgetFor(application.role),
+                      budget: request.budgetFor(application.role),
                       isHired: true,
                       onViewProfile: () => _openProfile(application),
                     ),
                     const SizedBox(height: 12),
                   ],
-                  PrimaryButton(
-                    label: l10n.guideRequestGoToChat,
-                    icon: Icons.chat_bubble_outline,
-                    onPressed: () => context.push(Routes.guideChat),
-                  ),
+                  // Con el API, el chat, el pago y la reseña viven en la
+                  // reserva que nació al elegir.
+                  if (request.isRemote)
+                    PrimaryButton(
+                      label: l10n.bookingDetailOpen,
+                      icon: Icons.receipt_long_outlined,
+                      onPressed: viewModel.hiredBookingId == null
+                          ? null
+                          : () => context.push(
+                              Routes.bookingDetailPath(
+                                viewModel.hiredBookingId!,
+                              ),
+                            ),
+                    )
+                  else
+                    PrimaryButton(
+                      label: l10n.guideRequestGoToChat,
+                      icon: Icons.chat_bubble_outline,
+                      onPressed: () => context.push(Routes.guideChat),
+                    ),
                 ] else if (request.isOpen) ...[
                   for (final role in request.roles) ...[
                     const SizedBox(height: 24),
@@ -204,7 +238,7 @@ class _RoleSection extends StatelessWidget {
     final l10n = context.l10n;
     final hired = request.hiredFor(role);
     final applications = request.applicationsFor(role);
-    final budget = request.terms.budgetFor(role);
+    final budget = request.budgetFor(role);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,11 +424,18 @@ class _TermsCard extends StatelessWidget {
               '${Formatters.timeText(request.startTime)} · '
               '${Formatters.people(request.groupSize)}',
         ),
-        _TermLine(
-          icon: Icons.person_pin_circle_outlined,
-          text: '${terms.needLabel} · ${terms.serviceHours} h',
-        ),
-        if (terms.need.needsGuide)
+        // Una convocatoria que llegó del API sin las condiciones de este
+        // teléfono solo tiene la nota que leen los guías.
+        if (!request.knowsTerms) ...[
+          if (request.note.isNotEmpty)
+            _TermLine(icon: Icons.notes_outlined, text: request.note),
+        ] else ...[
+          _TermLine(
+            icon: Icons.person_pin_circle_outlined,
+            text: '${terms.needLabel} · ${terms.serviceHours} h',
+          ),
+        ],
+        if (request.knowsTerms && terms.need.needsGuide)
           _TermLine(
             icon: Icons.directions_car_outlined,
             text: switch (terms.transportOption) {
@@ -404,14 +445,20 @@ class _TermsCard extends StatelessWidget {
               TransportOption.guideProvides => l10n.guideRequestTransportGuide,
             },
           ),
-        if (terms.touristProvidesLodging)
+        if (request.knowsTerms && terms.touristProvidesLodging)
           _TermLine(
             icon: Icons.hotel_outlined,
             text: l10n.guideRequestLodgingProvided,
           ),
         _TermLine(
           icon: Icons.sell_outlined,
-          text: bothRoles
+          text: request.isRemote
+              ? (request.maxFee == null
+                    ? l10n.guideRequestNoMaxFee
+                    : l10n.guideRequestBudget(
+                        Formatters.currency(request.maxFee!),
+                      ))
+              : bothRoles
               ? l10n.guideRequestBudgetBoth(
                   Formatters.currency(terms.budget),
                   Formatters.currency(terms.guideBudget),

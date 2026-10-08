@@ -5,16 +5,26 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
+import '../../models/booking.dart';
 import '../../models/guide_application.dart';
 import '../../models/guide_request.dart';
 import '../../models/tour_guide.dart';
+import '../remote/api_call.dart';
+import '../remote/api_client.dart';
+import '../remote/services_api.dart';
+import 'bookings_repository.dart';
 import 'guide_repository.dart';
 
 /// La propuesta de trabajo para guía y/o traductor en curso, si hay una.
 ///
+/// Con el API es una **convocatoria** (`POST /service-request/`) para un
+/// itinerario propio: los guías se postulan desde su app y el turista elige
+/// una postulación, que crea la reserva ([publishRemote], [refreshActive],
+/// [hireRemote], [cancelRemote], [loadMine]).
+///
 /// Sólo puede haber una propuesta a la vez (igual que
-/// [ActiveTripRepository] con el viaje en curso). Todavía no existe una app
-/// del lado del guía, así que las postulaciones se simulan: al publicar se
+/// [ActiveTripRepository] con el viaje en curso). En la demo las
+/// postulaciones se simulan: al publicar se
 /// arma una fila con quienes pueden cubrir lo pedido (puesto, idioma,
 /// transporte) y van llegando de a una con un [Timer]. La propuesta queda
 /// abierta [openFor] o hasta que el turista contrata.
@@ -22,10 +32,17 @@ class GuideRequestRepository extends ChangeNotifier {
   GuideRequestRepository(
     this._guideRepository, {
     Random? random,
+    BookingsRepository? bookings,
     this.openFor = const Duration(hours: 24),
     this.firstApplicationDelay = const Duration(seconds: 2),
     this.applicationInterval = const Duration(seconds: 3),
-  }) : _random = random ?? Random();
+  }) : _random = random ?? Random(),
+       _bookings = bookings;
+
+  final BookingsRepository? _bookings;
+
+  /// Con el API: la reserva que nació al elegir una postulación.
+  String? _hiredBookingId;
 
   /// Tope de postulaciones por puesto: suficientes para comparar sin
   /// llenar la pantalla.
@@ -304,6 +321,175 @@ class GuideRequestRepository extends ChangeNotifier {
     _applicationTimer?.cancel();
     _expiryTimer?.cancel();
     _upcoming.clear();
+  }
+
+  // ── Con el API: convocatorias (`docs/servicios.md`) ───────────────────────
+
+  /// La reserva que nació al elegir a alguien en la convocatoria activa.
+  String? get hiredBookingId {
+    final request = _request;
+    if (request == null || request.status != GuideRequestStatus.hired) {
+      return null;
+    }
+    if (_hiredBookingId case final id?) return id;
+    for (final booking in _bookings?.bookings ?? const <Booking>[]) {
+      if (booking.itineraryId == request.circuitId &&
+          booking.date == request.date) {
+        return booking.id;
+      }
+    }
+    return null;
+  }
+
+  /// Publica una convocatoria para el itinerario propio [itineraryId]. El
+  /// presupuesto de [terms] va como `max_fee` y lo que se pide, como nota.
+  Future<Result<GuideRequest>> publishRemote({
+    required String itineraryId,
+    required DateTime date,
+    required String startTime,
+    required int adults,
+    required int children,
+    required GuideRequestTerms terms,
+  }) async {
+    final budget = terms.budget.round();
+    final result = await apiCall(
+      'createServiceRequest',
+      () => ServicesApi.createServiceRequest(
+        itineraryId: itineraryId,
+        date: date,
+        startTime: startTime,
+        adults: adults,
+        children: children,
+        maxFee: budget > 0 ? budget : null,
+        note: terms.apiNote,
+      ),
+    );
+    switch (result) {
+      case Ok(:final value):
+        _stopSimulation();
+        final request = GuideRequest.fromApi(value, terms: terms);
+        _request = request;
+        _hiredBookingId = null;
+        notifyListeners();
+        return Result.ok(request);
+      case Failure(:final message, :final error):
+        return Result.failure(message, error);
+    }
+  }
+
+  /// Vuelve a pedir la convocatoria activa (las postulaciones que llegaron).
+  Future<void> refreshActive() async {
+    final request = _request;
+    if (request == null || !request.isRemote) return;
+    final result = await apiCall(
+      'serviceRequest',
+      () => ServicesApi.serviceRequest(request.id),
+    );
+    if (result case Ok(:final value) when _request?.id == request.id) {
+      _request = GuideRequest.fromApi(
+        value,
+        terms: request.knowsTerms ? request.terms : null,
+      );
+      notifyListeners();
+    }
+  }
+
+  /// Trae las convocatorias de la cuenta y deja activa la abierta más nueva
+  /// (o la que ya estaba, al día).
+  Future<void> loadMine() async {
+    if (!ApiClient.isConfigured) return;
+    final result = await apiCall(
+      'serviceRequests',
+      ServicesApi.serviceRequests,
+    );
+    if (result case Ok(:final value)) {
+      final current = _request;
+      Map<String, dynamic>? chosen;
+      for (final row in value) {
+        if (current != null && current.isRemote && row['id'] == current.id) {
+          chosen = row;
+          break;
+        }
+      }
+      chosen ??= value
+          .where((row) => row['status'] == 'open')
+          .fold<Map<String, dynamic>?>(
+            null,
+            (newest, row) =>
+                newest == null ||
+                    '${row['created_at']}'.compareTo(
+                          '${newest['created_at']}',
+                        ) >
+                        0
+                ? row
+                : newest,
+          );
+      if (chosen == null) {
+        if (current != null && current.isRemote) _request = null;
+      } else {
+        final keepsTerms =
+            current != null && current.id == chosen['id'] && current.knowsTerms;
+        _request = GuideRequest.fromApi(
+          chosen,
+          terms: keepsTerms ? current.terms : null,
+        );
+      }
+      notifyListeners();
+    }
+  }
+
+  /// Elige [applicationId]: el API crea la reserva y cierra la convocatoria.
+  Future<Result<Booking>> hireRemote(String applicationId) async {
+    final request = _request;
+    if (request == null || !request.isRemote) {
+      return Result.failure(AppStrings.current.commonSomethingWentWrong);
+    }
+    final result = await apiCall(
+      'acceptApplication',
+      () => ServicesApi.acceptApplication(request.id, applicationId),
+    );
+    if (result case Ok(:final value)) {
+      _bookings?.remember(value);
+      _hiredBookingId = value.id;
+      GuideApplication? hired;
+      for (final application in request.applications) {
+        if (application.id == applicationId) hired = application;
+      }
+      if (_request?.id == request.id) {
+        _request = request.copyWith(
+          status: GuideRequestStatus.hired,
+          hiredGuide: hired?.role == ApplicationRole.guide ? hired : null,
+          hiredTranslator: hired?.role == ApplicationRole.translator
+              ? hired
+              : null,
+        );
+        notifyListeners();
+      }
+    }
+    return result;
+  }
+
+  /// Retira la convocatoria activa en el API.
+  Future<Result<void>> cancelRemote() async {
+    final request = _request;
+    if (request == null || !request.isRemote) return const Result.ok(null);
+    final result = await apiCall(
+      'cancelServiceRequest',
+      () => ServicesApi.cancelServiceRequest(request.id),
+    );
+    if (result case Ok(:final value) when _request?.id == request.id) {
+      _request = value.isEmpty
+          ? request.copyWith(status: GuideRequestStatus.cancelled)
+          : GuideRequest.fromApi(
+              value,
+              terms: request.knowsTerms ? request.terms : null,
+            );
+      notifyListeners();
+    }
+    return switch (result) {
+      Ok() => const Result.ok(null),
+      Failure(:final message, :final error) => Result.failure(message, error),
+    };
   }
 
   @override

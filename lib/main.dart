@@ -150,8 +150,10 @@ class _KPlanAppState extends State<KPlanApp> {
         // Las postulaciones se simulan con el catálogo de guías: en la demo
         // no llegan a la app del guía, que tiene sus propuestas de ejemplo.
         ChangeNotifierProvider<GuideRequestRepository>(
-          create: (context) =>
-              GuideRequestRepository(context.read<GuideRepository>()),
+          create: (context) => GuideRequestRepository(
+            context.read<GuideRepository>(),
+            bookings: context.read<BookingsRepository>(),
+          ),
         ),
         // Chat simulado con quienes se contrató en la propuesta activa.
         ChangeNotifierProvider<GuideChatRepository>(

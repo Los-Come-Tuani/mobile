@@ -94,15 +94,25 @@ class _BookingViewState extends State<BookingView> {
     final viewModel = _viewModel;
     final hadGuideRequest = viewModel.hasGuideRequest;
     final ok = await viewModel.confirm();
-    if (!mounted || !ok) return;
-
+    if (!mounted) return;
     final l10n = context.l10n;
+    if (!ok) {
+      if (viewModel.errorMessage case final message?) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      }
+      return;
+    }
+
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: Text(
-            hadGuideRequest
+            viewModel.needsGuideRequest
+                ? l10n.bookingRequestPublished
+                : hadGuideRequest
                 ? l10n.bookingConfirmedWithProposal
                 : l10n.bookingConfirmed,
           ),

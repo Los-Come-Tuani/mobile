@@ -276,6 +276,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookingIncludes => 'Incluye';
 
   @override
+  String get bookingItineraryNotSaved =>
+      'Tu circuito todavía no se guardó en tu cuenta. Revisa tu conexión e intenta de nuevo.';
+
+  @override
   String get bookingMeetingPoint => 'Punto de encuentro';
 
   @override
@@ -376,6 +380,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bookingRemove => 'Quitar';
+
+  @override
+  String get bookingRequestPublished =>
+      'Publicamos tu convocatoria: los guías se postularán con su precio y tú eliges.';
 
   @override
   String bookingScheduleSummary(String start, String mode, String end) {
@@ -2172,6 +2180,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get guideRequestLodgingProvided => 'Le das alojamiento al guía';
+
+  @override
+  String get guideRequestNoMaxFee =>
+      'Sin tope de precio: cada guía propone el suyo';
 
   @override
   String get guideRequestNoneSubtitle =>

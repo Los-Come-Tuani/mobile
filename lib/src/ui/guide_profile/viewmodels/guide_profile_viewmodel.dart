@@ -34,8 +34,16 @@ class GuideProfileViewModel extends BaseViewModel {
   num? get budget {
     final application = this.application;
     if (application == null) return null;
-    return request?.terms.budgetFor(application.role);
+    return request?.budgetFor(application.role);
   }
+
+  /// Con el API: la reserva que nació al contratarlo.
+  String? get hiredBookingId => _guideRequestRepository.hiredBookingId;
+
+  String? _hireError;
+
+  /// Por qué el API no dejó contratar.
+  String? get hireError => _hireError;
 
   bool get isHired => request?.isHired(guideId) ?? false;
 
@@ -45,9 +53,16 @@ class GuideProfileViewModel extends BaseViewModel {
   }
 
   /// `false` si ya no se puede contratar.
-  bool hire() {
+  Future<bool> hire() async {
     final application = this.application;
-    return application != null && _guideRequestRepository.hire(application.id);
+    if (application == null) return false;
+    _hireError = null;
+    if (request?.isRemote ?? false) {
+      final result = await _guideRequestRepository.hireRemote(application.id);
+      if (result case Failure(:final message)) _hireError = message;
+      return result.isOk;
+    }
+    return _guideRequestRepository.hire(application.id);
   }
 
   Future<void> load() async {

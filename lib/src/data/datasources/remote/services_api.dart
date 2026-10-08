@@ -1,3 +1,5 @@
+import '../../../core/utils/formatters.dart';
+import '../../../core/utils/time_parser.dart';
 import '../../models/booking.dart';
 import '../../models/circuit_group_session.dart';
 import '../../models/tour_guide.dart';
@@ -34,6 +36,51 @@ abstract final class ServicesApi {
     final rows = await ApiRows.list(ApiRoutes.circuitDepartures(circuitId));
     return [for (final row in rows) CircuitGroupSession.fromApi(row)];
   }
+
+  // ── Convocatorias (el turista) ────────────────────────────────────────────
+
+  /// Las suyas, con sus postulaciones.
+  static Future<List<Map<String, dynamic>>> serviceRequests() =>
+      ApiRows.list(ApiRoutes.serviceRequests);
+
+  /// Una, con sus postulaciones de menor a mayor precio.
+  static Future<Map<String, dynamic>> serviceRequest(String id) =>
+      ApiRows.one(ApiRoutes.serviceRequest(id));
+
+  /// Publica una para un itinerario propio. La hora va como `08:30`.
+  static Future<Map<String, dynamic>> createServiceRequest({
+    required String itineraryId,
+    required DateTime date,
+    required String startTime,
+    required int adults,
+    required int children,
+    int? maxFee,
+    String note = '',
+  }) {
+    final minutes = TimeParser.minutesOfDay(startTime);
+    return ApiRows.post(ApiRoutes.serviceRequests, {
+      'itinerary_id': itineraryId,
+      'date': _date(date),
+      'start_time': minutes == null ? startTime : Formatters.time24h(minutes),
+      'adults': adults,
+      'children': children,
+      'max_fee': ?maxFee,
+      if (note.trim().isNotEmpty) 'note': _clip(note.trim(), 1000),
+    });
+  }
+
+  /// Elige una postulación: crea la reserva y cierra la convocatoria.
+  static Future<Booking> acceptApplication(
+    String requestId,
+    String applicationId,
+  ) async => Booking.fromApi(
+    await ApiRows.post(ApiRoutes.serviceRequestAccept(requestId), {
+      'application_id': applicationId,
+    }),
+  );
+
+  static Future<Map<String, dynamic>> cancelServiceRequest(String id) =>
+      ApiRows.post(ApiRoutes.serviceRequestCancel(id));
 
   // ── Reservas (turista y guía) ─────────────────────────────────────────────
 
@@ -73,4 +120,15 @@ abstract final class ServicesApi {
 
   static Future<Booking> finishBooking(String id) async =>
       Booking.fromApi(await ApiRows.post(ApiRoutes.bookingFinish(id)));
+
+  // ── Piezas ────────────────────────────────────────────────────────────────
+
+  /// `2026-10-10`.
+  static String _date(DateTime day) =>
+      '${day.year.toString().padLeft(4, '0')}-'
+      '${day.month.toString().padLeft(2, '0')}-'
+      '${day.day.toString().padLeft(2, '0')}';
+
+  static String _clip(String text, int max) =>
+      text.length > max ? text.substring(0, max) : text;
 }

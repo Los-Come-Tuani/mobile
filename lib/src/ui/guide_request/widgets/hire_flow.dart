@@ -27,15 +27,26 @@ Future<bool> confirmHire(BuildContext context, GuideApplication application) {
 }
 
 /// Lo que sigue después de contratar: si ya quedó completo el equipo,
-/// muestra el aviso y abre el chat; si falta el otro puesto, avisa cuál
-/// queda por elegir. Devuelve `true` si ya no falta nadie.
-Future<bool> showHireOutcome(BuildContext context, GuideRequest request) async {
+/// muestra el aviso y abre el chat (con el API, la reserva [bookingId] que
+/// nació al elegir); si falta el otro puesto, avisa cuál queda por elegir.
+/// Devuelve `true` si ya no falta nadie.
+Future<bool> showHireOutcome(
+  BuildContext context,
+  GuideRequest request, {
+  String? bookingId,
+}) async {
   if (request.status == GuideRequestStatus.hired) {
     await showGuideHiredOverlay(
       context,
       people: [for (final application in request.hired) application.guide],
     );
-    if (context.mounted) context.push(Routes.guideChat);
+    if (context.mounted) {
+      context.push(
+        bookingId == null
+            ? Routes.guideChat
+            : Routes.bookingDetailPath(bookingId),
+      );
+    }
     return true;
   }
 
