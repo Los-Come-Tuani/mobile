@@ -3,26 +3,48 @@ import '../../../core/utils/logger.dart';
 import '../../../core/utils/result.dart';
 import '../../models/tour_guide.dart';
 import '../local/mock_datasource.dart';
+import '../remote/api_call.dart';
+import '../remote/api_client.dart';
+import '../remote/services_api.dart';
 
-/// Catálogo de guías y traductores turísticos disponibles para solicitar en
-/// vivo.
+/// Catálogo de guías y traductores turísticos disponibles para contratar.
 ///
-/// Hoy se alimenta de [MockDatasource]; el día que exista la API sólo cambia
-/// el cuerpo de estos métodos.
+/// Con `ApiClient.isConfigured` sale del API (`GET /guide/`, solo prestadores
+/// aprobados); sin él, de [MockDatasource].
 class GuideRepository {
   GuideRepository({MockDatasource? datasource})
     : _datasource = datasource ?? MockDatasource();
 
   final MockDatasource _datasource;
 
-  Future<Result<List<TourGuide>>> getGuides() async {
+  /// Con el API, [city] y [language] son códigos (`leon`, `en`) y [service]
+  /// es `guia` o `traductor`. La demo ignora los filtros.
+  Future<Result<List<TourGuide>>> getGuides({
+    String? city,
+    String? language,
+    String? service,
+  }) async {
+    if (ApiClient.isConfigured) {
+      return apiCall(
+        'getGuides',
+        () => ServicesApi.guides(
+          city: city,
+          language: language,
+          service: service,
+        ),
+      );
+    }
     return _guard('getGuides', () async {
       final rows = await _datasource.readList('guides.json');
       return rows.map(TourGuide.fromJson).toList(growable: false);
     });
   }
 
+  /// Con el API trae también sus últimas reseñas y sus próximas salidas.
   Future<Result<TourGuide>> getGuideById(String id) async {
+    if (ApiClient.isConfigured) {
+      return apiCall('getGuideById', () => ServicesApi.guide(id));
+    }
     return _guard('getGuideById', () async {
       final rows = await _datasource.readList('guides.json');
       final row = rows.firstWhere(

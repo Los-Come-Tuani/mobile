@@ -68,6 +68,8 @@ import '../ui/guide_profile/view/guide_profile_view.dart';
 import '../ui/guide_profile/viewmodels/guide_profile_viewmodel.dart';
 import '../ui/guide_request/view/guide_proposal_view.dart';
 import '../ui/guide_request/viewmodels/guide_request_viewmodel.dart';
+import '../ui/guides/view/guides_view.dart';
+import '../ui/guides/viewmodels/guides_viewmodel.dart';
 import '../ui/home/view/home_view.dart';
 import '../ui/home/viewmodels/home_viewmodel.dart';
 import '../ui/itinerary_assistant/view/itinerary_assistant_view.dart';
@@ -521,6 +523,13 @@ GoRouter createRouter(AuthRepository authRepository) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.guides,
+        builder: (context, state) => ChangeNotifierProvider<GuidesViewModel>(
+          create: (context) => GuidesViewModel(context.read<GuideRepository>()),
+          child: const GuidesView(),
+        ),
       ),
       GoRoute(
         path: Routes.guideProfile,

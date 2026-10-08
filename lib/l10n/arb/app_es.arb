@@ -1451,6 +1451,7 @@
   "guideProfileAppliedAsGuide": "Se postuló como guía a tu propuesta",
   "guideProfileAppliedAsTranslator": "Se postuló como traductor a tu propuesta",
   "guideProfileChat": "Chatear",
+  "guideProfileDeparturesTitle": "Próximas salidas",
   "guideProfileHasVehicle": "Tiene vehículo propio",
   "guideProfileHiredAsGuide": "Contratado como guía",
   "guideProfileHiredAsTranslator": "Contratado como traductor",
@@ -1642,6 +1643,13 @@
       }
     }
   },
+  "guidesEmptyMessage": "Cuando el equipo apruebe a más guías y traductores, aparecerán aquí.",
+  "guidesEmptyTitle": "Todavía no hay guías disponibles",
+  "guidesFilterAll": "Todos",
+  "guidesFilterGuides": "Guías",
+  "guidesFilterTranslators": "Traductores",
+  "guidesNoReviews": "Sin reseñas todavía",
+  "guidesTitle": "Guías y traductores",
   "homeActiveTripAllVisited": "Ya pasaste por todas las paradas · toca para finalizar",
   "homeActiveTripNext": "Siguiente: {stop} · {time} · {delay}",
   "@homeActiveTripNext": {

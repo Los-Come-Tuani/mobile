@@ -1,7 +1,10 @@
+import '../../core/utils/api_json.dart';
+import '../../core/utils/formatters.dart';
+import 'circuit_group_session.dart';
 import 'guide_coverage.dart';
 
-/// Qué servicio ofrece un guía: acompañar y explicar (guía), traducir sin
-/// conocimiento turístico (traductor), o ambos.
+/// QuÃ© servicio ofrece un guÃ­a: acompaÃ±ar y explicar (guÃ­a), traducir sin
+/// conocimiento turÃ­stico (traductor), o ambos.
 enum GuideRole {
   guide,
   translator,
@@ -13,14 +16,14 @@ enum GuideRole {
     _ => GuideRole.guide,
   };
 
-  /// `true` si esta persona puede cubrir el rol de guía.
+  /// `true` si esta persona puede cubrir el rol de guÃ­a.
   bool get canGuide => this == guide || this == both;
 
   /// `true` si esta persona puede cubrir el rol de traductor.
   bool get canTranslate => this == translator || this == both;
 }
 
-/// Un guía turístico (o traductor) disponible para solicitar en vivo.
+/// Un guÃ­a turÃ­stico (o traductor) disponible para solicitar en vivo.
 class TourGuide {
   const TourGuide({
     required this.id,
@@ -37,6 +40,7 @@ class TourGuide {
     this.hasTransport = false,
     this.coverage = GuideCoverage.national,
     this.certifiedCity,
+    this.departures = const [],
   });
 
   final String id;
@@ -51,16 +55,20 @@ class TourGuide {
   final List<GuideReview> reviews;
   final GuideRole role;
 
-  /// `true` si el guía tiene transporte propio para ofrecerlo en el
+  /// `true` si el guÃ­a tiene transporte propio para ofrecerlo en el
   /// recorrido (ver [TransportOption.guideProvides]).
   final bool hasTransport;
 
-  /// Hasta dónde puede guiar. Sólo limita el puesto de guía: un traductor
-  /// acompaña recorridos en cualquier ciudad.
+  /// Hasta dÃ³nde puede guiar. SÃ³lo limita el puesto de guÃ­a: un traductor
+  /// acompaÃ±a recorridos en cualquier ciudad.
   final GuideCoverage coverage;
 
-  /// La única ciudad donde puede guiar si es local.
+  /// La Ãºnica ciudad donde puede guiar si es local.
   final String? certifiedCity;
+
+  /// Sus prÃ³ximas salidas en circuitos oficiales (solo con el API, en el
+  /// perfil del guÃ­a).
+  final List<CircuitGroupSession> departures;
 
   /// Si puede guiar un recorrido en [city].
   bool coversCity(String city) =>
@@ -90,13 +98,75 @@ class TourGuide {
     );
   }
 
+  /// Un guÃ­a de `GET /guide/` o `GET /guide/{id}/` (este trae `reviews` y
+  /// `departures`). El API no tiene aÃ±os de experiencia ni especialidades.
+  factory TourGuide.fromApi(Map<String, dynamic> json) {
+    final services = [for (final s in json['services'] as List? ?? []) '$s'];
+    final city = ApiJson.map(json['city']);
+    final guide = TourGuide(
+      id: ApiJson.str(json['id']),
+      name: ApiJson.str(json['name']),
+      photoUrl: ApiJson.imageUrl(json['photo']),
+      rating: ApiJson.decimal(json['rating']) ?? 0,
+      reviewsCount: ApiJson.integer(json['reviews_count']),
+      // El nombre del idioma llega en espaÃ±ol ("InglÃ©s"): `languageName` lo
+      // traduce al mostrar.
+      languages: [
+        for (final language in ApiJson.rows(json['languages']))
+          ApiJson.str(language['name']),
+      ],
+      bio: ApiJson.str(json['presentation']),
+      yearsExperience: 0,
+      specialties: const [],
+      reviews: [
+        for (final review in ApiJson.rows(json['reviews']))
+          GuideReview.fromApi(review),
+      ],
+      role: switch ((
+        services.contains('guia'),
+        services.contains('traductor'),
+      )) {
+        (true, true) => GuideRole.both,
+        (false, true) => GuideRole.translator,
+        _ => GuideRole.guide,
+      },
+      hasTransport: json['carries_tourists'] == true,
+      coverage: city.isEmpty ? GuideCoverage.national : GuideCoverage.local,
+      certifiedCity: ApiJson.strOrNull(city['name']),
+    );
+    final departures = ApiJson.rows(json['departures']);
+    if (departures.isEmpty) return guide;
+    return guide.withDepartures([
+      for (final row in departures)
+        CircuitGroupSession.fromApi(row, guide: guide),
+    ]);
+  }
+
+  TourGuide withDepartures(List<CircuitGroupSession> departures) => TourGuide(
+    id: id,
+    name: name,
+    photoUrl: photoUrl,
+    rating: rating,
+    reviewsCount: reviewsCount,
+    languages: languages,
+    bio: bio,
+    yearsExperience: yearsExperience,
+    specialties: specialties,
+    reviews: reviews,
+    role: role,
+    hasTransport: hasTransport,
+    coverage: coverage,
+    certifiedCity: certifiedCity,
+    departures: departures,
+  );
+
   static List<String> _stringList(Object? value) =>
       (value as List<dynamic>? ?? const [])
           .map((e) => '$e')
           .toList(growable: false);
 }
 
-/// Reseña de un guía turístico.
+/// ReseÃ±a de un guÃ­a turÃ­stico.
 class GuideReview {
   const GuideReview({
     required this.author,
@@ -120,6 +190,17 @@ class GuideReview {
       rating: json['rating'] as int? ?? 0,
       timeAgo: json['timeAgo'] as String? ?? '',
       text: json['text'] as String? ?? '',
+    );
+  }
+
+  /// `{ rating, comment, author, created_at }` del perfil de un guÃ­a.
+  factory GuideReview.fromApi(Map<String, dynamic> json) {
+    final createdAt = ApiJson.date(json['created_at']);
+    return GuideReview(
+      author: ApiJson.str(json['author']),
+      rating: ApiJson.integer(json['rating']),
+      timeAgo: createdAt == null ? '' : Formatters.timeAgo(createdAt),
+      text: ApiJson.str(json['comment']),
     );
   }
 }

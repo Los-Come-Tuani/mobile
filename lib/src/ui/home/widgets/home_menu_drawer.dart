@@ -83,6 +83,14 @@ class HomeMenuDrawer extends StatelessWidget {
               },
             ),
             _MenuItem(
+              icon: Icons.person_search_outlined,
+              label: l10n.guidesTitle,
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push(Routes.guides);
+              },
+            ),
+            _MenuItem(
               icon: Icons.military_tech_outlined,
               label: l10n.commonMyMedals,
               onTap: () {

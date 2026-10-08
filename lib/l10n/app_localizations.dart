@@ -3133,6 +3133,12 @@ abstract class AppLocalizations {
   /// **'Chatear'**
   String get guideProfileChat;
 
+  /// No description provided for @guideProfileDeparturesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Próximas salidas'**
+  String get guideProfileDeparturesTitle;
+
   /// No description provided for @guideProfileHasVehicle.
   ///
   /// In es, this message translates to:
@@ -3486,6 +3492,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{years, plural, =1{1 año de experiencia} other{{years} años de experiencia}}'**
   String guideRequestYearsExperience(int years);
+
+  /// No description provided for @guidesEmptyMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando el equipo apruebe a más guías y traductores, aparecerán aquí.'**
+  String get guidesEmptyMessage;
+
+  /// No description provided for @guidesEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay guías disponibles'**
+  String get guidesEmptyTitle;
+
+  /// No description provided for @guidesFilterAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Todos'**
+  String get guidesFilterAll;
+
+  /// No description provided for @guidesFilterGuides.
+  ///
+  /// In es, this message translates to:
+  /// **'Guías'**
+  String get guidesFilterGuides;
+
+  /// No description provided for @guidesFilterTranslators.
+  ///
+  /// In es, this message translates to:
+  /// **'Traductores'**
+  String get guidesFilterTranslators;
+
+  /// No description provided for @guidesNoReviews.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin reseñas todavía'**
+  String get guidesNoReviews;
+
+  /// No description provided for @guidesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Guías y traductores'**
+  String get guidesTitle;
 
   /// No description provided for @homeActiveTripAllVisited.
   ///

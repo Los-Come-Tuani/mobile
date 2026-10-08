@@ -115,6 +115,9 @@ abstract final class Routes {
   /// Asistente que arma un circuito desde cero: `/assistant`.
   static const assistant = '/assistant';
 
+  /// Los guías y traductores aprobados para contratar.
+  static const guides = '/guides';
+
   /// Perfil de un guía: `/guide/:id`
   static const guideProfile = '/guide/:$guideId';
 

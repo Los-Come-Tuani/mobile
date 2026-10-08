@@ -7,12 +7,14 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/models/circuit_group_session.dart';
 import '../../../data/models/guide_application.dart';
 import '../../../data/models/tour_guide.dart';
 import '../../../router/routes.dart';
 import '../../guide_request/widgets/application_card.dart';
 import '../../guide_request/widgets/hire_flow.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/empty_state.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/offer_chip.dart';
@@ -89,7 +91,15 @@ class _GuideProfileViewState extends State<GuideProfileView> {
         ),
       ),
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy || guide == null
+      body: viewModel.hasError && guide == null && !viewModel.isBusy
+          ? EmptyState(
+              title: viewModel.errorMessage!,
+              action: TextButton(
+                onPressed: viewModel.load,
+                child: Text(l10n.commonRetry),
+              ),
+            )
+          : viewModel.isBusy || guide == null
           ? const Center(child: KPlanLoader())
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 24, bottom: 24),
@@ -118,6 +128,21 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                       onPressed: _hire,
                     ),
                 ],
+                if (guide.departures.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.guideProfileDeparturesTitle,
+                    style: AppTextStyles.title,
+                  ),
+                  const SizedBox(height: 4),
+                  for (final departure in guide.departures)
+                    _DepartureTile(
+                      departure: departure,
+                      onTap: () => context.push(
+                        Routes.groupSlotsPath(departure.circuitId),
+                      ),
+                    ),
+                ],
                 if (guide.reviews.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   Text(
@@ -129,6 +154,38 @@ class _GuideProfileViewState extends State<GuideProfileView> {
                 ],
               ],
             ),
+    );
+  }
+}
+
+/// Una salida próxima del guía: a qué circuito, cuándo y cuántos cupos
+/// quedan. Lleva a los horarios del circuito para reservarla.
+class _DepartureTile extends StatelessWidget {
+  const _DepartureTile({required this.departure, required this.onTap});
+
+  final CircuitGroupSession departure;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.event_available, color: AppColors.primary30),
+      title: Text(departure.circuitTitle, style: AppTextStyles.cardTitle),
+      subtitle: Text(
+        Formatters.facts([
+          Formatters.weekdayDate(departure.date),
+          Formatters.timeText(departure.startTime),
+          if (departure.isFull)
+            l10n.groupSlotsNoSpots
+          else
+            l10n.groupSlotsSpotsLeft(departure.spotsLeft),
+        ]),
+        style: AppTextStyles.caption,
+      ),
+      trailing: const Icon(Icons.chevron_right, color: AppColors.hintText),
+      onTap: onTap,
     );
   }
 }
@@ -179,11 +236,13 @@ class _Header extends StatelessWidget {
               ].join(', '),
               color: AppColors.secondaryText,
             ),
-            IconLabel(
-              icon: Icons.work_outline,
-              label: l10n.guideRequestYearsExperience(guide.yearsExperience),
-              color: AppColors.secondaryText,
-            ),
+            // El API no tiene años de experiencia.
+            if (guide.yearsExperience > 0)
+              IconLabel(
+                icon: Icons.work_outline,
+                label: l10n.guideRequestYearsExperience(guide.yearsExperience),
+                color: AppColors.secondaryText,
+              ),
             if (guide.role.canGuide)
               IconLabel(
                 icon: guide.hasTransport

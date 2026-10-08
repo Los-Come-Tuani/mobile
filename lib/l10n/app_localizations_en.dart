@@ -1986,6 +1986,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guideProfileChat => 'Chat';
 
   @override
+  String get guideProfileDeparturesTitle => 'Upcoming departures';
+
+  @override
   String get guideProfileHasVehicle => 'Has their own vehicle';
 
   @override
@@ -2215,6 +2218,28 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get guidesEmptyMessage =>
+      'When the team approves more guides and translators, they will show up here.';
+
+  @override
+  String get guidesEmptyTitle => 'No guides available yet';
+
+  @override
+  String get guidesFilterAll => 'All';
+
+  @override
+  String get guidesFilterGuides => 'Guides';
+
+  @override
+  String get guidesFilterTranslators => 'Translators';
+
+  @override
+  String get guidesNoReviews => 'No reviews yet';
+
+  @override
+  String get guidesTitle => 'Guides and translators';
 
   @override
   String get homeActiveTripAllVisited =>

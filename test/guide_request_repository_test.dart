@@ -56,7 +56,11 @@ class _FakeGuideRepository implements GuideRepository {
   final List<TourGuide> _guides;
 
   @override
-  Future<Result<List<TourGuide>>> getGuides() async => Result.ok(_guides);
+  Future<Result<List<TourGuide>>> getGuides({
+    String? city,
+    String? language,
+    String? service,
+  }) async => Result.ok(_guides);
 
   @override
   Future<Result<TourGuide>> getGuideById(String id) =>
