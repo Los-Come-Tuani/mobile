@@ -95,6 +95,7 @@ import '../ui/medals/viewmodels/medals_viewmodel.dart';
 import '../ui/my_circuit/view/my_circuit_view.dart';
 import '../ui/my_circuit/viewmodels/my_circuit_viewmodel.dart';
 import '../ui/my_trips/view/my_trips_view.dart';
+import '../ui/notifications/view/notifications_view.dart';
 import '../ui/my_trips/viewmodels/my_trips_viewmodel.dart';
 import '../ui/profile/view/profile_view.dart';
 import '../ui/profile/viewmodels/profile_viewmodel.dart';
@@ -569,6 +570,10 @@ GoRouter createRouter(AuthRepository authRepository) {
                 ),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.notifications,
+        builder: (context, state) => const NotificationsView(),
       ),
       GoRoute(
         path: Routes.guides,

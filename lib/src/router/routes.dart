@@ -118,6 +118,9 @@ abstract final class Routes {
   /// Los guías y traductores aprobados para contratar.
   static const guides = '/guides';
 
+  /// La bandeja de avisos de la cuenta (turista o guía), con el API.
+  static const notifications = '/notifications';
+
   /// Perfil de un guía: `/guide/:id`
   static const guideProfile = '/guide/:$guideId';
 

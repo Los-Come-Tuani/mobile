@@ -23,6 +23,7 @@ import 'src/data/datasources/repository/guide_request_repository.dart';
 import 'src/data/datasources/repository/guide_work_repository.dart';
 import 'src/data/datasources/repository/language_repository.dart';
 import 'src/data/datasources/repository/location_repository.dart';
+import 'src/data/datasources/repository/notifications_repository.dart';
 import 'src/data/datasources/repository/saved_repository.dart';
 import 'src/data/datasources/repository/security_repository.dart';
 import 'src/data/datasources/repository/settings_repository.dart';
@@ -108,6 +109,12 @@ class _KPlanAppState extends State<KPlanApp> {
             context.read<GuideAccessRepository>(),
             context.read<GuideInboxRepository>(),
           ),
+        ),
+        // Con el API: la bandeja de avisos y el punto de la campana. El envío
+        // al teléfono espera el proyecto de Firebase (NoPushService).
+        ChangeNotifierProvider<NotificationsRepository>(
+          create: (context) =>
+              NotificationsRepository(auth: context.read<AuthRepository>()),
         ),
         // Con el API: las salidas, convocatorias, postulaciones, el saldo y
         // los retiros del guía aprobado.

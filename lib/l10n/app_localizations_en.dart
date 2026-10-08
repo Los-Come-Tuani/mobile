@@ -3355,6 +3355,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myTripsYourTranslator => 'Your translator';
 
   @override
+  String get notificationsEmptyMessage =>
+      'Here we let you know about your bookings, messages, applications and payments.';
+
+  @override
+  String get notificationsEmptyTitle => 'You have no notifications';
+
+  @override
+  String get notificationsMore => 'See more';
+
+  @override
+  String get notificationsReadAll => 'Mark all as read';
+
+  @override
   String get profileCouponsSubtitle => 'Perks from local businesses';
 
   @override
@@ -4071,6 +4084,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNotificationsHeading => 'Stay in the loop';
+
+  @override
+  String get settingsNotificationsInboxNote =>
+      'Turning a notification off only stops sending it to your phone: it always reaches your inbox.';
 
   @override
   String get settingsNotificationsPermissionNote =>

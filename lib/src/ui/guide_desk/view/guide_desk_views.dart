@@ -6,6 +6,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/datasources/repository/notifications_repository.dart';
 import '../../../data/models/circuit_group_session.dart';
 import '../../../data/models/guide_desk.dart';
 import '../../../router/routes.dart';
@@ -97,10 +98,22 @@ class _GuideDeskHomeViewState extends _DeskTabState<GuideDeskHomeView> {
     final viewModel = context.watch<GuideDeskViewModel>();
     final requests = viewModel.openRequests;
     final bids = viewModel.bids;
+    final unread = context.select<NotificationsRepository, int>(
+      (notifications) => notifications.unreadCount,
+    );
 
     return Scaffold(
       appBar: GuideBar(
         actions: [
+          IconButton(
+            icon: Badge(
+              isLabelVisible: unread > 0,
+              label: Text('$unread'),
+              child: const Icon(Icons.notifications_none),
+            ),
+            tooltip: l10n.commonNotifications,
+            onPressed: () => context.push(Routes.notifications),
+          ),
           IconButton(
             icon: const Icon(Icons.account_balance_wallet_outlined),
             tooltip: l10n.guideFinanceTitle,

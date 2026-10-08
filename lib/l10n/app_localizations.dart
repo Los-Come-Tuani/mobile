@@ -5335,6 +5335,30 @@ abstract class AppLocalizations {
   /// **'Tu traductora'**
   String get myTripsYourTranslator;
 
+  /// No description provided for @notificationsEmptyMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Aquí te avisamos de tus reservas, mensajes, postulaciones y pagos.'**
+  String get notificationsEmptyMessage;
+
+  /// No description provided for @notificationsEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes avisos'**
+  String get notificationsEmptyTitle;
+
+  /// No description provided for @notificationsMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver más'**
+  String get notificationsMore;
+
+  /// No description provided for @notificationsReadAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Marcar todo como leído'**
+  String get notificationsReadAll;
+
   /// No description provided for @profileCouponsSubtitle.
   ///
   /// In es, this message translates to:
@@ -6510,6 +6534,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Mantente al tanto'**
   String get settingsNotificationsHeading;
+
+  /// No description provided for @settingsNotificationsInboxNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Apagar un aviso solo deja de mandarlo al teléfono: siempre llega a tu bandeja de avisos.'**
+  String get settingsNotificationsInboxNote;
 
   /// No description provided for @settingsNotificationsPermissionNote.
   ///
