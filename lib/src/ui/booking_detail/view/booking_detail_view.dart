@@ -116,6 +116,21 @@ class _BookingDetailViewState extends State<BookingDetailView> {
                   _Summary(booking: booking),
                   const SizedBox(height: 12),
                   _Counterpart(booking: booking),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push(Routes.bookingChatPath(booking.id)),
+                    icon: Badge(
+                      isLabelVisible: booking.unreadMessages > 0,
+                      label: Text('${booking.unreadMessages}'),
+                      child: const Icon(Icons.chat_bubble_outline),
+                    ),
+                    label: Text(
+                      booking.asGuide
+                          ? l10n.bookingDetailChatWithTourist
+                          : l10n.bookingDetailChatWithGuide,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   PaymentCard(booking: booking),
                   const SizedBox(height: 16),

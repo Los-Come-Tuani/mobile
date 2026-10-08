@@ -154,6 +154,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get bookingChatEmpty =>
+      'No messages yet. Write to agree on the meeting point.';
+
+  @override
+  String get bookingChatHint => 'Write a message';
+
+  @override
+  String get bookingChatReadOnly =>
+      'The booking was cancelled: the chat is read-only.';
+
+  @override
+  String get bookingChatSend => 'Send';
+
+  @override
+  String get bookingChatTitle => 'Chat';
+
+  @override
   String get bookingChildren => 'Children';
 
   @override
@@ -208,6 +225,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String bookingDetailCancelUntil(String day, String time) {
     return 'You can cancel for free until $day at $time.';
   }
+
+  @override
+  String get bookingDetailChatWithGuide => 'Message the guide';
+
+  @override
+  String get bookingDetailChatWithTourist => 'Message the tourist';
 
   @override
   String get bookingDetailConfirmedTitle => 'Booking confirmed!';

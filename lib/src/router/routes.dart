@@ -134,6 +134,9 @@ abstract final class Routes {
   /// Una reserva del API, para el turista o el guía: `/booking/:bookingId`.
   static const bookingDetail = '/booking/:$bookingId';
 
+  /// Sub-ruta del chat de una reserva: `/booking/:id/chat`.
+  static const chatSegment = 'chat';
+
   /// Nombres de los parámetros de ruta.
   static const circuitId = 'circuitId';
   static const stopId = 'stopId';
@@ -164,6 +167,7 @@ abstract final class Routes {
   static String guideTripPath(String id) => '/guide-app/trip/$id';
   static String guideThreadPath(String tripId) => '/guide-app/chat/$tripId';
   static String bookingDetailPath(String id) => '/booking/$id';
+  static String bookingChatPath(String id) => '/booking/$id/chat';
 
   /// Rutas accesibles sin sesión iniciada.
   static const Set<String> public = {

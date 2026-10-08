@@ -284,6 +284,36 @@ abstract class AppLocalizations {
   /// **'Presupuesto: {summary}'**
   String bookingBudgetLine(String summary);
 
+  /// No description provided for @bookingChatEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay mensajes. Escribe para coordinar el punto de encuentro.'**
+  String get bookingChatEmpty;
+
+  /// No description provided for @bookingChatHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe un mensaje'**
+  String get bookingChatHint;
+
+  /// No description provided for @bookingChatReadOnly.
+  ///
+  /// In es, this message translates to:
+  /// **'La reserva se canceló: el chat quedó de solo lectura.'**
+  String get bookingChatReadOnly;
+
+  /// No description provided for @bookingChatSend.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviar'**
+  String get bookingChatSend;
+
+  /// No description provided for @bookingChatTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Chat'**
+  String get bookingChatTitle;
+
   /// No description provided for @bookingChildren.
   ///
   /// In es, this message translates to:
@@ -367,6 +397,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Puedes cancelar gratis hasta el {day} a las {time}.'**
   String bookingDetailCancelUntil(String day, String time);
+
+  /// No description provided for @bookingDetailChatWithGuide.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribirle al guía'**
+  String get bookingDetailChatWithGuide;
+
+  /// No description provided for @bookingDetailChatWithTourist.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribirle al turista'**
+  String get bookingDetailChatWithTourist;
 
   /// No description provided for @bookingDetailConfirmedTitle.
   ///

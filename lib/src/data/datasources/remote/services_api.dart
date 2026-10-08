@@ -1,6 +1,7 @@
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/time_parser.dart';
 import '../../models/booking.dart';
+import '../../models/booking_message.dart';
 import '../../models/circuit_group_session.dart';
 import '../../models/tour_guide.dart';
 import 'api_call.dart';
@@ -120,6 +121,36 @@ abstract final class ServicesApi {
 
   static Future<Booking> finishBooking(String id) async =>
       Booking.fromApi(await ApiRows.post(ApiRoutes.bookingFinish(id)));
+
+  // ── Chat de una reserva ───────────────────────────────────────────────────
+
+  /// Los mensajes, del más viejo; con [after] (el `sent_at` del último que se
+  /// tiene), solo los posteriores.
+  static Future<List<BookingMessage>> messages(
+    String bookingId, {
+    String? after,
+  }) async {
+    final rows = await ApiRows.list(
+      ApiRoutes.bookingMessages(bookingId),
+      query: {'after': after},
+    );
+    return [for (final row in rows) BookingMessage.fromApi(row)];
+  }
+
+  /// Hasta 2000 caracteres; en una reserva cancelada responde `409`.
+  static Future<BookingMessage> sendMessage(
+    String bookingId,
+    String body,
+  ) async => BookingMessage.fromApi(
+    await ApiRows.post(ApiRoutes.bookingMessages(bookingId), {
+      'body': _clip(body.trim(), 2000),
+    }),
+  );
+
+  /// Quien pregunta leyó todo.
+  static Future<void> markMessagesRead(String bookingId) async {
+    await ApiRows.post(ApiRoutes.bookingMessagesRead(bookingId));
+  }
 
   // ── Piezas ────────────────────────────────────────────────────────────────
 

@@ -154,6 +154,23 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get bookingChatEmpty =>
+      'Todavía no hay mensajes. Escribe para coordinar el punto de encuentro.';
+
+  @override
+  String get bookingChatHint => 'Escribe un mensaje';
+
+  @override
+  String get bookingChatReadOnly =>
+      'La reserva se canceló: el chat quedó de solo lectura.';
+
+  @override
+  String get bookingChatSend => 'Enviar';
+
+  @override
+  String get bookingChatTitle => 'Chat';
+
+  @override
   String get bookingChildren => 'Niños';
 
   @override
@@ -208,6 +225,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String bookingDetailCancelUntil(String day, String time) {
     return 'Puedes cancelar gratis hasta el $day a las $time.';
   }
+
+  @override
+  String get bookingDetailChatWithGuide => 'Escribirle al guía';
+
+  @override
+  String get bookingDetailChatWithTourist => 'Escribirle al turista';
 
   @override
   String get bookingDetailConfirmedTitle => '¡Reserva confirmada!';

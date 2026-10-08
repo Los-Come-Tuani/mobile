@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../data/datasources/repository/active_trip_repository.dart';
 import '../data/datasources/repository/auth_repository.dart';
 import '../data/datasources/repository/badges_repository.dart';
+import '../data/datasources/repository/booking_chat_repository.dart';
 import '../data/datasources/repository/bookings_repository.dart';
 import '../data/datasources/repository/circuit_collections_repository.dart';
 import '../data/datasources/repository/group_session_repository.dart';
@@ -26,6 +27,8 @@ import '../data/models/provider.dart';
 import '../data/models/user_role.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
+import '../ui/booking_chat/view/booking_chat_view.dart';
+import '../ui/booking_chat/viewmodels/booking_chat_viewmodel.dart';
 import '../ui/booking_detail/view/booking_detail_view.dart';
 import '../ui/booking_detail/viewmodels/booking_detail_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
@@ -536,6 +539,20 @@ GoRouter createRouter(AuthRepository authRepository) {
               ),
               child: const BookingDetailView(),
             ),
+        routes: [
+          GoRoute(
+            path: Routes.chatSegment,
+            builder: (context, state) =>
+                ChangeNotifierProvider<BookingChatViewModel>(
+                  create: (context) => BookingChatViewModel(
+                    context.read<BookingChatRepository>(),
+                    context.read<BookingsRepository>(),
+                    state.pathParameters[Routes.bookingId] ?? '',
+                  ),
+                  child: const BookingChatView(),
+                ),
+          ),
+        ],
       ),
       GoRoute(
         path: Routes.guides,

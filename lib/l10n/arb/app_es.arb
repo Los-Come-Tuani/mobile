@@ -131,6 +131,11 @@
       }
     }
   },
+  "bookingChatEmpty": "Todavía no hay mensajes. Escribe para coordinar el punto de encuentro.",
+  "bookingChatHint": "Escribe un mensaje",
+  "bookingChatReadOnly": "La reserva se canceló: el chat quedó de solo lectura.",
+  "bookingChatSend": "Enviar",
+  "bookingChatTitle": "Chat",
   "bookingChildren": "Niños",
   "bookingChildrenCount": "{count, plural, =1{1 niño} other{{count} niños}}",
   "@bookingChildrenCount": {
@@ -172,6 +177,8 @@
       }
     }
   },
+  "bookingDetailChatWithGuide": "Escribirle al guía",
+  "bookingDetailChatWithTourist": "Escribirle al turista",
   "bookingDetailConfirmedTitle": "¡Reserva confirmada!",
   "bookingDetailHowToPay": "Cómo pagar",
   "bookingDetailKeep": "Mantenerla",

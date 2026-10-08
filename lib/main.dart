@@ -10,6 +10,7 @@ import 'src/data/datasources/repository/active_trip_repository.dart';
 import 'src/data/datasources/repository/api_repository.dart';
 import 'src/data/datasources/repository/auth_repository.dart';
 import 'src/data/datasources/repository/badges_repository.dart';
+import 'src/data/datasources/repository/booking_chat_repository.dart';
 import 'src/data/datasources/repository/bookings_repository.dart';
 import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/group_session_repository.dart';
@@ -155,6 +156,8 @@ class _KPlanAppState extends State<KPlanApp> {
             bookings: context.read<BookingsRepository>(),
           ),
         ),
+        // Con el API: el chat de cada reserva (turista y guía).
+        Provider<BookingChatRepository>(create: (_) => BookingChatRepository()),
         // Chat simulado con quienes se contrató en la propuesta activa.
         ChangeNotifierProvider<GuideChatRepository>(
           create: (_) => GuideChatRepository(),
