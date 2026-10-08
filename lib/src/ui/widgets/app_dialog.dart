@@ -85,6 +85,7 @@ Future<String?> showTextInputDialog(
   required String emptyMessage,
   String initialValue = '',
   TextCapitalization textCapitalization = TextCapitalization.sentences,
+  String? Function(String?)? validator,
 }) {
   return showAppDialog<String>(
     context,
@@ -95,6 +96,7 @@ Future<String?> showTextInputDialog(
       emptyMessage: emptyMessage,
       initialValue: initialValue,
       textCapitalization: textCapitalization,
+      validator: validator,
     ),
   );
 }
@@ -311,6 +313,7 @@ class _TextInputDialog extends StatefulWidget {
     required this.emptyMessage,
     required this.initialValue,
     required this.textCapitalization,
+    this.validator,
   });
 
   final String title;
@@ -319,6 +322,9 @@ class _TextInputDialog extends StatefulWidget {
   final String emptyMessage;
   final String initialValue;
   final TextCapitalization textCapitalization;
+
+  /// Revisa el texto después de [emptyMessage].
+  final String? Function(String?)? validator;
 
   @override
   State<_TextInputDialog> createState() => _TextInputDialogState();
@@ -348,7 +354,9 @@ class _TextInputDialogState extends State<_TextInputDialog> {
         child: AppTextField(
           hint: widget.hint,
           controller: _controller,
-          validator: Validators.notEmpty(widget.emptyMessage),
+          validator: (value) =>
+              Validators.notEmpty(widget.emptyMessage)(value) ??
+              widget.validator?.call(value),
           autofocus: true,
           textCapitalization: widget.textCapitalization,
           textInputAction: TextInputAction.done,

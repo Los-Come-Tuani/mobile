@@ -2277,6 +2277,30 @@
   "repoChatReplyMeetingPoint": "Perfecto, nos vemos en el punto de encuentro. ¡Puntual!",
   "repoChatReplyQuestions": "Cualquier duda antes del recorrido, escríbeme por aquí.",
   "repoChatReplyWelcome": "¡Hola! Con gusto te acompaño en el recorrido.",
+  "repoCollectionsDeleteFailed": "No pudimos borrar el circuito de tu cuenta. {message}",
+  "@repoCollectionsDeleteFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "repoCollectionsLoadFailed": "No pudimos traer los circuitos guardados en tu cuenta. {message}",
+  "@repoCollectionsLoadFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "repoCollectionsSaveFailed": "No pudimos guardar el circuito en tu cuenta; tus cambios siguen en este teléfono. {message}",
+  "@repoCollectionsSaveFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "repoInboxReplyEarlier": "¿Podemos empezar 15 minutos antes?",
   "repoInboxReplyNoted": "Genial, gracias por avisar.",
   "repoInboxReplySeeYou": "Ahí estaremos. ¡Nos vemos!",
@@ -2761,6 +2785,7 @@
   "sharedNewCircuitEmpty": "Ponle un nombre a tu circuito",
   "sharedNewCircuitHint": "Ej. Fin de semana en el sur",
   "sharedNewCircuitTitle": "Nuevo circuito",
+  "sharedNewCircuitTooShort": "Usa al menos 3 caracteres",
   "sharedOpenAppFailed": "No se pudo abrir {app}",
   "@sharedOpenAppFailed": {
     "placeholders": {

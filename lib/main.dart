@@ -30,6 +30,7 @@ import 'src/data/datasources/repository/tourist_repository.dart';
 import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
 import 'src/ui/language/widgets/language_content_sync.dart';
+import 'src/ui/my_circuit/widgets/collection_sync_notices.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +75,7 @@ class KPlanApp extends StatefulWidget {
 
 class _KPlanAppState extends State<KPlanApp> {
   late final GoRouter _router = createRouter(widget.authRepository);
+  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +116,13 @@ class _KPlanAppState extends State<KPlanApp> {
         Provider<SecurityRepository>(create: (_) => SecurityRepository()),
         Provider<TourRepository>(create: (_) => TourRepository()),
         // Las "playlists" de paradas: se siembran del catálogo y el usuario
-        // puede añadir paradas o crear circuitos propios.
+        // puede añadir paradas o crear circuitos propios. Con el API y sesión
+        // abierta se guardan en su cuenta.
         ChangeNotifierProvider<CircuitCollectionsRepository>(
-          create: (context) =>
-              CircuitCollectionsRepository(context.read<TourRepository>()),
+          create: (context) => CircuitCollectionsRepository(
+            context.read<TourRepository>(),
+            auth: context.read<AuthRepository>(),
+          ),
         ),
         ChangeNotifierProvider<SavedRepository>(
           create: (_) => SavedRepository(),
@@ -169,18 +174,24 @@ class _KPlanAppState extends State<KPlanApp> {
       // Al cambiar el idioma, el contenido del catálogo que ya se cargó se
       // vuelve a leer en el nuevo.
       child: LanguageContentSync(
-        child: Consumer<LanguageRepository>(
-          builder: (context, language, _) => MaterialApp.router(
-            title: "K'Plan",
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            routerConfig: _router,
-            // El idioma elegido: también traduce date pickers y los textos
-            // de Material (AppLocalizations.localizationsDelegates los
-            // incluye).
-            locale: language.locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
+        // Lo que no se pudo guardar en la cuenta se avisa en cualquier
+        // pantalla.
+        child: CollectionSyncNotices(
+          messengerKey: _messengerKey,
+          child: Consumer<LanguageRepository>(
+            builder: (context, language, _) => MaterialApp.router(
+              title: "K'Plan",
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              routerConfig: _router,
+              scaffoldMessengerKey: _messengerKey,
+              // El idioma elegido: también traduce date pickers y los textos
+              // de Material (AppLocalizations.localizationsDelegates los
+              // incluye).
+              locale: language.locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+            ),
           ),
         ),
       ),

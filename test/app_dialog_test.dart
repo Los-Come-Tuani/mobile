@@ -167,4 +167,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(_result, isNull);
   });
+
+  testWidgets('con un validador, revisa el texto además de que no esté vacío', (
+    tester,
+  ) async {
+    await _open(
+      tester,
+      (context) => showTextInputDialog(
+        context,
+        title: 'Nuevo circuito',
+        hint: 'Ej. Fin de semana en el sur',
+        confirmLabel: 'Crear',
+        emptyMessage: 'Ponle un nombre a tu circuito',
+        validator: (value) =>
+            value!.trim().length < 3 ? 'Usa al menos 3 caracteres' : null,
+      ),
+    );
+
+    await tester.tap(find.text('Crear'));
+    await tester.pump();
+    expect(find.text('Ponle un nombre a tu circuito'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), ' Yo ');
+    await tester.tap(find.text('Crear'));
+    await tester.pump();
+    expect(find.text('Usa al menos 3 caracteres'), findsOneWidget);
+    expect(_result, _noAnswer);
+
+    await tester.enterText(find.byType(TextField), 'Yo y mi perro');
+    await tester.tap(find.text('Crear'));
+    await tester.pumpAndSettle();
+    expect(_result, 'Yo y mi perro');
+  });
 }

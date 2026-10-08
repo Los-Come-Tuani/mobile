@@ -3099,6 +3099,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hi! I\'d be happy to join you on the tour.';
 
   @override
+  String repoCollectionsDeleteFailed(String message) {
+    return 'We couldn\'t delete the circuit from your account. $message';
+  }
+
+  @override
+  String repoCollectionsLoadFailed(String message) {
+    return 'We couldn\'t load the circuits saved in your account. $message';
+  }
+
+  @override
+  String repoCollectionsSaveFailed(String message) {
+    return 'We couldn\'t save the circuit to your account; your changes are still on this phone. $message';
+  }
+
+  @override
   String get repoInboxReplyEarlier => 'Can we start 15 minutes earlier?';
 
   @override
@@ -3823,6 +3838,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sharedNewCircuitTitle => 'New circuit';
+
+  @override
+  String get sharedNewCircuitTooShort => 'Use at least 3 characters';
 
   @override
   String sharedOpenAppFailed(String app) {

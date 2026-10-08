@@ -4861,6 +4861,24 @@ abstract class AppLocalizations {
   /// **'¡Hola! Con gusto te acompaño en el recorrido.'**
   String get repoChatReplyWelcome;
 
+  /// No description provided for @repoCollectionsDeleteFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos borrar el circuito de tu cuenta. {message}'**
+  String repoCollectionsDeleteFailed(String message);
+
+  /// No description provided for @repoCollectionsLoadFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos traer los circuitos guardados en tu cuenta. {message}'**
+  String repoCollectionsLoadFailed(String message);
+
+  /// No description provided for @repoCollectionsSaveFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos guardar el circuito en tu cuenta; tus cambios siguen en este teléfono. {message}'**
+  String repoCollectionsSaveFailed(String message);
+
   /// No description provided for @repoInboxReplyEarlier.
   ///
   /// In es, this message translates to:
@@ -6048,6 +6066,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Nuevo circuito'**
   String get sharedNewCircuitTitle;
+
+  /// No description provided for @sharedNewCircuitTooShort.
+  ///
+  /// In es, this message translates to:
+  /// **'Usa al menos 3 caracteres'**
+  String get sharedNewCircuitTooShort;
 
   /// No description provided for @sharedOpenAppFailed.
   ///

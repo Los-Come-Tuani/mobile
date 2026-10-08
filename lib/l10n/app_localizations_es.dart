@@ -3116,6 +3116,21 @@ class AppLocalizationsEs extends AppLocalizations {
       '¡Hola! Con gusto te acompaño en el recorrido.';
 
   @override
+  String repoCollectionsDeleteFailed(String message) {
+    return 'No pudimos borrar el circuito de tu cuenta. $message';
+  }
+
+  @override
+  String repoCollectionsLoadFailed(String message) {
+    return 'No pudimos traer los circuitos guardados en tu cuenta. $message';
+  }
+
+  @override
+  String repoCollectionsSaveFailed(String message) {
+    return 'No pudimos guardar el circuito en tu cuenta; tus cambios siguen en este teléfono. $message';
+  }
+
+  @override
   String get repoInboxReplyEarlier => '¿Podemos empezar 15 minutos antes?';
 
   @override
@@ -3842,6 +3857,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sharedNewCircuitTitle => 'Nuevo circuito';
+
+  @override
+  String get sharedNewCircuitTooShort => 'Usa al menos 3 caracteres';
 
   @override
   String sharedOpenAppFailed(String app) {

@@ -13,5 +13,8 @@ Future<String?> showNewCircuitDialog(BuildContext context) {
     hint: l10n.sharedNewCircuitHint,
     confirmLabel: l10n.sharedNewCircuitCreate,
     emptyMessage: l10n.sharedNewCircuitEmpty,
+    // El API guarda en la cuenta títulos de 3 a 80 caracteres.
+    validator: (value) =>
+        (value ?? '').trim().length < 3 ? l10n.sharedNewCircuitTooShort : null,
   );
 }

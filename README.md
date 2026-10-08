@@ -65,6 +65,15 @@ Con el API configurado, la identidad va contra el API real (`/auth/mobile/*`, ve
 
 Sin API (modo demo) todo esto se simula con cuentas de ejemplo y no se guarda nada en disco.
 
+## Catálogo y "Mi circuito"
+
+Con el API configurado, los circuitos y los lugares salen del API (`/circuit/` y `/stop/`, ver
+`docs/territorio.md` del repo del API) y los circuitos que arma el turista se guardan en su cuenta
+como itinerarios (`/itinerary/`): los que crea y, en cuanto le cambia las paradas, uno del
+catálogo. Los cambios se ven al momento y se suben detrás; si el API falla, la app lo avisa y lo
+que el turista ve no se pierde. Los lugares destacados, los eventos, los cupones y los horarios de
+grupo de los circuitos creativos siguen siendo de ejemplo.
+
 ### Probar contra el API de verdad
 
 Con el API local corriendo y el correo en consola (`DEBUG=True`):
@@ -77,6 +86,13 @@ Crea una cuenta de turista nueva y recorre el registro con código, la renovaci�
 2FA completo con códigos reales. `provider_contract_test.dart` crea además una cuenta de guía con
 sus documentos: necesita el almacenamiento configurado en el API (`STORAGE_*`). Sin esas variables,
 las pruebas se saltan.
+
+`tour_contract_test.dart` lee el catálogo (con `seedcontent` cargado en el API) y recorre "Mi
+circuito" con un turista que ya existe; borra lo que crea:
+
+```bash
+KPLAN_API_URL=http://localhost:8080 KPLAN_TOURIST_PASSWORD=<la del turista local> flutter test test/integration/tour_contract_test.dart
+```
 
 ## Calidad
 

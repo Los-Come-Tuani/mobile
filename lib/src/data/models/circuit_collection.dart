@@ -40,6 +40,10 @@ class CircuitCollection {
   /// `true` si lo creó el usuario desde la hoja "Añadir a un circuito".
   final bool isUserCreated;
 
+  /// Uso interno del repositorio: el itinerario de la cuenta donde se guarda, si ya
+  /// se guardó.
+  String? itineraryId;
+
   final List<String> _stopIds;
   String _startTime;
   TravelMode _travelMode;
@@ -81,6 +85,12 @@ class CircuitCollection {
     } else if (index > 0 && index < stopCount) {
       _fixedArrivals[index] = minutes;
     }
+  }
+
+  /// Uso interno del repositorio: las llegadas fijas guardadas en la cuenta.
+  void replaceFixedArrivals(Map<int, int> arrivals) {
+    _fixedArrivals.clear();
+    arrivals.forEach(setFixedArrival);
   }
 
   /// Uso interno del repositorio: sólo cambia lo que llega.
