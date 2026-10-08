@@ -37,10 +37,16 @@ hacia `localhost` y la red local). Un build release **rechaza** una URL que no s
 
 ## Staging y producción
 
-Las URLs todavía no existen. Cuando haya, copia `staging.example.json` / `prod.example.json`,
-completa la URL y compila con ese archivo:
+| Archivo                | Rama de la app | `API_BASE_URL`                  |
+| ---------------------- | -------------- | ------------------------------- |
+| `staging.example.json` | `staging`      | `https://develop-api.kplan.dev` |
+| `prod.example.json`    | `main`         | `https://api.kplan.dev`         |
+
+Copia el que toque a `staging.json` o `prod.json` (ignorados), completa los Client ID y
+compila con ese archivo:
 
 ```bash
+flutter build apk --release --dart-define-from-file=env/staging.json
 flutter build apk --release --dart-define-from-file=env/prod.json
 ```
 
