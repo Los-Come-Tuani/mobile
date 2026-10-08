@@ -181,7 +181,71 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookingDaySchedule => 'Horario del día';
 
   @override
+  String get bookingDetailCancel => 'Cancelar reserva';
+
+  @override
+  String bookingDetailCancelClosed(String day, String time) {
+    return 'El plazo para cancelar venció el $day a las $time.';
+  }
+
+  @override
+  String get bookingDetailCancelled => 'Reserva cancelada';
+
+  @override
+  String get bookingDetailCancelMessage =>
+      'Si ya pagaste, el equipo de K\'Plan te devolverá el dinero.';
+
+  @override
+  String get bookingDetailCancelReasonHint => 'Cuéntale al turista por qué';
+
+  @override
+  String get bookingDetailCancelReasonRequired => 'Escribe el motivo';
+
+  @override
+  String get bookingDetailCancelTitle => '¿Cancelar la reserva?';
+
+  @override
+  String bookingDetailCancelUntil(String day, String time) {
+    return 'Puedes cancelar gratis hasta el $day a las $time.';
+  }
+
+  @override
+  String get bookingDetailConfirmedTitle => '¡Reserva confirmada!';
+
+  @override
+  String get bookingDetailHowToPay => 'Cómo pagar';
+
+  @override
+  String get bookingDetailKeep => 'Mantenerla';
+
+  @override
+  String get bookingDetailOpen => 'Ver mi reserva';
+
+  @override
+  String get bookingDetailPaymentManual =>
+      'El equipo de K\'Plan confirma tu pago a mano y te avisa cuando quede listo.';
+
+  @override
+  String get bookingDetailPaymentTitle => 'Pago';
+
+  @override
+  String bookingDetailStatus(String status) {
+    return 'Estado: $status';
+  }
+
+  @override
   String get bookingDetailsTitle => 'Detalles de la reserva';
+
+  @override
+  String get bookingDetailTitle => 'Tu reserva';
+
+  @override
+  String get bookingDetailWasCancelled => 'Esta reserva se canceló.';
+
+  @override
+  String bookingDetailWasCancelledBecause(String reason) {
+    return 'Esta reserva se canceló: $reason';
+  }
 
   @override
   String bookingDurationEnds(String duration, String time) {
@@ -2602,6 +2666,21 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get modelBookingStatusCancelled => 'Cancelada';
+
+  @override
+  String get modelBookingStatusClosed => 'Cerrada';
+
+  @override
+  String get modelBookingStatusConfirmed => 'Confirmada';
+
+  @override
+  String get modelBookingStatusDelivered => 'Terminada';
+
+  @override
+  String get modelBookingStatusInProgress => 'En curso';
+
+  @override
   String get modelDropReasonClosed => 'Estaba cerrado';
 
   @override
@@ -2686,6 +2765,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get modelPaceRelaxed => 'Relajado';
+
+  @override
+  String get modelPaymentFree => 'Sin cobro';
+
+  @override
+  String get modelPaymentPaid => 'Pagado';
+
+  @override
+  String get modelPaymentPending => 'Pago pendiente';
+
+  @override
+  String get modelPaymentRefundDue => 'Por reembolsar';
+
+  @override
+  String get modelPaymentRefunded => 'Reembolsado';
+
+  @override
+  String get modelPaymentVoided => 'Pago anulado';
 
   @override
   String get modelTravelModeVehicle => 'En vehículo';

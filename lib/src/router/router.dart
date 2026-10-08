@@ -26,6 +26,8 @@ import '../data/models/provider.dart';
 import '../data/models/user_role.dart';
 import '../ui/booking/view/booking_view.dart';
 import '../ui/booking/viewmodels/booking_viewmodel.dart';
+import '../ui/booking_detail/view/booking_detail_view.dart';
+import '../ui/booking_detail/viewmodels/booking_detail_viewmodel.dart';
 import '../ui/circuit_detail/view/circuit_detail_view.dart';
 import '../ui/circuit_detail/viewmodels/circuit_detail_viewmodel.dart';
 import '../ui/coupons/view/coupons_view.dart';
@@ -523,6 +525,17 @@ GoRouter createRouter(AuthRepository authRepository) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: Routes.bookingDetail,
+        builder: (context, state) =>
+            ChangeNotifierProvider<BookingDetailViewModel>(
+              create: (context) => BookingDetailViewModel(
+                context.read<BookingsRepository>(),
+                state.pathParameters[Routes.bookingId] ?? '',
+              ),
+              child: const BookingDetailView(),
+            ),
       ),
       GoRoute(
         path: Routes.guides,

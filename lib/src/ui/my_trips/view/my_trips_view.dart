@@ -231,10 +231,13 @@ class _UpcomingTab extends StatelessWidget {
           _BookingCard(
             booking: booking,
             image: viewModel.imageFor(booking),
-            onTap: () => onOpenCircuit(
-              booking.circuitId,
-              isUserCircuit: booking.isUserCircuit,
-            ),
+            // Una reserva del API tiene su detalle: cobro, chat y reseña.
+            onTap: booking.fromApi
+                ? () => context.push(Routes.bookingDetailPath(booking.id))
+                : () => onOpenCircuit(
+                    booking.circuitId,
+                    isUserCircuit: booking.isUserCircuit,
+                  ),
           ),
           if (viewModel.hiredGuideFor(booking.circuitId) case final guide?)
             _GuideRow(guide: guide),
@@ -289,7 +292,13 @@ class _BookingCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    l10n.myTripsBookingConfirmed(people),
+                    booking.fromApi
+                        ? Formatters.facts([
+                            people,
+                            booking.status.label,
+                            booking.paymentStatus.label,
+                          ])
+                        : l10n.myTripsBookingConfirmed(people),
                     style: AppTextStyles.caption,
                   ),
                   const SizedBox(height: 8),

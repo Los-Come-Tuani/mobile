@@ -1,9 +1,11 @@
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/group_session_repository.dart';
 import '../../../data/datasources/repository/tour_repository.dart';
 import '../../../data/datasources/repository/visit_log_repository.dart';
+import '../../../data/models/booking.dart';
 import '../../../data/models/circuit.dart';
 import '../../../data/models/circuit_group_session.dart';
 import '../../../data/models/itinerary.dart';
@@ -22,6 +24,7 @@ class GroupSlotsViewModel extends BaseViewModel {
     this.circuitId,
   ) {
     _groupSessionRepository.addListener(_onSessionsChanged);
+    _bookingsRepository.addListener(safeNotify);
   }
 
   final TourRepository _tourRepository;
@@ -36,8 +39,16 @@ class GroupSlotsViewModel extends BaseViewModel {
   int _adults = 2;
   int _children = 0;
   String? _enrollingSessionId;
+  Booking? _lastBooking;
+  String? _enrollError;
 
   Circuit? get circuit => _circuit;
+
+  /// Con el API, la reserva que acaba de nacer (con su cobro).
+  Booking? get lastBooking => _lastBooking;
+
+  /// Por qué el API no dejó reservar la última vez.
+  String? get enrollError => _enrollError;
 
   /// Del más próximo al más lejano.
   List<CircuitGroupSession> get sessions => _sessions;
@@ -46,11 +57,13 @@ class GroupSlotsViewModel extends BaseViewModel {
   int get children => _children;
   int get groupSize => _adults + _children;
 
-  bool isEnrolled(CircuitGroupSession session) =>
-      _groupSessionRepository.isEnrolled(session.id);
+  bool isEnrolled(CircuitGroupSession session) => ApiClient.isConfigured
+      ? _bookingsRepository.bookingForDeparture(session.id) != null
+      : _groupSessionRepository.isEnrolled(session.id);
 
-  int enrolledPeopleIn(CircuitGroupSession session) =>
-      _groupSessionRepository.enrolledPeopleIn(session.id);
+  int enrolledPeopleIn(CircuitGroupSession session) => ApiClient.isConfigured
+      ? _bookingsRepository.bookingForDeparture(session.id)?.people ?? 0
+      : _groupSessionRepository.enrolledPeopleIn(session.id);
 
   bool isEnrolling(CircuitGroupSession session) =>
       _enrollingSessionId == session.id;
@@ -77,6 +90,22 @@ class GroupSlotsViewModel extends BaseViewModel {
   num get serviceFee => subtotal * BookingViewModel.serviceRate;
   num get total => subtotal + serviceFee;
 
+  /// Lo que cuesta un adulto y un niño en [session]: con el API, el precio de
+  /// la salida (el que congela la reserva); en la demo, el del circuito.
+  num priceAdultFor(CircuitGroupSession session) =>
+      session.priceAdult ?? _circuit?.priceAdult ?? 0;
+  num priceChildFor(CircuitGroupSession session) =>
+      session.priceChild ?? _circuit?.priceChild ?? 0;
+
+  /// Con el API el monto es solo precio por persona: la comisión de K'Plan
+  /// sale de lo que recibe el guía, no se suma al turista.
+  num serviceFeeFor(CircuitGroupSession session) =>
+      ApiClient.isConfigured ? 0 : serviceFee;
+  num totalFor(CircuitGroupSession session) =>
+      priceAdultFor(session) * _adults +
+      priceChildFor(session) * _children +
+      serviceFeeFor(session);
+
   Future<void> load() async {
     setBusy(true);
     clearError();
@@ -86,6 +115,8 @@ class GroupSlotsViewModel extends BaseViewModel {
         _circuit = value;
         await _loadStops(value);
         await _loadSessions();
+        // Para saber en qué salidas ya está inscrito.
+        await _bookingsRepository.ensureLoaded();
       case Failure(:final message):
         setError(message);
     }
@@ -130,7 +161,11 @@ class GroupSlotsViewModel extends BaseViewModel {
     }
 
     _enrollingSessionId = session.id;
+    _enrollError = null;
+    _lastBooking = null;
     safeNotify();
+
+    if (ApiClient.isConfigured) return _book(circuit, session);
 
     // Simula la confirmación remota, igual que al agendar.
     await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -165,6 +200,37 @@ class GroupSlotsViewModel extends BaseViewModel {
     return enrolled;
   }
 
+  /// Reserva la salida en el API: el monto queda congelado y abre su cobro
+  /// (el equipo lo confirma a mano).
+  Future<bool> _book(Circuit circuit, CircuitGroupSession session) async {
+    final result = await _bookingsRepository.book(
+      departureId: session.id,
+      adults: _adults,
+      children: _children,
+    );
+    switch (result) {
+      case Ok(:final value):
+        _lastBooking = value;
+        final plan = itineraryFor(session);
+        if (plan != null) {
+          _visitLogRepository.recordPlannedVisits(
+            circuitId: circuit.id,
+            itinerary: plan,
+            groupSize: groupSize,
+            bookingId: value.id,
+          );
+        }
+        await _loadSessions();
+      case Failure(:final message):
+        _enrollError = message;
+        // Otro pudo llenar los cupos: se ven los de ahora.
+        await _loadSessions();
+    }
+    _enrollingSessionId = null;
+    safeNotify();
+    return result.isOk;
+  }
+
   Future<void> _onSessionsChanged() async {
     if (_circuit == null) return;
     await _loadSessions();
@@ -174,6 +240,7 @@ class GroupSlotsViewModel extends BaseViewModel {
   @override
   void dispose() {
     _groupSessionRepository.removeListener(_onSessionsChanged);
+    _bookingsRepository.removeListener(safeNotify);
     super.dispose();
   }
 }

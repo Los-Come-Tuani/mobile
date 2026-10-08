@@ -12,6 +12,7 @@ import '../../../data/models/circuit_group_session.dart';
 import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
 import '../../booking/widgets/group_picker_sheet.dart';
+import '../../booking_detail/widgets/payment_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/creative_circuit_badge.dart';
 import '../../widgets/kplan_loader.dart';
@@ -64,14 +65,21 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
       session: session,
       adults: viewModel.adults,
       children: viewModel.children,
-      serviceFee: viewModel.serviceFee,
-      total: viewModel.total,
+      serviceFee: viewModel.serviceFeeFor(session),
+      total: viewModel.totalFor(session),
+      priceAdult: viewModel.priceAdultFor(session),
+      priceChild: viewModel.priceChildFor(session),
     );
     if (!confirmed || !mounted) return;
 
     final enrolled = await viewModel.enroll(session);
     if (!mounted) return;
     final l10n = context.l10n;
+    // Con el API, la reserva nace con su cobro: se muestra cómo pagar.
+    if (viewModel.lastBooking case final booking? when enrolled) {
+      await showBookingConfirmedSheet(context, booking);
+      return;
+    }
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -82,7 +90,7 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
                     Formatters.dayAndMonth(session.date),
                     Formatters.timeText(session.startTime),
                   )
-                : l10n.groupSlotsNoSpotsLeft,
+                : viewModel.enrollError ?? l10n.groupSlotsNoSpotsLeft,
           ),
         ),
       );

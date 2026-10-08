@@ -6,14 +6,18 @@ import '../../../core/utils/result.dart';
 import '../../models/circuit_group_session.dart';
 import '../../models/tour_guide.dart';
 import '../local/mock_datasource.dart';
+import '../remote/api_call.dart';
+import '../remote/api_client.dart';
+import '../remote/services_api.dart';
 import 'guide_repository.dart';
 
 /// Horarios que publican los guías para hacer circuitos creativos en grupo.
 ///
-/// Se siembra desde `circuit_groups.json` en la primera lectura (mismo
-/// patrón que [CircuitCollectionsRepository]: catálogo + mutación en
+/// En la demo se siembra desde `circuit_groups.json` en la primera lectura
+/// (mismo patrón que [CircuitCollectionsRepository]: catálogo + mutación en
 /// memoria) y después vive en memoria: inscribirse sólo suma cupos
-/// localmente, no hay backend real todavía.
+/// localmente. Con el API, los horarios son las salidas de los guías y se
+/// reserva con `BookingsRepository.book`.
 class GroupSessionRepository extends ChangeNotifier {
   GroupSessionRepository(
     this._guideRepository, {
@@ -39,10 +43,24 @@ class GroupSessionRepository extends ChangeNotifier {
 
   int enrolledPeopleIn(String sessionId) => _enrolledPeople[sessionId] ?? 0;
 
-  /// Horarios que todavía no salen, del más próximo al más lejano.
+  /// Horarios que todavía no salen, del más próximo al más lejano. Con el API
+  /// son las salidas de `GET /circuit/{id}/departure/` sin las canceladas.
   Future<Result<List<CircuitGroupSession>>> getSessionsForCircuit(
     String circuitId,
   ) async {
+    if (ApiClient.isConfigured) {
+      final result = await apiCall(
+        'circuitDepartures',
+        () => ServicesApi.circuitDepartures(circuitId),
+      );
+      return switch (result) {
+        Ok(:final value) => Result.ok(
+          value.where((s) => !s.cancelled).toList()
+            ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
+        ),
+        Failure() => result,
+      };
+    }
     try {
       final sessions = await _ensureLoaded();
       final now = _now();

@@ -1,3 +1,4 @@
+import '../../../core/utils/result.dart';
 import '../../../core/utils/route_map_builder.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
@@ -46,14 +47,20 @@ class MyTripsViewModel extends BaseViewModel {
   /// Circuitos que armó el usuario.
   List<CircuitCollection> get trips => _collectionsRepository.userCollections;
 
-  /// Reservas de hoy en adelante, de la más cercana a la más lejana.
+  /// Reservas en pie de hoy en adelante, de la más cercana a la más lejana.
+  /// Con el API también las que terminaron y esperan su reseña.
   List<Booking> get upcomingBookings {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     return _bookingsRepository.bookings
-        .where((booking) => !booking.date.isBefore(today))
+        .where(
+          (booking) =>
+              !booking.asGuide &&
+              (booking.canReview ||
+                  (booking.isActive && !booking.date.isBefore(today))),
+        )
         .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+      ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
   }
 
   /// La foto del circuito de una reserva, del catálogo o de uno propio.
@@ -99,6 +106,8 @@ class MyTripsViewModel extends BaseViewModel {
   Future<void> load() async {
     setBusy(true);
     await _collectionsRepository.ensureLoaded();
+    final bookings = await _bookingsRepository.refresh();
+    if (bookings case Failure(:final message)) setError(message);
     setBusy(false);
   }
 

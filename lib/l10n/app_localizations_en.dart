@@ -181,7 +181,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookingDaySchedule => 'Schedule for the day';
 
   @override
+  String get bookingDetailCancel => 'Cancel booking';
+
+  @override
+  String bookingDetailCancelClosed(String day, String time) {
+    return 'The free cancellation window ended on $day at $time.';
+  }
+
+  @override
+  String get bookingDetailCancelled => 'Booking cancelled';
+
+  @override
+  String get bookingDetailCancelMessage =>
+      'If you already paid, the K\'Plan team will refund you.';
+
+  @override
+  String get bookingDetailCancelReasonHint => 'Tell the tourist why';
+
+  @override
+  String get bookingDetailCancelReasonRequired => 'Write the reason';
+
+  @override
+  String get bookingDetailCancelTitle => 'Cancel the booking?';
+
+  @override
+  String bookingDetailCancelUntil(String day, String time) {
+    return 'You can cancel for free until $day at $time.';
+  }
+
+  @override
+  String get bookingDetailConfirmedTitle => 'Booking confirmed!';
+
+  @override
+  String get bookingDetailHowToPay => 'How to pay';
+
+  @override
+  String get bookingDetailKeep => 'Keep it';
+
+  @override
+  String get bookingDetailOpen => 'See my booking';
+
+  @override
+  String get bookingDetailPaymentManual =>
+      'The K\'Plan team confirms your payment by hand and lets you know when it is done.';
+
+  @override
+  String get bookingDetailPaymentTitle => 'Payment';
+
+  @override
+  String bookingDetailStatus(String status) {
+    return 'Status: $status';
+  }
+
+  @override
   String get bookingDetailsTitle => 'Booking details';
+
+  @override
+  String get bookingDetailTitle => 'Your booking';
+
+  @override
+  String get bookingDetailWasCancelled => 'This booking was cancelled.';
+
+  @override
+  String bookingDetailWasCancelledBecause(String reason) {
+    return 'This booking was cancelled: $reason';
+  }
 
   @override
   String bookingDurationEnds(String duration, String time) {
@@ -2585,6 +2649,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get modelBookingStatusCancelled => 'Cancelled';
+
+  @override
+  String get modelBookingStatusClosed => 'Closed';
+
+  @override
+  String get modelBookingStatusConfirmed => 'Confirmed';
+
+  @override
+  String get modelBookingStatusDelivered => 'Finished';
+
+  @override
+  String get modelBookingStatusInProgress => 'In progress';
+
+  @override
   String get modelDropReasonClosed => 'It was closed';
 
   @override
@@ -2669,6 +2748,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modelPaceRelaxed => 'Relaxed';
+
+  @override
+  String get modelPaymentFree => 'Free';
+
+  @override
+  String get modelPaymentPaid => 'Paid';
+
+  @override
+  String get modelPaymentPending => 'Payment pending';
+
+  @override
+  String get modelPaymentRefundDue => 'Refund due';
+
+  @override
+  String get modelPaymentRefunded => 'Refunded';
+
+  @override
+  String get modelPaymentVoided => 'Payment voided';
 
   @override
   String get modelTravelModeVehicle => 'By vehicle';

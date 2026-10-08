@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/route_map_builder.dart';
@@ -181,6 +183,9 @@ class HomeViewModel extends BaseViewModel {
     clearError();
 
     await _collectionsRepository.ensureLoaded();
+    // Con el API, el aviso de "próximo viaje" sale de las reservas de la
+    // cuenta; llega cuando llegue.
+    unawaited(_bookingsRepository.refresh());
 
     // Se lanzan las cuatro lecturas en paralelo y luego se recogen.
     final circuitsFuture = _tourRepository.getCircuits();

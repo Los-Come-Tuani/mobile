@@ -320,11 +320,119 @@ abstract class AppLocalizations {
   /// **'Horario del día'**
   String get bookingDaySchedule;
 
+  /// No description provided for @bookingDetailCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar reserva'**
+  String get bookingDetailCancel;
+
+  /// No description provided for @bookingDetailCancelClosed.
+  ///
+  /// In es, this message translates to:
+  /// **'El plazo para cancelar venció el {day} a las {time}.'**
+  String bookingDetailCancelClosed(String day, String time);
+
+  /// No description provided for @bookingDetailCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Reserva cancelada'**
+  String get bookingDetailCancelled;
+
+  /// No description provided for @bookingDetailCancelMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Si ya pagaste, el equipo de K\'Plan te devolverá el dinero.'**
+  String get bookingDetailCancelMessage;
+
+  /// No description provided for @bookingDetailCancelReasonHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuéntale al turista por qué'**
+  String get bookingDetailCancelReasonHint;
+
+  /// No description provided for @bookingDetailCancelReasonRequired.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el motivo'**
+  String get bookingDetailCancelReasonRequired;
+
+  /// No description provided for @bookingDetailCancelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar la reserva?'**
+  String get bookingDetailCancelTitle;
+
+  /// No description provided for @bookingDetailCancelUntil.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes cancelar gratis hasta el {day} a las {time}.'**
+  String bookingDetailCancelUntil(String day, String time);
+
+  /// No description provided for @bookingDetailConfirmedTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¡Reserva confirmada!'**
+  String get bookingDetailConfirmedTitle;
+
+  /// No description provided for @bookingDetailHowToPay.
+  ///
+  /// In es, this message translates to:
+  /// **'Cómo pagar'**
+  String get bookingDetailHowToPay;
+
+  /// No description provided for @bookingDetailKeep.
+  ///
+  /// In es, this message translates to:
+  /// **'Mantenerla'**
+  String get bookingDetailKeep;
+
+  /// No description provided for @bookingDetailOpen.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver mi reserva'**
+  String get bookingDetailOpen;
+
+  /// No description provided for @bookingDetailPaymentManual.
+  ///
+  /// In es, this message translates to:
+  /// **'El equipo de K\'Plan confirma tu pago a mano y te avisa cuando quede listo.'**
+  String get bookingDetailPaymentManual;
+
+  /// No description provided for @bookingDetailPaymentTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago'**
+  String get bookingDetailPaymentTitle;
+
+  /// No description provided for @bookingDetailStatus.
+  ///
+  /// In es, this message translates to:
+  /// **'Estado: {status}'**
+  String bookingDetailStatus(String status);
+
   /// No description provided for @bookingDetailsTitle.
   ///
   /// In es, this message translates to:
   /// **'Detalles de la reserva'**
   String get bookingDetailsTitle;
+
+  /// No description provided for @bookingDetailTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu reserva'**
+  String get bookingDetailTitle;
+
+  /// No description provided for @bookingDetailWasCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta reserva se canceló.'**
+  String get bookingDetailWasCancelled;
+
+  /// No description provided for @bookingDetailWasCancelledBecause.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta reserva se canceló: {reason}'**
+  String bookingDetailWasCancelledBecause(String reason);
 
   /// No description provided for @bookingDurationEnds.
   ///
@@ -4027,6 +4135,36 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Te falta 1 insignia para la siguiente medalla} other{Te faltan {count} insignias para la siguiente medalla}}'**
   String medalsToNextOverall(int count);
 
+  /// No description provided for @modelBookingStatusCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelada'**
+  String get modelBookingStatusCancelled;
+
+  /// No description provided for @modelBookingStatusClosed.
+  ///
+  /// In es, this message translates to:
+  /// **'Cerrada'**
+  String get modelBookingStatusClosed;
+
+  /// No description provided for @modelBookingStatusConfirmed.
+  ///
+  /// In es, this message translates to:
+  /// **'Confirmada'**
+  String get modelBookingStatusConfirmed;
+
+  /// No description provided for @modelBookingStatusDelivered.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminada'**
+  String get modelBookingStatusDelivered;
+
+  /// No description provided for @modelBookingStatusInProgress.
+  ///
+  /// In es, this message translates to:
+  /// **'En curso'**
+  String get modelBookingStatusInProgress;
+
   /// No description provided for @modelDropReasonClosed.
   ///
   /// In es, this message translates to:
@@ -4170,6 +4308,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Relajado'**
   String get modelPaceRelaxed;
+
+  /// No description provided for @modelPaymentFree.
+  ///
+  /// In es, this message translates to:
+  /// **'Sin cobro'**
+  String get modelPaymentFree;
+
+  /// No description provided for @modelPaymentPaid.
+  ///
+  /// In es, this message translates to:
+  /// **'Pagado'**
+  String get modelPaymentPaid;
+
+  /// No description provided for @modelPaymentPending.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago pendiente'**
+  String get modelPaymentPending;
+
+  /// No description provided for @modelPaymentRefundDue.
+  ///
+  /// In es, this message translates to:
+  /// **'Por reembolsar'**
+  String get modelPaymentRefundDue;
+
+  /// No description provided for @modelPaymentRefunded.
+  ///
+  /// In es, this message translates to:
+  /// **'Reembolsado'**
+  String get modelPaymentRefunded;
+
+  /// No description provided for @modelPaymentVoided.
+  ///
+  /// In es, this message translates to:
+  /// **'Pago anulado'**
+  String get modelPaymentVoided;
 
   /// No description provided for @modelTravelModeVehicle.
   ///

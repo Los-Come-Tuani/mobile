@@ -149,7 +149,9 @@ class _HomeViewState extends State<HomeView> {
             onTap: () {
               final booking = viewModel.nextBooking!;
               context.push(
-                booking.isUserCircuit
+                booking.fromApi
+                    ? Routes.bookingDetailPath(booking.id)
+                    : booking.isUserCircuit
                     ? Routes.myCircuitPath(booking.circuitId)
                     : Routes.circuitDetailPath(booking.circuitId),
               );

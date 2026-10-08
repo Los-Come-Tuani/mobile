@@ -133,7 +133,8 @@ class _KPlanAppState extends State<KPlanApp> {
         ),
         // Reservas confirmadas, para el aviso de "próximo viaje" del home.
         ChangeNotifierProvider<BookingsRepository>(
-          create: (_) => BookingsRepository(),
+          create: (context) =>
+              BookingsRepository(auth: context.read<AuthRepository>()),
         ),
         // El circuito que el usuario está recorriendo ahora, si hay uno.
         ChangeNotifierProvider<ActiveTripRepository>(

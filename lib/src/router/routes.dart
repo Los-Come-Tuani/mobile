@@ -131,6 +131,9 @@ abstract final class Routes {
   /// Chat con quienes se contrató en la propuesta activa: `/guide-chat`.
   static const guideChat = '/guide-chat';
 
+  /// Una reserva del API, para el turista o el guía: `/booking/:bookingId`.
+  static const bookingDetail = '/booking/:$bookingId';
+
   /// Nombres de los parámetros de ruta.
   static const circuitId = 'circuitId';
   static const stopId = 'stopId';
@@ -140,6 +143,7 @@ abstract final class Routes {
   static const jobId = 'jobId';
   static const touristId = 'touristId';
   static const tripId = 'tripId';
+  static const bookingId = 'bookingId';
 
   static String circuitDetailPath(String id) => '/circuit/$id';
   static String bookingPath(String id) => '/circuit/$id/booking';
@@ -159,6 +163,7 @@ abstract final class Routes {
   static String guideTouristPath(String id) => '/guide-app/tourist/$id';
   static String guideTripPath(String id) => '/guide-app/trip/$id';
   static String guideThreadPath(String tripId) => '/guide-app/chat/$tripId';
+  static String bookingDetailPath(String id) => '/booking/$id';
 
   /// Rutas accesibles sin sesión iniciada.
   static const Set<String> public = {

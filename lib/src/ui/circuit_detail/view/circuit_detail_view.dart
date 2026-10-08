@@ -139,6 +139,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
               onEndTrip: _endTrip,
               onSkipStop: _skipStop,
               onReorderStops: viewModel.canReorderStops ? _reorderStops : null,
+              booksDeparture: viewModel.booksDeparture,
             ),
     );
   }
@@ -177,9 +178,14 @@ class _DetailContent extends StatelessWidget {
     required this.onEndTrip,
     required this.onSkipStop,
     required this.onReorderStops,
+    required this.booksDeparture,
   });
 
   final Circuit circuit;
+
+  /// Se reserva en una salida (horario de grupo) que publicó un guía, en vez
+  /// de agendar en privado.
+  final bool booksDeparture;
   final List<Stop> stops;
   final Itinerary? itinerary;
   final List<String> startTimes;
@@ -305,9 +311,10 @@ class _DetailContent extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Los creativos no se agendan en privado: el turista se
-              // inscribe en un horario de grupo que publicó un guía.
-              if (circuit.isCreativeCircuit)
+              // Los creativos (y, con el API, todo circuito oficial) no se
+              // agendan en privado: el turista se inscribe en un horario que
+              // publicó un guía.
+              if (booksDeparture)
                 PrimaryButton(
                   label: l10n.circuitDetailSeeTimes,
                   icon: Icons.groups_outlined,

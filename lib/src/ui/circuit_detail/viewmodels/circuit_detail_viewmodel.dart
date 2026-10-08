@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../core/utils/itinerary_planner.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/time_parser.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
 import '../../../data/datasources/repository/bookings_repository.dart';
@@ -58,6 +61,18 @@ class CircuitDetailViewModel extends BaseViewModel with TripActions {
   /// A qué hora se llega a cada parada saliendo a [startTime]; `null` si el
   /// circuito no tiene paradas.
   Itinerary? get itinerary => _itinerary;
+
+  /// Se reserva en una salida que publicó un guía. En la demo, solo los
+  /// creativos. Con el API, todo circuito oficial (`docs/servicios.md`); si el
+  /// turista le cambió las paradas, ya es un itinerario suyo y se agenda
+  /// publicando una convocatoria.
+  bool get booksDeparture {
+    final circuit = _circuit;
+    if (circuit == null) return false;
+    if (!ApiClient.isConfigured) return circuit.isCreativeCircuit;
+    final own = _collectionsRepository.stopIdsOf(circuitId);
+    return own.isEmpty || listEquals(own, circuit.stopIds);
+  }
 
   /// Sólo se muestran las primeras reseñas; el resto va en "Ver todos".
   static const int previewComments = 2;

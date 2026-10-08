@@ -17,7 +17,11 @@ Future<bool> showEnrollSheet(
   required int children,
   required num serviceFee,
   required num total,
+  num? priceAdult,
+  num? priceChild,
 }) async {
+  final adultPrice = priceAdult ?? circuit.priceAdult;
+  final childPrice = priceChild ?? circuit.priceChild;
   final confirmed = await showModalBottomSheet<bool>(
     context: context,
     backgroundColor: AppColors.white,
@@ -56,19 +60,20 @@ Future<bool> showEnrollSheet(
                 _Line(
                   label: l10n.groupSlotsAdultsLine(
                     adults,
-                    Formatters.currency(circuit.priceAdult),
+                    Formatters.currency(adultPrice),
                   ),
-                  amount: circuit.priceAdult * adults,
+                  amount: adultPrice * adults,
                 ),
               if (children > 0)
                 _Line(
                   label: l10n.groupSlotsChildrenLine(
                     children,
-                    Formatters.currency(circuit.priceChild),
+                    Formatters.currency(childPrice),
                   ),
-                  amount: circuit.priceChild * children,
+                  amount: childPrice * children,
                 ),
-              _Line(label: l10n.bookingServiceFee, amount: serviceFee),
+              if (serviceFee > 0)
+                _Line(label: l10n.bookingServiceFee, amount: serviceFee),
               const Divider(height: 20, color: AppColors.divider),
               _Line(label: l10n.commonTotal, amount: total, highlight: true),
               const SizedBox(height: 14),

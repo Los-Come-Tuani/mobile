@@ -144,7 +144,59 @@
   "bookingConfirmed": "¡Listo! Tu circuito quedó agendado",
   "bookingConfirmedWithProposal": "¡Listo! Tu circuito quedó agendado y tu propuesta ya está publicada para los guías",
   "bookingDaySchedule": "Horario del día",
+  "bookingDetailCancel": "Cancelar reserva",
+  "bookingDetailCancelClosed": "El plazo para cancelar venció el {day} a las {time}.",
+  "@bookingDetailCancelClosed": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingDetailCancelled": "Reserva cancelada",
+  "bookingDetailCancelMessage": "Si ya pagaste, el equipo de K'Plan te devolverá el dinero.",
+  "bookingDetailCancelReasonHint": "Cuéntale al turista por qué",
+  "bookingDetailCancelReasonRequired": "Escribe el motivo",
+  "bookingDetailCancelTitle": "¿Cancelar la reserva?",
+  "bookingDetailCancelUntil": "Puedes cancelar gratis hasta el {day} a las {time}.",
+  "@bookingDetailCancelUntil": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "bookingDetailConfirmedTitle": "¡Reserva confirmada!",
+  "bookingDetailHowToPay": "Cómo pagar",
+  "bookingDetailKeep": "Mantenerla",
+  "bookingDetailOpen": "Ver mi reserva",
+  "bookingDetailPaymentManual": "El equipo de K'Plan confirma tu pago a mano y te avisa cuando quede listo.",
+  "bookingDetailPaymentTitle": "Pago",
+  "bookingDetailStatus": "Estado: {status}",
+  "@bookingDetailStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "bookingDetailsTitle": "Detalles de la reserva",
+  "bookingDetailTitle": "Tu reserva",
+  "bookingDetailWasCancelled": "Esta reserva se canceló.",
+  "bookingDetailWasCancelledBecause": "Esta reserva se canceló: {reason}",
+  "@bookingDetailWasCancelledBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "bookingDurationEnds": "{duration} · termina aprox. a las {time}",
   "@bookingDurationEnds": {
     "placeholders": {
@@ -1909,6 +1961,11 @@
       }
     }
   },
+  "modelBookingStatusCancelled": "Cancelada",
+  "modelBookingStatusClosed": "Cerrada",
+  "modelBookingStatusConfirmed": "Confirmada",
+  "modelBookingStatusDelivered": "Terminada",
+  "modelBookingStatusInProgress": "En curso",
   "modelDropReasonClosed": "Estaba cerrado",
   "modelDropReasonNoTime": "Falta de tiempo",
   "modelDropReasonNotInterested": "No me interesó",
@@ -1982,6 +2039,12 @@
   "modelPaceBalanced": "Equilibrado",
   "modelPaceIntense": "Intenso",
   "modelPaceRelaxed": "Relajado",
+  "modelPaymentFree": "Sin cobro",
+  "modelPaymentPaid": "Pagado",
+  "modelPaymentPending": "Pago pendiente",
+  "modelPaymentRefundDue": "Por reembolsar",
+  "modelPaymentRefunded": "Reembolsado",
+  "modelPaymentVoided": "Pago anulado",
   "modelTravelModeVehicle": "En vehículo",
   "modelTravelModeWalking": "A pie",
   "myCircuitAiMessage": "Te pregunta cómo quieres tu día, calcula los traslados y te sugiere qué quitar o agregar.",
