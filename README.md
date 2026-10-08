@@ -188,7 +188,7 @@ ejecución.
 | Variable | Uso |
 | --- | --- |
 | `API_BASE_URL` | URL base sin `/` final. En debug, vacía o ausente activa el modo demo; en release, ausente usa `https://develop-api.kplan.dev`. |
-| `GOOGLE_SERVER_CLIENT_ID` | Client ID público de tipo Web que también valida el API. Vacío oculta el botón de Google. |
+| `GOOGLE_SERVER_CLIENT_ID` | Client ID público de tipo Web que también valida el API. Vacío oculta el botón de Google; en release, ausente usa el de desarrollo. |
 | `GOOGLE_IOS_CLIENT_ID` | Client ID público de tipo iOS. En Android puede quedar vacío. |
 
 Todo valor compilado en un APK o IPA puede extraerse. Estos archivos solo deben
@@ -321,15 +321,15 @@ itinerarios que crean.
 ### Android
 
 Un release sin archivo de entorno habla con `https://develop-api.kplan.dev`, el
-API de desarrollo publicado:
+API de desarrollo publicado, y trae el Client ID Web de Google de desarrollo:
 
 ```bash
 flutter build apk --release
 ```
 
-Con los Client ID de Google, compile con `env/staging.json` (copia de
-`staging.example.json`, que apunta al mismo API). `env/prod.json` queda para
-cuando exista producción (`https://api.kplan.dev`):
+`env/staging.json` (copia de `staging.example.json`) da lo mismo de forma
+explícita. `env/prod.json` queda para cuando exista producción
+(`https://api.kplan.dev`):
 
 ```bash
 flutter build apk --release --dart-define-from-file=env/staging.json
@@ -417,6 +417,11 @@ configuración de las tiendas.
 - **El emulador Android no llega a `localhost`:** utilice `10.0.2.2`.
 - **El botón de Google no aparece:** defina `GOOGLE_SERVER_CLIENT_ID` y vuelva a
   compilar; los `dart-define` no cambian en caliente.
+- **Google responde «no está habilitado»:** al API le falta el Client ID Web en
+  `GOOGLE_OAUTH_CLIENT_IDS`. Si el selector de cuentas se cierra solo, falta la
+  SHA-1 de la llave de firma en el Client ID Android.
+- **El código del registro nunca llega:** el API publicado descarta los correos
+  mientras no tenga `EMAIL_HOST` y sus credenciales (ver `.env.example` del API).
 - **El release falla al iniciar:** compruebe que `API_BASE_URL` use `https`.
 - **Las pruebas de integración aparecen como omitidas:** defina las variables
   `KPLAN_*` requeridas y asegúrese de que el API esté disponible.

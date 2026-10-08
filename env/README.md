@@ -12,7 +12,7 @@ flutter run --dart-define-from-file=env/dev.json
 | Variable                  | Qué es                                                                                          |
 | ------------------------- | ----------------------------------------------------------------------------------------------- |
 | `API_BASE_URL`            | URL base del API, sin `/` al final. Vacía o ausente = modo demo (sin backend).                  |
-| `GOOGLE_SERVER_CLIENT_ID` | Client ID de tipo **Web** de Google Cloud (el que valida el API). Vacío = sin botón de Google.   |
+| `GOOGLE_SERVER_CLIENT_ID` | Client ID de tipo **Web** de Google Cloud (el que valida el API). Vacío = sin botón de Google; ausente en release = el de desarrollo. |
 | `GOOGLE_IOS_CLIENT_ID`    | Client ID de tipo **iOS**. Solo iOS lo usa; en Android se deja vacío.                            |
 
 Los dos Client ID de Google son públicos (no son secretos). El identificador definitivo
@@ -45,9 +45,12 @@ hacia `localhost` y la red local). Un build release **rechaza** una URL que no s
 | `prod.example.json`    | `main`         | `https://api.kplan.dev`         |
 
 Un build release **sin** archivo (`flutter build apk --release`) usa
-`https://develop-api.kplan.dev`, así que el APK publicado nunca queda en modo demo. Para
-incluir los Client ID de Google, copia el que toque a `staging.json` o `prod.json`
-(ignorados), complétalos y compila con ese archivo:
+`https://develop-api.kplan.dev` y el Client ID Web de desarrollo
+(`GoogleSignInService.releaseServerClientId`), así que el APK publicado nunca queda en
+modo demo ni sin el botón de Google. Para que ese botón funcione, `develop-api` necesita
+el mismo Client ID en `GOOGLE_OAUTH_CLIENT_IDS`, y el Client ID Android de Google, la
+SHA-1 de la llave con la que se firmó el APK. Para otro entorno, copia el que toque a
+`staging.json` o `prod.json` (ignorados), complétalos y compila con ese archivo:
 
 ```bash
 flutter build apk --release --dart-define-from-file=env/staging.json

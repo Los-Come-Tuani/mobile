@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'api_client.dart';
@@ -15,12 +16,20 @@ abstract interface class GoogleIdTokenProvider {
 ///
 /// El API valida el token con las llaves públicas de Google y comprueba que fue emitido
 /// para el Client ID **Web**; por eso la app lo pasa como `serverClientId`. Ninguno de
-/// estos valores es secreto (ver `docs/google.md` del repo del API), pero tampoco se
-/// versionan: vienen de `--dart-define-from-file=env/<entorno>.json`.
+/// estos valores es secreto (ver `docs/google.md` del repo del API): vienen de
+/// `--dart-define-from-file=env/<entorno>.json`, y un build release sin archivo usa
+/// [releaseServerClientId].
 class GoogleSignInService implements GoogleIdTokenProvider {
+  /// El Client ID Web de un build release sin `GOOGLE_SERVER_CLIENT_ID`: el de desarrollo,
+  /// que `develop-api` (ver [ApiClient.releaseBaseUrl]) debe tener en
+  /// `GOOGLE_OAUTH_CLIENT_IDS`.
+  static const String releaseServerClientId =
+      '552338673379-b5qoepfp6ogt04gnuidonrl72itheg4s.apps.googleusercontent.com';
+
   /// Client ID de tipo Web: el `aud` del token que valida el API.
   static const String serverClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue: kReleaseMode ? releaseServerClientId : '',
   );
 
   /// Client ID de tipo iOS. Android no lo necesita.

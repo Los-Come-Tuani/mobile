@@ -17,6 +17,18 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `ApiClient.releaseBaseUrl` = `https://develop-api.kplan.dev` (nunca queda en demo);
   `env/staging.example.json` apunta al mismo API y `env/prod.example.json` a
   `https://api.kplan.dev` para cuando haya producción. En debug, sin URL, sigue el demo.
+  Igual con Google: sin `GOOGLE_SERVER_CLIENT_ID`, un release usa
+  `GoogleSignInService.releaseServerClientId` (el Client ID Web de desarrollo, también en
+  `staging.example.json`), así que el botón aparece en el APK.
+- **`develop-api` (comprobado el 2026-10-08 desde el APK en un SM A235M):** no tiene
+  `EMAIL_HOST`, y con `DEPLOY=True` el API **descarta** los correos: el código del registro,
+  el de recuperar contraseña y el de la postulación nunca llegan. Tampoco tiene
+  `GOOGLE_OAUTH_CLIENT_IDS`: `POST /auth/mobile/google/` da `404` "no está habilitado".
+  Las dos son variables del servicio `develop-a` en Railway (las define el usuario). Un
+  `flutter run --release` sin `android/key.properties` firma con la llave de debug de la
+  máquina; la de esta (Lenovo) tiene SHA-1
+  `62:65:94:64:A9:06:A4:82:84:DD:80:E7:6C:6A:C5:23:F3:93:40:05` y debe estar en el Client
+  ID Android de Google.
 - **Hecho: `f1-app-link`** (identidad contra el API real; con `API_BASE_URL` vacío la app sigue
   en modo demo, como antes):
   - `lib/src/data/datasources/local/session_store.dart`: `SessionStore` con `SecureSessionStore`
@@ -212,7 +224,8 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 1. **Google y publicación.** El `applicationId` de Android y el bundle ID de iOS ya son
    `dev.kplan.app`. Ya existen el Client ID Web y el Android de desarrollo; `env/dev.json`
    local y `dev.example.json` llevan el Web como `GOOGLE_SERVER_CLIENT_ID`. Falta probar el
-   botón en un dispositivo real. Para publicar Android faltan la llave de subida
+   botón en un dispositivo real, y antes `develop-api` necesita `GOOGLE_OAUTH_CLIENT_IDS` y
+   un proveedor de correo (ver "Estado"). Para publicar Android faltan la llave de subida
    (`android/key.properties`) y registrar las SHA-1 de release y Play App Signing. Para iOS
    faltan el Client ID, su esquema invertido en `Info.plist` y la configuración de Apple.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
