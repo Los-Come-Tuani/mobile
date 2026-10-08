@@ -1,6 +1,7 @@
 # Memoria de trabajo: app y la hoja de ruta del API
 
-Actualizada el 2026-10-07. Traspaso para el siguiente agente. La memoria general (estado de
+Actualizada el 2026-10-07 (F4: catálogo y "Mi circuito" contra el API). Traspaso para el
+siguiente agente. La memoria general (estado de
 todas las tareas, API, F2 a F8, avisos y cómo correr el API en esta máquina) está en
 `C:\development\kplan\api\.cursor\memory\hoja-de-ruta.md`: léela primero.
 
@@ -88,6 +89,43 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   Los textos que la rama agregó (2FA, Google, registro con nacionalidad, recuperar y cambiar
   contraseña, postulación F5, estados vacíos, documentos del guía) tienen sus claves en los dos
   ARB. `flutter analyze` queda sin avisos y `flutter test` pasa completo (347, 4 saltadas).
+- **Hecho: F4 en la app** (catálogo y "Mi circuito", 2026-10-07; contrato en
+  `api/docs/territorio.md`). Con `API_BASE_URL` vacío todo sigue con `assets/mock`, como antes.
+  - Catálogo: `remote/tour_api.dart` (`TourApi`) y `TourRepository` con
+    `if (ApiClient.isConfigured)`. `getCircuits` (`GET /circuit/` más los lugares de todas las
+    paradas en un solo `GET /stop/?ids=`), `getCircuitById` (`/circuit/{id}/`, con las paradas),
+    `getStops` (todas las páginas, `page_size=100`), `getStopsByIds` (respeta el orden pedido) y
+    `getStopById` (`/stop/{id}/`). Los lugares se reusan dos minutos (las URL firmadas de las fotos
+    vencen a los cinco).
+  - Mapeo (`Circuit.fromApi`, `Stop.fromApi`): categoría del circuito y pilar del lugar como clave
+    en español (`city` -> Ciudad, `historia` -> Historia; `ContentLabels` las traduce al mostrar),
+    dificultad, `durationShort` y `badgesNote` en el idioma de la app (claves `repoTour*`), horas
+    `"08:30"` -> `"8:30 a.m."` (`Formatters.dataTime`, igual en los dos idiomas), `badges` sin las
+    extra del creativo, `organizer` = alcaldía, `legMinutes` de `stops[].leg_minutes`, comentarios
+    vacíos (F7). La **duración** la calcula la app con `ItineraryPlanner` (visitas más traslados,
+    ritmo equilibrado), como en el detalle; sin los lugares queda `duration_minutes`.
+  - Mi circuito: `CircuitCollectionsRepository(tour, auth:)`. Con API **y sesión** guarda en la
+    cuenta: `createCollection` -> `POST /itinerary/` con `stop_ids`; `toggleStop`, `updatePlan` y
+    `setFixedArrival` -> `PATCH` con el estado completo; `deleteCollection` -> `DELETE`. Uno del
+    catálogo solo se guarda cuando le cambian las paradas (`circuit_id` + `stop_ids`, copia propia)
+    y queda ligado (`CircuitCollection.itineraryId`). Optimista, con una cola por colección (lo que
+    se junta mientras otro viaja se sube una vez; un borrado espera al alta en camino); si falla,
+    el aviso sale por `syncErrors` y `CollectionSyncNotices` (en `main.dart`, con el
+    `scaffoldMessengerKey`) lo muestra en un SnackBar; el siguiente cambio reintenta.
+    `ensureLoaded` trae `GET /itinerary/` (también al iniciar sesión): lo que sale de un circuito
+    del catálogo (`followed_circuit` u `origin_circuit_ids`) queda en ese circuito, el más nuevo;
+    lo demás son circuitos del turista con el id del itinerario. Al salir o cambiar de cuenta se
+    vacía y se vuelve a sembrar. El nombre de un circuito nuevo pide 3 caracteres (el API, 3 a 80).
+  - Pruebas: `tour_repository_api_test.dart`, `circuit_collections_sync_test.dart` (con `FakeApi`,
+    que ahora anota `query`; muestras del API en `test/support/tour_samples.dart`;
+    `repository.settle()` espera lo que se sube) y `test/integration/tour_contract_test.dart`
+    (catálogo y ciclo completo de un itinerario con el turista local; pide `KPLAN_API_URL` y
+    `KPLAN_TOURIST_PASSWORD`, la contraseña local está en la memoria del API, sección 10; pasó
+    contra el API local y borra lo que crea). `flutter analyze` sin avisos; `flutter test` 370 pasan, 6 saltadas.
+  - **Sigue en demo aunque el API esté configurado**: lugares destacados (`places.json`), eventos,
+    cupones, horarios de grupo de los creativos (`circuit_groups.json` usa los slugs viejos: con el
+    API un creativo no muestra horarios hasta F7), reseñas, reservas, guías para contratar,
+    insignias, viaje en curso y bitácora de visitas.
 
 ## Qué falta
 
@@ -108,9 +146,10 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    traductora llega como `guia`; los servicios completos vienen en `provider.services`.
    Falta: el turista no ve todavía a los guías aprobados (el perfil público del guía y la
    contratación siguen simulados; llegan con la fase que los conecte).
-4. **Datos del dominio** (circuitos, lugares, reservas, guías...): siguen simulados. Cada fase
-   (F3 en adelante) reemplaza su repositorio por llamadas al API; la app no consume nada de eso
-   todavía. El mejor checklist es `portal/src/data/api/endpoints.ts`.
+4. **Datos del dominio**: circuitos, lugares e itinerarios ya vienen del API (F4, arriba); lo
+   demás (reservas, guías para contratar, horarios de grupo, reseñas, insignias, eventos,
+   cupones) sigue simulado. Cada fase reemplaza su repositorio por llamadas al API. El mejor
+   checklist es `portal/src/data/api/endpoints.ts`.
 5. **Eliminar la cuenta** (`POST /auth/account-close/`, baja a 30 días) no tiene pantalla todavía.
 6. Opcional: borrar la sesión del Keychain en una reinstalación de iOS (el Keychain sobrevive a
    desinstalar la app); con un `refresh` de un día el riesgo es bajo.
@@ -125,6 +164,21 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    - Lo que manda el API llega en español: el `detail` de los errores (`describeError` lo muestra
      tal cual) y los catálogos de prestadores (ciudades, idiomas, tipos de documento). Si se
      quiere en inglés, el API tendría que leer `Accept-Language`.
+8. **Lo que el API debería cambiar para la app** (anotado en F4, sin tocar el API):
+   - Leer `Accept-Language`: los circuitos y lugares llegan en español; con la app en inglés el
+     catálogo del API se ve en español (los JSON de ejemplo sí tenían la traducción).
+   - Las fotos del catálogo llegan con URL firmadas de cinco minutos
+     (`STORAGE_DOWNLOAD_EXPIRES`): en una sesión larga una foto que no se había pintado puede
+     fallar. Para fotos públicas convendría una URL pública o un vencimiento largo.
+   - `duration_minutes` no suma los traslados que calcula la app, y la lista de circuitos no
+     trae coordenadas ni tiempos de las paradas: la app pide los lugares aparte para calcular la
+     duración. Sería más simple que la lista traiga eso (o que el API calcule los traslados).
+   - `POST /itinerary/` no acepta `fixed_arrivals`: la app hace `POST` y luego `PATCH`.
+   - Un itinerario guarda nombre y coordenadas de un lugar retirado, pero la app solo pinta lugares
+     de `/stop/` (activos): esa parada desaparece de su circuito. O el API entrega el lugar
+     retirado por id, o la app arma la parada con lo que trae el itinerario.
+   - Los horarios de grupo de los creativos (`circuit/{id}/group-session/`) y las reseñas: F7.
+   - Los circuitos de Ometepe (Rivas) no se siembran: en la app con API no aparecen.
 
 ## Cómo está armada la app
 
@@ -146,6 +200,13 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `Result<T>` (`Ok`/`Failure`); las vistas no lanzan excepciones de red.
 - Para probar un repositorio sin red: `FakeApi` (`test/support/fake_api.dart`) se conecta con
   `api.connect(store: ...)` y se limpia con `ApiClient.configureForTest()` en `tearDown`.
+- Patrón para conectar un repositorio al API: una capa fina en `remote/<algo>_api.dart` (rutas en
+  `api_routes.dart`, modelos con `fromApi`), y en el repositorio `if (ApiClient.isConfigured)` ->
+  API con un `_call` que devuelve `Result<T>` (el `detail` del API como mensaje); si no, la demo.
+  Ver `provider_api.dart` (F5) y `tour_api.dart` (F4). En un repositorio que se precarga con
+  `tester.runAsync`, no hagas `await` de un `Future` ya terminado en las llamadas siguientes: su
+  continuación queda en la otra zona y la pantalla no sigue con el reloj falso (por eso
+  `ensureLoaded` vuelve sin esperar cuando ya cargó).
 - Idiomas (gen-l10n, `l10n.yaml`): los textos viven en `lib/l10n/arb/app_es.arb` (plantilla) y
   `app_en.arb`; `flutter gen-l10n` genera `lib/l10n/app_localizations*.dart`, que se versionan
   (córrelo después de tocar un ARB). En las vistas se usa `context.l10n.clave`
