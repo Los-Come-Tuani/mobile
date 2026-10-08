@@ -15,8 +15,10 @@ flutter run --dart-define-from-file=env/dev.json
 | `GOOGLE_SERVER_CLIENT_ID` | Client ID de tipo **Web** de Google Cloud (el que valida el API). Vacío = sin botón de Google.   |
 | `GOOGLE_IOS_CLIENT_ID`    | Client ID de tipo **iOS**. Solo iOS lo usa; en Android se deja vacío.                            |
 
-Los dos Client ID de Google son públicos (no son secretos), pero se crean con el
-identificador definitivo de la app: ver `docs/google.md` en el repo del API.
+Los dos Client ID de Google son públicos (no son secretos). El identificador definitivo
+de Android y el bundle ID de iOS son `dev.kplan.app`; ver `docs/google.md` en el repo del
+API. `dev.example.json` ya trae el Client ID Web de desarrollo. El Client ID iOS se
+agregará cuando se trabaje esa publicación.
 
 > Todo lo que se compila dentro de la app se puede extraer del APK/IPA. Aquí solo van valores
 > públicos (la URL del API, un Client ID de Google), **nunca** claves de servidor ni tokens.

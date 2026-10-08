@@ -1,4 +1,4 @@
-package com.example.k_plan_mobile
+package dev.kplan.app
 
 import io.flutter.embedding.android.FlutterActivity
 

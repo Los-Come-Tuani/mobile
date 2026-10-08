@@ -1,6 +1,6 @@
 # Memoria de trabajo: app y la hoja de ruta del API
 
-Actualizada el 2026-10-07 (F4: catálogo y "Mi circuito" contra el API). Traspaso para el
+Actualizada el 2026-10-08 (Google y el identificador definitivo). Traspaso para el
 siguiente agente. La memoria general (estado de
 todas las tareas, API, F2 a F8, avisos y cómo correr el API en esta máquina) está en
 `C:\development\kplan\api\.cursor\memory\hoja-de-ruta.md`: léela primero.
@@ -204,14 +204,12 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 
 ## Qué falta
 
-1. **Decisión del usuario: identificador de la app (bloquea Google y publicar).** Hoy el
-   `applicationId` es `com.example.k_plan_mobile` (`android/app/build.gradle.kts`) y el bundle id
-   `com.example.kPlanMobile` (`ios/Runner.xcodeproj/project.pbxproj`). Los Client ID de Google
-   quedan atados a ellos: **preguntar el definitivo antes de crearlos**. Luego: la llave de
-   firma del release (`android/key.properties`), el Client ID Android (paquete + SHA-1 de
-   debug, release y Play App Signing), el Client ID iOS (bundle id) y, en iOS, el esquema de URL
-   con el Client ID iOS invertido en `ios/Runner/Info.plist` (`CFBundleURLTypes`). Paso a paso:
-   `api/docs/google.md`. Probar el botón de Google en un dispositivo real.
+1. **Google y publicación.** El `applicationId` de Android y el bundle ID de iOS ya son
+   `dev.kplan.app`. Ya existen el Client ID Web y el Android de desarrollo; `env/dev.json`
+   local y `dev.example.json` llevan el Web como `GOOGLE_SERVER_CLIENT_ID`. Falta probar el
+   botón en un dispositivo real. Para publicar Android faltan la llave de subida
+   (`android/key.properties`) y registrar las SHA-1 de release y Play App Signing. Para iOS
+   faltan el Client ID, su esquema invertido en `Info.plist` y la configuración de Apple.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
 3. **Roles en la app (hecho, 2026-10-06)**: `mobile` solo admite turista, guía y traductor (y
    cuentas sin rol); una cuenta del equipo o de un negocio recibe `401` como una contraseña mala.
