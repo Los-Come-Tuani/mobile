@@ -180,11 +180,15 @@
   "bookingDetailChatWithGuide": "Escribirle al guía",
   "bookingDetailChatWithTourist": "Escribirle al turista",
   "bookingDetailConfirmedTitle": "¡Reserva confirmada!",
+  "bookingDetailFinish": "Terminar el recorrido",
+  "bookingDetailFinished": "Recorrido terminado. Cuando el pago esté confirmado, entra a tu saldo.",
   "bookingDetailHowToPay": "Cómo pagar",
   "bookingDetailKeep": "Mantenerla",
   "bookingDetailOpen": "Ver mi reserva",
   "bookingDetailPaymentManual": "El equipo de K'Plan confirma tu pago a mano y te avisa cuando quede listo.",
   "bookingDetailPaymentTitle": "Pago",
+  "bookingDetailStart": "Iniciar el recorrido",
+  "bookingDetailStarted": "Recorrido en curso",
   "bookingDetailStatus": "Estado: {status}",
   "@bookingDetailStatus": {
     "placeholders": {
@@ -1520,6 +1524,124 @@
       }
     }
   },
+  "guideDeskAlreadyApplied": "Ya te postulaste",
+  "guideDeskApplied": "Te postulaste: el turista verá tu precio y tu mensaje.",
+  "guideDeskApply": "Postularme",
+  "guideDeskApplyFee": "Tu precio (C$)",
+  "guideDeskApplyFeeMissing": "Escribe tu precio",
+  "guideDeskApplyMaxFee": "Hasta {amount}",
+  "@guideDeskApplyMaxFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideDeskApplyMessage": "Un mensaje para el turista (opcional)",
+  "guideDeskApplyTitle": "Postularte a la convocatoria",
+  "guideDeskBidAccepted": "Te eligieron",
+  "guideDeskBidRejected": "Eligieron a otra persona",
+  "guideDeskBidsEmpty": "Todavía no te postulas a ninguna convocatoria.",
+  "guideDeskBidSent": "Enviada",
+  "guideDeskBidsTitle": "Mis postulaciones",
+  "guideDeskBidTitle": "Convocatoria",
+  "guideDeskBidWithdrawn": "Retirada",
+  "guideDeskBookingsEmpty": "Cuando un turista reserve contigo, su reserva aparecerá aquí.",
+  "guideDeskBookingsTitle": "Mis reservas",
+  "guideDeskChatsEmpty": "Cada reserva tiene su chat con el turista. Todavía no tienes reservas.",
+  "guideDeskDepartureCancel": "Cancelar salida",
+  "guideDeskDepartureCancelled": "Salida cancelada. Avisamos a quienes habían reservado.",
+  "guideDeskDepartureCancelTitle": "¿Cancelar la salida? Sus reservas también se cancelan.",
+  "guideDeskDepartureCapacity": "Cupo",
+  "guideDeskDepartureCircuit": "Circuito",
+  "guideDeskDepartureCircuitMissing": "Elige un circuito",
+  "guideDeskDepartureEdit": "Editar",
+  "guideDeskDepartureEditTitle": "Editar la salida",
+  "guideDeskDepartureExclusive": "Privada",
+  "guideDeskDepartureNote": "Nota para los turistas (opcional)",
+  "guideDeskDeparturePublish": "Publicar salida",
+  "guideDeskDeparturePublished": "Salida publicada: ya la ven los turistas.",
+  "guideDeskDeparturePublishTitle": "Publicar una salida",
+  "guideDeskDepartureSaved": "Salida actualizada",
+  "guideDeskDeparturesEmpty": "Publica una salida en un circuito oficial de tu ciudad para que los turistas la reserven.",
+  "guideDeskDeparturesTitle": "Mis salidas",
+  "guideDeskDepartureTime": "Hora de salida",
+  "guideDeskDepartureTransport": "Incluyo el transporte",
+  "guideDeskLess": "Menos",
+  "guideDeskMore": "Más",
+  "guideDeskOpenRequestsEmpty": "No hay convocatorias abiertas en tu ciudad por ahora.",
+  "guideDeskOpenRequestsTitle": "Convocatorias abiertas",
+  "guideDeskStops": "{count, plural, =1{1 parada} other{{count} paradas}}",
+  "@guideDeskStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideDeskWithdraw": "Retirar postulación",
+  "guideDeskWithdrawn": "Postulación retirada",
+  "guideDeskWithdrawTitle": "¿Retirar tu postulación?",
+  "guideFinanceAccountActive": "Recibe tus retiros",
+  "guideFinanceAccountAdd": "Agregar",
+  "guideFinanceAccountBank": "Banco",
+  "guideFinanceAccountBankMissing": "Escribe el banco",
+  "guideFinanceAccountChange": "Cambiar",
+  "guideFinanceAccountChecking": "Corriente",
+  "guideFinanceAccountHolder": "Titular de la cuenta",
+  "guideFinanceAccountHolderMissing": "Escribe el nombre del titular",
+  "guideFinanceAccountNone": "Todavía no tienes una cuenta para recibir tus retiros.",
+  "guideFinanceAccountNumber": "Número de cuenta",
+  "guideFinanceAccountNumberInvalid": "Escribe el número completo (solo números, espacios o guiones)",
+  "guideFinanceAccountPendingFrom": "El cambio vale desde el {day} a las {time}",
+  "@guideFinanceAccountPendingFrom": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "guideFinanceAccountSaved": "Cuenta guardada",
+  "guideFinanceAccountSavings": "Ahorro",
+  "guideFinanceAccountTitle": "Cuenta bancaria",
+  "guideFinanceAccountWait": "La primera cuenta vale de una vez; un cambio espera 24 horas por seguridad.",
+  "guideFinanceAvailable": "Puedes retirar hasta {amount}",
+  "@guideFinanceAvailable": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideFinanceBalance": "Saldo disponible",
+  "guideFinanceMovementReturned": "Retiro devuelto",
+  "guideFinanceMovementsEmpty": "Todavía no hay movimientos.",
+  "guideFinanceMovementService": "Recorrido",
+  "guideFinanceMovementsTitle": "Movimientos",
+  "guideFinanceMovementWithdrawal": "Retiro",
+  "guideFinanceNeedsAccount": "Agrega una cuenta bancaria para pedir retiros.",
+  "guideFinancePayoutAmount": "Monto (C$)",
+  "guideFinancePayoutAmountMissing": "Escribe el monto",
+  "guideFinancePayoutPaid": "Depositado",
+  "guideFinancePayoutPending": "En proceso",
+  "guideFinancePayoutRejected": "Rechazado",
+  "guideFinancePayoutRequest": "Pedir un retiro",
+  "guideFinancePayoutRequested": "Pediste el retiro: el equipo lo depositará en tu cuenta.",
+  "guideFinancePayoutsEmpty": "Todavía no has pedido retiros.",
+  "guideFinancePayoutsTitle": "Mis retiros",
+  "guideFinancePayoutTitle": "Pedir un retiro",
+  "guideFinancePendingPayouts": "{amount} en retiros por depositar",
+  "@guideFinancePendingPayouts": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guideFinanceTitle": "Mi dinero",
   "guideProfileAcceptsBudget": "Acepta tu presupuesto",
   "guideProfileAppliedAsGuide": "Se postuló como guía a tu propuesta",
   "guideProfileAppliedAsTranslator": "Se postuló como traductor a tu propuesta",

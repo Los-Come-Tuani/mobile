@@ -236,6 +236,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookingDetailConfirmedTitle => '¡Reserva confirmada!';
 
   @override
+  String get bookingDetailFinish => 'Terminar el recorrido';
+
+  @override
+  String get bookingDetailFinished =>
+      'Recorrido terminado. Cuando el pago esté confirmado, entra a tu saldo.';
+
+  @override
   String get bookingDetailHowToPay => 'Cómo pagar';
 
   @override
@@ -250,6 +257,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get bookingDetailPaymentTitle => 'Pago';
+
+  @override
+  String get bookingDetailStart => 'Iniciar el recorrido';
+
+  @override
+  String get bookingDetailStarted => 'Recorrido en curso';
 
   @override
   String bookingDetailStatus(String status) {
@@ -2084,6 +2097,277 @@ class AppLocalizationsEs extends AppLocalizations {
   String guideChatNamePair(String first, String second) {
     return '$first y $second';
   }
+
+  @override
+  String get guideDeskAlreadyApplied => 'Ya te postulaste';
+
+  @override
+  String get guideDeskApplied =>
+      'Te postulaste: el turista verá tu precio y tu mensaje.';
+
+  @override
+  String get guideDeskApply => 'Postularme';
+
+  @override
+  String get guideDeskApplyFee => 'Tu precio (C\$)';
+
+  @override
+  String get guideDeskApplyFeeMissing => 'Escribe tu precio';
+
+  @override
+  String guideDeskApplyMaxFee(String amount) {
+    return 'Hasta $amount';
+  }
+
+  @override
+  String get guideDeskApplyMessage => 'Un mensaje para el turista (opcional)';
+
+  @override
+  String get guideDeskApplyTitle => 'Postularte a la convocatoria';
+
+  @override
+  String get guideDeskBidAccepted => 'Te eligieron';
+
+  @override
+  String get guideDeskBidRejected => 'Eligieron a otra persona';
+
+  @override
+  String get guideDeskBidsEmpty =>
+      'Todavía no te postulas a ninguna convocatoria.';
+
+  @override
+  String get guideDeskBidSent => 'Enviada';
+
+  @override
+  String get guideDeskBidsTitle => 'Mis postulaciones';
+
+  @override
+  String get guideDeskBidTitle => 'Convocatoria';
+
+  @override
+  String get guideDeskBidWithdrawn => 'Retirada';
+
+  @override
+  String get guideDeskBookingsEmpty =>
+      'Cuando un turista reserve contigo, su reserva aparecerá aquí.';
+
+  @override
+  String get guideDeskBookingsTitle => 'Mis reservas';
+
+  @override
+  String get guideDeskChatsEmpty =>
+      'Cada reserva tiene su chat con el turista. Todavía no tienes reservas.';
+
+  @override
+  String get guideDeskDepartureCancel => 'Cancelar salida';
+
+  @override
+  String get guideDeskDepartureCancelled =>
+      'Salida cancelada. Avisamos a quienes habían reservado.';
+
+  @override
+  String get guideDeskDepartureCancelTitle =>
+      '¿Cancelar la salida? Sus reservas también se cancelan.';
+
+  @override
+  String get guideDeskDepartureCapacity => 'Cupo';
+
+  @override
+  String get guideDeskDepartureCircuit => 'Circuito';
+
+  @override
+  String get guideDeskDepartureCircuitMissing => 'Elige un circuito';
+
+  @override
+  String get guideDeskDepartureEdit => 'Editar';
+
+  @override
+  String get guideDeskDepartureEditTitle => 'Editar la salida';
+
+  @override
+  String get guideDeskDepartureExclusive => 'Privada';
+
+  @override
+  String get guideDeskDepartureNote => 'Nota para los turistas (opcional)';
+
+  @override
+  String get guideDeskDeparturePublish => 'Publicar salida';
+
+  @override
+  String get guideDeskDeparturePublished =>
+      'Salida publicada: ya la ven los turistas.';
+
+  @override
+  String get guideDeskDeparturePublishTitle => 'Publicar una salida';
+
+  @override
+  String get guideDeskDepartureSaved => 'Salida actualizada';
+
+  @override
+  String get guideDeskDeparturesEmpty =>
+      'Publica una salida en un circuito oficial de tu ciudad para que los turistas la reserven.';
+
+  @override
+  String get guideDeskDeparturesTitle => 'Mis salidas';
+
+  @override
+  String get guideDeskDepartureTime => 'Hora de salida';
+
+  @override
+  String get guideDeskDepartureTransport => 'Incluyo el transporte';
+
+  @override
+  String get guideDeskLess => 'Menos';
+
+  @override
+  String get guideDeskMore => 'Más';
+
+  @override
+  String get guideDeskOpenRequestsEmpty =>
+      'No hay convocatorias abiertas en tu ciudad por ahora.';
+
+  @override
+  String get guideDeskOpenRequestsTitle => 'Convocatorias abiertas';
+
+  @override
+  String guideDeskStops(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count paradas',
+      one: '1 parada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get guideDeskWithdraw => 'Retirar postulación';
+
+  @override
+  String get guideDeskWithdrawn => 'Postulación retirada';
+
+  @override
+  String get guideDeskWithdrawTitle => '¿Retirar tu postulación?';
+
+  @override
+  String get guideFinanceAccountActive => 'Recibe tus retiros';
+
+  @override
+  String get guideFinanceAccountAdd => 'Agregar';
+
+  @override
+  String get guideFinanceAccountBank => 'Banco';
+
+  @override
+  String get guideFinanceAccountBankMissing => 'Escribe el banco';
+
+  @override
+  String get guideFinanceAccountChange => 'Cambiar';
+
+  @override
+  String get guideFinanceAccountChecking => 'Corriente';
+
+  @override
+  String get guideFinanceAccountHolder => 'Titular de la cuenta';
+
+  @override
+  String get guideFinanceAccountHolderMissing =>
+      'Escribe el nombre del titular';
+
+  @override
+  String get guideFinanceAccountNone =>
+      'Todavía no tienes una cuenta para recibir tus retiros.';
+
+  @override
+  String get guideFinanceAccountNumber => 'Número de cuenta';
+
+  @override
+  String get guideFinanceAccountNumberInvalid =>
+      'Escribe el número completo (solo números, espacios o guiones)';
+
+  @override
+  String guideFinanceAccountPendingFrom(String day, String time) {
+    return 'El cambio vale desde el $day a las $time';
+  }
+
+  @override
+  String get guideFinanceAccountSaved => 'Cuenta guardada';
+
+  @override
+  String get guideFinanceAccountSavings => 'Ahorro';
+
+  @override
+  String get guideFinanceAccountTitle => 'Cuenta bancaria';
+
+  @override
+  String get guideFinanceAccountWait =>
+      'La primera cuenta vale de una vez; un cambio espera 24 horas por seguridad.';
+
+  @override
+  String guideFinanceAvailable(String amount) {
+    return 'Puedes retirar hasta $amount';
+  }
+
+  @override
+  String get guideFinanceBalance => 'Saldo disponible';
+
+  @override
+  String get guideFinanceMovementReturned => 'Retiro devuelto';
+
+  @override
+  String get guideFinanceMovementsEmpty => 'Todavía no hay movimientos.';
+
+  @override
+  String get guideFinanceMovementService => 'Recorrido';
+
+  @override
+  String get guideFinanceMovementsTitle => 'Movimientos';
+
+  @override
+  String get guideFinanceMovementWithdrawal => 'Retiro';
+
+  @override
+  String get guideFinanceNeedsAccount =>
+      'Agrega una cuenta bancaria para pedir retiros.';
+
+  @override
+  String get guideFinancePayoutAmount => 'Monto (C\$)';
+
+  @override
+  String get guideFinancePayoutAmountMissing => 'Escribe el monto';
+
+  @override
+  String get guideFinancePayoutPaid => 'Depositado';
+
+  @override
+  String get guideFinancePayoutPending => 'En proceso';
+
+  @override
+  String get guideFinancePayoutRejected => 'Rechazado';
+
+  @override
+  String get guideFinancePayoutRequest => 'Pedir un retiro';
+
+  @override
+  String get guideFinancePayoutRequested =>
+      'Pediste el retiro: el equipo lo depositará en tu cuenta.';
+
+  @override
+  String get guideFinancePayoutsEmpty => 'Todavía no has pedido retiros.';
+
+  @override
+  String get guideFinancePayoutsTitle => 'Mis retiros';
+
+  @override
+  String get guideFinancePayoutTitle => 'Pedir un retiro';
+
+  @override
+  String guideFinancePendingPayouts(String amount) {
+    return '$amount en retiros por depositar';
+  }
+
+  @override
+  String get guideFinanceTitle => 'Mi dinero';
 
   @override
   String get guideProfileAcceptsBudget => 'Acepta tu presupuesto';

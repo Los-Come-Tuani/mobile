@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../data/datasources/remote/api_client.dart';
+import '../../../data/datasources/repository/bookings_repository.dart';
 import '../../../data/datasources/repository/guide_inbox_repository.dart';
 import '../../../router/routes.dart';
 
@@ -62,9 +64,14 @@ class GuideBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final items = _items(l10n);
-    final unread = context.select<GuideInboxRepository, int>(
-      (inbox) => inbox.unreadCount,
-    );
+    // Con el API, los mensajes sin leer salen de sus reservas.
+    final unread = ApiClient.isConfigured
+        ? context.select<BookingsRepository, int>(
+            (bookings) => bookings.unreadAsGuide,
+          )
+        : context.select<GuideInboxRepository, int>(
+            (inbox) => inbox.unreadCount,
+          );
 
     return DecoratedBox(
       decoration: const BoxDecoration(

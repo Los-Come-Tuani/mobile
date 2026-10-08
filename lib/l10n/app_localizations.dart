@@ -416,6 +416,18 @@ abstract class AppLocalizations {
   /// **'¡Reserva confirmada!'**
   String get bookingDetailConfirmedTitle;
 
+  /// No description provided for @bookingDetailFinish.
+  ///
+  /// In es, this message translates to:
+  /// **'Terminar el recorrido'**
+  String get bookingDetailFinish;
+
+  /// No description provided for @bookingDetailFinished.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido terminado. Cuando el pago esté confirmado, entra a tu saldo.'**
+  String get bookingDetailFinished;
+
   /// No description provided for @bookingDetailHowToPay.
   ///
   /// In es, this message translates to:
@@ -445,6 +457,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Pago'**
   String get bookingDetailPaymentTitle;
+
+  /// No description provided for @bookingDetailStart.
+  ///
+  /// In es, this message translates to:
+  /// **'Iniciar el recorrido'**
+  String get bookingDetailStart;
+
+  /// No description provided for @bookingDetailStarted.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido en curso'**
+  String get bookingDetailStarted;
 
   /// No description provided for @bookingDetailStatus.
   ///
@@ -3300,6 +3324,486 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'{first} y {second}'**
   String guideChatNamePair(String first, String second);
+
+  /// No description provided for @guideDeskAlreadyApplied.
+  ///
+  /// In es, this message translates to:
+  /// **'Ya te postulaste'**
+  String get guideDeskAlreadyApplied;
+
+  /// No description provided for @guideDeskApplied.
+  ///
+  /// In es, this message translates to:
+  /// **'Te postulaste: el turista verá tu precio y tu mensaje.'**
+  String get guideDeskApplied;
+
+  /// No description provided for @guideDeskApply.
+  ///
+  /// In es, this message translates to:
+  /// **'Postularme'**
+  String get guideDeskApply;
+
+  /// No description provided for @guideDeskApplyFee.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu precio (C\$)'**
+  String get guideDeskApplyFee;
+
+  /// No description provided for @guideDeskApplyFeeMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe tu precio'**
+  String get guideDeskApplyFeeMissing;
+
+  /// No description provided for @guideDeskApplyMaxFee.
+  ///
+  /// In es, this message translates to:
+  /// **'Hasta {amount}'**
+  String guideDeskApplyMaxFee(String amount);
+
+  /// No description provided for @guideDeskApplyMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Un mensaje para el turista (opcional)'**
+  String get guideDeskApplyMessage;
+
+  /// No description provided for @guideDeskApplyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Postularte a la convocatoria'**
+  String get guideDeskApplyTitle;
+
+  /// No description provided for @guideDeskBidAccepted.
+  ///
+  /// In es, this message translates to:
+  /// **'Te eligieron'**
+  String get guideDeskBidAccepted;
+
+  /// No description provided for @guideDeskBidRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Eligieron a otra persona'**
+  String get guideDeskBidRejected;
+
+  /// No description provided for @guideDeskBidsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no te postulas a ninguna convocatoria.'**
+  String get guideDeskBidsEmpty;
+
+  /// No description provided for @guideDeskBidSent.
+  ///
+  /// In es, this message translates to:
+  /// **'Enviada'**
+  String get guideDeskBidSent;
+
+  /// No description provided for @guideDeskBidsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis postulaciones'**
+  String get guideDeskBidsTitle;
+
+  /// No description provided for @guideDeskBidTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Convocatoria'**
+  String get guideDeskBidTitle;
+
+  /// No description provided for @guideDeskBidWithdrawn.
+  ///
+  /// In es, this message translates to:
+  /// **'Retirada'**
+  String get guideDeskBidWithdrawn;
+
+  /// No description provided for @guideDeskBookingsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuando un turista reserve contigo, su reserva aparecerá aquí.'**
+  String get guideDeskBookingsEmpty;
+
+  /// No description provided for @guideDeskBookingsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis reservas'**
+  String get guideDeskBookingsTitle;
+
+  /// No description provided for @guideDeskChatsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Cada reserva tiene su chat con el turista. Todavía no tienes reservas.'**
+  String get guideDeskChatsEmpty;
+
+  /// No description provided for @guideDeskDepartureCancel.
+  ///
+  /// In es, this message translates to:
+  /// **'Cancelar salida'**
+  String get guideDeskDepartureCancel;
+
+  /// No description provided for @guideDeskDepartureCancelled.
+  ///
+  /// In es, this message translates to:
+  /// **'Salida cancelada. Avisamos a quienes habían reservado.'**
+  String get guideDeskDepartureCancelled;
+
+  /// No description provided for @guideDeskDepartureCancelTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Cancelar la salida? Sus reservas también se cancelan.'**
+  String get guideDeskDepartureCancelTitle;
+
+  /// No description provided for @guideDeskDepartureCapacity.
+  ///
+  /// In es, this message translates to:
+  /// **'Cupo'**
+  String get guideDeskDepartureCapacity;
+
+  /// No description provided for @guideDeskDepartureCircuit.
+  ///
+  /// In es, this message translates to:
+  /// **'Circuito'**
+  String get guideDeskDepartureCircuit;
+
+  /// No description provided for @guideDeskDepartureCircuitMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Elige un circuito'**
+  String get guideDeskDepartureCircuitMissing;
+
+  /// No description provided for @guideDeskDepartureEdit.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar'**
+  String get guideDeskDepartureEdit;
+
+  /// No description provided for @guideDeskDepartureEditTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Editar la salida'**
+  String get guideDeskDepartureEditTitle;
+
+  /// No description provided for @guideDeskDepartureExclusive.
+  ///
+  /// In es, this message translates to:
+  /// **'Privada'**
+  String get guideDeskDepartureExclusive;
+
+  /// No description provided for @guideDeskDepartureNote.
+  ///
+  /// In es, this message translates to:
+  /// **'Nota para los turistas (opcional)'**
+  String get guideDeskDepartureNote;
+
+  /// No description provided for @guideDeskDeparturePublish.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicar salida'**
+  String get guideDeskDeparturePublish;
+
+  /// No description provided for @guideDeskDeparturePublished.
+  ///
+  /// In es, this message translates to:
+  /// **'Salida publicada: ya la ven los turistas.'**
+  String get guideDeskDeparturePublished;
+
+  /// No description provided for @guideDeskDeparturePublishTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Publicar una salida'**
+  String get guideDeskDeparturePublishTitle;
+
+  /// No description provided for @guideDeskDepartureSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Salida actualizada'**
+  String get guideDeskDepartureSaved;
+
+  /// No description provided for @guideDeskDeparturesEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Publica una salida en un circuito oficial de tu ciudad para que los turistas la reserven.'**
+  String get guideDeskDeparturesEmpty;
+
+  /// No description provided for @guideDeskDeparturesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis salidas'**
+  String get guideDeskDeparturesTitle;
+
+  /// No description provided for @guideDeskDepartureTime.
+  ///
+  /// In es, this message translates to:
+  /// **'Hora de salida'**
+  String get guideDeskDepartureTime;
+
+  /// No description provided for @guideDeskDepartureTransport.
+  ///
+  /// In es, this message translates to:
+  /// **'Incluyo el transporte'**
+  String get guideDeskDepartureTransport;
+
+  /// No description provided for @guideDeskLess.
+  ///
+  /// In es, this message translates to:
+  /// **'Menos'**
+  String get guideDeskLess;
+
+  /// No description provided for @guideDeskMore.
+  ///
+  /// In es, this message translates to:
+  /// **'Más'**
+  String get guideDeskMore;
+
+  /// No description provided for @guideDeskOpenRequestsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay convocatorias abiertas en tu ciudad por ahora.'**
+  String get guideDeskOpenRequestsEmpty;
+
+  /// No description provided for @guideDeskOpenRequestsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Convocatorias abiertas'**
+  String get guideDeskOpenRequestsTitle;
+
+  /// No description provided for @guideDeskStops.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{1 parada} other{{count} paradas}}'**
+  String guideDeskStops(int count);
+
+  /// No description provided for @guideDeskWithdraw.
+  ///
+  /// In es, this message translates to:
+  /// **'Retirar postulación'**
+  String get guideDeskWithdraw;
+
+  /// No description provided for @guideDeskWithdrawn.
+  ///
+  /// In es, this message translates to:
+  /// **'Postulación retirada'**
+  String get guideDeskWithdrawn;
+
+  /// No description provided for @guideDeskWithdrawTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'¿Retirar tu postulación?'**
+  String get guideDeskWithdrawTitle;
+
+  /// No description provided for @guideFinanceAccountActive.
+  ///
+  /// In es, this message translates to:
+  /// **'Recibe tus retiros'**
+  String get guideFinanceAccountActive;
+
+  /// No description provided for @guideFinanceAccountAdd.
+  ///
+  /// In es, this message translates to:
+  /// **'Agregar'**
+  String get guideFinanceAccountAdd;
+
+  /// No description provided for @guideFinanceAccountBank.
+  ///
+  /// In es, this message translates to:
+  /// **'Banco'**
+  String get guideFinanceAccountBank;
+
+  /// No description provided for @guideFinanceAccountBankMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el banco'**
+  String get guideFinanceAccountBankMissing;
+
+  /// No description provided for @guideFinanceAccountChange.
+  ///
+  /// In es, this message translates to:
+  /// **'Cambiar'**
+  String get guideFinanceAccountChange;
+
+  /// No description provided for @guideFinanceAccountChecking.
+  ///
+  /// In es, this message translates to:
+  /// **'Corriente'**
+  String get guideFinanceAccountChecking;
+
+  /// No description provided for @guideFinanceAccountHolder.
+  ///
+  /// In es, this message translates to:
+  /// **'Titular de la cuenta'**
+  String get guideFinanceAccountHolder;
+
+  /// No description provided for @guideFinanceAccountHolderMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el nombre del titular'**
+  String get guideFinanceAccountHolderMissing;
+
+  /// No description provided for @guideFinanceAccountNone.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no tienes una cuenta para recibir tus retiros.'**
+  String get guideFinanceAccountNone;
+
+  /// No description provided for @guideFinanceAccountNumber.
+  ///
+  /// In es, this message translates to:
+  /// **'Número de cuenta'**
+  String get guideFinanceAccountNumber;
+
+  /// No description provided for @guideFinanceAccountNumberInvalid.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el número completo (solo números, espacios o guiones)'**
+  String get guideFinanceAccountNumberInvalid;
+
+  /// No description provided for @guideFinanceAccountPendingFrom.
+  ///
+  /// In es, this message translates to:
+  /// **'El cambio vale desde el {day} a las {time}'**
+  String guideFinanceAccountPendingFrom(String day, String time);
+
+  /// No description provided for @guideFinanceAccountSaved.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta guardada'**
+  String get guideFinanceAccountSaved;
+
+  /// No description provided for @guideFinanceAccountSavings.
+  ///
+  /// In es, this message translates to:
+  /// **'Ahorro'**
+  String get guideFinanceAccountSavings;
+
+  /// No description provided for @guideFinanceAccountTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Cuenta bancaria'**
+  String get guideFinanceAccountTitle;
+
+  /// No description provided for @guideFinanceAccountWait.
+  ///
+  /// In es, this message translates to:
+  /// **'La primera cuenta vale de una vez; un cambio espera 24 horas por seguridad.'**
+  String get guideFinanceAccountWait;
+
+  /// No description provided for @guideFinanceAvailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Puedes retirar hasta {amount}'**
+  String guideFinanceAvailable(String amount);
+
+  /// No description provided for @guideFinanceBalance.
+  ///
+  /// In es, this message translates to:
+  /// **'Saldo disponible'**
+  String get guideFinanceBalance;
+
+  /// No description provided for @guideFinanceMovementReturned.
+  ///
+  /// In es, this message translates to:
+  /// **'Retiro devuelto'**
+  String get guideFinanceMovementReturned;
+
+  /// No description provided for @guideFinanceMovementsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay movimientos.'**
+  String get guideFinanceMovementsEmpty;
+
+  /// No description provided for @guideFinanceMovementService.
+  ///
+  /// In es, this message translates to:
+  /// **'Recorrido'**
+  String get guideFinanceMovementService;
+
+  /// No description provided for @guideFinanceMovementsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Movimientos'**
+  String get guideFinanceMovementsTitle;
+
+  /// No description provided for @guideFinanceMovementWithdrawal.
+  ///
+  /// In es, this message translates to:
+  /// **'Retiro'**
+  String get guideFinanceMovementWithdrawal;
+
+  /// No description provided for @guideFinanceNeedsAccount.
+  ///
+  /// In es, this message translates to:
+  /// **'Agrega una cuenta bancaria para pedir retiros.'**
+  String get guideFinanceNeedsAccount;
+
+  /// No description provided for @guideFinancePayoutAmount.
+  ///
+  /// In es, this message translates to:
+  /// **'Monto (C\$)'**
+  String get guideFinancePayoutAmount;
+
+  /// No description provided for @guideFinancePayoutAmountMissing.
+  ///
+  /// In es, this message translates to:
+  /// **'Escribe el monto'**
+  String get guideFinancePayoutAmountMissing;
+
+  /// No description provided for @guideFinancePayoutPaid.
+  ///
+  /// In es, this message translates to:
+  /// **'Depositado'**
+  String get guideFinancePayoutPaid;
+
+  /// No description provided for @guideFinancePayoutPending.
+  ///
+  /// In es, this message translates to:
+  /// **'En proceso'**
+  String get guideFinancePayoutPending;
+
+  /// No description provided for @guideFinancePayoutRejected.
+  ///
+  /// In es, this message translates to:
+  /// **'Rechazado'**
+  String get guideFinancePayoutRejected;
+
+  /// No description provided for @guideFinancePayoutRequest.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir un retiro'**
+  String get guideFinancePayoutRequest;
+
+  /// No description provided for @guideFinancePayoutRequested.
+  ///
+  /// In es, this message translates to:
+  /// **'Pediste el retiro: el equipo lo depositará en tu cuenta.'**
+  String get guideFinancePayoutRequested;
+
+  /// No description provided for @guideFinancePayoutsEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no has pedido retiros.'**
+  String get guideFinancePayoutsEmpty;
+
+  /// No description provided for @guideFinancePayoutsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis retiros'**
+  String get guideFinancePayoutsTitle;
+
+  /// No description provided for @guideFinancePayoutTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Pedir un retiro'**
+  String get guideFinancePayoutTitle;
+
+  /// No description provided for @guideFinancePendingPayouts.
+  ///
+  /// In es, this message translates to:
+  /// **'{amount} en retiros por depositar'**
+  String guideFinancePendingPayouts(String amount);
+
+  /// No description provided for @guideFinanceTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mi dinero'**
+  String get guideFinanceTitle;
 
   /// No description provided for @guideProfileAcceptsBudget.
   ///

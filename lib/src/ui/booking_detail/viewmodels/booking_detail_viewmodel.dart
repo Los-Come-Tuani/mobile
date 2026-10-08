@@ -46,6 +46,12 @@ class BookingDetailViewModel extends BaseViewModel {
   Future<String?> cancel({String reason = ''}) =>
       _run(() => _bookings.cancel(bookingId, reason: reason));
 
+  /// El guía, el día del recorrido.
+  Future<String?> start() => _run(() => _bookings.start(bookingId));
+
+  /// El guía, al terminar: con el pago confirmado la reserva se cierra.
+  Future<String?> finish() => _run(() => _bookings.finish(bookingId));
+
   /// La reseña de quien pregunta, cuando el recorrido terminó.
   Future<String?> review({required int stars, String comment = ''}) =>
       _run(() => _bookings.review(bookingId, rating: stars, comment: comment));

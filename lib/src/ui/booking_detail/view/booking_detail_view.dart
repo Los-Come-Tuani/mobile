@@ -173,6 +173,32 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     final l10n = context.l10n;
     final deadline = booking.cancelDeadline;
     return [
+      if (booking.asGuide && booking.status == BookingStatus.confirmed) ...[
+        PrimaryButton(
+          label: l10n.bookingDetailStart,
+          icon: Icons.play_arrow_rounded,
+          onPressed: viewModel.isWorking
+              ? null
+              : () async {
+                  final error = await viewModel.start();
+                  if (mounted) _show(error ?? l10n.bookingDetailStarted);
+                },
+        ),
+        const SizedBox(height: 12),
+      ],
+      if (booking.asGuide && booking.status == BookingStatus.inProgress) ...[
+        PrimaryButton(
+          label: l10n.bookingDetailFinish,
+          icon: Icons.flag_rounded,
+          onPressed: viewModel.isWorking
+              ? null
+              : () async {
+                  final error = await viewModel.finish();
+                  if (mounted) _show(error ?? l10n.bookingDetailFinished);
+                },
+        ),
+        const SizedBox(height: 12),
+      ],
       if (booking.canReview) ...[
         PrimaryButton(
           label: l10n.guideAppRateTourist(booking.counterpartName),

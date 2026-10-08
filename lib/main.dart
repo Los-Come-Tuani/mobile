@@ -16,6 +16,7 @@ import 'src/data/datasources/repository/circuit_collections_repository.dart';
 import 'src/data/datasources/repository/group_session_repository.dart';
 import 'src/data/datasources/repository/guide_access_repository.dart';
 import 'src/data/datasources/repository/guide_chat_repository.dart';
+import 'src/data/datasources/repository/guide_desk_repository.dart';
 import 'src/data/datasources/repository/guide_inbox_repository.dart';
 import 'src/data/datasources/repository/guide_repository.dart';
 import 'src/data/datasources/repository/guide_request_repository.dart';
@@ -107,6 +108,12 @@ class _KPlanAppState extends State<KPlanApp> {
             context.read<GuideAccessRepository>(),
             context.read<GuideInboxRepository>(),
           ),
+        ),
+        // Con el API: las salidas, convocatorias, postulaciones, el saldo y
+        // los retiros del guía aprobado.
+        ChangeNotifierProvider<GuideDeskRepository>(
+          create: (context) =>
+              GuideDeskRepository(auth: context.read<AuthRepository>()),
         ),
         ChangeNotifierProvider<TouristRepository>(
           create: (context) =>

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../data/datasources/remote/api_client.dart';
 import '../data/datasources/repository/active_trip_repository.dart';
 import '../data/datasources/repository/auth_repository.dart';
 import '../data/datasources/repository/badges_repository.dart';
@@ -12,6 +13,7 @@ import '../data/datasources/repository/circuit_collections_repository.dart';
 import '../data/datasources/repository/group_session_repository.dart';
 import '../data/datasources/repository/guide_access_repository.dart';
 import '../data/datasources/repository/guide_chat_repository.dart';
+import '../data/datasources/repository/guide_desk_repository.dart';
 import '../data/datasources/repository/guide_inbox_repository.dart';
 import '../data/datasources/repository/guide_repository.dart';
 import '../data/datasources/repository/guide_request_repository.dart';
@@ -68,6 +70,9 @@ import '../ui/guide_app/trips/view/guide_trips_view.dart';
 import '../ui/guide_app/trips/viewmodels/guide_trip_viewmodel.dart';
 import '../ui/guide_app/trips/viewmodels/guide_trips_viewmodel.dart';
 import '../ui/guide_chat/view/guide_chat_view.dart';
+import '../ui/guide_desk/view/guide_desk_views.dart';
+import '../ui/guide_desk/view/guide_finance_view.dart';
+import '../ui/guide_desk/viewmodels/guide_desk_viewmodel.dart';
 import '../ui/guide_chat/viewmodels/guide_chat_viewmodel.dart';
 import '../ui/guide_profile/view/guide_profile_view.dart';
 import '../ui/guide_profile/viewmodels/guide_profile_viewmodel.dart';
@@ -280,37 +285,43 @@ GoRouter createRouter(AuthRepository authRepository) {
       // ── App del guía ──────────────────────────────────────────────────────
       GoRoute(
         path: Routes.guideHome,
-        builder: (context, state) => ChangeNotifierProvider<GuideHomeViewModel>(
-          create: (context) => GuideHomeViewModel(
-            context.read<GuideAccessRepository>(),
-            context.read<GuideWorkRepository>(),
-            context.read<TouristRepository>(),
-          ),
-          child: const GuideHomeView(),
-        ),
+        // Con el API, el trabajo del guía sale de sus salidas, convocatorias y
+        // reservas reales; en la demo, de GuideWorkRepository.
+        builder: (context, state) => ApiClient.isConfigured
+            ? _guideDesk(const GuideDeskHomeView())
+            : ChangeNotifierProvider<GuideHomeViewModel>(
+                create: (context) => GuideHomeViewModel(
+                  context.read<GuideAccessRepository>(),
+                  context.read<GuideWorkRepository>(),
+                  context.read<TouristRepository>(),
+                ),
+                child: const GuideHomeView(),
+              ),
       ),
       GoRoute(
         path: Routes.guideTrips,
-        builder: (context, state) =>
-            ChangeNotifierProvider<GuideTripsViewModel>(
-              create: (context) => GuideTripsViewModel(
-                context.read<GuideWorkRepository>(),
-                context.read<TouristRepository>(),
+        builder: (context, state) => ApiClient.isConfigured
+            ? _guideDesk(const GuideDeskTripsView())
+            : ChangeNotifierProvider<GuideTripsViewModel>(
+                create: (context) => GuideTripsViewModel(
+                  context.read<GuideWorkRepository>(),
+                  context.read<TouristRepository>(),
+                ),
+                child: const GuideTripsView(),
               ),
-              child: const GuideTripsView(),
-            ),
       ),
       GoRoute(
         path: Routes.guideChats,
-        builder: (context, state) =>
-            ChangeNotifierProvider<GuideChatsViewModel>(
-              create: (context) => GuideChatsViewModel(
-                context.read<GuideWorkRepository>(),
-                context.read<TouristRepository>(),
-                context.read<GuideInboxRepository>(),
+        builder: (context, state) => ApiClient.isConfigured
+            ? _guideDesk(const GuideDeskChatsView())
+            : ChangeNotifierProvider<GuideChatsViewModel>(
+                create: (context) => GuideChatsViewModel(
+                  context.read<GuideWorkRepository>(),
+                  context.read<TouristRepository>(),
+                  context.read<GuideInboxRepository>(),
+                ),
+                child: const GuideChatsView(),
               ),
-              child: const GuideChatsView(),
-            ),
       ),
       GoRoute(
         path: Routes.guideSelfProfile,
@@ -343,14 +354,19 @@ GoRouter createRouter(AuthRepository authRepository) {
       ),
       GoRoute(
         path: Routes.guideBalance,
-        builder: (context, state) =>
-            ChangeNotifierProvider<GuideBalanceViewModel>(
-              create: (context) => GuideBalanceViewModel(
-                context.read<GuideWorkRepository>(),
-                context.read<TouristRepository>(),
+        builder: (context, state) => ApiClient.isConfigured
+            ? ChangeNotifierProvider<GuideFinanceViewModel>(
+                create: (context) =>
+                    GuideFinanceViewModel(context.read<GuideDeskRepository>()),
+                child: const GuideFinanceView(),
+              )
+            : ChangeNotifierProvider<GuideBalanceViewModel>(
+                create: (context) => GuideBalanceViewModel(
+                  context.read<GuideWorkRepository>(),
+                  context.read<TouristRepository>(),
+                ),
+                child: const GuideBalanceView(),
               ),
-              child: const GuideBalanceView(),
-            ),
       ),
       GoRoute(
         path: Routes.guideJob,
@@ -796,5 +812,17 @@ Widget _routeMap(MapSubject subject) {
       subject,
     ),
     child: const RouteMapView(),
+  );
+}
+
+/// Una pestaña de la app del guía con el API, con su propio ViewModel.
+Widget _guideDesk(Widget view) {
+  return ChangeNotifierProvider<GuideDeskViewModel>(
+    create: (context) => GuideDeskViewModel(
+      context.read<GuideDeskRepository>(),
+      context.read<BookingsRepository>(),
+      context.read<TourRepository>(),
+    ),
+    child: view,
   );
 }

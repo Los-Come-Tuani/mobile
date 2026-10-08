@@ -71,6 +71,11 @@ class BookingsRepository extends ChangeNotifier {
     return null;
   }
 
+  /// Mensajes sin leer en las reservas que atiende como guía.
+  int get unreadAsGuide => _bookings
+      .where((b) => b.asGuide)
+      .fold(0, (sum, b) => sum + b.unreadMessages);
+
   Booking? findById(String id) {
     for (final booking in _bookings) {
       if (booking.id == id) return booking;
