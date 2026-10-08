@@ -122,10 +122,81 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     (catálogo y ciclo completo de un itinerario con el turista local; pide `KPLAN_API_URL` y
     `KPLAN_TOURIST_PASSWORD`, la contraseña local está en la memoria del API, sección 10; pasó
     contra el API local y borra lo que crea). `flutter analyze` sin avisos; `flutter test` 370 pasan, 6 saltadas.
-  - **Sigue en demo aunque el API esté configurado**: lugares destacados (`places.json`), eventos,
-    cupones, horarios de grupo de los creativos (`circuit_groups.json` usa los slugs viejos: con el
-    API un creativo no muestra horarios hasta F7), reseñas, reservas, guías para contratar,
-    insignias, viaje en curso y bitácora de visitas.
+  - Lo que F4 dejó en demo (eventos, cupones, horarios de grupo, reseñas, reservas, guías,
+    insignias) pasó al API con F6 a F8: ver el bloque siguiente.
+- **Hecho: F6, F7 y F8 en la app** (2026-10-08; contratos en `api/docs/servicios.md`,
+  `agenda-y-recompensas.md`, `finanzas.md` y `avisos.md`). Con `API_BASE_URL` vacío todo sigue en
+  demo como antes. Un commit por área en `feat/hoja-de-ruta-api`.
+  - **Piezas comunes**: `remote/api_call.dart` (`apiCall` devuelve `Result` con el `detail` del API;
+    `failureStatus` da el código; `ApiRows.list/one/pages/post/patch/put`) y
+    `core/utils/api_json.dart` (`ApiJson`: lectura tolerante de campos, fechas, imágenes). Las rutas
+    de F6 a F8 están en `api_routes.dart`. Capas finas: `services_api.dart` (F7),
+    `guide_desk_api.dart` (lo del guía y su dinero), `rewards_api.dart` (visitas, insignias,
+    cupones), `notifications_api.dart`, `reports_api.dart`.
+  - **Guías** (`GuideRepository`): `GET /guide/` con filtros y `GET /guide/{id}/` (reseñas y
+    próximas salidas). Pantalla nueva "Guías y traductores" (`/guides`, menú del inicio). El API no
+    tiene años de experiencia ni especialidades: el perfil los oculta.
+  - **Salidas y reservas**: con el API todo circuito oficial se reserva en una salida (la pantalla
+    de horarios de grupo lista `GET /circuit/{id}/departure/` y reserva con `POST /booking/`); si el
+    turista le cambió las paradas, ya es suyo y va por la agenda con convocatoria
+    (`CircuitDetailViewModel.booksDeparture`). `BookingsRepository(auth:)` trae `GET /booking/` (al
+    abrir el inicio y "Mis viajes") y reserva, cancela, inicia, termina y reseña; `Booking.fromApi`
+    con estado, monto, `payment_status`, `payment_instructions`, plazo y `can_cancel`. Detalle
+    nuevo `/booking/:id` (turista y guía): estado, cobro con las instrucciones mientras está
+    pendiente (sin cobro con tarjeta), cancelar, chat, reseña, iniciar/terminar (guía) y reportar
+    al turista (guía). Tras reservar sale la hoja "Reserva confirmada" con cómo pagar.
+  - **Convocatorias** (`GuideRequestRepository`, `publishRemote`/`refreshActive`/`hireRemote`/
+    `cancelRemote`/`loadMine`): agendar un itinerario propio publica `POST /service-request/` con
+    el itinerario de la cuenta (`CircuitCollectionsRepository.savedItineraryId` espera a que esté
+    guardado), el presupuesto como `max_fee` y lo pedido como nota (`GuideRequestTerms.apiNote`).
+    El API pide **una** persona por convocatoria (guía o traductor). La pantalla de propuesta
+    refresca cada 10 s; elegir crea la reserva y abre su detalle. Al abrir el inicio se trae la
+    abierta más nueva; sin las condiciones del teléfono que la publicó, se muestra la nota.
+  - **Chat** (`BookingChatRepository`, `/booking/:id/chat`): `?after=` con el `sent_at` crudo del
+    último mensaje cada 7 s, `POST` y `.../read/`; solo lectura en una reserva cancelada.
+  - **Reseñas**: hoja de calificación compartida (`showRateGuideSheet` para el turista);
+    `disputeReview` (motivo de 10 caracteres o más) se ofrece al tocar un aviso de reseña.
+  - **App del guía con el API** (`GuideDeskRepository(auth:)`, `ui/guide_desk/`): las pestañas
+    Inicio (convocatorias abiertas y postularse sin pasar del tope; mis postulaciones y retirar),
+    Viajes (mis salidas: publicar, editar cupo/transporte/nota, cancelar con motivo; mis reservas),
+    Chats (una conversación por reserva, no leídos en la barra) y "Mi dinero" (saldo y
+    movimientos, cuenta activa y la pendiente de 24 h, retiros). El router elige estas pantallas
+    con `ApiClient.isConfigured`; la demo sigue con `GuideWorkRepository`.
+  - **Avisos** (`NotificationsRepository(auth:)`, `/notifications`): bandeja paginada, contador
+    con `?unread=true` cada minuto (campana del inicio y del guía), marcar uno y todos; tocar abre
+    la reserva, la convocatoria o los retiros según `data`. Configuraciones -> Notificaciones usa
+    `GET|PUT /notification-preference/` con el API. **Push**: interfaz `PushService` con
+    `NoPushService` (sin `firebase_messaging` ni `google-services.json`); el cliente de
+    `POST /device-token/` y `/device-token/remove/` está listo en `registerDevice` y
+    `unregisterDevice`. Cuando exista el proyecto de Firebase: implementar `PushService` con
+    `firebase_messaging`, pasarlo a `NotificationsRepository(push:)` en `main.dart`, agregar
+    `google-services.json`/`GoogleService-Info.plist` y llamar a `unregisterDevice()` **antes** de
+    `AuthRepository.logout()` (no se tocó `auth_repository.dart` por el trabajo de Google).
+  - **Agenda**: `TourRepository.getUpcomingEvents/getEventById` con `GET /event/`;
+    `EventItem.fromApi` (organizador, cancelado con motivo). Los lugares destacados siguen en
+    `places.json`.
+  - **Insignias** (`BadgesRepository(auth:)`): escanear un QR (detalle del lugar y mapa del viaje)
+    manda `POST /visit/` con la ubicación (`LocationRepository.currentPosition`, geolocator ya
+    estaba con sus permisos) y muestra el error del API; saldo y logros de `GET /badge/mine/`
+    (`by_pillar` con la clave de categoría de la app). El escáner acepta cualquier QR con el API.
+  - **Cupones**: tienda `GET /reward/`, canje `POST /coupon/` con el código para el mostrador y
+    billetera `GET /coupon/mine/` en la misma pantalla (`BadgesRepository.rewards`,
+    `redeemCampaign`, `loadWallet`).
+  - **Reportar** (`ReportsRepository`, `showReportSheet`): motivos de `GET /report/reason/` y
+    `POST /report/`. Botón en lugar, evento y turista de una reserva (guía). En el perfil del guía
+    y en cada reseña queda oculto hasta que el API mande `user_id` e `id` (ver abajo).
+  - Pruebas con `FakeApi` (muestras en `test/support/services_samples.dart`):
+    `guide_repository_api_test`, `bookings_repository_api_test`, `guide_request_api_test`,
+    `booking_chat_test`, `reviews_api_test`, `guide_desk_repository_test`,
+    `notifications_repository_test`, `badges_api_test`, `coupons_api_test`,
+    `reports_repository_test` y la agenda en `tour_repository_api_test`. Contrato:
+    `test/integration/services_contract_test.dart` (pasó contra el API local con el turista; lo
+    del guía pide `KPLAN_GUIDE_EMAIL`/`KPLAN_GUIDE_PASSWORD` de un guía aprobado, que no hay
+    sembrado: postularse desde la app y aprobarlo desde el portal). El API local tiene 12 eventos
+    y ningún guía aprobado ni campaña de cupones. `flutter analyze` sin avisos; `flutter test` 410
+    pasan, 9 saltadas. No se probó en un dispositivo.
+  - **Sigue en demo con el API**: lugares destacados, viaje en curso y bitácora de visitas (solo en
+    el teléfono), medallas por ciudad creativa, el chat simulado de la propuesta de la demo.
 
 ## Qué falta
 
@@ -144,12 +215,10 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    `provider` (estado y servicios del perfil de prestador): de ahí sale el acceso a la app del
    guía (ver F5 arriba). El API manda un solo rol, el de más rango: una cuenta que es guía y
    traductora llega como `guia`; los servicios completos vienen en `provider.services`.
-   Falta: el turista no ve todavía a los guías aprobados (el perfil público del guía y la
-   contratación siguen simulados; llegan con la fase que los conecte).
-4. **Datos del dominio**: circuitos, lugares e itinerarios ya vienen del API (F4, arriba); lo
-   demás (reservas, guías para contratar, horarios de grupo, reseñas, insignias, eventos,
-   cupones) sigue simulado. Cada fase reemplaza su repositorio por llamadas al API. El mejor
-   checklist es `portal/src/data/api/endpoints.ts`.
+   Desde F7 el turista ve a los guías aprobados y los contrata con el API (arriba).
+4. **Datos del dominio**: con F4 a F8 casi todo viene del API (arriba). Faltan los lugares
+   destacados, el viaje en curso y la bitácora de visitas, que el API todavía no tiene. Falta
+   también probar el flujo del guía contra el API con un guía aprobado de verdad.
 5. **Eliminar la cuenta** (`POST /auth/account-close/`, baja a 30 días) no tiene pantalla todavía.
 6. Opcional: borrar la sesión del Keychain en una reinstalación de iOS (el Keychain sobrevive a
    desinstalar la app); con un `refresh` de un día el riesgo es bajo.
@@ -177,7 +246,26 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    - Un itinerario guarda nombre y coordenadas de un lugar retirado, pero la app solo pinta lugares
      de `/stop/` (activos): esa parada desaparece de su circuito. O el API entrega el lugar
      retirado por id, o la app arma la parada con lo que trae el itinerario.
-   - Los horarios de grupo de los creativos (`circuit/{id}/group-session/`) y las reseñas: F7.
+   - (F6 a F8) El guía llega en `GET /guide/`, las salidas y las reservas con el id de su perfil
+     de prestador, pero `POST /report/` con `target_kind: user` pide el id de la cuenta: hoy no se
+     puede reportar a un guía. Que `GuideCardGet`/`GuideRef` traigan `user_id` (o que el reporte
+     acepte el perfil). La app ya lee `user_id` y muestra el botón cuando llegue.
+   - (F7) Las reseñas de `GET /guide/{id}/` no traen `id`: no se pueden reportar. La app ya lee
+     `id` y muestra el botón cuando llegue.
+   - (F7) `GET /application/mine/` solo trae `request_id`: el guía no ve fecha ni itinerario de
+     una postulación cuya convocatoria ya no está abierta. Que traiga la convocatoria resumida.
+   - (F7) Una convocatoria pide una sola persona: la app pedía guía y traductor a la vez. Con el
+     API se publica una por persona (hoy la app manda lo pedido en la nota y acepta a una).
+   - (F7) La convocatoria no guarda las condiciones (servicio, horas, transporte): la app las
+     manda como nota y `max_fee`; otro teléfono solo ve la nota. Campos propios ayudarían.
+   - (F7) Reservar en una salida no deja elegir idioma ni pedir traductor; y no hay reservas del
+     equipo para incidencias (anotado en el API).
+   - (F8) `GET /notification/?unread=true` para el contador trae una página entera; un
+     `GET /notification/unread-count/` liviano sería mejor. Los avisos llegan en español.
+   - (F8) El chat no tiene tiempo real: la app pregunta cada 7 s con la conversación abierta.
+   - (F6) `GET /badge/mine/` no dice cuándo vuelve a valer un lugar (24 h); la app solo muestra
+     el `409` del API.
+   - Los horarios de grupo de los creativos y las reseñas ya están (F7: salidas y reseñas).
    - Los circuitos de Ometepe (Rivas) no se siembran: en la app con API no aparecen.
 
 ## Cómo está armada la app
@@ -203,7 +291,10 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 - Patrón para conectar un repositorio al API: una capa fina en `remote/<algo>_api.dart` (rutas en
   `api_routes.dart`, modelos con `fromApi`), y en el repositorio `if (ApiClient.isConfigured)` ->
   API con un `_call` que devuelve `Result<T>` (el `detail` del API como mensaje); si no, la demo.
-  Ver `provider_api.dart` (F5) y `tour_api.dart` (F4). En un repositorio que se precarga con
+  Ver `provider_api.dart` (F5) y `tour_api.dart` (F4); desde F6 a F8 el `_call` común es
+  `apiCall` (`remote/api_call.dart`) y los modelos leen con `ApiJson`. Un repositorio que guarda
+  datos de la cuenta escucha `AuthRepository` y se vacía al cambiar de cuenta (`auth:`). En un
+  repositorio que se precarga con
   `tester.runAsync`, no hagas `await` de un `Future` ya terminado en las llamadas siguientes: su
   continuación queda en la otra zona y la pantalla no sigue con el reloj falso (por eso
   `ensureLoaded` vuelve sin esperar cuando ya cargó).
