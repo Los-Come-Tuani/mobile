@@ -391,9 +391,9 @@ void main() {
       expect(first.image, 'https://cdn.test/1.jpg');
       expect(first.date, DateTime(2026, 10, 10, 18));
       expect(
-      first.dateLabel.replaceAll('\u00A0', ' '),
-      '10 oct - 11 oct · 6:00 p.m.',
-    );
+        first.dateLabel.replaceAll('\u00A0', ' '),
+        '10 oct - 11 oct · 6:00 p.m.',
+      );
       expect(first.organizer, 'Teatro de León');
       expect(events.last.cancelled, isTrue);
       expect(events.last.cancellationReason, 'Lluvia');

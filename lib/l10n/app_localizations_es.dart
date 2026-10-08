@@ -719,6 +719,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String couponsCodeMessage(String code) {
+    return 'Tu código es $code. Díctalo en el mostrador del comercio; también queda en Mis cupones.';
+  }
+
+  @override
   String get couponsRedeemButton => 'CANJEAR';
 
   @override
@@ -748,6 +753,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String couponsRedeemTitle(String title) {
     return '¿Canjear \"$title\"?';
   }
+
+  @override
+  String get couponsStoreEmpty =>
+      'Por ahora no hay cupones disponibles. Vuelve pronto.';
+
+  @override
+  String get couponsStoreTitle => 'Para canjear';
+
+  @override
+  String get couponsWalletConsumed => 'Usado';
+
+  @override
+  String get couponsWalletExpired => 'Vencido';
+
+  @override
+  String get couponsWalletTitle => 'Mis cupones';
+
+  @override
+  String couponsWalletUntil(String date) {
+    return 'vale hasta el $date';
+  }
+
+  @override
+  String get couponsWalletValid => 'Listo para usar';
 
   @override
   String get eventDetailCancelled => 'Este evento se canceló.';

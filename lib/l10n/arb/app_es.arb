@@ -449,6 +449,14 @@
       }
     }
   },
+  "couponsCodeMessage": "Tu código es {code}. Díctalo en el mostrador del comercio; también queda en Mis cupones.",
+  "@couponsCodeMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "couponsRedeemButton": "CANJEAR",
   "couponsRedeemConfirm": "Canjear",
   "couponsRedeemed": "¡Cupón canjeado! Muéstralo al reservar.",
@@ -470,6 +478,20 @@
       }
     }
   },
+  "couponsStoreEmpty": "Por ahora no hay cupones disponibles. Vuelve pronto.",
+  "couponsStoreTitle": "Para canjear",
+  "couponsWalletConsumed": "Usado",
+  "couponsWalletExpired": "Vencido",
+  "couponsWalletTitle": "Mis cupones",
+  "couponsWalletUntil": "vale hasta el {date}",
+  "@couponsWalletUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "couponsWalletValid": "Listo para usar",
   "eventDetailCancelled": "Este evento se canceló.",
   "eventDetailCancelledBecause": "Este evento se canceló: {reason}",
   "@eventDetailCancelledBecause": {

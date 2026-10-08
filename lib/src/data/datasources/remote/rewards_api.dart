@@ -1,4 +1,5 @@
 import '../../models/badge_summary.dart';
+import '../../models/coupon.dart';
 import 'api_call.dart';
 import 'api_routes.dart';
 
@@ -22,4 +23,24 @@ abstract final class RewardsApi {
 
   static Future<BadgeSummary> badges() async =>
       BadgeSummary.fromApi(await ApiRows.one(ApiRoutes.badgesMine));
+
+  /// La tienda: campañas activas con cupos. [city] es el código de la ciudad
+  /// del comercio.
+  static Future<List<Coupon>> rewards({String? city}) async {
+    final rows = await ApiRows.pages(ApiRoutes.rewards, query: {'city': city});
+    return [for (final row in rows) Coupon.fromApi(row)];
+  }
+
+  /// Canjea insignias por un cupón (`409` si no alcanzan, `404` si la campaña
+  /// ya no está disponible).
+  static Future<WalletCoupon> redeem(String campaignId) async =>
+      WalletCoupon.fromApi(
+        await ApiRows.post(ApiRoutes.coupons, {'campaign_id': campaignId}),
+      );
+
+  /// La billetera, del más reciente.
+  static Future<List<WalletCoupon>> wallet() async {
+    final rows = await ApiRows.list(ApiRoutes.couponsMine);
+    return [for (final row in rows) WalletCoupon.fromApi(row)];
+  }
 }

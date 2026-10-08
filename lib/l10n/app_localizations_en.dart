@@ -721,6 +721,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String couponsCodeMessage(String code) {
+    return 'Your code is $code. Read it out at the shop\'s counter; it also stays in My coupons.';
+  }
+
+  @override
   String get couponsRedeemButton => 'REDEEM';
 
   @override
@@ -750,6 +755,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String couponsRedeemTitle(String title) {
     return 'Redeem \"$title\"?';
   }
+
+  @override
+  String get couponsStoreEmpty =>
+      'There are no coupons available right now. Come back soon.';
+
+  @override
+  String get couponsStoreTitle => 'To redeem';
+
+  @override
+  String get couponsWalletConsumed => 'Used';
+
+  @override
+  String get couponsWalletExpired => 'Expired';
+
+  @override
+  String get couponsWalletTitle => 'My coupons';
+
+  @override
+  String couponsWalletUntil(String date) {
+    return 'valid until $date';
+  }
+
+  @override
+  String get couponsWalletValid => 'Ready to use';
 
   @override
   String get eventDetailCancelled => 'This event was cancelled.';

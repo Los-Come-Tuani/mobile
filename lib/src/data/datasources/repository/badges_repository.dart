@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/utils/result.dart';
 import '../../models/badge_summary.dart';
+import '../../models/coupon.dart';
 import '../../models/user_location.dart';
 import '../remote/api_call.dart';
 import '../remote/api_client.dart';
@@ -39,6 +40,7 @@ class BadgesRepository extends ChangeNotifier {
 
   /// Con el API, el último saldo que llegó.
   BadgeSummary? _summary;
+  final List<WalletCoupon> _wallet = [];
 
   Map<String, int> get earnedByCategory =>
       Map.unmodifiable(_summary?.byCategory ?? _earnedByCategory);
@@ -142,11 +144,44 @@ class BadgesRepository extends ChangeNotifier {
     return result;
   }
 
+  /// La tienda de cupones del API.
+  Future<Result<List<Coupon>>> rewards({String? city}) =>
+      apiCall('rewards', () => RewardsApi.rewards(city: city));
+
+  /// Los cupones canjeados (con el API), del más reciente.
+  List<WalletCoupon> get wallet => List.unmodifiable(_wallet);
+
+  Future<Result<List<WalletCoupon>>> loadWallet() async {
+    final result = await apiCall('wallet', RewardsApi.wallet);
+    if (_isDisposed) return result;
+    if (result case Ok(:final value)) {
+      _wallet
+        ..clear()
+        ..addAll(value);
+      notifyListeners();
+    }
+    return result;
+  }
+
+  /// Canjea insignias por un cupón de la campaña [campaignId]: el cupón queda
+  /// en la billetera y el saldo se vuelve a traer.
+  Future<Result<WalletCoupon>> redeemCampaign(String campaignId) async {
+    final result = await apiCall('redeem', () => RewardsApi.redeem(campaignId));
+    if (_isDisposed) return result;
+    if (result case Ok(:final value)) {
+      _wallet.insert(0, value);
+      notifyListeners();
+      await refresh();
+    }
+    return result;
+  }
+
   void _onSessionChanged() {
     final account = _auth?.currentUser?.id;
     if (account == _account) return;
     _account = account;
     _summary = null;
+    _wallet.clear();
     notifyListeners();
   }
 

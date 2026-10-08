@@ -5,6 +5,7 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../data/models/coupon.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
@@ -43,13 +44,31 @@ class _CouponsViewState extends State<CouponsView> {
     );
     if (!confirmed || !mounted) return;
 
-    final ok = viewModel.redeem(coupon);
+    final ok = await viewModel.redeem(coupon);
     if (!mounted) return;
+    // Con el API sale un código: se muestra para dictarlo en el mostrador.
+    if (viewModel.lastRedeemed case final redeemed? when ok) {
+      await showAppDialog<void>(
+        context,
+        builder: (context) => AppDialog(
+          icon: Icons.confirmation_number_outlined,
+          title: l10n.couponsRedeemed,
+          message: l10n.couponsCodeMessage(redeemed.spacedCode),
+          primaryLabel: l10n.commonDone,
+          onPrimary: () => Navigator.of(context).pop(),
+        ),
+      );
+      return;
+    }
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(ok ? l10n.couponsRedeemed : l10n.couponsRedeemFailed),
+          content: Text(
+            ok
+                ? l10n.couponsRedeemed
+                : viewModel.redeemError ?? l10n.couponsRedeemFailed,
+          ),
         ),
       );
   }
@@ -57,6 +76,7 @@ class _CouponsViewState extends State<CouponsView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<CouponsViewModel>();
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: BrandAppBar(title: context.l10n.commonCoupons),
@@ -69,7 +89,22 @@ class _CouponsViewState extends State<CouponsView> {
               padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
               children: [
                 _BalanceCard(available: viewModel.availableBadges),
+                if (viewModel.errorMessage case final error?) ...[
+                  const SizedBox(height: 12),
+                  Text(error, style: AppTextStyles.bodySmall),
+                ],
+                if (viewModel.wallet.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  Text(l10n.couponsWalletTitle, style: AppTextStyles.title),
+                  const SizedBox(height: 8),
+                  for (final coupon in viewModel.wallet)
+                    _WalletTile(coupon: coupon),
+                  const SizedBox(height: 8),
+                  Text(l10n.couponsStoreTitle, style: AppTextStyles.title),
+                ],
                 const SizedBox(height: 20),
+                if (viewModel.usesApi && viewModel.coupons.isEmpty)
+                  Text(l10n.couponsStoreEmpty, style: AppTextStyles.bodySmall),
                 for (final coupon in viewModel.coupons)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -82,6 +117,45 @@ class _CouponsViewState extends State<CouponsView> {
                   ),
               ],
             ),
+    );
+  }
+}
+
+/// Un cupón canjeado: su código para dictarlo en el mostrador, el comercio y
+/// hasta cuándo vale.
+class _WalletTile extends StatelessWidget {
+  const _WalletTile({required this.coupon});
+
+  final WalletCoupon coupon;
+
+  @override
+  Widget build(BuildContext context) {
+    final valid = coupon.status == WalletCouponStatus.valid;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        Icons.confirmation_number_outlined,
+        color: valid ? AppColors.primary30 : AppColors.hintText,
+      ),
+      title: Text(
+        coupon.spacedCode,
+        style: AppTextStyles.title.copyWith(
+          letterSpacing: 2,
+          color: valid ? AppColors.primaryText : AppColors.hintText,
+        ),
+      ),
+      subtitle: Text(
+        Formatters.facts([
+          coupon.title,
+          coupon.business,
+          coupon.status.label,
+          if (valid)
+            context.l10n.couponsWalletUntil(
+              Formatters.shortDate(coupon.expiresAt),
+            ),
+        ]),
+        style: AppTextStyles.caption,
+      ),
     );
   }
 }

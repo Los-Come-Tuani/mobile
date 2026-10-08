@@ -19,7 +19,8 @@ import '../remote/tour_api.dart';
 /// Con `ApiClient.isConfigured`, los circuitos, los lugares y la agenda salen del
 /// API ([TourApi], `GET /event/`); sin él, de [MockDatasource]. Los lugares
 /// destacados todavía no existen en el API: siguen saliendo de los JSON de ejemplo
-/// en los dos modos.
+/// en los dos modos. [getCoupons] es solo la tienda de la demo: con el API, la
+/// tienda de cupones está en `BadgesRepository.rewards`.
 class TourRepository {
   TourRepository({MockDatasource? datasource, DateTime Function()? now})
     : _datasource = datasource ?? MockDatasource(),

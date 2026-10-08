@@ -1244,6 +1244,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, other{insignias disponibles para canjear}}'**
   String couponsBalanceLabel(int count);
 
+  /// No description provided for @couponsCodeMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Tu código es {code}. Díctalo en el mostrador del comercio; también queda en Mis cupones.'**
+  String couponsCodeMessage(String code);
+
   /// No description provided for @couponsRedeemButton.
   ///
   /// In es, this message translates to:
@@ -1285,6 +1291,48 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'¿Canjear \"{title}\"?'**
   String couponsRedeemTitle(String title);
+
+  /// No description provided for @couponsStoreEmpty.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ahora no hay cupones disponibles. Vuelve pronto.'**
+  String get couponsStoreEmpty;
+
+  /// No description provided for @couponsStoreTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Para canjear'**
+  String get couponsStoreTitle;
+
+  /// No description provided for @couponsWalletConsumed.
+  ///
+  /// In es, this message translates to:
+  /// **'Usado'**
+  String get couponsWalletConsumed;
+
+  /// No description provided for @couponsWalletExpired.
+  ///
+  /// In es, this message translates to:
+  /// **'Vencido'**
+  String get couponsWalletExpired;
+
+  /// No description provided for @couponsWalletTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Mis cupones'**
+  String get couponsWalletTitle;
+
+  /// No description provided for @couponsWalletUntil.
+  ///
+  /// In es, this message translates to:
+  /// **'vale hasta el {date}'**
+  String couponsWalletUntil(String date);
+
+  /// No description provided for @couponsWalletValid.
+  ///
+  /// In es, this message translates to:
+  /// **'Listo para usar'**
+  String get couponsWalletValid;
 
   /// No description provided for @eventDetailCancelled.
   ///
