@@ -157,13 +157,14 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   - **Reseñas**: hoja de calificación compartida (`showRateGuideSheet` para el turista);
     `disputeReview` (motivo de 10 caracteres o más) se ofrece al tocar un aviso de reseña.
   - **App del guía con el API** (`GuideDeskRepository(auth:)`, `ui/guide_desk/`): las pestañas
-    Inicio (convocatorias abiertas y postularse sin pasar del tope; mis postulaciones y retirar),
+    Inicio (convocatorias abiertas y postularse sin pasar del tope; mis postulaciones, con la
+    convocatoria en corto que trae cada una en `request` (`BidRequest`), y retirar),
     Viajes (mis salidas: publicar, editar cupo/transporte/nota, cancelar con motivo; mis reservas),
     Chats (una conversación por reserva, no leídos en la barra) y "Mi dinero" (saldo y
     movimientos, cuenta activa y la pendiente de 24 h, retiros). El router elige estas pantallas
     con `ApiClient.isConfigured`; la demo sigue con `GuideWorkRepository`.
   - **Avisos** (`NotificationsRepository(auth:)`, `/notifications`): bandeja paginada, contador
-    con `?unread=true` cada minuto (campana del inicio y del guía), marcar uno y todos; tocar abre
+    con `GET /notification/unread/` (`{ count }`) cada minuto (campana del inicio y del guía), marcar uno y todos; tocar abre
     la reserva, la convocatoria o los retiros según `data`. Configuraciones -> Notificaciones usa
     `GET|PUT /notification-preference/` con el API. **Push**: interfaz `PushService` con
     `NoPushService` (sin `firebase_messaging` ni `google-services.json`); el cliente de
@@ -183,17 +184,20 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     billetera `GET /coupon/mine/` en la misma pantalla (`BadgesRepository.rewards`,
     `redeemCampaign`, `loadWallet`).
   - **Reportar** (`ReportsRepository`, `showReportSheet`): motivos de `GET /report/reason/` y
-    `POST /report/`. Botón en lugar, evento y turista de una reserva (guía). En el perfil del guía
-    y en cada reseña queda oculto hasta que el API mande `user_id` e `id` (ver abajo).
+    `POST /report/`. Botón en lugar, evento y turista de una reserva (guía), en el perfil del guía
+    (`target_kind: "user"` con su `user_id`, no el id del perfil) y en cada reseña (`"review"`
+    con su `id`); los dos últimos los cubre `guide_profile_report_test`.
   - Pruebas con `FakeApi` (muestras en `test/support/services_samples.dart`):
     `guide_repository_api_test`, `bookings_repository_api_test`, `guide_request_api_test`,
     `booking_chat_test`, `reviews_api_test`, `guide_desk_repository_test`,
     `notifications_repository_test`, `badges_api_test`, `coupons_api_test`,
-    `reports_repository_test` y la agenda en `tour_repository_api_test`. Contrato:
-    `test/integration/services_contract_test.dart` (pasó contra el API local con el turista; lo
-    del guía pide `KPLAN_GUIDE_EMAIL`/`KPLAN_GUIDE_PASSWORD` de un guía aprobado, que no hay
-    sembrado: postularse desde la app y aprobarlo desde el portal). El API local tiene 12 eventos
-    y ningún guía aprobado ni campaña de cupones. `flutter analyze` sin avisos; `flutter test` 410
+    `reports_repository_test`, `guide_profile_report_test` y la agenda en
+    `tour_repository_api_test`. Contrato: `test/integration/services_contract_test.dart`, que
+    pasó entero contra el API local (2026-10-08, API `fd2bb7b`) con el turista y con el guía
+    local `guia.leon@example.com` (`KPLAN_GUIDE_EMAIL`/`KPLAN_GUIDE_PASSWORD`, la misma clave
+    local; otra ciudad con `KPLAN_GUIDE_CITY`): publica una salida en un circuito de León, la ve
+    en su lista y en las públicas del circuito y la cancela al final. El API local tiene 12
+    eventos y ninguna campaña de cupones. `flutter analyze` sin avisos; `flutter test` 411
     pasan, 9 saltadas. No se probó en un dispositivo.
   - **Sigue en demo con el API**: lugares destacados, viaje en curso y bitácora de visitas (solo en
     el teléfono), medallas por ciudad creativa, el chat simulado de la propuesta de la demo.
@@ -217,8 +221,9 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    traductora llega como `guia`; los servicios completos vienen en `provider.services`.
    Desde F7 el turista ve a los guías aprobados y los contrata con el API (arriba).
 4. **Datos del dominio**: con F4 a F8 casi todo viene del API (arriba). Faltan los lugares
-   destacados, el viaje en curso y la bitácora de visitas, que el API todavía no tiene. Falta
-   también probar el flujo del guía contra el API con un guía aprobado de verdad.
+   destacados, el viaje en curso y la bitácora de visitas, que el API todavía no tiene. El
+   flujo del guía (salidas) ya pasó contra el API local; falta probar postularse y cobrar con
+   una convocatoria y una reserva reales.
 5. **Eliminar la cuenta** (`POST /auth/account-close/`, baja a 30 días) no tiene pantalla todavía.
 6. Opcional: borrar la sesión del Keychain en una reinstalación de iOS (el Keychain sobrevive a
    desinstalar la app); con un `refresh` de un día el riesgo es bajo.
@@ -246,25 +251,22 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
    - Un itinerario guarda nombre y coordenadas de un lugar retirado, pero la app solo pinta lugares
      de `/stop/` (activos): esa parada desaparece de su circuito. O el API entrega el lugar
      retirado por id, o la app arma la parada con lo que trae el itinerario.
-   - (F6 a F8) El guía llega en `GET /guide/`, las salidas y las reservas con el id de su perfil
-     de prestador, pero `POST /report/` con `target_kind: user` pide el id de la cuenta: hoy no se
-     puede reportar a un guía. Que `GuideCardGet`/`GuideRef` traigan `user_id` (o que el reporte
-     acepte el perfil). La app ya lee `user_id` y muestra el botón cuando llegue.
-   - (F7) Las reseñas de `GET /guide/{id}/` no traen `id`: no se pueden reportar. La app ya lee
-     `id` y muestra el botón cuando llegue.
-   - (F7) `GET /application/mine/` solo trae `request_id`: el guía no ve fecha ni itinerario de
-     una postulación cuya convocatoria ya no está abierta. Que traiga la convocatoria resumida.
+   - Resuelto en el API `fd2bb7b` y ya usado por la app: `user_id` en cada guía y `id` en cada
+     reseña (para reportarlos), `request` resumida en cada postulación y
+     `GET /notification/unread/` para la campana.
    - (F7) Una convocatoria pide una sola persona: la app pedía guía y traductor a la vez. Con el
      API se publica una por persona (hoy la app manda lo pedido en la nota y acepta a una).
-   - (F7) La convocatoria no guarda las condiciones (servicio, horas, transporte): la app las
-     manda como nota y `max_fee`; otro teléfono solo ve la nota. Campos propios ayudarían.
+   - (F7, abierto) La convocatoria no guarda las condiciones (servicio, horas, transporte): la
+     app las manda como nota y `max_fee`; otro teléfono solo ve la nota. Campos propios
+     ayudarían.
    - (F7) Reservar en una salida no deja elegir idioma ni pedir traductor; y no hay reservas del
      equipo para incidencias (anotado en el API).
-   - (F8) `GET /notification/?unread=true` para el contador trae una página entera; un
-     `GET /notification/unread-count/` liviano sería mejor. Los avisos llegan en español.
-   - (F8) El chat no tiene tiempo real: la app pregunta cada 7 s con la conversación abierta.
-   - (F6) `GET /badge/mine/` no dice cuándo vuelve a valer un lugar (24 h); la app solo muestra
-     el `409` del API.
+   - (F8, abierto) Los avisos (título y cuerpo, también los push) llegan en español: el API
+     debería escribirlos en el idioma del teléfono.
+   - (F8, abierto) El chat no tiene tiempo real: la app pregunta cada 7 s con la conversación
+     abierta.
+   - (F6, abierto) `GET /badge/mine/` no dice cuándo vuelve a valer un lugar (24 h); la app solo
+     muestra el `409` del API.
    - Los horarios de grupo de los creativos y las reseñas ya están (F7: salidas y reseñas).
    - Los circuitos de Ometepe (Rivas) no se siembran: en la app con API no aparecen.
 
