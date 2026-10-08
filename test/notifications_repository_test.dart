@@ -155,8 +155,8 @@ void main() {
       final push = _FakePush();
       final repository = NotificationsRepository(auth: auth, push: push);
 
-    await auth.login(email: 'ana@example.com', password: 'Secreta123');
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+      await auth.login(email: 'ana@example.com', password: 'Secreta123');
+      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       final register = api.requests.singleWhere(
         (r) => r.path == '/device-token/',

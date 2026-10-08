@@ -101,6 +101,27 @@ class LocationRepository extends ChangeNotifier {
     }
   }
 
+  /// Dónde está el teléfono ahora, para acreditar la visita a un lugar (el API
+  /// pide estar a menos de 50 m). Pide el permiso si hace falta; `null` sin
+  /// permiso, con el GPS apagado o si no llega a tiempo.
+  Future<UserLocation?> currentPosition() async {
+    await _updateAccess(request: true);
+    if (!isGranted) return null;
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+      _onPosition(position);
+    } catch (e) {
+      log.w('LocationRepository.current: $e');
+      await _seedWithLastKnown();
+    }
+    return _location;
+  }
+
   Future<void> _resume() async {
     await _updateAccess(request: false);
     _listen();

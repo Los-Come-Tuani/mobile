@@ -144,7 +144,8 @@ class _KPlanAppState extends State<KPlanApp> {
         ),
         // Insignias por categoría y su saldo canjeable por cupones.
         ChangeNotifierProvider<BadgesRepository>(
-          create: (_) => BadgesRepository(),
+          create: (context) =>
+              BadgesRepository(auth: context.read<AuthRepository>()),
         ),
         // Reservas confirmadas, para el aviso de "próximo viaje" del home.
         ChangeNotifierProvider<BookingsRepository>(

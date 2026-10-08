@@ -187,6 +187,7 @@ class HomeViewModel extends BaseViewModel {
     // cuenta; llega cuando llegue.
     unawaited(_bookingsRepository.refresh());
     unawaited(_guideRequestRepository.loadMine());
+    unawaited(_badgesRepository.refresh());
 
     // Se lanzan las cuatro lecturas en paralelo y luego se recogen.
     final circuitsFuture = _tourRepository.getCircuits();

@@ -3572,6 +3572,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repoAuthWrongCredentials => 'Incorrect email or password';
 
   @override
+  String get repoBadgesNeedsLocation =>
+      'To earn the badge we need your location: turn on GPS and allow K\'Plan to use it.';
+
+  @override
   String get repoChatReplyMeetingPoint =>
       'Perfect, see you at the meeting point. I\'ll be on time!';
 

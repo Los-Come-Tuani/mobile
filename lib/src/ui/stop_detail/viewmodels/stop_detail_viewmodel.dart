@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../../core/utils/result.dart';
 import '../../../data/datasources/repository/active_trip_repository.dart';
 import '../../../data/datasources/repository/badges_repository.dart';
@@ -43,6 +45,8 @@ class StopDetailViewModel extends BaseViewModel {
     clearError();
 
     await _collectionsRepository.ensureLoaded();
+    // Con el API, si ya ganó la insignia de este lugar sale de su saldo.
+    unawaited(_badgesRepository.refresh());
     switch (await _tourRepository.getStopById(stopId)) {
       case Ok(:final value):
         _stop = value;

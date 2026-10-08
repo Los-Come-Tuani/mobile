@@ -3590,6 +3590,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get repoAuthWrongCredentials => 'Correo o contraseña incorrectos';
 
   @override
+  String get repoBadgesNeedsLocation =>
+      'Para ganar la insignia necesitamos tu ubicación: activa el GPS y da permiso a K\'Plan.';
+
+  @override
   String get repoChatReplyMeetingPoint =>
       'Perfecto, nos vemos en el punto de encuentro. ¡Puntual!';
 

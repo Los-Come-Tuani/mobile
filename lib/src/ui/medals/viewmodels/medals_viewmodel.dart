@@ -30,6 +30,10 @@ class MedalsViewModel extends BaseViewModel {
   bool hasCityMedal(String city) => _badgesRepository.hasCityMedal(city);
 
   Future<void> load() async {
+    // Con el API, el saldo y los logros salen de `GET /badge/mine/`.
+    if (await _badgesRepository.refresh() case Failure(:final message)) {
+      setError(message);
+    }
     switch (await _tourRepository.getCircuits()) {
       case Ok(:final value):
         final cities = <String>[];

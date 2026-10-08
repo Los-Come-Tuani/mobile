@@ -10,11 +10,13 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/location_repository.dart';
 import '../../../data/models/route_map.dart';
 import '../../../data/models/stop.dart';
 import '../../../data/models/trip_progress.dart';
 import '../../../router/routes.dart';
+import '../../core/visit_scan.dart';
 import '../../stop_detail/view/qr_generator_view.dart';
 import '../../stop_detail/view/qr_scanner_view.dart';
 import '../../widgets/badge_earned_overlay.dart';
@@ -191,6 +193,12 @@ class _RouteMapViewState extends State<RouteMapView> {
   /// Escanea el QR de la parada; si coincide, confirma la visita y muestra
   /// la insignia ganada.
   Future<void> _scanQr(Stop stop) async {
+    // Con el API, el QR del lugar lo valida el API junto con la ubicación.
+    if (ApiClient.isConfigured) {
+      final viewModel = context.read<RouteMapViewModel>();
+      if (await scanAndRecordVisit(context)) viewModel.confirmVisit(stop);
+      return;
+    }
     final matched = await showQrScanner(context, stopId: stop.id);
     if (matched != true || !mounted) return;
 

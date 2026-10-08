@@ -5701,6 +5701,12 @@ abstract class AppLocalizations {
   /// **'Correo o contraseña incorrectos'**
   String get repoAuthWrongCredentials;
 
+  /// No description provided for @repoBadgesNeedsLocation.
+  ///
+  /// In es, this message translates to:
+  /// **'Para ganar la insignia necesitamos tu ubicación: activa el GPS y da permiso a K\'Plan.'**
+  String get repoBadgesNeedsLocation;
+
   /// No description provided for @repoChatReplyMeetingPoint.
   ///
   /// In es, this message translates to:

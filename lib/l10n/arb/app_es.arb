@@ -2510,6 +2510,7 @@
   "repoAuthInvalidCode": "El código no es válido",
   "repoAuthMissingData": "Faltan datos para crear la cuenta",
   "repoAuthWrongCredentials": "Correo o contraseña incorrectos",
+  "repoBadgesNeedsLocation": "Para ganar la insignia necesitamos tu ubicación: activa el GPS y da permiso a K'Plan.",
   "repoChatReplyMeetingPoint": "Perfecto, nos vemos en el punto de encuentro. ¡Puntual!",
   "repoChatReplyQuestions": "Cualquier duda antes del recorrido, escríbeme por aquí.",
   "repoChatReplyWelcome": "¡Hola! Con gusto te acompaño en el recorrido.",

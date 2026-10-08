@@ -14,10 +14,19 @@ Future<bool?> showQrScanner(BuildContext context, {required String stopId}) {
   );
 }
 
+/// Con el API: abre la cámara y devuelve el texto del primer QR que lea (el
+/// API decide si es de un lugar con insignia). `null` si se cierra.
+Future<String?> scanVisitQr(BuildContext context) {
+  return Navigator.of(context).push<String>(
+    MaterialPageRoute(builder: (context) => const QrScannerView(stopId: null)),
+  );
+}
+
 class QrScannerView extends StatefulWidget {
   const QrScannerView({super.key, required this.stopId});
 
-  final String stopId;
+  /// El lugar cuyo QR se espera; `null` acepta cualquiera y devuelve su texto.
+  final String? stopId;
 
   @override
   State<QrScannerView> createState() => _QrScannerViewState();
@@ -43,7 +52,11 @@ class _QrScannerViewState extends State<QrScannerView> {
     final value = capture.barcodes.first.rawValue;
     if (value == null) return;
 
-    if (StopQrCode.matches(value, widget.stopId)) {
+    final stopId = widget.stopId;
+    if (stopId == null) {
+      _handled = true;
+      Navigator.of(context).pop(value);
+    } else if (StopQrCode.matches(value, stopId)) {
       _handled = true;
       Navigator.of(context).pop(true);
     } else {

@@ -6,9 +6,11 @@ import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/models/circuit_collection.dart';
 import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
+import '../../core/visit_scan.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/category_chip.dart';
@@ -81,6 +83,11 @@ class _StopContent extends StatelessWidget {
   /// Abre la cámara a escanear el código de esta parada; si coincide,
   /// confirma la visita y muestra la animación de insignia ganada.
   Future<void> _scanQr(BuildContext context) async {
+    // Con el API, el QR del lugar lo valida el API junto con la ubicación.
+    if (ApiClient.isConfigured) {
+      if (await scanAndRecordVisit(context)) onConfirmVisit();
+      return;
+    }
     final matched = await showQrScanner(context, stopId: stop.id);
     if (matched != true || !context.mounted) return;
 

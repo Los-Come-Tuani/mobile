@@ -933,6 +933,7 @@
   "repoAuthInvalidCode": "That code isn't valid",
   "repoAuthMissingData": "Some details are missing to create the account",
   "repoAuthWrongCredentials": "Incorrect email or password",
+  "repoBadgesNeedsLocation": "To earn the badge we need your location: turn on GPS and allow K'Plan to use it.",
   "repoChatReplyMeetingPoint": "Perfect, see you at the meeting point. I'll be on time!",
   "repoChatReplyQuestions": "Any questions before the tour, message me here.",
   "repoChatReplyWelcome": "Hi! I'd be happy to join you on the tour.",
