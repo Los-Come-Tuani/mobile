@@ -9,13 +9,18 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
+import '../../../data/datasources/remote/google_sign_in_service.dart';
 import '../../../data/models/nationality.dart';
 import '../../../router/routes.dart';
+import '../../login/viewmodels/google_profile_viewmodel.dart';
+import '../../login/viewmodels/login_viewmodel.dart';
+import '../../login/viewmodels/two_factor_login_viewmodel.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/nationality_sheet.dart';
 import '../../widgets/picker_field.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/secondary_button.dart';
 import '../../widgets/verification_code_field.dart';
 import '../viewmodels/register_viewmodel.dart';
 import '../widgets/birth_date_sheet.dart';
@@ -73,6 +78,39 @@ class _RegisterViewState extends State<RegisterView> {
       _codeController.clear();
     } else {
       _showError(viewModel);
+    }
+  }
+
+  /// Con Google no hacen falta el código ni la contraseña: si la cuenta es
+  /// nueva, solo se piden la fecha de nacimiento y la nacionalidad.
+  Future<void> _signUpWithGoogle() async {
+    FocusScope.of(context).unfocus();
+    final viewModel = context.read<LoginViewModel>();
+    final result = await viewModel.loginWithGoogle();
+    if (!mounted) return;
+    switch (result) {
+      case LoginResult.success:
+        context.go(Routes.home);
+      case LoginResult.twoFactor:
+        context.push(
+          Routes.loginTwoFactor,
+          extra: TwoFactorLoginArgs(challenge: viewModel.challenge!),
+        );
+      case LoginResult.needsProfile:
+        context.push(
+          Routes.googleProfile,
+          extra: GoogleProfileArgs(idToken: viewModel.googleToken!),
+        );
+      case LoginResult.cancelled || LoginResult.missingAccount:
+        break;
+      case LoginResult.failed:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+            ),
+          ),
+        );
     }
   }
 
@@ -214,25 +252,7 @@ class _RegisterViewState extends State<RegisterView> {
     final l10n = context.l10n;
 
     return switch (step) {
-      RegisterStep.email => _StepLayout(
-        title: l10n.registerEmailTitle,
-        subtitle: l10n.registerEmailSubtitle,
-        label: l10n.commonEmail,
-        field: AppTextField(
-          hint: 'example@kplan.com',
-          controller: _emailController,
-          validator: Validators.email,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.done,
-          enabled: !isBusy,
-          onSubmitted: (_) => _submitEmail(),
-        ),
-        button: PrimaryButton(
-          label: l10n.commonNext,
-          isLoading: isBusy,
-          onPressed: _submitEmail,
-        ),
-      ),
+      RegisterStep.email => _buildEmailStep(isBusy),
       RegisterStep.code => Column(
         children: [
           Align(
@@ -347,6 +367,44 @@ class _RegisterViewState extends State<RegisterView> {
         ),
       ),
     };
+  }
+
+  Widget _buildEmailStep(bool isBusy) {
+    final l10n = context.l10n;
+    final googleBusy = context.select<LoginViewModel, bool>((vm) => vm.isBusy);
+    final busy = isBusy || googleBusy;
+
+    return _StepLayout(
+      title: l10n.registerEmailTitle,
+      subtitle: l10n.registerEmailSubtitle,
+      label: l10n.commonEmail,
+      field: AppTextField(
+        hint: 'example@kplan.com',
+        controller: _emailController,
+        validator: Validators.email,
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.done,
+        enabled: !busy,
+        onSubmitted: (_) => _submitEmail(),
+      ),
+      button: Column(
+        children: [
+          PrimaryButton(
+            label: l10n.commonNext,
+            isLoading: busy,
+            onPressed: _submitEmail,
+          ),
+          // Solo con el API real y el Client ID de Google configurado.
+          if (GoogleSignInService.isAvailable) ...[
+            const SizedBox(height: 12),
+            SecondaryButton(
+              label: l10n.loginContinueWithGoogle,
+              onPressed: busy ? null : _signUpWithGoogle,
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 

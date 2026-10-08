@@ -19,12 +19,17 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `https://api.kplan.dev` para cuando haya producción. En debug, sin URL, sigue el demo.
   Igual con Google: sin `GOOGLE_SERVER_CLIENT_ID`, un release usa
   `GoogleSignInService.releaseServerClientId` (el Client ID Web de desarrollo, también en
-  `staging.example.json`), así que el botón aparece en el APK.
+  `staging.example.json`), así que el botón aparece en el APK. "Continuar con Google" está
+  en el login y en el primer paso de "Crear cuenta" (la ruta del registro también da un
+  `LoginViewModel`).
 - **`develop-api` (comprobado el 2026-10-08 desde el APK en un SM A235M):** no tiene
   `EMAIL_HOST`, y con `DEPLOY=True` el API **descarta** los correos: el código del registro,
   el de recuperar contraseña y el de la postulación nunca llegan. Tampoco tiene
   `GOOGLE_OAUTH_CLIENT_IDS`: `POST /auth/mobile/google/` da `404` "no está habilitado".
-  Las dos son variables del servicio `develop-a` en Railway (las define el usuario). Un
+  Las dos son variables del servicio `develop-a` en Railway (las define el usuario). Para
+  poder crear cuentas sin correo, el API `497cfa9` agregó
+  `VERIFICATION_ACCEPT_ANY_SIGNUP_CODE=True`: cualquier código de seis dígitos sirve para el
+  alta (no para recuperar la contraseña); ver la memoria del API, aviso 20. Un
   `flutter run --release` sin `android/key.properties` firma con la llave de debug de la
   máquina; la de esta (Lenovo) tiene SHA-1
   `62:65:94:64:A9:06:A4:82:84:DD:80:E7:6C:6A:C5:23:F3:93:40:05` y debe estar en el Client

@@ -217,9 +217,18 @@ GoRouter createRouter(AuthRepository authRepository) {
         path: Routes.register,
         pageBuilder: (context, state) => _fadePage(
           state,
-          ChangeNotifierProvider<RegisterViewModel>(
-            create: (context) =>
-                RegisterViewModel(context.read<AuthRepository>()),
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<RegisterViewModel>(
+                create: (context) =>
+                    RegisterViewModel(context.read<AuthRepository>()),
+              ),
+              // "Continuar con Google" también crea la cuenta desde aquí.
+              ChangeNotifierProvider<LoginViewModel>(
+                create: (context) =>
+                    LoginViewModel(context.read<AuthRepository>()),
+              ),
+            ],
             child: const RegisterView(),
           ),
         ),
