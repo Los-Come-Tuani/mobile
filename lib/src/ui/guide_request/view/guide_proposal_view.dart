@@ -15,6 +15,7 @@ import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/primary_button.dart';
 import '../viewmodels/guide_request_viewmodel.dart';
 import '../widgets/application_card.dart';
@@ -58,16 +59,10 @@ class _GuideProposalViewState extends State<GuideProposalView> {
     final hired = await viewModel.hire(application);
     if (!mounted) return;
     if (!hired) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              viewModel.lastError ??
-                  context.l10n.guideRequestApplicationUnavailable,
-            ),
-          ),
-        );
+      ScaffoldMessenger.of(context).showMessage(
+        viewModel.lastError ?? context.l10n.guideRequestApplicationUnavailable,
+        tone: SnackTone.error,
+      );
       return;
     }
 
@@ -98,9 +93,9 @@ class _GuideProposalViewState extends State<GuideProposalView> {
     if (!confirmed) return;
     await viewModel.cancel();
     if (!mounted || viewModel.errorMessage == null) return;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(viewModel.errorMessage!)));
+    ScaffoldMessenger.of(
+      context,
+    ).showMessage(viewModel.errorMessage!, tone: SnackTone.error);
   }
 
   @override

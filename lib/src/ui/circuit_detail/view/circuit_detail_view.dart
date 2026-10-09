@@ -14,10 +14,12 @@ import '../../../data/models/trip_progress.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_choice_chip.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/creative_circuit_badge.dart';
 import '../../widgets/drop_reason_sheet.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/itinerary_timeline.dart';
@@ -48,9 +50,7 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
   }
 
   void _notifySoon(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showMessage(message);
   }
 
   /// El mapa del circuito: su recorrido o, si se está siguiendo, el viaje.
@@ -109,11 +109,15 @@ class _CircuitDetailViewState extends State<CircuitDetailView> {
 
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy
+      body: viewModel.isBusy || (circuit == null && !viewModel.hasError)
           ? const Center(child: KPlanLoader())
           : circuit == null
-          ? _ErrorState(
-              message: viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+          ? SafeArea(
+              child: ErrorState(
+                message: viewModel.errorMessage!,
+                onRetry: viewModel.load,
+                secondaryAction: const BackToHomeButton(),
+              ),
             )
           : _DetailContent(
               circuit: circuit,
@@ -487,44 +491,6 @@ class _MetaRow extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: AppTheme.screenPadding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 44,
-                color: AppColors.hintText,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => context.go(Routes.home),
-                child: Text(context.l10n.commonBackToHome),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

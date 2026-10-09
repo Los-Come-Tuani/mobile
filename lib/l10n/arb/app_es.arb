@@ -406,14 +406,18 @@
   "commonCancel": "Cancelar",
   "commonChangePassword": "Cambiar contraseña",
   "commonChooseCountry": "Elige tu país",
+  "commonClearSearch": "Borrar la búsqueda",
   "commonClose": "Cerrar",
   "commonContinue": "Continuar",
   "commonCoupons": "Cupones",
+  "commonCrashMessage": "Esta parte no se pudo mostrar. Vuelve al inicio para seguir; si se repite, escríbenos desde Ayuda.",
+  "commonCrashTitle": "Algo no salió como esperábamos",
   "commonCreateAccount": "Crear cuenta",
   "commonCreativeCircuits": "Circuitos creativos",
   "commonDate": "Fecha",
   "commonDone": "Listo",
   "commonEmail": "Correo electrónico",
+  "commonErrorTitle": "No pudimos cargar esto",
   "commonFullName": "Nombre completo",
   "commonGuide": "Guía",
   "commonHome": "Inicio",
@@ -426,9 +430,12 @@
   "commonNewPassword": "Contraseña nueva",
   "commonNewPasswordHelper": "Usa al menos 8 caracteres, una mayúscula y un número.",
   "commonNext": "Siguiente",
+  "commonNotFoundMessage": "Puede que el enlace esté incompleto o que esa página ya no exista. Desde el inicio puedes seguir explorando.",
+  "commonNotFoundTitle": "No encontramos esta pantalla",
   "commonNotifications": "Notificaciones",
   "commonPassword": "Contraseña",
   "commonPasswordsDontMatch": "Las contraseñas no coinciden",
+  "commonRefresh": "Actualizar",
   "commonRepeatPassword": "Repite la contraseña",
   "commonResendCode": "Reenviar código",
   "commonRetry": "Reintentar",
@@ -496,7 +503,8 @@
       }
     }
   },
-  "couponsStoreEmpty": "Por ahora no hay cupones disponibles. Vuelve pronto.",
+  "couponsStoreEmpty": "Sigue ganando insignias en tus visitas: te servirán cuando lleguen nuevos cupones.",
+  "couponsStoreEmptyTitle": "Por ahora no hay cupones",
   "couponsStoreTitle": "Para canjear",
   "couponsWalletConsumed": "Usado",
   "couponsWalletExpired": "Vencido",
@@ -680,7 +688,8 @@
       }
     }
   },
-  "groupSlotsEmpty": "Todavía no hay horarios publicados para este circuito. Vuelve a revisar pronto.",
+  "groupSlotsEmpty": "Los guías certificados publican horarios seguido. Mientras tanto, puedes explorar otros circuitos.",
+  "groupSlotsEmptyTitle": "Todavía no hay horarios publicados",
   "groupSlotsEndsAround": "Termina aprox. {time}",
   "@groupSlotsEndsAround": {
     "placeholders": {
@@ -1373,6 +1382,7 @@
     }
   },
   "guideAppSeeProposals": "Ver propuestas",
+  "guideAppSeeTrips": "Ver mis viajes",
   "guideAppServiceHours": "{hours} h de servicio",
   "@guideAppServiceHours": {
     "placeholders": {
@@ -1628,6 +1638,7 @@
   "guideDeskMore": "Más",
   "guideDeskOpenRequestsEmpty": "No hay convocatorias abiertas en tu ciudad por ahora.",
   "guideDeskOpenRequestsTitle": "Convocatorias abiertas",
+  "guideDeskSeeOpenRequests": "Ver convocatorias",
   "guideDeskStops": "{count, plural, =1{1 parada} other{{count} paradas}}",
   "@guideDeskStops": {
     "placeholders": {
@@ -1902,6 +1913,7 @@
   "guidesFilterGuides": "Guías",
   "guidesFilterTranslators": "Traductores",
   "guidesNoReviews": "Sin reseñas todavía",
+  "guidesSeeAll": "Ver todos",
   "guidesTitle": "Guías y traductores",
   "homeActiveTripAllVisited": "Ya pasaste por todas las paradas · toca para finalizar",
   "homeActiveTripNext": "Siguiente: {stop} · {time} · {delay}",
@@ -1954,10 +1966,16 @@
   },
   "homeDrawerGuideMode": "Modo guía",
   "homeDrawerTranslatorMode": "Modo traductor",
+  "homeEmptyCatalogMessage": "Estamos sumando circuitos, lugares y eventos. Vuelve a revisar en un rato.",
+  "homeEmptyCatalogTitle": "Todavía no hay nada para explorar",
+  "homeEmptyCircuitsTitle": "No hay circuitos para mostrar",
+  "homeEmptyEventsTitle": "No hay eventos próximos",
+  "homeEmptyListMessage": "Prueba con otra búsqueda o explora los lugares destacados.",
   "homeEmptySearchMessage": "Prueba con otra palabra o revisa cómo está escrita.",
   "homeEmptySearchTitle": "No encontramos nada con esa búsqueda",
   "homeEmptyStopsMessage": "Prueba con otra categoría o con otra búsqueda.",
   "homeEmptyStopsTitle": "No hay paradas que coincidan",
+  "homeExplorePlaces": "Explorar lugares",
   "homeGuideRequestApplicationsHint": "Toca para revisarlas y elegir",
   "homeGuideRequestApplicationsTitle": "{count, plural, =1{1 postulación para {circuit}} other{{count} postulaciones para {circuit}}}",
   "@homeGuideRequestApplicationsTitle": {
@@ -2016,6 +2034,7 @@
   "homeSectionCircuits": "Circuitos completos",
   "homeSectionEvents": "Eventos Próximos",
   "homeSectionStops": "Paradas destacadas",
+  "homeShowAllCategories": "Ver todas las categorías",
   "homeStopCount": "{count, plural, =1{1 parada} other{{count} paradas}}",
   "@homeStopCount": {
     "placeholders": {
@@ -2272,6 +2291,8 @@
       }
     }
   },
+  "myCircuitNotFoundMessage": "Puede que lo hayas borrado. En Mis viajes están todos tus circuitos.",
+  "myCircuitNotFoundTitle": "No encontramos este circuito",
   "myCircuitProposalNote": "Como lo armaste tú, puedes publicar una propuesta para que guías o traductores se postulen.",
   "myCircuitRemoved": "{stop} se quitó del circuito",
   "@myCircuitRemoved": {
@@ -2588,9 +2609,13 @@
   "repoInlineLanguageItalian": "italiano",
   "repoInlineLanguagePortuguese": "portugués",
   "repoInlineLanguageSpanish": "español",
-  "repoNetworkCommunicationError": "Ocurrió un error de comunicación con el servidor",
-  "repoNetworkConnectionTimeout": "Tiempo de conexión agotado",
+  "repoNetworkCommunicationError": "No pudimos comunicarnos con K'Plan. Intenta de nuevo.",
+  "repoNetworkConflict": "Esto cambió mientras lo veías. Actualiza e intenta de nuevo.",
+  "repoNetworkConnectionTimeout": "La conexión está tardando demasiado. Revisa tu internet e intenta de nuevo.",
+  "repoNetworkForbidden": "No tienes permiso para hacer esto.",
+  "repoNetworkInvalidData": "Revisa los datos e intenta de nuevo.",
   "repoNetworkNoConnection": "No hay conexión a internet",
+  "repoNetworkNotFound": "No encontramos lo que buscas. Puede que ya no esté disponible.",
   "repoNetworkRetryIn": "{message} Puedes reintentar en {wait}.",
   "@repoNetworkRetryIn": {
     "placeholders": {
@@ -2602,8 +2627,10 @@
       }
     }
   },
-  "repoNetworkServerTimeout": "El servidor tardó demasiado en responder",
+  "repoNetworkServerError": "Tuvimos un problema de nuestro lado. Intenta de nuevo en unos minutos.",
+  "repoNetworkServerTimeout": "K'Plan tardó demasiado en responder. Intenta de nuevo.",
   "repoNetworkSessionExpired": "Sesión expirada, vuelve a iniciar sesión",
+  "repoNetworkTooLarge": "El archivo es demasiado grande.",
   "repoNetworkTooManyAttempts": "Demasiados intentos, espera un momento e intenta de nuevo",
   "repoNetworkWaitMinutes": "{count, plural, =1{1 minuto} other{{count} minutos}}",
   "@repoNetworkWaitMinutes": {
@@ -3508,6 +3535,14 @@
   "validatorUsernameInvalid": "De 3 a 20 letras, números, puntos o guiones bajos",
   "validatorUsernameRequired": "Ingresa un nombre de usuario",
   "welcomeGuideSubtitle": "Accede o postula tus servicios",
+  "welcomeRestoreFailed": "No pudimos abrir tu sesión. {message}",
+  "@welcomeRestoreFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeSubtitle": "Elige cómo quieres continuar.",
   "welcomeTitle": "Bienvenido",
   "welcomeTouristSubtitle": "Explora y organiza tus viajes"

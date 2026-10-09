@@ -12,6 +12,7 @@ import '../../../guide_access/viewmodels/guide_application_viewmodel.dart';
 import '../../../guide_access/widgets/credential_card.dart';
 import '../../../guide_access/widgets/guide_heading.dart';
 import '../../../guide_access/widgets/labeled_field.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/primary_button.dart';
@@ -33,8 +34,9 @@ class GuideRenewalView extends StatelessWidget {
         allowedExtensions: GuideApplicationViewModel.allowedExtensions,
       );
     } on Exception {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('No pudimos abrir tus archivos.')),
+      messenger.showMessage(
+        'No pudimos abrir tus archivos.',
+        tone: SnackTone.error,
       );
       return;
     }
@@ -45,7 +47,7 @@ class GuideRenewalView extends StatelessWidget {
       sizeBytes: size,
     );
     if (problem != null) {
-      messenger.showSnackBar(SnackBar(content: Text(problem)));
+      messenger.showMessage(problem, tone: SnackTone.error);
       return;
     }
     viewModel.attach(GuideDocument(name: file.name, uri: file.uri));
@@ -70,16 +72,13 @@ class GuideRenewalView extends StatelessWidget {
       final router = GoRouter.of(context);
       final messenger = ScaffoldMessenger.of(context);
       if (await viewModel.submit()) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Enviamos tu renovación: te avisamos al revisarla.'),
-          ),
+        messenger.showMessage(
+          'Enviamos tu renovación: te avisamos al revisarla.',
+          tone: SnackTone.success,
         );
         router.go(Routes.guideSelfProfile);
       } else if (viewModel.hasError) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(viewModel.errorMessage!)),
-        );
+        messenger.showMessage(viewModel.errorMessage!, tone: SnackTone.error);
       }
     }
 

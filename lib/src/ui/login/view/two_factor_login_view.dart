@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/user_role.dart';
 import '../../../router/routes.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../viewmodels/two_factor_login_viewmodel.dart';
@@ -45,12 +46,9 @@ class _TwoFactorLoginViewState extends State<TwoFactorLoginView> {
         widget.role == UserRole.guide ? Routes.guideAccess : Routes.home,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
-          ),
-        ),
+      ScaffoldMessenger.of(context).showMessage(
+        viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+        tone: SnackTone.error,
       );
     }
   }

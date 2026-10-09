@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
+import '../../widgets/app_snack_bar.dart';
 
 /// Avisa cuando un circuito del turista no se pudo guardar en su cuenta (o traer de
 /// ella). Lo que ve en pantalla no cambia: el aviso solo cuenta que no llegó al API.
@@ -38,9 +39,10 @@ class _CollectionSyncNoticesState extends State<CollectionSyncNotices> {
   }
 
   void _show(String message) {
-    widget.messengerKey.currentState
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    widget.messengerKey.currentState?.showMessage(
+      message,
+      tone: SnackTone.error,
+    );
   }
 
   @override

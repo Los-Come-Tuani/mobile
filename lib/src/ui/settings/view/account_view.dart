@@ -9,6 +9,7 @@ import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../router/routes.dart';
 import '../../widgets/action_row.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/soft_button.dart';
 import '../widgets/logout_sheet.dart';
 import '../widgets/settings_page.dart';
@@ -35,7 +36,7 @@ class AccountView extends StatelessWidget {
     if (result case Failure(:final message)) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ).showMessage(message, tone: SnackTone.error);
     }
   }
 

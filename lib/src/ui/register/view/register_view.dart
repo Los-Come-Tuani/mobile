@@ -15,6 +15,7 @@ import '../../../router/routes.dart';
 import '../../login/viewmodels/google_profile_viewmodel.dart';
 import '../../login/viewmodels/login_viewmodel.dart';
 import '../../login/viewmodels/two_factor_login_viewmodel.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/nationality_sheet.dart';
@@ -60,12 +61,9 @@ class _RegisterViewState extends State<RegisterView> {
   }
 
   void _showError(RegisterViewModel viewModel) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
-        ),
-      ),
+    ScaffoldMessenger.of(context).showMessage(
+      viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+      tone: SnackTone.error,
     );
   }
 
@@ -104,12 +102,9 @@ class _RegisterViewState extends State<RegisterView> {
       case LoginResult.cancelled || LoginResult.missingAccount:
         break;
       case LoginResult.failed:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
-            ),
-          ),
+        ScaffoldMessenger.of(context).showMessage(
+          viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+          tone: SnackTone.error,
         );
     }
   }

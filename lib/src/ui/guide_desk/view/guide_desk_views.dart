@@ -13,6 +13,8 @@ import '../../../router/routes.dart';
 import '../../guide_app/widgets/guide_bar.dart';
 import '../../guide_app/widgets/guide_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../viewmodels/guide_desk_viewmodel.dart';
 import '../widgets/desk_sheets.dart';
@@ -31,10 +33,13 @@ abstract class _DeskTabState<T extends StatefulWidget> extends State<T> {
     });
   }
 
-  void show(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  /// El resultado de una acción: [error] si el API la rechazó o, si no,
+  /// [done].
+  void report(String? error, String done) {
+    ScaffoldMessenger.of(context).showMessage(
+      error ?? done,
+      tone: error == null ? SnackTone.success : SnackTone.error,
+    );
   }
 
   Widget body(GuideDeskViewModel viewModel, List<Widget> children) {
@@ -49,9 +54,13 @@ abstract class _DeskTabState<T extends StatefulWidget> extends State<T> {
           if (viewModel.errorMessage case final error?)
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Text(
-                error,
-                style: const TextStyle(color: AppColors.error),
+              child: InlineNotice(
+                tone: NoticeTone.error,
+                message: error,
+                action: TextButton(
+                  onPressed: viewModel.load,
+                  child: Text(context.l10n.commonRetry),
+                ),
               ),
             ),
           ...children,
@@ -75,7 +84,7 @@ class _GuideDeskHomeViewState extends _DeskTabState<GuideDeskHomeView> {
     final offer = await showApplySheet(context, request);
     if (offer == null || !mounted) return;
     final error = await viewModel.apply(request, offer.fee, offer.message);
-    if (mounted) show(error ?? context.l10n.guideDeskApplied);
+    if (mounted) report(error, context.l10n.guideDeskApplied);
   }
 
   Future<void> _withdraw(GuideBid bid) async {
@@ -89,7 +98,7 @@ class _GuideDeskHomeViewState extends _DeskTabState<GuideDeskHomeView> {
     );
     if (!confirmed || !mounted) return;
     final error = await viewModel.withdrawBid(bid);
-    if (mounted) show(error ?? l10n.guideDeskWithdrawn);
+    if (mounted) report(error, l10n.guideDeskWithdrawn);
   }
 
   @override
@@ -125,7 +134,13 @@ class _GuideDeskHomeViewState extends _DeskTabState<GuideDeskHomeView> {
       body: body(viewModel, [
         DeskSection(title: l10n.guideDeskOpenRequestsTitle),
         if (requests.isEmpty)
-          DeskEmpty(l10n.guideDeskOpenRequestsEmpty)
+          DeskEmpty(
+            l10n.guideDeskOpenRequestsEmpty,
+            action: FilledButton.tonal(
+              onPressed: () => context.go(Routes.guideTrips),
+              child: Text(l10n.guideDeskDeparturePublish),
+            ),
+          )
         else
           for (final request in requests) ...[
             DeskCard(
@@ -217,14 +232,14 @@ class _GuideDeskTripsViewState extends _DeskTabState<GuideDeskTripsView> {
     final draft = await showDepartureSheet(context, circuits: circuits);
     if (draft == null || !mounted) return;
     final error = await viewModel.publishDeparture(draft);
-    if (mounted) show(error ?? context.l10n.guideDeskDeparturePublished);
+    if (mounted) report(error, context.l10n.guideDeskDeparturePublished);
   }
 
   Future<void> _edit(CircuitGroupSession departure) async {
     final draft = await showDepartureSheet(context, editing: departure);
     if (draft == null || !mounted) return;
     final error = await viewModel.updateDeparture(departure, draft);
-    if (mounted) show(error ?? context.l10n.guideDeskDepartureSaved);
+    if (mounted) report(error, context.l10n.guideDeskDepartureSaved);
   }
 
   Future<void> _cancel(CircuitGroupSession departure) async {
@@ -238,7 +253,7 @@ class _GuideDeskTripsViewState extends _DeskTabState<GuideDeskTripsView> {
     );
     if (reason == null || !mounted) return;
     final error = await viewModel.cancelDeparture(departure, reason);
-    if (mounted) show(error ?? l10n.guideDeskDepartureCancelled);
+    if (mounted) report(error, l10n.guideDeskDepartureCancelled);
   }
 
   @override
@@ -263,7 +278,13 @@ class _GuideDeskTripsViewState extends _DeskTabState<GuideDeskTripsView> {
           ),
         ),
         if (departures.isEmpty)
-          DeskEmpty(l10n.guideDeskDeparturesEmpty)
+          DeskEmpty(
+            l10n.guideDeskDeparturesEmpty,
+            action: FilledButton.tonal(
+              onPressed: viewModel.isWorking ? null : _publish,
+              child: Text(l10n.guideDeskDeparturePublish),
+            ),
+          )
         else
           for (final departure in departures) ...[
             DeskCard(
@@ -341,7 +362,13 @@ class _GuideDeskChatsViewState extends _DeskTabState<GuideDeskChatsView> {
       body: body(viewModel, [
         const SizedBox(height: 12),
         if (conversations.isEmpty)
-          DeskEmpty(l10n.guideDeskChatsEmpty)
+          DeskEmpty(
+            l10n.guideDeskChatsEmpty,
+            action: FilledButton.tonal(
+              onPressed: () => context.go(Routes.guideHome),
+              child: Text(l10n.guideDeskSeeOpenRequests),
+            ),
+          )
         else
           for (final booking in conversations) ...[
             DeskCard(

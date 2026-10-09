@@ -10,6 +10,7 @@ import '../../../../router/routes.dart';
 import '../../../guide_access/widgets/guide_heading.dart';
 import '../../../guide_access/widgets/labeled_field.dart';
 import '../../../widgets/app_choice_chip.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/app_text_field.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../../widgets/primary_button.dart';
@@ -51,8 +52,9 @@ class _GuideProfileEditViewState extends State<GuideProfileEditView> {
         allowedExtensions: GuideProfileEditViewModel.photoExtensions,
       );
     } on Exception {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('No pudimos abrir tus fotos.')),
+      messenger.showMessage(
+        'No pudimos abrir tus fotos.',
+        tone: SnackTone.error,
       );
       return;
     }
@@ -63,7 +65,7 @@ class _GuideProfileEditViewState extends State<GuideProfileEditView> {
       sizeBytes: size,
     );
     if (problem != null) {
-      messenger.showSnackBar(SnackBar(content: Text(problem)));
+      messenger.showMessage(problem, tone: SnackTone.error);
       return;
     }
     _viewModel.setPhoto(GuideDocument(name: file.name, uri: file.uri));
@@ -73,9 +75,7 @@ class _GuideProfileEditViewState extends State<GuideProfileEditView> {
     final router = GoRouter.of(context);
     final messenger = ScaffoldMessenger.of(context);
     if (await _viewModel.save()) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Guardamos tu perfil.')),
-      );
+      messenger.showMessage('Guardamos tu perfil.', tone: SnackTone.success);
       router.go(Routes.guideSelfProfile);
     }
   }

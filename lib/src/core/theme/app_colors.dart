@@ -27,6 +27,11 @@ abstract final class AppColors {
   static const Color hintText = Color(0xFF9A9484);
   static const Color error = Color(0xFFB3261E);
 
+  /// Íconos de error y de éxito sobre la tinta oscura de los SnackBar: los
+  /// tonos de arriba no se distinguen ahí.
+  static const Color errorOnDark = Color(0xFFF2B8B5);
+  static const Color successOnDark = Color(0xFF95D5B2);
+
   // ── Alias semánticos ──────────────────────────────────────────────────────
   // Se usan en los widgets para no acoplarlos al nombre del tono.
   static const Color background = primary10;

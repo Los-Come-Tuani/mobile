@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/result.dart';
 import '../../data/datasources/remote/reports_api.dart';
 import '../../data/datasources/repository/reports_repository.dart';
+import 'app_snack_bar.dart';
 import 'app_text_field.dart';
 import 'kplan_loader.dart';
 import 'primary_button.dart';
@@ -54,9 +55,7 @@ Future<void> showReportSheet(
     builder: (_) => _ReportSheet(target: target, targetId: targetId),
   );
   if (sent == null) return;
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(sent)));
+  messenger.showMessage(sent, tone: SnackTone.success);
 }
 
 class _ReportSheet extends StatefulWidget {

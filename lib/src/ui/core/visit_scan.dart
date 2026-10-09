@@ -5,6 +5,7 @@ import '../../core/utils/result.dart';
 import '../../data/datasources/repository/badges_repository.dart';
 import '../../data/datasources/repository/location_repository.dart';
 import '../stop_detail/view/qr_scanner_view.dart';
+import '../widgets/app_snack_bar.dart';
 import '../widgets/badge_earned_overlay.dart';
 
 /// Con el API: escanea el QR de un lugar y acredita la visita
@@ -28,9 +29,7 @@ Future<bool> scanAndRecordVisit(BuildContext context) async {
       await showBadgeEarnedAnimation(context, category: value.category);
       return true;
     case Failure(:final message):
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
+      messenger.showMessage(message, tone: SnackTone.error);
       return false;
   }
 }

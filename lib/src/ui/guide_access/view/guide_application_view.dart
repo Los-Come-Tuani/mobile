@@ -17,6 +17,7 @@ import '../../../data/models/provider.dart';
 import '../../../router/routes.dart';
 import '../../register/widgets/birth_date_sheet.dart';
 import '../../widgets/app_choice_chip.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/foot_art.dart';
 import '../../widgets/inline_notice.dart';
@@ -100,10 +101,9 @@ class _GuideApplicationViewState extends State<GuideApplicationView> {
     return _formKeys[step]!.currentState?.validate() ?? false;
   }
 
+  /// Lo que impide seguir: un dato que falta, un archivo o el API.
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showMessage(message, tone: SnackTone.error);
   }
 
   void _showError(GuideApplicationViewModel viewModel) => _showMessage(

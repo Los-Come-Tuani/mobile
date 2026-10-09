@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/l10n/l10n.dart';
@@ -7,12 +8,15 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/tourist_profile.dart';
+import '../../../../router/routes.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/offer_chip.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/rating_stars.dart';
+import '../../../widgets/secondary_button.dart';
 import '../../widgets/guide_bar.dart';
 import '../../widgets/rate_tourist_sheet.dart';
 import '../../widgets/tourist_identity.dart';
@@ -54,17 +58,12 @@ class _TouristProfileViewState extends State<TouristProfileView> {
     );
     if (!mounted) return;
     final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.guideAppRateSent
-                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      ok
+          ? l10n.guideAppRateSent
+          : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+      tone: ok ? SnackTone.success : SnackTone.error,
+    );
   }
 
   /// El día dentro de una frase: en español va en minúsculas ("sáb 3 oct"); en
@@ -88,6 +87,10 @@ class _TouristProfileViewState extends State<TouristProfileView> {
             : EmptyState(
                 title: l10n.guideAppTouristNotFoundTitle,
                 message: l10n.guideAppTouristNotFoundMessage,
+                action: SecondaryButton(
+                  label: l10n.guideAppSeeTrips,
+                  onPressed: () => context.go(Routes.guideTrips),
+                ),
               ),
       );
     }

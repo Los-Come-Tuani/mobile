@@ -10,6 +10,7 @@ import '../../../data/models/user_role.dart';
 import '../../../router/routes.dart';
 import '../../guide_access/widgets/labeled_field.dart';
 import '../../register/widgets/birth_date_sheet.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/nationality_sheet.dart';
 import '../../widgets/picker_field.dart';
 import '../../widgets/primary_button.dart';
@@ -63,12 +64,9 @@ class GoogleProfileView extends StatelessWidget {
           ),
         );
       case GoogleProfileResult.failed:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
-            ),
-          ),
+        ScaffoldMessenger.of(context).showMessage(
+          viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+          tone: SnackTone.error,
         );
     }
   }

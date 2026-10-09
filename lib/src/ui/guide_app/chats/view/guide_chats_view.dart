@@ -12,6 +12,7 @@ import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
 import '../../../widgets/empty_state.dart';
+import '../../../widgets/secondary_button.dart';
 import '../../../widgets/kplan_loader.dart';
 import '../../widgets/guide_bar.dart';
 import '../../widgets/guide_bottom_nav.dart';
@@ -55,6 +56,10 @@ class _GuideChatsViewState extends State<GuideChatsView> {
                 EmptyState(
                   title: l10n.guideAppChatsEmptyTitle,
                   message: l10n.guideAppChatsEmptyMessage,
+                  action: SecondaryButton(
+                    label: l10n.guideAppSeeProposals,
+                    onPressed: () => context.go(Routes.guideHome),
+                  ),
                 ),
               ],
             )

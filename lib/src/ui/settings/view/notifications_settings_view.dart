@@ -7,6 +7,8 @@ import '../../../core/utils/result.dart';
 import '../../../data/datasources/remote/api_client.dart';
 import '../../../data/datasources/repository/notifications_repository.dart';
 import '../../../data/datasources/repository/settings_repository.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
 import '../widgets/setting_switch.dart';
 import '../widgets/settings_page.dart';
@@ -58,18 +60,22 @@ class _AccountPreferencesState extends State<_AccountPreferences> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final result = await context
-          .read<NotificationsRepository>()
-          .loadPreferences();
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = switch (result) {
-          Failure(:final message) => message,
-          Ok() => null,
-        };
-      });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    final result = await context
+        .read<NotificationsRepository>()
+        .loadPreferences();
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _error = switch (result) {
+        Failure(:final message) => message,
+        Ok() => null,
+      };
     });
   }
 
@@ -80,9 +86,9 @@ class _AccountPreferencesState extends State<_AccountPreferences> {
     );
     if (!mounted) return;
     if (result case Failure(:final message)) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showMessage(message, tone: SnackTone.error);
     }
   }
 
@@ -100,8 +106,8 @@ class _AccountPreferencesState extends State<_AccountPreferences> {
             padding: EdgeInsets.all(24),
             child: Center(child: KPlanLoader()),
           )
-        else if (_error != null)
-          Text(_error!, style: AppTextStyles.bodySmall)
+        else if (_error case final error?)
+          ErrorState(compact: true, message: error, onRetry: _load)
         else
           for (final preference in preferences)
             SettingSwitch(

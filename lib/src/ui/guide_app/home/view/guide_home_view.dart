@@ -12,6 +12,7 @@ import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
+import '../../../widgets/secondary_button.dart';
 import '../../widgets/coverage_chip.dart';
 import '../../widgets/date_badge.dart';
 import '../../widgets/guide_bar.dart';
@@ -121,6 +122,10 @@ class _GuideHomeViewState extends State<GuideHomeView> {
               ? l10n.guideAppHomeEmptyLocal(viewModel.city ?? '')
               : l10n.guideAppHomeEmptyNational,
           message: l10n.guideAppHomeEmptyMessage,
+          action: SecondaryButton(
+            label: l10n.commonRefresh,
+            onPressed: viewModel.load,
+          ),
         ),
       ];
     }

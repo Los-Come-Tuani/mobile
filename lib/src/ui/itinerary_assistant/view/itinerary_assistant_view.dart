@@ -9,6 +9,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_choice_chip.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
@@ -68,9 +70,9 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
     final circuitId = viewModel.save();
     if (circuitId == null) return;
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(context.l10n.assistantSaved)));
+    ScaffoldMessenger.of(
+      context,
+    ).showMessage(context.l10n.assistantSaved, tone: SnackTone.success);
     if (viewModel.startsFromScratch) {
       context.pushReplacement(Routes.myCircuitPath(circuitId));
     } else {
@@ -105,6 +107,12 @@ class _ItineraryAssistantViewState extends State<ItineraryAssistantView> {
       ),
       body: viewModel.isBusy
           ? const Center(child: KPlanLoader())
+          : viewModel.hasError
+          ? ErrorState(
+              message: viewModel.errorMessage!,
+              onRetry: viewModel.load,
+              secondaryAction: const BackToHomeButton(),
+            )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

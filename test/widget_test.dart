@@ -29,7 +29,16 @@ void main() {
   testWidgets('Welcome muestra el título y las dos formas de entrar', (
     tester,
   ) async {
-    await tester.pumpWidget(_wrap(const WelcomeView()));
+    await tester.pumpWidget(
+      _wrap(
+        const WelcomeView(),
+        providers: [
+          ChangeNotifierProvider<AuthRepository>(
+            create: (_) => AuthRepository(),
+          ),
+        ],
+      ),
+    );
 
     expect(find.text('Bienvenido'), findsOneWidget);
     expect(find.text('Turista'), findsOneWidget);

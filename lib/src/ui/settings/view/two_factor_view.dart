@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
@@ -40,14 +42,14 @@ class _TwoFactorViewState extends State<TwoFactorView> {
     super.dispose();
   }
 
-  void _show(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  void _show(String message, {SnackTone tone = SnackTone.success}) {
+    ScaffoldMessenger.of(context).showMessage(message, tone: tone);
   }
 
-  void _showError(TwoFactorViewModel viewModel) =>
-      _show(viewModel.errorMessage ?? 'Algo salió mal, intenta de nuevo');
+  void _showError(TwoFactorViewModel viewModel) => _show(
+    viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+    tone: SnackTone.error,
+  );
 
   Future<void> _start() async {
     final viewModel = context.read<TwoFactorViewModel>();

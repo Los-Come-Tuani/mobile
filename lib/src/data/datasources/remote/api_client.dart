@@ -152,7 +152,8 @@ class ApiClient {
 
   static Dio get instance => _dio;
 
-  /// Mensaje legible para el usuario a partir de un error de red.
+  /// Mensaje legible para el usuario a partir de un error de red. Nunca lleva el
+  /// código de estado.
   ///
   /// Si el API explicó qué pasó (`detail`), se usa su texto: ya viene en español y pensado
   /// para la persona.
@@ -172,19 +173,45 @@ class ApiClient {
 
     return switch (e.type) {
       DioExceptionType.connectionError => l10n.repoNetworkNoConnection,
-      DioExceptionType.connectionTimeout => l10n.repoNetworkConnectionTimeout,
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout => l10n.repoNetworkConnectionTimeout,
       DioExceptionType.receiveTimeout => l10n.repoNetworkServerTimeout,
-      _ when status == 401 => l10n.repoNetworkSessionExpired,
-      _ => l10n.repoNetworkCommunicationError,
+      _ => switch (status) {
+        401 => l10n.repoNetworkSessionExpired,
+        403 => l10n.repoNetworkForbidden,
+        404 => l10n.repoNetworkNotFound,
+        409 => l10n.repoNetworkConflict,
+        413 => l10n.repoNetworkTooLarge,
+        400 || 422 => l10n.repoNetworkInvalidData,
+        final code? when code >= 500 => l10n.repoNetworkServerError,
+        _ => l10n.repoNetworkCommunicationError,
+      },
     };
   }
+
+  /// Lo que el API responde cuando no tiene nada más concreto que decir
+  /// (`api_exceptions/errors`): habla de recursos y cabeceras, así que la app
+  /// usa su propio mensaje para ese caso.
+  static const _genericDetails = {
+    'La solicitud contiene datos inválidos.',
+    'Ha ocurrido un error inesperado.',
+    'Hay un conflicto con el estado actual del recurso.',
+    'La solicitud excede los límites permitidos.',
+    'El recurso solicitado no se encontró.',
+    'No tiene permiso para realizar esta acción.',
+    'El servicio no está disponible por ahora.',
+    'Ha superado el límite de uso establecido para este recurso.',
+    'Ha enviado un `Accept` header inválido.',
+    'No se proporcionaron credenciales de autenticación válidas.',
+    'No se pudo interpretar la solicitud.',
+  };
 
   /// El `detail` que manda el API (`{ "detail": "...", "field_errors": {...} }`).
   static String? _detailOf(DioException e) {
     final data = e.response?.data;
     if (data is Map && data['detail'] is String) {
       final detail = (data['detail'] as String).trim();
-      if (detail.isNotEmpty) return detail;
+      if (detail.isNotEmpty && !_genericDetails.contains(detail)) return detail;
     }
     return null;
   }

@@ -13,7 +13,9 @@ import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
 import '../../../guide_access/widgets/labeled_field.dart';
 import '../../../widgets/app_text_field.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/empty_state.dart';
+import '../../../widgets/secondary_button.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/offer_chip.dart';
@@ -64,17 +66,12 @@ class _GuideJobViewState extends State<GuideJobView> {
     );
     if (!mounted) return;
     final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.guideAppJobApplicationSent
-                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      ok
+          ? l10n.guideAppJobApplicationSent
+          : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+      tone: ok ? SnackTone.success : SnackTone.error,
+    );
   }
 
   String? _validatePrice(String? value) {
@@ -99,6 +96,10 @@ class _GuideJobViewState extends State<GuideJobView> {
             : EmptyState(
                 title: l10n.guideAppJobNotFoundTitle,
                 message: l10n.guideAppJobNotFoundMessage,
+                action: SecondaryButton(
+                  label: l10n.guideAppSeeProposals,
+                  onPressed: () => context.go(Routes.guideHome),
+                ),
               ),
       );
     }

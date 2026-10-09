@@ -97,6 +97,7 @@ import '../ui/my_circuit/viewmodels/my_circuit_viewmodel.dart';
 import '../ui/my_trips/view/my_trips_view.dart';
 import '../ui/notifications/view/notifications_view.dart';
 import '../ui/my_trips/viewmodels/my_trips_viewmodel.dart';
+import '../ui/not_found/view/not_found_view.dart';
 import '../ui/profile/view/profile_view.dart';
 import '../ui/profile/viewmodels/profile_viewmodel.dart';
 import '../ui/register/view/register_view.dart';
@@ -132,6 +133,7 @@ GoRouter createRouter(AuthRepository authRepository) {
     debugLogDiagnostics: kDebugMode,
     // Reevalúa [redirect] cada vez que cambia la sesión (login / logout).
     refreshListenable: authRepository,
+    errorBuilder: (context, state) => const NotFoundView(),
     redirect: (context, state) {
       final location = state.matchedLocation;
       if (Routes.guideOnboarding.contains(location)) return null;

@@ -98,6 +98,10 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
     };
   }
 
+  /// Antes de la primera carga todavía no se sabe si el circuito existe.
+  bool get hasLoaded => _hasLoaded;
+  bool _hasLoaded = false;
+
   Future<void> load() async {
     setBusy(true);
     clearError();
@@ -105,6 +109,7 @@ class MyCircuitViewModel extends BaseViewModel with TripActions {
     await _collectionsRepository.ensureLoaded();
     await _loadStops();
 
+    _hasLoaded = true;
     setBusy(false);
     safeNotify();
   }

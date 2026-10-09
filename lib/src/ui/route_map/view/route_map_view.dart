@@ -19,6 +19,7 @@ import '../../../router/routes.dart';
 import '../../core/visit_scan.dart';
 import '../../stop_detail/view/qr_generator_view.dart';
 import '../../stop_detail/view/qr_scanner_view.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/circle_icon_button.dart';
 import '../../widgets/drop_reason_sheet.dart';
@@ -76,10 +77,14 @@ class _RouteMapViewState extends State<RouteMapView> {
     }
   }
 
-  void _notify(String message, {SnackBarAction? action}) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message), action: action));
+  void _notify(
+    String message, {
+    SnackBarAction? action,
+    SnackTone tone = SnackTone.info,
+  }) {
+    ScaffoldMessenger.of(
+      context,
+    ).showMessage(message, action: action, tone: tone);
   }
 
   /// Mueve la cámara con una animación corta.
@@ -206,7 +211,10 @@ class _RouteMapViewState extends State<RouteMapView> {
     if (earnedBadge) {
       await showBadgeEarnedAnimation(context, category: stop.category);
     } else {
-      _notify(context.l10n.routeMapVisitConfirmed(stop.name));
+      _notify(
+        context.l10n.routeMapVisitConfirmed(stop.name),
+        tone: SnackTone.success,
+      );
     }
   }
 
@@ -236,7 +244,7 @@ class _RouteMapViewState extends State<RouteMapView> {
 
   void _endTrip() {
     context.read<RouteMapViewModel>().endTrip();
-    _notify(context.l10n.routeMapTripEnded);
+    _notify(context.l10n.routeMapTripEnded, tone: SnackTone.success);
   }
 
   @override
@@ -275,6 +283,7 @@ class _RouteMapViewState extends State<RouteMapView> {
                   ? _Backdrop(
                       isBusy: viewModel.isBusy,
                       message: viewModel.errorMessage ?? l10n.routeMapNoStops,
+                      onRetry: viewModel.hasError ? _load : null,
                     )
                   : KPlanMap(
                       map: map,
@@ -620,10 +629,17 @@ class _TripCompletePill extends StatelessWidget {
 
 /// El papel del mapa mientras carga, o con un aviso si no hay qué mostrar.
 class _Backdrop extends StatelessWidget {
-  const _Backdrop({required this.isBusy, required this.message});
+  const _Backdrop({
+    required this.isBusy,
+    required this.message,
+    this.onRetry,
+  });
 
   final bool isBusy;
   final String message;
+
+  /// Si no se pudo cargar: volver a intentarlo.
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -651,6 +667,14 @@ class _Backdrop extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: AppTextStyles.bodySmall,
                       ),
+                      if (onRetry case final retry?) ...[
+                        const SizedBox(height: 16),
+                        TextButton.icon(
+                          onPressed: retry,
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: Text(context.l10n.commonRetry),
+                        ),
+                      ],
                     ],
                   ),
                 ),

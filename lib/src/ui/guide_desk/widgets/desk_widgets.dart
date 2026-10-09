@@ -87,17 +87,28 @@ class DeskSection extends StatelessWidget {
   }
 }
 
-/// Un texto corto cuando una sección está vacía.
+/// Un texto corto cuando una sección está vacía y, si la pantalla no ofrece
+/// otra, la acción para seguir.
 class DeskEmpty extends StatelessWidget {
-  const DeskEmpty(this.text, {super.key});
+  const DeskEmpty(this.text, {super.key, this.action});
 
   final String text;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(text, style: AppTextStyles.bodySmall),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(text, style: AppTextStyles.bodySmall),
+          if (action case final action?) ...[
+            const SizedBox(height: 8),
+            action,
+          ],
+        ],
+      ),
     );
   }
 }

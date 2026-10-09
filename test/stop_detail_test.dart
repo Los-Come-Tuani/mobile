@@ -89,6 +89,16 @@ void main() {
     expect(find.text('Granada Histórica'), findsOneWidget);
   });
 
+  testWidgets('Una parada que no existe ofrece reintentar, no carga sin fin', (
+    tester,
+  ) async {
+    await pumpStopDetail(tester, 'no-existe');
+
+    expect(find.text('No pudimos cargar esto'), findsOneWidget);
+    expect(find.text('REINTENTAR'), findsOneWidget);
+    expect(find.text('Volver al inicio'), findsOneWidget);
+  });
+
   testWidgets('La hoja añade la parada a otro circuito', (tester) async {
     await pumpStopDetail(tester, 'granada-catedral');
 

@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'l10n/app_localizations.dart';
 import 'src/core/theme/app_theme.dart';
+import 'src/core/utils/logger.dart';
 import 'src/data/datasources/local/session_store.dart';
 import 'src/data/datasources/remote/api_client.dart';
 import 'src/data/datasources/repository/active_trip_repository.dart';
@@ -35,9 +37,16 @@ import 'src/data/datasources/repository/visit_log_repository.dart';
 import 'src/router/router.dart';
 import 'src/ui/language/widgets/language_content_sync.dart';
 import 'src/ui/my_circuit/widgets/collection_sync_notices.dart';
+import 'src/ui/widgets/crash_fallback.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // En debug sigue la pantalla roja de Flutter, que dice qué corregir.
+  if (!kDebugMode) ErrorWidget.builder = (_) => const CrashFallback();
+  PlatformDispatcher.instance.onError = (error, stack) {
+    log.e('Error sin atrapar', error: error, stackTrace: stack);
+    return true;
+  };
   // En release solo se acepta un API por https (ver `ApiClient.baseUrl`).
   ApiClient.ensureSafeConfiguration();
 

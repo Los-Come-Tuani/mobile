@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/datasources/repository/circuit_collections_repository.dart';
 import '../../../data/models/circuit_collection.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/new_circuit_dialog.dart';
 import '../../widgets/remote_image.dart';
 
@@ -48,11 +49,10 @@ class _AddToCircuitSheet extends StatelessWidget {
     repository.createCollection(title, withStopId: stopId);
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(context.l10n.stopDetailCircuitCreated(title))),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      context.l10n.stopDetailCircuitCreated(title),
+      tone: SnackTone.success,
+    );
   }
 
   @override
