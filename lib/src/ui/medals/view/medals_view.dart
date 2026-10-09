@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/medal_tiers.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/inline_notice.dart';
 import '../viewmodels/medals_viewmodel.dart';
 
 /// Medallas ganadas: una general, una por cada categoría de parada, y una
@@ -44,6 +45,17 @@ class _MedalsViewState extends State<MedalsView> {
       body: ListView(
         padding: AppTheme.screenPadding.copyWith(top: 12, bottom: 24),
         children: [
+          if (viewModel.errorMessage case final message?) ...[
+            InlineNotice(
+              tone: NoticeTone.error,
+              message: message,
+              action: TextButton(
+                onPressed: viewModel.load,
+                child: Text(l10n.commonRetry),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           _OverallMedalCard(earnedTotal: viewModel.earnedTotal),
           const SizedBox(height: 12),
           _BalanceNote(

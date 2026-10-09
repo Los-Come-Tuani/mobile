@@ -127,7 +127,11 @@ class ItineraryAssistantViewModel extends BaseViewModel {
       case Ok(:final value):
         _allStops = value;
       case Failure(:final message):
+        // Sin el catálogo no hay qué proponer; la vista ofrece reintentar
+        // y la conversación empieza de cero.
         setError(message);
+        setBusy(false);
+        return;
     }
 
     final id = collectionId;

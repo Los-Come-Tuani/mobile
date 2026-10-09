@@ -361,10 +361,20 @@ class AuthRepository extends ChangeNotifier {
       );
       _setUser(User.fromApi(response.data ?? const {}));
     } on DioException catch (e) {
-      // Un 401 sin renovación ya borró los tokens (`onSessionExpired`).
       log.w('restoreSession: ${e.message}');
+      // Un 401 sin renovación ya borró los tokens (`onSessionExpired`): ahí
+      // no hay nada que recuperar.
+      if (await ApiClient.storedTokens() != null) {
+        _restoreError = ApiClient.describeError(e);
+        notifyListeners();
+      }
     }
   }
+
+  /// Por qué no se pudo recuperar la sesión guardada al abrir la app (sin red o
+  /// con el API caído); los tokens siguen guardados y se puede reintentar.
+  String? get restoreError => _restoreError;
+  String? _restoreError;
 
   /// Cierra la sesión: el API invalida los tokens y se borran de este teléfono.
   Future<void> logout() async {
@@ -391,6 +401,7 @@ class AuthRepository extends ChangeNotifier {
   Future<void> _endSessionLocally() async {
     await ApiClient.closeSession();
     _currentUser = null;
+    _restoreError = null;
     notifyListeners();
   }
 
@@ -489,6 +500,7 @@ class AuthRepository extends ChangeNotifier {
 
   void _setUser(User user) {
     _currentUser = user;
+    _restoreError = null;
     notifyListeners();
   }
 }

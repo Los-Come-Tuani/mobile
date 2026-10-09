@@ -12,7 +12,8 @@ import '../../../data/models/booking.dart';
 import '../../../router/routes.dart';
 import '../../guide_app/widgets/rate_tourist_sheet.dart';
 import '../../widgets/app_dialog.dart';
-import '../../widgets/empty_state.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
@@ -42,10 +43,13 @@ class _BookingDetailViewState extends State<BookingDetailView> {
   BookingDetailViewModel get _viewModel =>
       context.read<BookingDetailViewModel>();
 
-  void _show(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  /// El resultado de una acción: [error] si el API la rechazó o, si no,
+  /// [done].
+  void _report(String? error, String done) {
+    ScaffoldMessenger.of(context).showMessage(
+      error ?? done,
+      tone: error == null ? SnackTone.success : SnackTone.error,
+    );
   }
 
   Future<void> _cancel(Booking booking) async {
@@ -77,7 +81,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
     if (!mounted) return;
     final error = await _viewModel.cancel(reason: reason);
     if (!mounted) return;
-    _show(error ?? l10n.bookingDetailCancelled);
+    _report(error, l10n.bookingDetailCancelled);
   }
 
   Future<void> _review(Booking booking) async {
@@ -103,7 +107,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       comment: rating.comment,
     );
     if (!mounted) return;
-    _show(error ?? context.l10n.bookingReviewSent);
+    _report(error, context.l10n.bookingReviewSent);
   }
 
   @override
@@ -130,12 +134,10 @@ class _BookingDetailViewState extends State<BookingDetailView> {
       ),
       body: booking == null
           ? (viewModel.hasError && !viewModel.isBusy
-                ? EmptyState(
-                    title: viewModel.errorMessage!,
-                    action: TextButton(
-                      onPressed: viewModel.load,
-                      child: Text(l10n.commonRetry),
-                    ),
+                ? ErrorState(
+                    message: viewModel.errorMessage!,
+                    onRetry: viewModel.load,
+                    secondaryAction: const BackToHomeButton(),
                   )
                 : const Center(child: KPlanLoader()))
           : RefreshIndicator(
@@ -183,7 +185,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
               ? null
               : () async {
                   final error = await viewModel.start();
-                  if (mounted) _show(error ?? l10n.bookingDetailStarted);
+                  if (mounted) _report(error, l10n.bookingDetailStarted);
                 },
         ),
         const SizedBox(height: 12),
@@ -196,7 +198,7 @@ class _BookingDetailViewState extends State<BookingDetailView> {
               ? null
               : () async {
                   final error = await viewModel.finish();
-                  if (mounted) _show(error ?? l10n.bookingDetailFinished);
+                  if (mounted) _report(error, l10n.bookingDetailFinished);
                 },
         ),
         const SizedBox(height: 12),

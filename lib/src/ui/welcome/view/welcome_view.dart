@@ -2,18 +2,22 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../router/routes.dart';
 import '../../widgets/illustration_header.dart';
+import '../../widgets/inline_notice.dart';
 
 /// Pantalla de bienvenida: elegir si se entra como turista o como guía.
 ///
-/// No tiene estado propio (sólo navega), por eso no necesita ViewModel.
+/// Sólo navega (y, si hace falta, reintenta abrir la sesión guardada), por eso
+/// no necesita ViewModel.
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
 
@@ -60,6 +64,7 @@ class WelcomeView extends StatelessWidget {
                               l10n.welcomeSubtitle,
                               style: AppTextStyles.body,
                             ),
+                            const _RestoreNotice(),
                             const SizedBox(height: 32),
                             _RoleOption(
                               icon: Icons.explore_outlined,
@@ -84,6 +89,47 @@ class WelcomeView extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Si la sesión guardada no se pudo recuperar al abrir (sin red, el API caído),
+/// lo dice y deja reintentar sin volver a escribir la contraseña. Al
+/// recuperarla, el router lleva al inicio.
+class _RestoreNotice extends StatefulWidget {
+  const _RestoreNotice();
+
+  @override
+  State<_RestoreNotice> createState() => _RestoreNoticeState();
+}
+
+class _RestoreNoticeState extends State<_RestoreNotice> {
+  bool _retrying = false;
+
+  Future<void> _retry() async {
+    setState(() => _retrying = true);
+    await context.read<AuthRepository>().restoreSession();
+    if (mounted) setState(() => _retrying = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final error = context.select<AuthRepository, String?>(
+      (auth) => auth.restoreError,
+    );
+    if (error == null) return const SizedBox.shrink();
+    final l10n = context.l10n;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: InlineNotice(
+        tone: NoticeTone.error,
+        message: l10n.welcomeRestoreFailed(error),
+        action: TextButton(
+          onPressed: _retrying ? null : _retry,
+          child: Text(l10n.commonRetry),
         ),
       ),
     );

@@ -11,9 +11,11 @@ import '../../../router/routes.dart';
 import '../../guide_request/widgets/application_card.dart';
 import '../../widgets/app_choice_chip.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/rating_stars.dart';
 import '../../widgets/remote_image.dart';
+import '../../widgets/secondary_button.dart';
 import '../viewmodels/guides_viewmodel.dart';
 
 /// Los guías y traductores aprobados para contratar, con su calificación.
@@ -80,17 +82,24 @@ class _GuidesViewState extends State<GuidesView> {
             child: viewModel.isBusy
                 ? const Center(child: KPlanLoader())
                 : viewModel.hasError
-                ? EmptyState(
-                    title: viewModel.errorMessage!,
-                    action: TextButton(
-                      onPressed: viewModel.load,
-                      child: Text(l10n.commonRetry),
-                    ),
+                ? ErrorState(
+                    message: viewModel.errorMessage!,
+                    onRetry: viewModel.load,
                   )
                 : guides.isEmpty
                 ? EmptyState(
                     title: l10n.guidesEmptyTitle,
                     message: l10n.guidesEmptyMessage,
+                    action: viewModel.filter == GuideServiceFilter.all
+                        ? SecondaryButton(
+                            label: l10n.myTripsExploreCircuits,
+                            onPressed: () => context.go(Routes.home),
+                          )
+                        : SecondaryButton(
+                            label: l10n.guidesSeeAll,
+                            onPressed: () =>
+                                viewModel.setFilter(GuideServiceFilter.all),
+                          ),
                   )
                 : RefreshIndicator(
                     onRefresh: viewModel.load,

@@ -1028,6 +1028,12 @@ abstract class AppLocalizations {
   /// **'Elige tu país'**
   String get commonChooseCountry;
 
+  /// No description provided for @commonClearSearch.
+  ///
+  /// In es, this message translates to:
+  /// **'Borrar la búsqueda'**
+  String get commonClearSearch;
+
   /// No description provided for @commonClose.
   ///
   /// In es, this message translates to:
@@ -1045,6 +1051,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Cupones'**
   String get commonCoupons;
+
+  /// No description provided for @commonCrashMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Esta parte no se pudo mostrar. Vuelve al inicio para seguir; si se repite, escríbenos desde Ayuda.'**
+  String get commonCrashMessage;
+
+  /// No description provided for @commonCrashTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Algo no salió como esperábamos'**
+  String get commonCrashTitle;
 
   /// No description provided for @commonCreateAccount.
   ///
@@ -1076,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'Correo electrónico'**
   String get commonEmail;
 
+  /// No description provided for @commonErrorTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos cargar esto'**
+  String get commonErrorTitle;
+
   /// No description provided for @commonFullName.
   ///
   /// In es, this message translates to:
@@ -1093,6 +1117,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Inicio'**
   String get commonHome;
+
+  /// No description provided for @commonLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargando…'**
+  String get commonLoading;
 
   /// No description provided for @commonLocalGuide.
   ///
@@ -1148,6 +1178,18 @@ abstract class AppLocalizations {
   /// **'Siguiente'**
   String get commonNext;
 
+  /// No description provided for @commonNotFoundMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que el enlace esté incompleto o que esa página ya no exista. Desde el inicio puedes seguir explorando.'**
+  String get commonNotFoundMessage;
+
+  /// No description provided for @commonNotFoundTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos esta pantalla'**
+  String get commonNotFoundTitle;
+
   /// No description provided for @commonNotifications.
   ///
   /// In es, this message translates to:
@@ -1165,6 +1207,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Las contraseñas no coinciden'**
   String get commonPasswordsDontMatch;
+
+  /// No description provided for @commonRefresh.
+  ///
+  /// In es, this message translates to:
+  /// **'Actualizar'**
+  String get commonRefresh;
 
   /// No description provided for @commonRepeatPassword.
   ///
@@ -1319,8 +1367,14 @@ abstract class AppLocalizations {
   /// No description provided for @couponsStoreEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Por ahora no hay cupones disponibles. Vuelve pronto.'**
+  /// **'Sigue ganando insignias en tus visitas: te servirán cuando lleguen nuevos cupones.'**
   String get couponsStoreEmpty;
+
+  /// No description provided for @couponsStoreEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ahora no hay cupones'**
+  String get couponsStoreEmptyTitle;
 
   /// No description provided for @couponsStoreTitle.
   ///
@@ -1583,8 +1637,14 @@ abstract class AppLocalizations {
   /// No description provided for @groupSlotsEmpty.
   ///
   /// In es, this message translates to:
-  /// **'Todavía no hay horarios publicados para este circuito. Vuelve a revisar pronto.'**
+  /// **'Los guías certificados publican horarios seguido. Mientras tanto, puedes explorar otros circuitos.'**
   String get groupSlotsEmpty;
+
+  /// No description provided for @groupSlotsEmptyTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay horarios publicados'**
+  String get groupSlotsEmptyTitle;
 
   /// No description provided for @groupSlotsEndsAround.
   ///
@@ -3079,6 +3139,12 @@ abstract class AppLocalizations {
   /// **'Ver propuestas'**
   String get guideAppSeeProposals;
 
+  /// No description provided for @guideAppSeeTrips.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver mis viajes'**
+  String get guideAppSeeTrips;
+
   /// No description provided for @guideAppServiceHours.
   ///
   /// In es, this message translates to:
@@ -3654,6 +3720,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Convocatorias abiertas'**
   String get guideDeskOpenRequestsTitle;
+
+  /// No description provided for @guideDeskSeeOpenRequests.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver convocatorias'**
+  String get guideDeskSeeOpenRequests;
 
   /// No description provided for @guideDeskStops.
   ///
@@ -4321,6 +4393,12 @@ abstract class AppLocalizations {
   /// **'Sin reseñas todavía'**
   String get guidesNoReviews;
 
+  /// No description provided for @guidesSeeAll.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todos'**
+  String get guidesSeeAll;
+
   /// No description provided for @guidesTitle.
   ///
   /// In es, this message translates to:
@@ -4387,6 +4465,36 @@ abstract class AppLocalizations {
   /// **'Modo traductor'**
   String get homeDrawerTranslatorMode;
 
+  /// No description provided for @homeEmptyCatalogMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Estamos sumando circuitos, lugares y eventos. Vuelve a revisar en un rato.'**
+  String get homeEmptyCatalogMessage;
+
+  /// No description provided for @homeEmptyCatalogTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no hay nada para explorar'**
+  String get homeEmptyCatalogTitle;
+
+  /// No description provided for @homeEmptyCircuitsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay circuitos para mostrar'**
+  String get homeEmptyCircuitsTitle;
+
+  /// No description provided for @homeEmptyEventsTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay eventos próximos'**
+  String get homeEmptyEventsTitle;
+
+  /// No description provided for @homeEmptyListMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Prueba con otra búsqueda o explora los lugares destacados.'**
+  String get homeEmptyListMessage;
+
   /// No description provided for @homeEmptySearchMessage.
   ///
   /// In es, this message translates to:
@@ -4410,6 +4518,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'No hay paradas que coincidan'**
   String get homeEmptyStopsTitle;
+
+  /// No description provided for @homeExplorePlaces.
+  ///
+  /// In es, this message translates to:
+  /// **'Explorar lugares'**
+  String get homeExplorePlaces;
 
   /// No description provided for @homeGuideRequestApplicationsHint.
   ///
@@ -4494,6 +4608,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Paradas destacadas'**
   String get homeSectionStops;
+
+  /// No description provided for @homeShowAllCategories.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver todas las categorías'**
+  String get homeShowAllCategories;
 
   /// No description provided for @homeStopCount.
   ///
@@ -5100,6 +5220,18 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Querías llegar a las {time}'**
   String myCircuitMissedFixedTime(String time);
+
+  /// No description provided for @myCircuitNotFoundMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'Puede que lo hayas borrado. En Mis viajes están todos tus circuitos.'**
+  String get myCircuitNotFoundMessage;
+
+  /// No description provided for @myCircuitNotFoundTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos este circuito'**
+  String get myCircuitNotFoundTitle;
 
   /// No description provided for @myCircuitProposalNote.
   ///
@@ -5878,14 +6010,32 @@ abstract class AppLocalizations {
   /// No description provided for @repoNetworkCommunicationError.
   ///
   /// In es, this message translates to:
-  /// **'Ocurrió un error de comunicación con el servidor'**
+  /// **'No pudimos comunicarnos con K\'Plan. Intenta de nuevo.'**
   String get repoNetworkCommunicationError;
+
+  /// No description provided for @repoNetworkConflict.
+  ///
+  /// In es, this message translates to:
+  /// **'Esto cambió mientras lo veías. Actualiza e intenta de nuevo.'**
+  String get repoNetworkConflict;
 
   /// No description provided for @repoNetworkConnectionTimeout.
   ///
   /// In es, this message translates to:
-  /// **'Tiempo de conexión agotado'**
+  /// **'La conexión está tardando demasiado. Revisa tu internet e intenta de nuevo.'**
   String get repoNetworkConnectionTimeout;
+
+  /// No description provided for @repoNetworkForbidden.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso para hacer esto.'**
+  String get repoNetworkForbidden;
+
+  /// No description provided for @repoNetworkInvalidData.
+  ///
+  /// In es, this message translates to:
+  /// **'Revisa los datos e intenta de nuevo.'**
+  String get repoNetworkInvalidData;
 
   /// No description provided for @repoNetworkNoConnection.
   ///
@@ -5893,16 +6043,28 @@ abstract class AppLocalizations {
   /// **'No hay conexión a internet'**
   String get repoNetworkNoConnection;
 
+  /// No description provided for @repoNetworkNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'No encontramos lo que buscas. Puede que ya no esté disponible.'**
+  String get repoNetworkNotFound;
+
   /// No description provided for @repoNetworkRetryIn.
   ///
   /// In es, this message translates to:
   /// **'{message} Puedes reintentar en {wait}.'**
   String repoNetworkRetryIn(String message, String wait);
 
+  /// No description provided for @repoNetworkServerError.
+  ///
+  /// In es, this message translates to:
+  /// **'Tuvimos un problema de nuestro lado. Intenta de nuevo en unos minutos.'**
+  String get repoNetworkServerError;
+
   /// No description provided for @repoNetworkServerTimeout.
   ///
   /// In es, this message translates to:
-  /// **'El servidor tardó demasiado en responder'**
+  /// **'K\'Plan tardó demasiado en responder. Intenta de nuevo.'**
   String get repoNetworkServerTimeout;
 
   /// No description provided for @repoNetworkSessionExpired.
@@ -5911,11 +6073,23 @@ abstract class AppLocalizations {
   /// **'Sesión expirada, vuelve a iniciar sesión'**
   String get repoNetworkSessionExpired;
 
+  /// No description provided for @repoNetworkTooLarge.
+  ///
+  /// In es, this message translates to:
+  /// **'El archivo es demasiado grande.'**
+  String get repoNetworkTooLarge;
+
   /// No description provided for @repoNetworkTooManyAttempts.
   ///
   /// In es, this message translates to:
   /// **'Demasiados intentos, espera un momento e intenta de nuevo'**
   String get repoNetworkTooManyAttempts;
+
+  /// No description provided for @repoNetworkUploadsUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: intenta de nuevo más tarde.'**
+  String get repoNetworkUploadsUnavailable;
 
   /// No description provided for @repoNetworkWaitMinutes.
   ///
@@ -7667,6 +7841,12 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Accede o postula tus servicios'**
   String get welcomeGuideSubtitle;
+
+  /// No description provided for @welcomeRestoreFailed.
+  ///
+  /// In es, this message translates to:
+  /// **'No pudimos abrir tu sesión. {message}'**
+  String welcomeRestoreFailed(String message);
 
   /// No description provided for @welcomeSubtitle.
   ///

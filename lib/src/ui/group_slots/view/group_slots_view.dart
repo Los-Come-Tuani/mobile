@@ -14,8 +14,12 @@ import '../../booking/widgets/booking_card.dart';
 import '../../booking/widgets/group_picker_sheet.dart';
 import '../../booking_detail/widgets/payment_card.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/creative_circuit_badge.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
+import '../../widgets/secondary_button.dart';
 import '../viewmodels/group_slots_viewmodel.dart';
 import '../widgets/enroll_sheet.dart';
 import '../widgets/group_slot_card.dart';
@@ -80,20 +84,15 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
       await showBookingConfirmedSheet(context, booking);
       return;
     }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            enrolled
-                ? l10n.groupSlotsEnrolled(
-                    Formatters.dayAndMonth(session.date),
-                    Formatters.timeText(session.startTime),
-                  )
-                : viewModel.enrollError ?? l10n.groupSlotsNoSpotsLeft,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      enrolled
+          ? l10n.groupSlotsEnrolled(
+              Formatters.dayAndMonth(session.date),
+              Formatters.timeText(session.startTime),
+            )
+          : viewModel.enrollError ?? l10n.groupSlotsNoSpotsLeft,
+      tone: enrolled ? SnackTone.success : SnackTone.error,
+    );
   }
 
   @override
@@ -122,9 +121,10 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
       body: viewModel.isBusy || (circuit == null && !viewModel.hasError)
           ? const Center(child: KPlanLoader())
           : circuit == null
-          ? _Message(
-              icon: Icons.error_outline,
-              text: viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+          ? ErrorState(
+              message: viewModel.errorMessage!,
+              onRetry: viewModel.load,
+              secondaryAction: const BackToHomeButton(),
             )
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
@@ -155,9 +155,14 @@ class _GroupSlotsViewState extends State<GroupSlotsView> {
                   style: AppTextStyles.caption,
                 ),
                 if (viewModel.sessions.isEmpty)
-                  _Message(
-                    icon: Icons.event_busy_outlined,
-                    text: l10n.groupSlotsEmpty,
+                  EmptyState(
+                    compact: true,
+                    title: l10n.groupSlotsEmptyTitle,
+                    message: l10n.groupSlotsEmpty,
+                    action: SecondaryButton(
+                      label: l10n.myTripsExploreCircuits,
+                      onPressed: () => context.go(Routes.home),
+                    ),
                   )
                 else
                   ..._buildSessions(viewModel),
@@ -258,31 +263,6 @@ class _InfoLine extends StatelessWidget {
           Icon(icon, size: 16, color: AppColors.primary30),
           const SizedBox(width: 8),
           Expanded(child: Text(text, style: AppTextStyles.bodySmall)),
-        ],
-      ),
-    );
-  }
-}
-
-class _Message extends StatelessWidget {
-  const _Message({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-      child: Column(
-        children: [
-          Icon(icon, size: 44, color: AppColors.hintText),
-          const SizedBox(height: 12),
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall,
-          ),
         ],
       ),
     );

@@ -13,6 +13,8 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/bookmark_button.dart';
 import '../../widgets/brand_app_bar.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
+import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/section_header.dart';
@@ -49,6 +51,16 @@ class _SavedViewState extends State<SavedView> {
       ),
       body: viewModel.isBusy
           ? const Center(child: KPlanLoader())
+          : viewModel.isEmpty && viewModel.hasError
+          ? ListView(
+              children: [
+                ErrorState(
+                  message: viewModel.errorMessage!,
+                  onRetry: viewModel.load,
+                  secondaryAction: const BackToHomeButton(),
+                ),
+              ],
+            )
           : viewModel.isEmpty
           ? ListView(
               children: [
@@ -67,6 +79,17 @@ class _SavedViewState extends State<SavedView> {
               children: [
                 Text(l10n.savedHeadline, style: AppTextStyles.pageTitle),
                 const SizedBox(height: 16),
+                if (viewModel.errorMessage case final message?) ...[
+                  InlineNotice(
+                    tone: NoticeTone.error,
+                    message: message,
+                    action: TextButton(
+                      onPressed: viewModel.load,
+                      child: Text(l10n.commonRetry),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 if (viewModel.savedCircuits.isNotEmpty) ...[
                   SectionHeader(title: l10n.homeTabCircuits),
                   const SizedBox(height: 10),

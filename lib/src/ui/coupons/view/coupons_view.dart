@@ -11,10 +11,14 @@ import '../../../data/models/coupon.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/brand_app_bar.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/mascot.dart';
 import '../../widgets/remote_image.dart';
+import '../../widgets/secondary_button.dart';
 import '../viewmodels/coupons_viewmodel.dart';
 
 /// Catálogo de cupones y descuentos: se canjean con el saldo de insignias
@@ -63,17 +67,12 @@ class _CouponsViewState extends State<CouponsView> {
       );
       return;
     }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.couponsRedeemed
-                : viewModel.redeemError ?? l10n.couponsRedeemFailed,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      ok
+          ? l10n.couponsRedeemed
+          : viewModel.redeemError ?? l10n.couponsRedeemFailed,
+      tone: ok ? SnackTone.success : SnackTone.error,
+    );
   }
 
   /// Sin saldo suficiente, la vaca explica cuántas faltan y cómo se ganan.
@@ -115,7 +114,14 @@ class _CouponsViewState extends State<CouponsView> {
                 _BalanceCard(available: viewModel.availableBadges),
                 if (viewModel.errorMessage case final error?) ...[
                   const SizedBox(height: 12),
-                  Text(error, style: AppTextStyles.bodySmall),
+                  InlineNotice(
+                    tone: NoticeTone.error,
+                    message: error,
+                    action: TextButton(
+                      onPressed: viewModel.load,
+                      child: Text(l10n.commonRetry),
+                    ),
+                  ),
                 ],
                 if (viewModel.wallet.isNotEmpty) ...[
                   const SizedBox(height: 20),
@@ -127,8 +133,18 @@ class _CouponsViewState extends State<CouponsView> {
                   Text(l10n.couponsStoreTitle, style: AppTextStyles.title),
                 ],
                 const SizedBox(height: 20),
-                if (viewModel.usesApi && viewModel.coupons.isEmpty)
-                  Text(l10n.couponsStoreEmpty, style: AppTextStyles.bodySmall),
+                if (viewModel.usesApi &&
+                    viewModel.coupons.isEmpty &&
+                    !viewModel.hasError)
+                  EmptyState(
+                    compact: true,
+                    title: l10n.couponsStoreEmptyTitle,
+                    message: l10n.couponsStoreEmpty,
+                    action: SecondaryButton(
+                      label: l10n.couponsNoBadgesExplore,
+                      onPressed: () => context.go(Routes.home),
+                    ),
+                  ),
                 for (final coupon in viewModel.coupons)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),

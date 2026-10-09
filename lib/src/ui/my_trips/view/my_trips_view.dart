@@ -17,6 +17,7 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/new_circuit_dialog.dart';
 import '../../widgets/primary_button.dart';
@@ -202,6 +203,16 @@ class _UpcomingTab extends StatelessWidget {
     final l10n = context.l10n;
     final bookings = viewModel.upcomingBookings;
 
+    if (bookings.isEmpty && viewModel.hasError) {
+      return ListView(
+        children: [
+          ErrorState(
+            message: viewModel.errorMessage!,
+            onRetry: viewModel.load,
+          ),
+        ],
+      );
+    }
     if (bookings.isEmpty) {
       return _EmptyTab(
         title: l10n.myTripsUpcomingEmptyTitle,

@@ -453,6 +453,39 @@ void main() {
 
         expect(repository.isLoggedIn, isFalse);
         expect(await store.read(), isNull);
+        expect(repository.restoreError, isNull);
+      },
+    );
+
+    test(
+      'con el API caído conserva los tokens, dice por qué y se puede reintentar',
+      () async {
+        await store.write(
+          const SessionTokens(access: 'guardado', refresh: 'guardado'),
+        );
+        var down = true;
+        final api = FakeApi(
+          (_) => down
+              ? const FakeResponse(503, '<html>Service Unavailable</html>')
+              : FakeResponse(200, apiUser()),
+        );
+        final repository = repositoryFor(api);
+
+        await repository.restoreSession();
+
+        expect(repository.isLoggedIn, isFalse);
+        expect(await store.read(), isNotNull);
+        expect(
+          repository.restoreError,
+          'Tuvimos un problema de nuestro lado. Intenta de nuevo en unos '
+          'minutos.',
+        );
+
+        down = false;
+        await repository.restoreSession();
+
+        expect(repository.isLoggedIn, isTrue);
+        expect(repository.restoreError, isNull);
       },
     );
 

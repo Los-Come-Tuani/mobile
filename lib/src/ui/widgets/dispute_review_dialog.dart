@@ -5,6 +5,7 @@ import '../../core/l10n/l10n.dart';
 import '../../core/utils/result.dart';
 import '../../data/datasources/repository/bookings_repository.dart';
 import 'app_dialog.dart';
+import 'app_snack_bar.dart';
 
 /// Pide el motivo (10 caracteres o más) para que el equipo revise la reseña
 /// [reviewId] que recibió quien pregunta, y la manda al API. Avisa cómo salió.
@@ -23,14 +24,10 @@ Future<void> disputeReview(BuildContext context, String reviewId) async {
   );
   if (reason == null) return;
   final result = await bookings.disputeReview(reviewId, reason);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(switch (result) {
-          Ok() => l10n.reviewDisputeSent,
-          Failure(:final message) => message,
-        }),
-      ),
-    );
+  switch (result) {
+    case Ok():
+      messenger.showMessage(l10n.reviewDisputeSent, tone: SnackTone.success);
+    case Failure(:final message):
+      messenger.showMessage(message, tone: SnackTone.error);
+  }
 }

@@ -272,7 +272,84 @@ void main() {
 
       expect(
         ApiClient.describeError(error),
-        'Ocurrió un error de comunicación con el servidor',
+        'Tuvimos un problema de nuestro lado. Intenta de nuevo en unos minutos.',
+      );
+    });
+
+    test('el texto genérico del API se cambia por el de la app', () {
+      final error = errorOf(
+        apiError(404, 'El recurso solicitado no se encontró.'),
+      );
+
+      expect(
+        ApiClient.describeError(error),
+        'No encontramos lo que buscas. Puede que ya no esté disponible.',
+      );
+    });
+
+    test('sin detail, cada código tiene su mensaje y ninguno lo nombra', () {
+      String describe(int status, {Object? body}) => ApiClient.describeError(
+        DioException(
+          requestOptions: RequestOptions(path: '/x'),
+          response: Response<dynamic>(
+            requestOptions: RequestOptions(path: '/x'),
+            statusCode: status,
+            data: body,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      expect(describe(403), 'No tienes permiso para hacer esto.');
+      expect(
+        describe(404),
+        'No encontramos lo que buscas. Puede que ya no esté disponible.',
+      );
+      expect(
+        describe(409),
+        'Esto cambió mientras lo veías. Actualiza e intenta de nuevo.',
+      );
+      // La página HTML de un proxy no es un mensaje para la persona.
+      final html = describe(502, body: '<html><h1>502 Bad Gateway</h1></html>');
+      expect(
+        html,
+        'Tuvimos un problema de nuestro lado. Intenta de nuevo en unos minutos.',
+      );
+      for (final status in [400, 403, 404, 409, 413, 500, 502, 503]) {
+        expect(describe(status), isNot(contains('$status')));
+      }
+    });
+
+    test('subir sin almacenamiento en el API dice que por ahora no se puede', () {
+      final error = DioException(
+        requestOptions: RequestOptions(path: ApiRoutes.upload),
+        response: Response<dynamic>(
+          requestOptions: RequestOptions(path: ApiRoutes.upload),
+          statusCode: 503,
+          data: {
+            'detail': 'El almacenamiento de archivos no está configurado.',
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      expect(
+        ApiClient.describeError(error),
+        'Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: '
+        'intenta de nuevo más tarde.',
+      );
+    });
+
+    test('un envío que tarda demasiado lo dice sin tecnicismos', () {
+      final error = DioException(
+        requestOptions: RequestOptions(path: '/x'),
+        type: DioExceptionType.sendTimeout,
+      );
+
+      expect(
+        ApiClient.describeError(error),
+        'La conexión está tardando demasiado. Revisa tu internet e intenta '
+        'de nuevo.',
       );
     });
 

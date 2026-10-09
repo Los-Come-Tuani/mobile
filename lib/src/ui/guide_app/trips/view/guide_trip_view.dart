@@ -10,6 +10,7 @@ import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/tourist_profile.dart';
 import '../../../../router/routes.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/kplan_loader.dart';
 import '../../../widgets/primary_button.dart';
@@ -54,17 +55,12 @@ class _GuideTripViewState extends State<GuideTripView> {
     );
     if (!mounted) return;
     final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.guideAppRateSent
-                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      ok
+          ? l10n.guideAppRateSent
+          : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+      tone: ok ? SnackTone.success : SnackTone.error,
+    );
   }
 
   @override
@@ -81,6 +77,10 @@ class _GuideTripViewState extends State<GuideTripView> {
             : EmptyState(
                 title: l10n.guideAppTripNotFoundTitle,
                 message: l10n.guideAppTripNotFoundMessage,
+                action: SecondaryButton(
+                  label: l10n.guideAppSeeTrips,
+                  onPressed: () => context.go(Routes.guideTrips),
+                ),
               ),
       );
     }

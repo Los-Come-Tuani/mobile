@@ -8,6 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
 import '../../../data/datasources/repository/guide_access_repository.dart';
 import '../../../router/routes.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../viewmodels/home_viewmodel.dart';
 
 /// Menú lateral del home. Es el único lugar desde donde se cierra sesión.
@@ -183,11 +184,9 @@ class _MenuItem extends StatelessWidget {
           onTap ??
           () {
             Navigator.of(context).pop();
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text(l10n.homeDrawerComingSoon(label))),
-              );
+            ScaffoldMessenger.of(
+              context,
+            ).showMessage(l10n.homeDrawerComingSoon(label));
           },
     );
   }

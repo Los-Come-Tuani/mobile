@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
 import '../../../router/routes.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../../widgets/verification_code_field.dart';
@@ -38,14 +39,14 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     super.dispose();
   }
 
-  void _show(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  void _show(String message, {SnackTone tone = SnackTone.info}) {
+    ScaffoldMessenger.of(context).showMessage(message, tone: tone);
   }
 
-  void _showError(ForgotPasswordViewModel viewModel) =>
-      _show(viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong);
+  void _showError(ForgotPasswordViewModel viewModel) => _show(
+    viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+    tone: SnackTone.error,
+  );
 
   Future<void> _sendCode() async {
     FocusScope.of(context).unfocus();
@@ -66,7 +67,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     final sent = await viewModel.resendCode();
     if (!mounted) return;
     if (sent) {
-      _show(context.l10n.forgotPasswordCodeResent);
+      _show(context.l10n.forgotPasswordCodeResent, tone: SnackTone.success);
     } else {
       _showError(viewModel);
     }
@@ -75,7 +76,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   Future<void> _reset() async {
     FocusScope.of(context).unfocus();
     if (_codeController.text.length != 6) {
-      _show(context.l10n.forgotPasswordCodeMissing);
+      _show(context.l10n.forgotPasswordCodeMissing, tone: SnackTone.error);
       return;
     }
     if (!(_resetKey.currentState?.validate() ?? false)) return;
@@ -87,7 +88,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
     );
     if (!mounted) return;
     if (done) {
-      _show(context.l10n.forgotPasswordUpdated);
+      _show(context.l10n.forgotPasswordUpdated, tone: SnackTone.success);
       context.go(Routes.login);
     } else {
       _showError(viewModel);

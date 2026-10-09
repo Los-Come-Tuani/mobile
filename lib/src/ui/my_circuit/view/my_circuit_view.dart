@@ -11,13 +11,16 @@ import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../booking/widgets/booking_card.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_time_picker.dart';
 import '../../widgets/drop_reason_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/options_sheet.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/secondary_button.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/trip_progress.dart';
 import '../viewmodels/my_circuit_viewmodel.dart';
@@ -42,9 +45,7 @@ class _MyCircuitViewState extends State<MyCircuitView> {
   }
 
   void _notify(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showMessage(message);
   }
 
   /// Pregunta la razón antes de quitarla: es lo que el portal le muestra al
@@ -59,18 +60,14 @@ class _MyCircuitViewState extends State<MyCircuitView> {
     if (reason == null || !mounted) return;
 
     final removal = viewModel.removeStop(stopId, reason);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(l10n.myCircuitRemoved(stopName)),
-          action: SnackBarAction(
-            label: l10n.myCircuitUndo,
-            textColor: AppColors.primary10,
-            onPressed: () => viewModel.restoreStop(removal),
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      l10n.myCircuitRemoved(stopName),
+      action: SnackBarAction(
+        label: l10n.myCircuitUndo,
+        textColor: AppColors.primary10,
+        onPressed: () => viewModel.restoreStop(removal),
+      ),
+    );
   }
 
   /// El mapa del circuito: su recorrido o, si se está siguiendo, el viaje.
@@ -222,8 +219,17 @@ class _MyCircuitViewState extends State<MyCircuitView> {
         ],
       ),
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy
+      body: viewModel.isBusy || !viewModel.hasLoaded
           ? const Center(child: KPlanLoader())
+          : collection == null
+          ? ErrorState(
+              title: l10n.myCircuitNotFoundTitle,
+              message: l10n.myCircuitNotFoundMessage,
+              secondaryAction: SecondaryButton(
+                label: l10n.commonMyTrips,
+                onPressed: () => context.go(Routes.myTrips),
+              ),
+            )
           : ListView(
               padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
               children: [
@@ -307,7 +313,12 @@ class _MyCircuitViewState extends State<MyCircuitView> {
                     ),
                     const SizedBox(height: 20),
                   ],
-                  if (itinerary == null)
+                  if (itinerary == null && viewModel.hasError)
+                    ErrorState(
+                      message: viewModel.errorMessage!,
+                      onRetry: viewModel.load,
+                    )
+                  else if (itinerary == null)
                     EmptyState(
                       title: l10n.myCircuitEmpty,
                       message: l10n.myCircuitEmptyMessage,

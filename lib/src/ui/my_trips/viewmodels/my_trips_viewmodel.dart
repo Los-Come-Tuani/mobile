@@ -105,6 +105,7 @@ class MyTripsViewModel extends BaseViewModel {
 
   Future<void> load() async {
     setBusy(true);
+    clearError();
     await _collectionsRepository.ensureLoaded();
     final bookings = await _bookingsRepository.refresh();
     if (bookings case Failure(:final message)) setError(message);

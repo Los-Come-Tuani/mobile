@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../core/constants/app_assets.dart';
+import '../../core/l10n/l10n.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 
-/// La vaca de K'Plan saltando mientras algo carga.
+/// La vaca de K'Plan saltando mientras algo carga, con "Cargando…" y una
+/// barra sin avance debajo: no dice cuánto falta, solo que sigue cargando.
 ///
 /// Aparece tras un instante: en una carga rápida no llega a verse y la
-/// pantalla no parpadea. Con "reducir movimiento" se queda quieta.
+/// pantalla no parpadea. Con "reducir movimiento" la vaca se queda quieta y la
+/// barra no se pinta.
 class KPlanLoader extends StatefulWidget {
   const KPlanLoader({super.key, this.size = 120});
 
@@ -37,17 +42,44 @@ class _KPlanLoaderState extends State<KPlanLoader>
 
   @override
   Widget build(BuildContext context) {
+    final label = context.l10n.commonLoading;
+    final animate = !MediaQuery.disableAnimationsOf(context);
+
     return Semantics(
-      label: 'Cargando',
+      label: label,
+      excludeSemantics: true,
       child: FadeTransition(
         opacity: _opacity,
-        child: RepaintBoundary(
-          child: Lottie.asset(
-            AppAssets.mascotJumping,
-            width: widget.size,
-            height: widget.size,
-            animate: !MediaQuery.disableAnimationsOf(context),
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RepaintBoundary(
+              child: Lottie.asset(
+                AppAssets.mascotJumping,
+                width: widget.size,
+                height: widget.size,
+                animate: animate,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(label, style: AppTextStyles.caption),
+            if (animate) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: widget.size,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    minHeight: 4,
+                    color: AppColors.primary30,
+                    backgroundColor: AppColors.primary30.withValues(
+                      alpha: 0.15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

@@ -10,7 +10,7 @@ abstract final class AppColors {
   static const Color primary60 = Color(0xFF1E2022);
 
   /// Color de marca (terracota): acciones principales.
-  static const Color primary30 = Color(0xFFD95D39);
+  static const Color primary30 = Color(0xFFB04321);
 
   /// Fondo crema de toda la app.
   static const Color primary10 = Color(0xFFF8F4E6);
@@ -26,6 +26,11 @@ abstract final class AppColors {
   static const Color divider = Color(0xFFE6E0D0);
   static const Color hintText = Color(0xFF9A9484);
   static const Color error = Color(0xFFB3261E);
+
+  /// Íconos de error y de éxito sobre la tinta oscura de los SnackBar: los
+  /// tonos de arriba no se distinguen ahí.
+  static const Color errorOnDark = Color(0xFFF2B8B5);
+  static const Color successOnDark = Color(0xFF95D5B2);
 
   // ── Alias semánticos ──────────────────────────────────────────────────────
   // Se usan en los widgets para no acoplarlos al nombre del tono.

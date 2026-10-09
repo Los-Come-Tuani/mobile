@@ -11,6 +11,8 @@ import '../../../data/models/circuit.dart';
 import '../../../data/models/itinerary.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/itinerary_timeline.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/options_sheet.dart';
@@ -98,26 +100,21 @@ class _BookingViewState extends State<BookingView> {
     final l10n = context.l10n;
     if (!ok) {
       if (viewModel.errorMessage case final message?) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showMessage(message, tone: SnackTone.error);
       }
       return;
     }
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            viewModel.needsGuideRequest
-                ? l10n.bookingRequestPublished
-                : hadGuideRequest
-                ? l10n.bookingConfirmedWithProposal
-                : l10n.bookingConfirmed,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      viewModel.needsGuideRequest
+          ? l10n.bookingRequestPublished
+          : hadGuideRequest
+          ? l10n.bookingConfirmedWithProposal
+          : l10n.bookingConfirmed,
+      tone: SnackTone.success,
+    );
 
     // Con propuesta, se pasa a ver las postulaciones que van llegando; si
     // no, directo al home.
@@ -249,7 +246,14 @@ class _BookingViewState extends State<BookingView> {
               ],
             )
           : viewModel.hasError && !viewModel.isBusy
-          ? _LoadError(message: viewModel.errorMessage!, onBack: _goBack)
+          ? ErrorState(
+              message: viewModel.errorMessage!,
+              onRetry: viewModel.load,
+              secondaryAction: TextButton(
+                onPressed: _goBack,
+                child: Text(l10n.bookingGoBack),
+              ),
+            )
           : const Center(child: KPlanLoader()),
     );
   }
@@ -353,9 +357,9 @@ class _TourInfoCard extends StatelessWidget {
           icon: Icons.military_tech_outlined,
           title: l10n.bookingBadges,
           text: circuit.badgesNote,
-          onTap: () => ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(SnackBar(content: Text(l10n.bookingBadgesSoon))),
+          onTap: () => ScaffoldMessenger.of(
+            context,
+          ).showMessage(l10n.bookingBadgesSoon),
         ),
         TourInfoBlock(
           icon: Icons.info_outline,
@@ -414,43 +418,6 @@ class _ItineraryCard extends StatelessWidget {
         const SizedBox(height: 12),
         ItineraryTimeline(itinerary: itinerary, dense: true),
       ],
-    );
-  }
-}
-
-class _LoadError extends StatelessWidget {
-  const _LoadError({required this.message, required this.onBack});
-
-  final String message;
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: AppTheme.screenPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 44,
-              color: AppColors.hintText,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.bodySmall,
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: onBack,
-              child: Text(context.l10n.bookingGoBack),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

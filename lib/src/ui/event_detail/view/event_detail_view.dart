@@ -13,6 +13,7 @@ import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/circle_icon_button.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/inline_notice.dart';
@@ -45,13 +46,15 @@ class _EventDetailViewState extends State<EventDetailView> {
 
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy
+      body: viewModel.isBusy || (event == null && !viewModel.hasError)
           ? const Center(child: KPlanLoader())
           : event == null
-          ? _ErrorState(
-              message:
-                  viewModel.errorMessage ??
-                  context.l10n.commonSomethingWentWrong,
+          ? SafeArea(
+              child: ErrorState(
+                message: viewModel.errorMessage!,
+                onRetry: viewModel.load,
+                secondaryAction: const BackToHomeButton(),
+              ),
             )
           : _EventContent(event: event),
     );
@@ -203,44 +206,6 @@ class _EventContent extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Padding(
-          padding: AppTheme.screenPadding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 44,
-                color: AppColors.hintText,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () => context.go(Routes.home),
-                child: Text(context.l10n.commonBackToHome),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

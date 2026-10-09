@@ -1,6 +1,6 @@
 # Memoria de trabajo: app y la hoja de ruta del API
 
-Actualizada el 2026-10-08 (Google y el identificador definitivo). Traspaso para el
+Actualizada el 2026-10-09 (errores y estados vacíos amigables). Traspaso para el
 siguiente agente. La memoria general (estado de
 todas las tareas, API, F2 a F8, avisos y cómo correr el API en esta máquina) está en
 `C:\development\kplan\api\.cursor\memory\hoja-de-ruta.md`: léela primero.
@@ -31,7 +31,11 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `EMAIL_HOST`, y con `DEPLOY=True` el API **descarta** los correos: el código del registro,
   el de recuperar contraseña y el de la postulación nunca llegan. Tampoco tiene
   `GOOGLE_OAUTH_CLIENT_IDS`: `POST /auth/mobile/google/` da `404` "no está habilitado".
-  Las dos son variables del servicio `develop-a` en Railway (las define el usuario). Para
+  Las dos son variables del servicio `develop-a` en Railway (las define el usuario).
+  Tampoco tiene almacenamiento (`STORAGE_*`, comprobado el 2026-10-09): `POST /upload/`
+  responde `503` y nadie puede subir documentos (postulación de guía en la app, de negocio en el
+  portal) ni fotos; la app y el portal lo avisan con "Por ahora no podemos recibir archivos". Pasos
+  en `api/docs/archivos.md` (bucket R2, variables y CORS con los orígenes del portal). Para
   poder crear cuentas sin correo, el API `497cfa9` agregó
   `VERIFICATION_ACCEPT_ANY_SIGNUP_CODE=True`: cualquier código de seis dígitos sirve para el
   alta (no para recuperar la contraseña); ver la memoria del API, aviso 20. Un
@@ -244,6 +248,33 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
     pasan, 9 saltadas. No se probó en un dispositivo.
   - **Sigue en demo con el API**: lugares destacados, viaje en curso y bitácora de visitas (solo en
     el teléfono), medallas por ciudad creativa, el chat simulado de la propuesta de la demo.
+- **Hecho: errores y estados vacíos amigables** (2026-10-09, rama `feat/errores-amigables`, pedido
+  del cliente: "flujo automático", sin ayuda técnica y sin códigos a la vista; el portal y la
+  landing tienen lo suyo en sus ramas del mismo nombre):
+  - `ApiClient.describeError` nunca nombra el código: 401, 403, 404, 409, 413, 400/422 y 5xx tienen
+    su texto (`repoNetwork*`); un 5xx nunca muestra el `detail`; los textos genéricos del API
+    (`api_exceptions/errors`: "El recurso solicitado no se encontró.", "Ha enviado un `Accept`
+    header inválido."...) se cambian por los de la app (`_genericDetails`).
+  - Piezas comunes en `ui/widgets/`: `ErrorState` (la vaca, el motivo y "Reintentar"; sin reintento
+    ofrece volver al inicio) y `BackToHomeButton` (`error_state.dart`); `showMessage` sobre
+    `ScaffoldMessengerState` con `SnackTone.info|success|error` (`app_snack_bar.dart`: el error
+    lleva ícono y dura 6 s). Todos los SnackBar de la app pasan por ahí. `DeskEmpty` acepta una
+    `action`.
+  - Router: `errorBuilder` -> `NotFoundView` (`ui/not_found/`). `main.dart`: fuera de debug,
+    `ErrorWidget.builder` pinta `CrashFallback` (sin tema ni idioma encima; en un hueco chico solo
+    el ícono) y `PlatformDispatcher.onError` lo anota en el log.
+  - Pantallas: la ficha de un lugar ya no carga sin fin tras un error; detalle de circuito, evento,
+    reserva, perfil del guía, reservar, horarios de grupo, mapa, chat, avisos, asistente y
+    Configuraciones -> Notificaciones ofrecen reintentar. Inicio, Guardados, Mis viajes, Medallas,
+    Cupones y las pestañas del guía con API muestran el error (con reintentar) en vez de pasar por
+    vacío. Cada estado vacío tiene una acción (borrar la búsqueda, ver todas las categorías,
+    explorar circuitos, publicar salida, ver convocatorias...). Inicio y Mi circuito esperan su
+    primera carga (`hasLoaded`) antes de decir que algo está vacío; un circuito propio que ya no
+    existe lo dice y lleva a Mis viajes.
+  - Bienvenida: si al abrir la sesión guardada no se pudo recuperar (sin red, API caído; los tokens
+    siguen), `AuthRepository.restoreError` lo cuenta y la pantalla ofrece reintentar.
+  - Pruebas: `error_states_test.dart` y casos nuevos en `api_client_test`, `auth_repository_test`
+    y `stop_detail_test`. `flutter analyze` sin avisos; `flutter test` 426 pasan, 9 saltadas.
 
 ## Qué falta
 
@@ -337,6 +368,10 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `AuthRepository`).
 - Los viewmodels extienden `BaseViewModel` (`isBusy`, `errorMessage`) y los repositorios devuelven
   `Result<T>` (`Ok`/`Failure`); las vistas no lanzan excepciones de red.
+- Lo que falla al cargar se muestra con `ErrorState` (con `onRetry`) o, si ya hay contenido, con un
+  `InlineNotice` de error y "Reintentar"; nunca como lista vacía. Un aviso pasajero va con
+  `ScaffoldMessenger.of(context).showMessage(texto, tone: ...)`, no con `showSnackBar` a mano. Todo
+  `EmptyState` lleva una `action`.
 - Para probar un repositorio sin red: `FakeApi` (`test/support/fake_api.dart`) se conecta con
   `api.connect(store: ...)` y se limpia con `ApiClient.configureForTest()` en `tearDown`.
 - Patrón para conectar un repositorio al API: una capa fina en `remote/<algo>_api.dart` (rutas en

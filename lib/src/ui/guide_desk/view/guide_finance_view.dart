@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../guide_app/widgets/guide_bar.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/primary_button.dart';
@@ -34,10 +35,11 @@ class _GuideFinanceViewState extends State<GuideFinanceView> {
     });
   }
 
-  void _show(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+  void _report(String? error, String done) {
+    ScaffoldMessenger.of(context).showMessage(
+      error ?? done,
+      tone: error == null ? SnackTone.success : SnackTone.error,
+    );
   }
 
   Future<void> _editAccount() async {
@@ -49,7 +51,7 @@ class _GuideFinanceViewState extends State<GuideFinanceView> {
       accountType: account.accountType,
       number: account.number,
     );
-    if (mounted) _show(error ?? context.l10n.guideFinanceAccountSaved);
+    if (mounted) _report(error, context.l10n.guideFinanceAccountSaved);
   }
 
   Future<void> _requestPayout() async {
@@ -59,7 +61,7 @@ class _GuideFinanceViewState extends State<GuideFinanceView> {
     );
     if (amount == null || !mounted) return;
     final error = await _viewModel.requestPayout(amount);
-    if (mounted) _show(error ?? context.l10n.guideFinancePayoutRequested);
+    if (mounted) _report(error, context.l10n.guideFinancePayoutRequested);
   }
 
   @override
@@ -79,7 +81,14 @@ class _GuideFinanceViewState extends State<GuideFinanceView> {
                 padding: AppTheme.screenPadding.copyWith(top: 16, bottom: 24),
                 children: [
                   if (viewModel.errorMessage case final error?) ...[
-                    InlineNotice(tone: NoticeTone.error, message: error),
+                    InlineNotice(
+                      tone: NoticeTone.error,
+                      message: error,
+                      action: TextButton(
+                        onPressed: viewModel.load,
+                        child: Text(l10n.commonRetry),
+                      ),
+                    ),
                     const SizedBox(height: 12),
                   ],
                   Container(
@@ -146,7 +155,17 @@ class _GuideFinanceViewState extends State<GuideFinanceView> {
                       lines: [active.holder, l10n.guideFinanceAccountActive],
                     )
                   else
-                    DeskEmpty(l10n.guideFinanceAccountNone),
+                    DeskEmpty(
+                      l10n.guideFinanceAccountNone,
+                      action: accounts.pending == null
+                          ? FilledButton.tonal(
+                              onPressed: viewModel.isWorking
+                                  ? null
+                                  : _editAccount,
+                              child: Text(l10n.guideFinanceAccountAdd),
+                            )
+                          : null,
+                    ),
                   if (accounts.pending case final pending?) ...[
                     const SizedBox(height: 10),
                     DeskCard(

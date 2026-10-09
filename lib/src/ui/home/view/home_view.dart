@@ -18,7 +18,10 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_search_field.dart';
 import '../../widgets/category_filter_bar.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
+import '../../widgets/inline_notice.dart';
 import '../../widgets/kplan_loader.dart';
+import '../../widgets/secondary_button.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/stop_list_tile.dart';
 import '../../widgets/trip_progress.dart';
@@ -66,6 +69,31 @@ class _HomeViewState extends State<HomeView> {
 
   void _openStop(Stop stop) => context.push(Routes.stopDetailPath(stop.id));
 
+  void _clearSearch(HomeViewModel viewModel) {
+    _searchController.clear();
+    viewModel.onQueryChanged('');
+  }
+
+  /// Una lista vacía de una pestaña: si hay búsqueda, borrarla; si no,
+  /// [fallback] lleva a otra parte.
+  Widget _emptyList(
+    HomeViewModel viewModel, {
+    required String title,
+    required String message,
+    required Widget fallback,
+  }) {
+    return EmptyState(
+      title: title,
+      message: message,
+      action: viewModel.query.trim().isEmpty
+          ? fallback
+          : SecondaryButton(
+              label: context.l10n.commonClearSearch,
+              onPressed: () => _clearSearch(viewModel),
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -103,18 +131,49 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (viewModel.isBusy)
+              if (viewModel.isBusy || !viewModel.hasLoaded)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 64),
                   child: Center(child: KPlanLoader()),
                 )
+              else if (viewModel.isEmpty && viewModel.hasError)
+                ErrorState(
+                  message: viewModel.errorMessage!,
+                  onRetry: viewModel.load,
+                )
+              else if (viewModel.isEmpty && viewModel.query.trim().isNotEmpty)
+                EmptyState(
+                  title: l10n.homeEmptySearchTitle,
+                  message: l10n.homeEmptySearchMessage,
+                  action: SecondaryButton(
+                    label: l10n.commonClearSearch,
+                    onPressed: () => _clearSearch(viewModel),
+                  ),
+                )
               else if (viewModel.isEmpty)
                 EmptyState(
-                  title: context.l10n.homeEmptySearchTitle,
-                  message: context.l10n.homeEmptySearchMessage,
+                  title: l10n.homeEmptyCatalogTitle,
+                  message: l10n.homeEmptyCatalogMessage,
+                  action: SecondaryButton(
+                    label: l10n.commonRefresh,
+                    onPressed: viewModel.load,
+                  ),
                 )
-              else
+              else ...[
+                if (viewModel.errorMessage case final message?)
+                  Padding(
+                    padding: AppTheme.screenPadding.copyWith(bottom: 16),
+                    child: InlineNotice(
+                      tone: NoticeTone.error,
+                      message: message,
+                      action: TextButton(
+                        onPressed: viewModel.load,
+                        child: Text(l10n.commonRetry),
+                      ),
+                    ),
+                  ),
                 ..._buildSections(viewModel),
+              ],
             ],
           ),
         ),
@@ -190,6 +249,16 @@ class _HomeViewState extends State<HomeView> {
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
           child: SectionHeader(title: l10n.homeSectionCircuits),
         ),
+        if (viewModel.circuits.isEmpty)
+          _emptyList(
+            viewModel,
+            title: l10n.homeEmptyCircuitsTitle,
+            message: l10n.homeEmptyListMessage,
+            fallback: SecondaryButton(
+              label: l10n.homeExplorePlaces,
+              onPressed: () => viewModel.onTabChanged(DiscoverTab.stops),
+            ),
+          ),
         for (final circuit in viewModel.circuits)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
@@ -210,9 +279,20 @@ class _HomeViewState extends State<HomeView> {
         ),
         const SizedBox(height: 16),
         if (viewModel.stops.isEmpty)
-          EmptyState(
+          _emptyList(
+            viewModel,
             title: l10n.homeEmptyStopsTitle,
             message: l10n.homeEmptyStopsMessage,
+            fallback: viewModel.categoryFilter == null
+                ? SecondaryButton(
+                    label: l10n.myTripsExploreCircuits,
+                    onPressed: () =>
+                        viewModel.onTabChanged(DiscoverTab.circuits),
+                  )
+                : SecondaryButton(
+                    label: l10n.homeShowAllCategories,
+                    onPressed: () => viewModel.onCategoryFilterChanged(null),
+                  ),
           )
         else
           Padding(
@@ -235,6 +315,16 @@ class _HomeViewState extends State<HomeView> {
           padding: AppTheme.screenPadding.copyWith(bottom: 12),
           child: SectionHeader(title: l10n.homeSectionEvents),
         ),
+        if (viewModel.events.isEmpty)
+          _emptyList(
+            viewModel,
+            title: l10n.homeEmptyEventsTitle,
+            message: l10n.homeEmptyListMessage,
+            fallback: SecondaryButton(
+              label: l10n.homeExplorePlaces,
+              onPressed: () => viewModel.onTabChanged(DiscoverTab.stops),
+            ),
+          ),
         for (final event in viewModel.events)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),

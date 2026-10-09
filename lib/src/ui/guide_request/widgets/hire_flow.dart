@@ -7,6 +7,7 @@ import '../../../data/models/guide_application.dart';
 import '../../../data/models/guide_request.dart';
 import '../../../router/routes.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/guide_hired_overlay.dart';
 
 /// Pregunta antes de contratar a quien mandó [application]. `true` si el
@@ -55,16 +56,11 @@ Future<bool> showHireOutcome(
     orElse: () => ApplicationRole.guide,
   );
   final l10n = context.l10n;
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(
-          missing == ApplicationRole.translator
-              ? l10n.guideRequestHireNextTranslator
-              : l10n.guideRequestHireNextGuide,
-        ),
-      ),
-    );
+  ScaffoldMessenger.of(context).showMessage(
+    missing == ApplicationRole.translator
+        ? l10n.guideRequestHireNextTranslator
+        : l10n.guideRequestHireNextGuide,
+    tone: SnackTone.success,
+  );
   return false;
 }

@@ -14,6 +14,7 @@ import '../../../router/routes.dart';
 import '../../guide_access/widgets/guide_app_bar.dart';
 import '../../language/widgets/language_choice.dart';
 import '../../widgets/app_dialog.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/illustration_header.dart';
 import '../../widgets/primary_button.dart';
@@ -114,12 +115,9 @@ class _LoginViewState extends State<LoginView> {
         );
         if (wantsAccount && mounted) _startSignUp();
       case LoginResult.failed:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
-            ),
-          ),
+        ScaffoldMessenger.of(context).showMessage(
+          viewModel.errorMessage ?? context.l10n.commonSomethingWentWrong,
+          tone: SnackTone.error,
         );
     }
   }

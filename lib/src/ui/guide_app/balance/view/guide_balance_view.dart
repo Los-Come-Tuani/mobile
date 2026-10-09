@@ -8,6 +8,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/formatters.dart';
 import '../../../../data/models/guide_trip.dart';
 import '../../../../data/models/guide_withdrawal.dart';
+import '../../../widgets/app_snack_bar.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../widgets/inline_notice.dart';
 import '../../../widgets/kplan_loader.dart';
@@ -46,19 +47,12 @@ class _GuideBalanceViewState extends State<GuideBalanceView> {
     final ok = await viewModel.withdraw(amount);
     if (!mounted) return;
     final l10n = context.l10n;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            ok
-                ? l10n.guideAppBalanceWithdrawalSent(
-                    Formatters.currency(amount),
-                  )
-                : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
-          ),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      ok
+          ? l10n.guideAppBalanceWithdrawalSent(Formatters.currency(amount))
+          : viewModel.errorMessage ?? l10n.commonSomethingWentWrong,
+      tone: ok ? SnackTone.success : SnackTone.error,
+    );
   }
 
   @override

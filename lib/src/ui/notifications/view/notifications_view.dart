@@ -15,6 +15,7 @@ import '../../../router/routes.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/dispute_review_dialog.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
 
 /// La bandeja de avisos de la cuenta. Tocar uno lo marca leído y abre la
@@ -121,13 +122,14 @@ class _NotificationsViewState extends State<NotificationsView> {
       body: _loading
           ? const Center(child: KPlanLoader())
           : items.isEmpty
-          ? EmptyState(
-              title: _error ?? l10n.notificationsEmptyTitle,
-              message: _error == null ? l10n.notificationsEmptyMessage : null,
-              action: _error == null
-                  ? null
-                  : TextButton(onPressed: _load, child: Text(l10n.commonRetry)),
-            )
+          ? switch (_error) {
+              final error? => ErrorState(message: error, onRetry: _load),
+              null => EmptyState(
+                title: l10n.notificationsEmptyTitle,
+                message: l10n.notificationsEmptyMessage,
+                action: const BackToHomeButton(outlined: true),
+              ),
+            }
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView.separated(

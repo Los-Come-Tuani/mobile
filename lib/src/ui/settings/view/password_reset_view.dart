@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/result.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/datasources/repository/auth_repository.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/primary_button.dart';
 import '../widgets/done_panel.dart';
@@ -61,12 +62,13 @@ class _PasswordResetViewState extends State<PasswordResetView> {
         if (simulated) {
           if (mounted) setState(() => _done = true);
         } else {
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.settingsPasswordChangedLogInAgain)),
+          messenger.showMessage(
+            l10n.settingsPasswordChangedLogInAgain,
+            tone: SnackTone.success,
           );
         }
       case Failure(:final message):
-        messenger.showSnackBar(SnackBar(content: Text(message)));
+        messenger.showMessage(message, tone: SnackTone.error);
     }
   }
 

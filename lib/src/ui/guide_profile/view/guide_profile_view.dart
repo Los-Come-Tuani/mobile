@@ -16,7 +16,8 @@ import '../../../router/routes.dart';
 import '../../guide_request/widgets/application_card.dart';
 import '../../guide_request/widgets/hire_flow.dart';
 import '../../widgets/app_bottom_nav.dart';
-import '../../widgets/empty_state.dart';
+import '../../widgets/app_snack_bar.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/kplan_loader.dart';
 import '../../widgets/offer_chip.dart';
@@ -55,16 +56,10 @@ class _GuideProfileViewState extends State<GuideProfileView> {
     final hired = await viewModel.hire();
     if (!mounted) return;
     if (!hired) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              viewModel.hireError ??
-                  context.l10n.guideRequestApplicationUnavailable,
-            ),
-          ),
-        );
+      ScaffoldMessenger.of(context).showMessage(
+        viewModel.hireError ?? context.l10n.guideRequestApplicationUnavailable,
+        tone: SnackTone.error,
+      );
       return;
     }
 
@@ -104,12 +99,10 @@ class _GuideProfileViewState extends State<GuideProfileView> {
       ),
       bottomNavigationBar: const AppBottomNav(),
       body: viewModel.hasError && guide == null && !viewModel.isBusy
-          ? EmptyState(
-              title: viewModel.errorMessage!,
-              action: TextButton(
-                onPressed: viewModel.load,
-                child: Text(l10n.commonRetry),
-              ),
+          ? ErrorState(
+              message: viewModel.errorMessage!,
+              onRetry: viewModel.load,
+              secondaryAction: const BackToHomeButton(),
             )
           : viewModel.isBusy || guide == null
           ? const Center(child: KPlanLoader())

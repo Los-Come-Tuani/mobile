@@ -5,6 +5,7 @@ import '../../core/l10n/l10n.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
+import 'app_snack_bar.dart';
 
 /// Apps de navegación soportadas para abrir una ubicación puntual
 /// (una parada o el punto de encuentro de un circuito).
@@ -73,13 +74,10 @@ Future<void> openInNavigationApp(
   );
   final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
   if (!opened && context.mounted) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.sharedOpenAppFailed(selection.app.label)),
-        ),
-      );
+    ScaffoldMessenger.of(context).showMessage(
+      context.l10n.sharedOpenAppFailed(selection.app.label),
+      tone: SnackTone.error,
+    );
   }
 }
 

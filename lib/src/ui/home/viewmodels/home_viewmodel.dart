@@ -178,6 +178,10 @@ class HomeViewModel extends BaseViewModel {
       featuredStops.isEmpty &&
       !isBusy;
 
+  /// Antes de la primera carga no hay nada que decir de las listas vacías.
+  bool get hasLoaded => _hasLoaded;
+  bool _hasLoaded = false;
+
   Future<void> load() async {
     setBusy(true);
     clearError();
@@ -220,6 +224,7 @@ class HomeViewModel extends BaseViewModel {
         setError(message);
     }
 
+    _hasLoaded = true;
     setBusy(false);
     safeNotify();
   }

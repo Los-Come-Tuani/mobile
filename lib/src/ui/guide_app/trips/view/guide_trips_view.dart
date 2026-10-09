@@ -97,6 +97,10 @@ class _GuideTripsViewState extends State<GuideTripsView> {
                           empty: EmptyState(
                             title: l10n.guideAppTripsEmptyDoneTitle,
                             message: l10n.guideAppTripsEmptyDoneMessage,
+                            action: SecondaryButton(
+                              label: l10n.guideAppSeeProposals,
+                              onPressed: () => context.go(Routes.guideHome),
+                            ),
                           ),
                         ),
                       ],

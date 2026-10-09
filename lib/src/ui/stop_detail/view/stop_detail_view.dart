@@ -13,9 +13,11 @@ import '../../../data/models/stop.dart';
 import '../../../router/routes.dart';
 import '../../core/visit_scan.dart';
 import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/badge_earned_overlay.dart';
 import '../../widgets/category_chip.dart';
 import '../../widgets/circle_icon_button.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/icon_label.dart';
 import '../../widgets/image_gallery.dart';
 import '../../widgets/item_options_sheet.dart';
@@ -52,8 +54,16 @@ class _StopDetailViewState extends State<StopDetailView> {
 
     return Scaffold(
       bottomNavigationBar: const AppBottomNav(),
-      body: viewModel.isBusy || stop == null
+      body: viewModel.isBusy || (stop == null && !viewModel.hasError)
           ? const Center(child: KPlanLoader())
+          : stop == null
+          ? SafeArea(
+              child: ErrorState(
+                message: viewModel.errorMessage!,
+                onRetry: viewModel.load,
+                secondaryAction: const BackToHomeButton(),
+              ),
+            )
           : _StopContent(
               stop: stop,
               circuitsWithStop: viewModel.circuitsWithStop,
@@ -97,11 +107,9 @@ class _StopContent extends StatelessWidget {
     if (earnedNewBadge) {
       await showBadgeEarnedAnimation(context, category: stop.category);
     } else if (context.mounted) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(content: Text(context.l10n.stopDetailConfirmed)),
-        );
+      ScaffoldMessenger.of(
+        context,
+      ).showMessage(context.l10n.stopDetailConfirmed, tone: SnackTone.success);
     }
   }
 

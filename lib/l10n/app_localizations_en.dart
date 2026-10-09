@@ -604,6 +604,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonChooseCountry => 'Choose your country';
 
   @override
+  String get commonClearSearch => 'Clear search';
+
+  @override
   String get commonClose => 'Close';
 
   @override
@@ -611,6 +614,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonCoupons => 'Coupons';
+
+  @override
+  String get commonCrashMessage =>
+      'This part couldn\'t be shown. Go back home to continue; if it happens again, write to us from Help.';
+
+  @override
+  String get commonCrashTitle => 'Something didn\'t go as expected';
 
   @override
   String get commonCreateAccount => 'Create account';
@@ -628,6 +638,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonEmail => 'Email';
 
   @override
+  String get commonErrorTitle => 'We couldn\'t load this';
+
+  @override
   String get commonFullName => 'Full name';
 
   @override
@@ -635,6 +648,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonHome => 'Home';
+
+  @override
+  String get commonLoading => 'Loading…';
 
   @override
   String get commonLocalGuide => 'Local guide';
@@ -665,6 +681,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNext => 'Next';
 
   @override
+  String get commonNotFoundMessage =>
+      'The link may be incomplete or that page may no longer exist. You can keep exploring from home.';
+
+  @override
+  String get commonNotFoundTitle => 'We couldn\'t find this screen';
+
+  @override
   String get commonNotifications => 'Notifications';
 
   @override
@@ -672,6 +695,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonPasswordsDontMatch => 'The passwords don\'t match';
+
+  @override
+  String get commonRefresh => 'Refresh';
 
   @override
   String get commonRepeatPassword => 'Repeat the password';
@@ -788,7 +814,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get couponsStoreEmpty =>
-      'There are no coupons available right now. Come back soon.';
+      'Keep earning badges on your visits: you\'ll use them when new coupons arrive.';
+
+  @override
+  String get couponsStoreEmptyTitle => 'No coupons right now';
 
   @override
   String get couponsStoreTitle => 'To redeem';
@@ -996,7 +1025,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupSlotsEmpty =>
-      'There are no times published for this circuit yet. Check back soon.';
+      'Certified guides publish times often. Meanwhile, you can explore other circuits.';
+
+  @override
+  String get groupSlotsEmptyTitle => 'No group times published yet';
 
   @override
   String groupSlotsEndsAround(String time) {
@@ -1935,6 +1967,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guideAppSeeProposals => 'See proposals';
 
   @override
+  String get guideAppSeeTrips => 'See my trips';
+
+  @override
   String guideAppServiceHours(int hours) {
     return '$hours-hour service';
   }
@@ -2299,6 +2334,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guideDeskOpenRequestsTitle => 'Open requests';
+
+  @override
+  String get guideDeskSeeOpenRequests => 'See open requests';
 
   @override
   String guideDeskStops(int count) {
@@ -2712,6 +2750,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guidesNoReviews => 'No reviews yet';
 
   @override
+  String get guidesSeeAll => 'See all';
+
+  @override
   String get guidesTitle => 'Guides and translators';
 
   @override
@@ -2768,6 +2809,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDrawerTranslatorMode => 'Translator mode';
 
   @override
+  String get homeEmptyCatalogMessage =>
+      'We\'re adding circuits, places and events. Check back in a while.';
+
+  @override
+  String get homeEmptyCatalogTitle => 'There\'s nothing to explore yet';
+
+  @override
+  String get homeEmptyCircuitsTitle => 'No circuits to show';
+
+  @override
+  String get homeEmptyEventsTitle => 'No upcoming events';
+
+  @override
+  String get homeEmptyListMessage =>
+      'Try another search or explore the featured places.';
+
+  @override
   String get homeEmptySearchMessage =>
       'Try another word or check how it\'s spelled.';
 
@@ -2779,6 +2837,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeEmptyStopsTitle => 'No stops match';
+
+  @override
+  String get homeExplorePlaces => 'Explore places';
 
   @override
   String get homeGuideRequestApplicationsHint =>
@@ -2844,6 +2905,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeSectionStops => 'Featured stops';
+
+  @override
+  String get homeShowAllCategories => 'See all categories';
 
   @override
   String homeStopCount(int count) {
@@ -3217,6 +3281,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String myCircuitMissedFixedTime(String time) {
     return 'You wanted to arrive at $time';
   }
+
+  @override
+  String get myCircuitNotFoundMessage =>
+      'You may have deleted it. All your circuits are in My trips.';
+
+  @override
+  String get myCircuitNotFoundTitle => 'We couldn\'t find this circuit';
 
   @override
   String get myCircuitProposalNote =>
@@ -3693,13 +3764,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repoNetworkCommunicationError =>
-      'There was a problem communicating with the server';
+      'We couldn\'t reach K\'Plan. Try again.';
 
   @override
-  String get repoNetworkConnectionTimeout => 'Connection timed out';
+  String get repoNetworkConflict =>
+      'This changed while you were looking at it. Refresh and try again.';
+
+  @override
+  String get repoNetworkConnectionTimeout =>
+      'The connection is taking too long. Check your internet and try again.';
+
+  @override
+  String get repoNetworkForbidden => 'You don\'t have permission to do this.';
+
+  @override
+  String get repoNetworkInvalidData => 'Check the details and try again.';
 
   @override
   String get repoNetworkNoConnection => 'No internet connection';
+
+  @override
+  String get repoNetworkNotFound =>
+      'We couldn\'t find what you\'re looking for. It may no longer be available.';
 
   @override
   String repoNetworkRetryIn(String message, String wait) {
@@ -3707,14 +3793,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get repoNetworkServerTimeout => 'The server took too long to respond';
+  String get repoNetworkServerError =>
+      'We had a problem on our side. Try again in a few minutes.';
+
+  @override
+  String get repoNetworkServerTimeout =>
+      'K\'Plan took too long to respond. Try again.';
 
   @override
   String get repoNetworkSessionExpired => 'Session expired, log in again';
 
   @override
+  String get repoNetworkTooLarge => 'The file is too large.';
+
+  @override
   String get repoNetworkTooManyAttempts =>
       'Too many attempts. Wait a moment and try again';
+
+  @override
+  String get repoNetworkUploadsUnavailable =>
+      'We can\'t receive files right now. What you filled in is still here: try again later.';
 
   @override
   String repoNetworkWaitMinutes(int count) {
@@ -4836,6 +4934,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeGuideSubtitle => 'Log in or apply to offer your services';
+
+  @override
+  String welcomeRestoreFailed(String message) {
+    return 'We couldn\'t open your session. $message';
+  }
 
   @override
   String get welcomeSubtitle => 'Choose how you want to continue.';

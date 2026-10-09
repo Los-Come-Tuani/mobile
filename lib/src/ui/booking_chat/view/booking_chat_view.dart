@@ -8,7 +8,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/booking_message.dart';
 import '../../../router/routes.dart';
+import '../../widgets/app_snack_bar.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/error_state.dart';
 import '../../widgets/kplan_loader.dart';
 import '../viewmodels/booking_chat_viewmodel.dart';
 
@@ -45,9 +47,9 @@ class _BookingChatViewState extends State<BookingChatView> {
     if (await viewModel.send(text)) {
       _controller.clear();
     } else if (mounted && viewModel.sendError != null) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(viewModel.sendError!)));
+      ScaffoldMessenger.of(
+        context,
+      ).showMessage(viewModel.sendError!, tone: SnackTone.error);
     }
   }
 
@@ -100,12 +102,18 @@ class _BookingChatViewState extends State<BookingChatView> {
             Expanded(
               child: viewModel.isBusy && messages.isEmpty
                   ? const Center(child: KPlanLoader())
+                  : messages.isEmpty && viewModel.hasError
+                  ? ErrorState(
+                      compact: true,
+                      message: viewModel.errorMessage!,
+                      onRetry: viewModel.load,
+                    )
                   : messages.isEmpty
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24),
                         child: Text(
-                          viewModel.errorMessage ?? l10n.bookingChatEmpty,
+                          l10n.bookingChatEmpty,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodySmall,
                         ),
