@@ -355,6 +355,32 @@ La aplicación usa el identificador `dev.kplan.app` en Android e iOS. No debe
 cambiarse sin actualizar también la firma, los Client ID de Google y la
 configuración de las tiendas.
 
+## Producción y API en Azure
+
+La app no corre en un servidor: se instala en el teléfono. Lo que se publica es
+el build de release de la rama `main`, y ese build habla con
+`https://azure-api.kplan.dev`, el API desplegado en Azure App Service.
+
+El API de Azure corre siempre el código de la rama `production` del
+[repositorio del API](https://github.com/Los-Come-Tuani/api): cada `push` a esa
+rama lo construye y lo despliega con GitHub Actions, y la imagen queda
+etiquetada con el SHA del commit. Cómo se despliega y cómo comprobar qué commit
+corre en Azure está en la sección
+[Despliegue en Azure](https://github.com/Los-Come-Tuani/api#despliegue-en-azure)
+de su README.
+
+Para compilar exactamente lo que está en `main`:
+
+```bash
+git switch main
+git pull --ff-only
+flutter build apk --release
+```
+
+El APK que se reparte desde la landing tiene que ir firmado con la llave de
+release (`android/key.properties`): con otra, Android no deja actualizar sobre
+la versión instalada.
+
 ## Estructura del proyecto
 
 ```text
