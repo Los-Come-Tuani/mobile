@@ -10,7 +10,7 @@ abstract final class AppColors {
   static const Color primary60 = Color(0xFF1E2022);
 
   /// Color de marca (terracota): acciones principales.
-  static const Color primary30 = Color(0xFFD95D39);
+  static const Color primary30 = Color(0xFFB04321);
 
   /// Fondo crema de toda la app.
   static const Color primary10 = Color(0xFFF8F4E6);
