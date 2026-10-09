@@ -31,7 +31,11 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   `EMAIL_HOST`, y con `DEPLOY=True` el API **descarta** los correos: el código del registro,
   el de recuperar contraseña y el de la postulación nunca llegan. Tampoco tiene
   `GOOGLE_OAUTH_CLIENT_IDS`: `POST /auth/mobile/google/` da `404` "no está habilitado".
-  Las dos son variables del servicio `develop-a` en Railway (las define el usuario). Para
+  Las dos son variables del servicio `develop-a` en Railway (las define el usuario).
+  Tampoco tiene almacenamiento (`STORAGE_*`, comprobado el 2026-10-09): `POST /upload/`
+  responde `503` y nadie puede subir documentos (postulación de guía en la app, de negocio en el
+  portal) ni fotos; la app y el portal lo avisan con "Por ahora no podemos recibir archivos". Pasos
+  en `api/docs/archivos.md` (bucket R2, variables y CORS con los orígenes del portal). Para
   poder crear cuentas sin correo, el API `497cfa9` agregó
   `VERIFICATION_ACCEPT_ANY_SIGNUP_CODE=True`: cualquier código de seis dígitos sirve para el
   alta (no para recuperar la contraseña); ver la memoria del API, aviso 20. Un
