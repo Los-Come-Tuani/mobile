@@ -1118,6 +1118,12 @@ abstract class AppLocalizations {
   /// **'Inicio'**
   String get commonHome;
 
+  /// No description provided for @commonLoading.
+  ///
+  /// In es, this message translates to:
+  /// **'Cargando…'**
+  String get commonLoading;
+
   /// No description provided for @commonLocalGuide.
   ///
   /// In es, this message translates to:

@@ -650,6 +650,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonHome => 'Home';
 
   @override
+  String get commonLoading => 'Loading…';
+
+  @override
   String get commonLocalGuide => 'Local guide';
 
   @override

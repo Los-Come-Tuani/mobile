@@ -421,6 +421,7 @@
   "commonFullName": "Nombre completo",
   "commonGuide": "Guía",
   "commonHome": "Inicio",
+  "commonLoading": "Cargando…",
   "commonLocalGuide": "Guía local",
   "commonLogout": "Cerrar sesión",
   "commonMyCircuits": "Mis circuitos",

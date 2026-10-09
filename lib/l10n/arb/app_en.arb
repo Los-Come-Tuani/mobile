@@ -170,6 +170,7 @@
   "commonFullName": "Full name",
   "commonGuide": "Guide",
   "commonHome": "Home",
+  "commonLoading": "Loading…",
   "commonLocalGuide": "Local guide",
   "commonLogout": "Log out",
   "commonMyCircuits": "My circuits",

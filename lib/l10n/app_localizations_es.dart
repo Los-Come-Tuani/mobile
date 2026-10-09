@@ -649,6 +649,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get commonHome => 'Inicio';
 
   @override
+  String get commonLoading => 'Cargando…';
+
+  @override
   String get commonLocalGuide => 'Guía local';
 
   @override
