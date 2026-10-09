@@ -3811,6 +3811,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Too many attempts. Wait a moment and try again';
 
   @override
+  String get repoNetworkUploadsUnavailable =>
+      'We can\'t receive files right now. What you filled in is still here: try again later.';
+
+  @override
   String repoNetworkWaitMinutes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

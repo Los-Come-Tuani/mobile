@@ -320,6 +320,26 @@ void main() {
       }
     });
 
+    test('subir sin almacenamiento en el API dice que por ahora no se puede', () {
+      final error = DioException(
+        requestOptions: RequestOptions(path: ApiRoutes.upload),
+        response: Response<dynamic>(
+          requestOptions: RequestOptions(path: ApiRoutes.upload),
+          statusCode: 503,
+          data: {
+            'detail': 'El almacenamiento de archivos no está configurado.',
+          },
+        ),
+        type: DioExceptionType.badResponse,
+      );
+
+      expect(
+        ApiClient.describeError(error),
+        'Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: '
+        'intenta de nuevo más tarde.',
+      );
+    });
+
     test('un envío que tarda demasiado lo dice sin tecnicismos', () {
       final error = DioException(
         requestOptions: RequestOptions(path: '/x'),

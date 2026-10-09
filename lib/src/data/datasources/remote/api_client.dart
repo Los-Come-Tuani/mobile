@@ -183,6 +183,9 @@ class ApiClient {
         409 => l10n.repoNetworkConflict,
         413 => l10n.repoNetworkTooLarge,
         400 || 422 => l10n.repoNetworkInvalidData,
+        // El API sin almacenamiento configurado: reintentar ya no lo arregla.
+        503 when e.requestOptions.path == ApiRoutes.upload =>
+          l10n.repoNetworkUploadsUnavailable,
         final code? when code >= 500 => l10n.repoNetworkServerError,
         _ => l10n.repoNetworkCommunicationError,
       },

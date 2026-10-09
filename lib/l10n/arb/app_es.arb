@@ -2633,6 +2633,7 @@
   "repoNetworkSessionExpired": "Sesión expirada, vuelve a iniciar sesión",
   "repoNetworkTooLarge": "El archivo es demasiado grande.",
   "repoNetworkTooManyAttempts": "Demasiados intentos, espera un momento e intenta de nuevo",
+  "repoNetworkUploadsUnavailable": "Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: intenta de nuevo más tarde.",
   "repoNetworkWaitMinutes": "{count, plural, =1{1 minuto} other{{count} minutos}}",
   "@repoNetworkWaitMinutes": {
     "placeholders": {

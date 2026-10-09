@@ -997,6 +997,7 @@
   "repoNetworkSessionExpired": "Session expired, log in again",
   "repoNetworkTooLarge": "The file is too large.",
   "repoNetworkTooManyAttempts": "Too many attempts. Wait a moment and try again",
+  "repoNetworkUploadsUnavailable": "We can't receive files right now. What you filled in is still here: try again later.",
   "repoNetworkWaitMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
   "repoNetworkWaitSeconds": "{count, plural, =1{1 second} other{{count} seconds}}",
   "repoNotificationBookingChanges": "Changes to my bookings",

@@ -6085,6 +6085,12 @@ abstract class AppLocalizations {
   /// **'Demasiados intentos, espera un momento e intenta de nuevo'**
   String get repoNetworkTooManyAttempts;
 
+  /// No description provided for @repoNetworkUploadsUnavailable.
+  ///
+  /// In es, this message translates to:
+  /// **'Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: intenta de nuevo más tarde.'**
+  String get repoNetworkUploadsUnavailable;
+
   /// No description provided for @repoNetworkWaitMinutes.
   ///
   /// In es, this message translates to:

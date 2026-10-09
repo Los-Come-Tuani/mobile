@@ -3830,6 +3830,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Demasiados intentos, espera un momento e intenta de nuevo';
 
   @override
+  String get repoNetworkUploadsUnavailable =>
+      'Por ahora no podemos recibir archivos. Lo que llenaste sigue aquí: intenta de nuevo más tarde.';
+
+  @override
   String repoNetworkWaitMinutes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
