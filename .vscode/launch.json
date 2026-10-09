@@ -2,6 +2,20 @@
   "version": "0.2.0",
   "configurations": [
     {
+      // "templateFor": "lib" hace que el triángulo del editor y el "Run | Debug" sobre
+      // main() usen esta configuración. Solo lib/: las pruebas siguen en modo demo.
+      "name": "K'Plan — develop-api",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "templateFor": "lib",
+      "toolArgs": [
+        "--dart-define=API_BASE_URL=https://develop-api.kplan.dev",
+        "--dart-define=GOOGLE_SERVER_CLIENT_ID=552338673379-b5qoepfp6ogt04gnuidonrl72itheg4s.apps.googleusercontent.com"
+      ]
+    },
+    {
       "name": "K'Plan — API local",
       "request": "launch",
       "type": "dart",

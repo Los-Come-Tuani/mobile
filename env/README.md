@@ -25,6 +25,12 @@ agregará cuando se trabaje esa publicación.
 
 ## A dónde apuntar en desarrollo
 
+En VS Code / Cursor, el triángulo del editor y el "Run | Debug" sobre `main()` usan la
+configuración "K'Plan — develop-api" de `.vscode/launch.json` (`templateFor: "lib"`): la app
+habla con `https://develop-api.kplan.dev` sin crear ningún archivo. Para el API local o el
+modo demo, elige "K'Plan — API local" o "K'Plan — modo demo" en el panel "Run and Debug".
+Las pruebas no heredan esa configuración y siguen en modo demo.
+
 El API local corre en el puerto `8080` de tu máquina (`just run` en el repo del API).
 
 | Dónde corre la app           | `API_BASE_URL`                                                           |
