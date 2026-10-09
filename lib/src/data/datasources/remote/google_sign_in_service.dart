@@ -61,6 +61,10 @@ class GoogleSignInService implements GoogleIdTokenProvider {
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) return null;
       rethrow;
+    } finally {
+      // Si el teléfono guarda la cuenta elegida, el siguiente intento (por ejemplo, tras
+      // un error del API) entra solo con ella y no muestra el selector de cuentas.
+      await signIn.signOut().catchError((_) {});
     }
   }
 
