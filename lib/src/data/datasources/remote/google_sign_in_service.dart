@@ -21,8 +21,7 @@ abstract interface class GoogleIdTokenProvider {
 /// [releaseServerClientId].
 class GoogleSignInService implements GoogleIdTokenProvider {
   /// El Client ID Web de un build release sin `GOOGLE_SERVER_CLIENT_ID`: el de desarrollo,
-  /// que `develop-api` (ver [ApiClient.releaseBaseUrl]) debe tener en
-  /// `GOOGLE_OAUTH_CLIENT_IDS`.
+  /// que el API de [ApiClient.releaseBaseUrl] debe tener en `GOOGLE_OAUTH_CLIENT_IDS`.
   static const String releaseServerClientId =
       '552338673379-b5qoepfp6ogt04gnuidonrl72itheg4s.apps.googleusercontent.com';
 

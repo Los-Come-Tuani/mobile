@@ -27,9 +27,9 @@ import 'api_routes.dart';
 class ApiClient {
   ApiClient._();
 
-  /// El API de un build release sin `API_BASE_URL`: el de desarrollo publicado (rama
-  /// `develop-a` del API) mientras no haya producción.
-  static const String releaseBaseUrl = 'https://develop-api.kplan.dev';
+  /// El API de un build release sin `API_BASE_URL`: el de Azure (rama `production` del
+  /// API).
+  static const String releaseBaseUrl = 'https://azure-api.kplan.dev';
 
   static const String _envBaseUrl = String.fromEnvironment(
     'API_BASE_URL',

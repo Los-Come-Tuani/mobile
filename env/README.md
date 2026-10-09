@@ -48,13 +48,13 @@ hacia `localhost` y la red local). Un build release **rechaza** una URL que no s
 | Archivo                | Rama de la app | `API_BASE_URL`                  |
 | ---------------------- | -------------- | ------------------------------- |
 | `staging.example.json` | `staging`      | `https://develop-api.kplan.dev` |
-| `prod.example.json`    | `main`         | `https://api.kplan.dev`         |
+| `prod.example.json`    | `main`         | `https://azure-api.kplan.dev`   |
 
 Un build release **sin** archivo (`flutter build apk --release`) usa
-`https://develop-api.kplan.dev` y el Client ID Web de desarrollo
-(`GoogleSignInService.releaseServerClientId`), así que el APK publicado nunca queda en
-modo demo ni sin el botón de Google. Para que ese botón funcione, `develop-api` necesita
-el mismo Client ID en `GOOGLE_OAUTH_CLIENT_IDS`, y el Client ID Android de Google, la
+`https://azure-api.kplan.dev` (el API en Azure, rama `production`) y el Client ID Web de
+desarrollo (`GoogleSignInService.releaseServerClientId`), así que el APK publicado nunca
+queda en modo demo ni sin el botón de Google. Para que ese botón funcione, el API de Azure
+necesita el mismo Client ID en `GOOGLE_OAUTH_CLIENT_IDS`, y el Client ID Android de Google, la
 SHA-1 de la llave con la que se firmó el APK. Para otro entorno, copia el que toque a
 `staging.json` o `prod.json` (ignorados), complétalos y compila con ese archivo:
 
