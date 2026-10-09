@@ -16,7 +16,12 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   de `feat/hoja-de-ruta-api`. Un build release sin `API_BASE_URL` usa
   `ApiClient.releaseBaseUrl` = `https://develop-api.kplan.dev` (nunca queda en demo);
   `env/staging.example.json` apunta al mismo API y `env/prod.example.json` a
-  `https://api.kplan.dev` para cuando haya producción. En debug, sin URL, sigue el demo.
+  `https://api.kplan.dev` para cuando haya producción. En debug, sin URL, sigue el demo
+  (las pruebas dependen de eso: no cambiar el valor por defecto de `ApiClient`). Pero el
+  triángulo del editor de Cursor (y el CodeLens de `main()`) usa la entrada
+  "K'Plan — develop-api" de `.vscode/launch.json`, con `templateFor: "lib"` y los
+  `--dart-define` de develop-api: corre contra el API de desarrollo. Solo `lib/`, para que el
+  panel de pruebas no la herede.
   Igual con Google: sin `GOOGLE_SERVER_CLIENT_ID`, un release usa
   `GoogleSignInService.releaseServerClientId` (el Client ID Web de desarrollo, también en
   `staging.example.json`), así que el botón aparece en el APK. "Continuar con Google" está
@@ -34,6 +39,22 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
   máquina; la de esta (Lenovo) tiene SHA-1
   `62:65:94:64:A9:06:A4:82:84:DD:80:E7:6C:6A:C5:23:F3:93:40:05` y debe estar en el Client
   ID Android de Google.
+- **Datos de `develop-api` (2026-10-08, desplegado: `develop-a` en `4c883ff`).**
+  `develop-api` estaba vacío; ya tiene 16 circuitos, 111 lugares, 18 eventos, 13 guías, 64
+  salidas y 6 recompensas. En el API (rama `feat/datos-develop`, worktree
+  `C:\coding\kplan2\api-datos`): `seedcontent` hace superusuario a `kplan.nic@gmail.com`
+  (`fixtures/team.json`; sin contraseña, entra al portal con Google; si la cuenta ya
+  existía pierde contraseña, 2FA y sesiones, porque en `develop-api` el alta acepta
+  cualquier código) y carga 14 circuitos creativos reales (Managua Xolotlán
+  con sus 5 rutas, Granada con 2, Masaya, San Juan de Oriente, León Dariano, Estelí,
+  Bluefields, Juigalpa y Nagarote; listas oficiales y coordenadas de OpenStreetMap), 18
+  eventos reales, 13 guías y traductores ficticios aprobados (sin contraseña) con salidas y 4
+  comercios ficticios con 6 campañas. Railway ignora el `preDeployCommand` de `railway.json`
+  (usa el de su panel: solo `migrate`), así que la carga va enganchada al final de `migrate`
+  (`api_territory/apps.py`, con `DEPLOY=True`) y solo actúa en develop-api (rama
+  `develop-a` o `develop-api.kplan.dev` en `ALLOWED_HOSTS`). Es idempotente: cada
+  despliegue solo agrega las salidas que falten. El usuario no quiere tocar Railway.
+  Google ya funciona en `develop-api` (el usuario puso `GOOGLE_OAUTH_CLIENT_IDS`).
 - **Hecho: `f1-app-link`** (identidad contra el API real; con `API_BASE_URL` vacío la app sigue
   en modo demo, como antes):
   - `lib/src/data/datasources/local/session_store.dart`: `SessionStore` con `SecureSessionStore`
@@ -226,11 +247,18 @@ el usuario lo pida. Commits convencionales en español, sin emojis.
 
 ## Qué falta
 
+0. **Distribución por la landing (F9, 2026-10-08).** La landing (`..\landing-page`) ofrece el
+   instalador vigente de cada plataforma y el equipo lo sube y publica desde el portal ("Sitio web
+   → Versiones de la app"; contrato en `api/docs/landing.md`). El APK que se reparte tiene que ir
+   firmado siempre con la misma llave de release (`android/key.properties`): con otra, Android no
+   deja actualizar sobre la versión instalada. La app no tiene
+   destinos `macos/` ni `windows/`: el DMG y el EXE que acepta el panel requieren agregarlos a
+   Flutter (el DMG se compila en una Mac). iOS no se reparte como archivo.
 1. **Google y publicación.** El `applicationId` de Android y el bundle ID de iOS ya son
    `dev.kplan.app`. Ya existen el Client ID Web y el Android de desarrollo; `env/dev.json`
-   local y `dev.example.json` llevan el Web como `GOOGLE_SERVER_CLIENT_ID`. Falta probar el
-   botón en un dispositivo real, y antes `develop-api` necesita `GOOGLE_OAUTH_CLIENT_IDS` y
-   un proveedor de correo (ver "Estado"). Para publicar Android faltan la llave de subida
+   local y `dev.example.json` llevan el Web como `GOOGLE_SERVER_CLIENT_ID`. El botón ya se
+   probó en un SM A235M contra `develop-api` (2026-10-08): entra y crea la cuenta. A
+   `develop-api` le sigue faltando un proveedor de correo (ver "Estado"). Para publicar Android faltan la llave de subida
    (`android/key.properties`) y registrar las SHA-1 de release y Play App Signing. Para iOS
    faltan el Client ID, su esquema invertido en `Info.plist` y la configuración de Apple.
 2. **"Iniciar sesión con Apple"** si se publica en iOS (Apple lo exige junto a Google).
