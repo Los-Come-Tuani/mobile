@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/l10n/l10n.dart';
@@ -7,10 +8,12 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/coupon.dart';
+import '../../../router/routes.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_dialog.dart';
 import '../../widgets/brand_app_bar.dart';
 import '../../widgets/kplan_loader.dart';
+import '../../widgets/mascot.dart';
 import '../../widgets/remote_image.dart';
 import '../viewmodels/coupons_viewmodel.dart';
 
@@ -73,6 +76,27 @@ class _CouponsViewState extends State<CouponsView> {
       );
   }
 
+  /// Sin saldo suficiente, la vaca explica cuántas faltan y cómo se ganan.
+  Future<void> _explainMissingBadges(Coupon coupon) async {
+    final l10n = context.l10n;
+    final available = context.read<CouponsViewModel>().availableBadges;
+    final explore = await showAppDialog<bool>(
+      context,
+      builder: (context) => AppDialog(
+        illustration: const Mascot(size: 96),
+        title: available <= 0
+            ? l10n.couponsNoBadgesTitle
+            : l10n.couponsMissingBadgesTitle(coupon.cost - available),
+        message: l10n.couponsNoBadgesMessage(coupon.cost),
+        primaryLabel: l10n.couponsNoBadgesExplore,
+        onPrimary: () => Navigator.of(context).pop(true),
+        secondaryLabel: l10n.commonClose,
+        onSecondary: () => Navigator.of(context).pop(false),
+      ),
+    );
+    if ((explore ?? false) && mounted) context.go(Routes.home);
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<CouponsViewModel>();
@@ -112,7 +136,9 @@ class _CouponsViewState extends State<CouponsView> {
                       coupon: coupon,
                       isRedeemed: viewModel.isRedeemed(coupon.id),
                       canAfford: viewModel.canAfford(coupon),
-                      onRedeem: () => _redeem(coupon),
+                      onRedeem: () => viewModel.canAfford(coupon)
+                          ? _redeem(coupon)
+                          : _explainMissingBadges(coupon),
                     ),
                   ),
               ],
@@ -324,19 +350,33 @@ class _ActionButton extends StatelessWidget {
       );
     }
 
+    const padding = EdgeInsets.symmetric(horizontal: 14);
+    final textStyle = AppTextStyles.caption.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    // Sin saldo suficiente se ve en segundo plano, pero se puede tocar: la
+    // vaca explica cuántas insignias faltan.
     return SizedBox(
       height: 32,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          minimumSize: Size.zero,
-          textStyle: AppTextStyles.caption.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        onPressed: canAfford ? onPressed : null,
-        child: Text(l10n.couponsRedeemButton),
-      ),
+      child: canAfford
+          ? ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: padding,
+                minimumSize: Size.zero,
+                textStyle: textStyle,
+              ),
+              onPressed: onPressed,
+              child: Text(l10n.couponsRedeemButton),
+            )
+          : OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: padding,
+                minimumSize: Size.zero,
+                textStyle: textStyle,
+              ),
+              onPressed: onPressed,
+              child: Text(l10n.couponsRedeemButton),
+            ),
     );
   }
 }

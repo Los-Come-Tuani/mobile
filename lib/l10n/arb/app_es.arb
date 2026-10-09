@@ -457,6 +457,24 @@
       }
     }
   },
+  "couponsMissingBadgesTitle": "{count, plural, =1{Te falta 1 insignia} other{Te faltan {count} insignias}}",
+  "@couponsMissingBadgesTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsNoBadgesExplore": "Ver circuitos",
+  "couponsNoBadgesMessage": "{cost, plural, =1{Las ganas visitando las paradas de los circuitos. Con 1 insignia canjeas este cupón.} other{Las ganas visitando las paradas de los circuitos. Con {cost} insignias canjeas este cupón.}}",
+  "@couponsNoBadgesMessage": {
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
+  "couponsNoBadgesTitle": "Todavía no tienes insignias",
   "couponsRedeemButton": "CANJEAR",
   "couponsRedeemConfirm": "Canjear",
   "couponsRedeemed": "¡Cupón canjeado! Muéstralo al reservar.",

@@ -1250,6 +1250,30 @@ abstract class AppLocalizations {
   /// **'Tu código es {code}. Díctalo en el mostrador del comercio; también queda en Mis cupones.'**
   String couponsCodeMessage(String code);
 
+  /// No description provided for @couponsMissingBadgesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'{count, plural, =1{Te falta 1 insignia} other{Te faltan {count} insignias}}'**
+  String couponsMissingBadgesTitle(int count);
+
+  /// No description provided for @couponsNoBadgesExplore.
+  ///
+  /// In es, this message translates to:
+  /// **'Ver circuitos'**
+  String get couponsNoBadgesExplore;
+
+  /// No description provided for @couponsNoBadgesMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'{cost, plural, =1{Las ganas visitando las paradas de los circuitos. Con 1 insignia canjeas este cupón.} other{Las ganas visitando las paradas de los circuitos. Con {cost} insignias canjeas este cupón.}}'**
+  String couponsNoBadgesMessage(int cost);
+
+  /// No description provided for @couponsNoBadgesTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Todavía no tienes insignias'**
+  String get couponsNoBadgesTitle;
+
   /// No description provided for @couponsRedeemButton.
   ///
   /// In es, this message translates to:

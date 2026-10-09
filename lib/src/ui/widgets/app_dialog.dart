@@ -112,6 +112,7 @@ class AppDialog extends StatelessWidget {
     required this.title,
     this.message,
     this.icon,
+    this.illustration,
     this.destructive = false,
     this.content,
     required this.primaryLabel,
@@ -126,6 +127,9 @@ class AppDialog extends StatelessWidget {
   /// Con ícono todo va centrado, como una confirmación; sin él, alineado al
   /// inicio, como un formulario.
   final IconData? icon;
+
+  /// Va en lugar del ícono, también centrado; por ejemplo, la vaca.
+  final Widget? illustration;
 
   /// Para lo que borra o no se puede deshacer: el ícono y el botón principal
   /// van en rojo.
@@ -144,9 +148,10 @@ class AppDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = this.icon;
+    final illustration = this.illustration;
     final message = this.message;
     final content = this.content;
-    final isCentered = icon != null;
+    final isCentered = icon != null || illustration != null;
     final textAlign = isCentered ? TextAlign.center : TextAlign.start;
     final accent = destructive
         ? AppColors.error
@@ -168,7 +173,10 @@ class AppDialog extends StatelessWidget {
                   ? CrossAxisAlignment.center
                   : CrossAxisAlignment.stretch,
               children: [
-                if (icon != null) ...[
+                if (illustration != null) ...[
+                  illustration,
+                  const SizedBox(height: 16),
+                ] else if (icon != null) ...[
                   DecoratedBox(
                     decoration: BoxDecoration(
                       color: accent.withValues(alpha: 0.12),

@@ -724,6 +724,36 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String couponsMissingBadgesTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Te faltan $count insignias',
+      one: 'Te falta 1 insignia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couponsNoBadgesExplore => 'Ver circuitos';
+
+  @override
+  String couponsNoBadgesMessage(int cost) {
+    String _temp0 = intl.Intl.pluralLogic(
+      cost,
+      locale: localeName,
+      other:
+          'Las ganas visitando las paradas de los circuitos. Con $cost insignias canjeas este cupón.',
+      one:
+          'Las ganas visitando las paradas de los circuitos. Con 1 insignia canjeas este cupón.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get couponsNoBadgesTitle => 'Todavía no tienes insignias';
+
+  @override
   String get couponsRedeemButton => 'CANJEAR';
 
   @override
