@@ -150,19 +150,31 @@ class AuthRepository extends ChangeNotifier {
 
   // ── Crear cuenta ──────────────────────────────────────────────────────────
 
+  /// Lo que va en lugar del código cuando el API no lo pide.
+  static const skippedCode = '000000';
+
   /// Envía el código de 6 dígitos que confirma que el correo es del usuario. El API
   /// responde igual si el correo ya tiene cuenta, y no vuelve a mandar antes de un minuto.
-  Future<Result<void>> sendVerificationCode(String email) async {
+  ///
+  /// Devuelve si hay que pedir el código: un API desplegado sin correo (como develop-api)
+  /// no puede mandarlo, y entonces el alta sigue sin él con [skippedCode].
+  Future<Result<bool>> sendVerificationCode(String email) async {
     if (!ApiClient.isConfigured) {
       await Future<void>.delayed(const Duration(milliseconds: 600));
-      return const Result.ok(null);
+      return const Result.ok(true);
     }
-    return _call('sendVerificationCode', () async {
-      await ApiClient.instance.post<void>(
+    var required = true;
+    final sent = await _call('sendVerificationCode', () async {
+      final response = await ApiClient.instance.post<Map<String, dynamic>>(
         ApiRoutes.registerCode,
         data: {'email': email},
       );
+      required = response.data?['code_required'] != false;
     });
+    return switch (sent) {
+      Ok() => Result.ok(required),
+      Failure(:final message, :final error) => Result.failure(message, error),
+    };
   }
 
   /// Comprueba el código sin gastarlo: la cuenta se crea después, con el mismo código.

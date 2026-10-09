@@ -31,6 +31,9 @@ class RegisterViewModel extends BaseViewModel {
   /// El código que llegó al correo: el API lo vuelve a pedir al crear la cuenta.
   String _code = '';
 
+  /// El API no pide el código (no tiene correo): el paso se salta, también al volver.
+  bool _codeSkipped = false;
+
   String _password = '';
   DateTime? _birthDate;
   DateTime? get birthDate => _birthDate;
@@ -44,7 +47,9 @@ class RegisterViewModel extends BaseViewModel {
   bool back() {
     if (isFirstStep) return false;
     clearError();
-    _step = RegisterStep.values[_step.index - 1];
+    _step = _step == RegisterStep.password && _codeSkipped
+        ? RegisterStep.email
+        : RegisterStep.values[_step.index - 1];
     safeNotify();
     return true;
   }
@@ -62,9 +67,16 @@ class RegisterViewModel extends BaseViewModel {
     setBusy(false);
 
     switch (result) {
-      case Ok():
+      case Ok(value: final codeRequired):
         _email = email.trim();
-        _next();
+        _codeSkipped = !codeRequired;
+        if (codeRequired) {
+          _next();
+        } else {
+          _code = AuthRepository.skippedCode;
+          _step = RegisterStep.password;
+          safeNotify();
+        }
         return true;
       case Failure(:final message):
         setError(message);

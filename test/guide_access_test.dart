@@ -79,6 +79,13 @@ Future<void> _submitLogin(WidgetTester tester, String email) async {
 }
 
 /// Un viewmodel de postulación con los catálogos ya cargados.
+/// La demo con un API que no puede mandar el código de alta, como develop-api.
+class _AuthWithoutEmail extends AuthRepository {
+  @override
+  Future<Result<bool>> sendVerificationCode(String email) async =>
+      const Result.ok(false);
+}
+
 Future<GuideApplicationViewModel> _viewModel({
   AuthRepository? auth,
   GuideAccessRepository? access,
@@ -406,6 +413,32 @@ void main() {
       expect(guideAccess.status, GuideAccessStatus.pending);
       expect(guideAccess.application?.profile.cityId, 'city-granada');
       expect(guideAccess.application?.documents, hasLength(3));
+      guideAccess.dispose();
+    });
+
+    testWidgets('si el API no tiene correo, se salta el código', (
+      tester,
+    ) async {
+      final auth = _AuthWithoutEmail();
+      final guideAccess = GuideAccessRepository(auth);
+      final viewModel = await _settle(
+        tester,
+        _viewModel(auth: auth, access: guideAccess),
+      );
+      _fillUntilReview(viewModel);
+      viewModel.setConsent(true);
+
+      expect(await _settle(tester, viewModel.sendApplication()), isFalse);
+      expect(viewModel.step, GuideApplicationStep.password);
+      expect(viewModel.back(), isTrue);
+      expect(viewModel.step, GuideApplicationStep.review);
+
+      await _settle(tester, viewModel.sendApplication());
+      expect(
+        await _settle(tester, viewModel.createAccount('Secreta123')),
+        isTrue,
+      );
+      expect(guideAccess.status, GuideAccessStatus.pending);
       guideAccess.dispose();
     });
 

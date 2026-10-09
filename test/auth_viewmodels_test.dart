@@ -84,6 +84,46 @@ void main() {
       },
     );
 
+    test(
+      'si el API no tiene correo, se salta el código y crea la cuenta sin él',
+      () async {
+        final api = FakeApi((request) {
+          if (request.path == ApiRoutes.registerCode) {
+            return const FakeResponse(200, {'code_required': false});
+          }
+          if (request.path == ApiRoutes.register) {
+            return FakeResponse(201, apiUser());
+          }
+          if (request.path == ApiRoutes.login) return loginOk();
+          return const FakeResponse(204);
+        });
+        final viewModel = RegisterViewModel(connect(api));
+
+        expect(await viewModel.submitEmail('ana@example.com'), isTrue);
+        expect(viewModel.step, RegisterStep.password);
+        expect(viewModel.back(), isTrue);
+        expect(viewModel.step, RegisterStep.email);
+
+        await viewModel.submitEmail('ana@example.com');
+        viewModel.submitPassword('Clave-2026');
+        viewModel.setBirthDate(DateTime(1990, 5, 17));
+        viewModel.submitBirthDate();
+        viewModel.setNationality('NI');
+        viewModel.submitNationality();
+        viewModel.submitName('Ana Gómez');
+        expect(await viewModel.register('ana.g'), isTrue);
+
+        final register = api.requests.singleWhere(
+          (r) => r.path == ApiRoutes.register,
+        );
+        expect(register.body['code'], AuthRepository.skippedCode);
+        expect(
+          api.requests.where((r) => r.path == ApiRoutes.registerVerify),
+          isEmpty,
+        );
+      },
+    );
+
     test('una persona menor de edad no pasa de la fecha de nacimiento', () {
       final api = FakeApi((_) => const FakeResponse(204));
       final viewModel = RegisterViewModel(connect(api));

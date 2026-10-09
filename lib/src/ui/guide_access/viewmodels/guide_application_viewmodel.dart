@@ -422,11 +422,16 @@ class GuideApplicationViewModel extends BaseViewModel {
 
   String _verifiedCode = '';
 
+  /// El API no pide el código (no tiene correo): el paso se salta, también al volver.
+  bool _codeSkipped = false;
+
   /// Vuelve al paso anterior; `false` si ya estaba en el primero.
   bool back() {
     if (isFirstStep || isBusy) return false;
     clearError();
-    _step = GuideApplicationStep.values[_step.index - 1];
+    _step = _step == GuideApplicationStep.password && _codeSkipped
+        ? GuideApplicationStep.review
+        : GuideApplicationStep.values[_step.index - 1];
     safeNotify();
     return true;
   }
@@ -448,17 +453,26 @@ class GuideApplicationViewModel extends BaseViewModel {
     if (isCorrecting) {
       return _run(() => _guideAccessRepository.resubmit(_profile, _drafts));
     }
-    if (await _sendCode()) {
-      _codeResent = false;
-      _codeRejected = false;
-      _goTo(GuideApplicationStep.code);
+    switch (await _sendCode()) {
+      case true:
+        _codeSkipped = false;
+        _codeResent = false;
+        _codeRejected = false;
+        _goTo(GuideApplicationStep.code);
+      case false:
+        // el API no puede mandar el código: se sigue sin él
+        _codeSkipped = true;
+        _verifiedCode = AuthRepository.skippedCode;
+        _goTo(GuideApplicationStep.password);
+      case null:
+        break;
     }
     return false;
   }
 
   Future<void> resendCode() async {
     if (isBusy) return;
-    if (await _sendCode()) {
+    if (await _sendCode() != null) {
       _codeResent = true;
       _codeRejected = false;
       safeNotify();
@@ -505,18 +519,20 @@ class GuideApplicationViewModel extends BaseViewModel {
     ),
   );
 
-  Future<bool> _sendCode() async {
+  /// Si hay que pedir el código, o `null` si no se pudo mandar (el motivo queda en
+  /// [errorMessage]).
+  Future<bool?> _sendCode() async {
     clearError();
     setBusy(true);
     final result = await _authRepository.sendVerificationCode(_contactEmail);
     setBusy(false);
 
     switch (result) {
-      case Ok():
-        return true;
+      case Ok(:final value):
+        return value;
       case Failure(:final message):
         setError(message);
-        return false;
+        return null;
     }
   }
 
